@@ -8,7 +8,7 @@ from datetime import datetime
 import oneflow as flow
 
 import resnet_model
-# import vgg_model
+import vgg_model
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--gpu_num_per_node", type=int, default=1, required=False)
@@ -36,7 +36,7 @@ args = parser.parse_args()
 
 model_dict = {
   "resnet50": resnet_model.resnet50,
-  # "vgg16":    vgg_model.vgg16,
+  "vgg16":    vgg_model.vgg16,
 }
 
 
