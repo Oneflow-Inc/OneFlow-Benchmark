@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+import time
 from datetime import datetime
 
 import oneflow as flow
@@ -92,15 +93,14 @@ def main():
 
   fmt_str = "{:>12}  {:>12}  {:.6f}"
   for i in range(args.iter_num):
-    start_time = datetime.time()
+    start_time = time.time()
     train_loss = TrainNet().get().mean()
-    duration = datetime.time() - start_time
+    duration = time.time() - start_time
     images_per_sec = args.batch_size / duration
 
     if (i + 1) % args.log_every_n_iter == 0:
-      print("iter {}, loss: {.3f}, speed: {.3f}(sec/batch), {.3f}(images/sec)".format(i, train_loss, duration,
+        print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)".format(i, train_loss, duration,
                                                                                       images_per_sec))
-
 
 if __name__ == '__main__':
   main()
