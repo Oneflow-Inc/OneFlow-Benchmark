@@ -157,7 +157,7 @@ def resnet_stem(input):
 
 
 def resnet50(args):
-    (labels, images) = data_loader.load_imagenet(args.data_dir, IMAGE_SIZE, args.batch_size, args.data_part_num)
+    (labels, images) = data_loader.load_imagenet(args.train_dir, IMAGE_SIZE, args.batch_size, args.data_part_num)
     images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
 
     with flow.deprecated.variable_scope("Resnet"):
