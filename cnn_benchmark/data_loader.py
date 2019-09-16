@@ -10,7 +10,7 @@ def load_imagenet(data_dir, image_size, batch_size, data_part_num):
     "encoded",
     shape=(image_size, image_size, 3),
     dtype=flow.float,
-    codec=flow.data.ImageCodec([flow.data.ImagePreprocessor("bgr2rgb")]),
+    codec=flow.data.ImageCodec([flow.data.ImageResizePreprocessor(image_size, image_size)]),
     preprocessors=[
       flow.data.NormByChannelPreprocessor((123.68, 116.78, 103.94))
     ])
