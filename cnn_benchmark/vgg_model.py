@@ -71,7 +71,7 @@ def _conv_block(in_blob, index, filters, conv_times):
 
 def vgg16(args):
 
-    (labels, images) = data_loader.load_imagenet(args.train_dir, IMAGE_SIZE, args.batch_size, args.data_part_num)
+    (labels, images) = data_loader.load_imagenet(args.data_dir, IMAGE_SIZE, args.batch_size, args.data_part_num)
 
     transposed = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
     conv1 = _conv_block(transposed, 0, 64, 2)

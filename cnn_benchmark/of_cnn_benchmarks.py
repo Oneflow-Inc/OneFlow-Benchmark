@@ -11,43 +11,50 @@ import resnet_model
 import vgg_model
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--gpu_num_per_node", type=int, default=1, required=False)
-parser.add_argument("--multinode", default=False, action="store_true", required=False)
-parser.add_argument("--node_list", type=str, default=" ", required=False)
-parser.add_argument("--model", type=str, default="vgg16", required=False)
-parser.add_argument("--batch_size", type=int, default=8, required=False)
-parser.add_argument("--learning_rate", type=float, default=1e-4, required=False)
-parser.add_argument("--optimizer", type=str, default="sgd", required=False)
-parser.add_argument("--weight_decay", type=float, default=1e-4, required=False)
-parser.add_argument("--iter_num", type=int, default=10, required=False)
+parser.add_argument("--gpu_num_per_node", type=int, default=1, required=False, help="number of gpu(s) per node")
+parser.add_argument("--multinode", default=False, action="store_true", required=False, help="use mutinode if set")
+parser.add_argument("--node_list", type=str, default=None, required=False, help="nodes' IP address, split by comma")
+parser.add_argument("--model", type=str, default="vgg16", required=False, help="vgg16 or resnet50")
+parser.add_argument("--batch_size", type=int, default=8, required=False, help="batch size")
+parser.add_argument("--learning_rate", type=float, default=1e-4, required=False, help="Learning rate")
+parser.add_argument("--optimizer", type=str, default="sgd", required=False, help="sgd, adam, momentum")
+parser.add_argument("--weight_decay", type=float, default=None, required=False, help="weight decay parameter")
+parser.add_argument("--iter_num", type=int, default=10, required=False, help="total iterations to run")
+parser.add_argument("--log_every_n_iter", type=int, default=1, required=False, help="print loss every n iteration")
 parser.add_argument("--model_save_dir", type=str,
                     default="./output/model_save-{}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
-                    required=False)
-parser.add_argument("--model_load_dir", type=str, default=None, required=False)
-parser.add_argument("--train_dir", type=str, default=None, required=False)
-parser.add_argument("--data_part_num", type=int, default=32, required=False)
-parser.add_argument("--eval_dir", type=str, default=None, required=False)
-parser.add_argument("--skip_scp_binary", default=False, action="store_true", required=False)
-parser.add_argument("--scp_binary_without_uuid", default=False, action="store_true", required=False)
-parser.add_argument("--remote_by_hand", default=False, action="store_true", required=False)
+                    required=False, help="model save directory")
+parser.add_argument("--model_load_dir", type=str, default=None, required=False, help="model load directory")
+parser.add_argument("--data_dir", type=str, default=None, required=False, help="dataset directory")
+parser.add_argument("--data_part_num", type=int, default=32, required=False, help="data part number in dataset")
+parser.add_argument("--skip_scp_binary", default=False, action="store_true", required=False, help="copy binary to another node if set")
+parser.add_argument("--scp_binary_without_uuid", default=False, action="store_true", required=False, help="copy binary to another node without uuid if set")
+parser.add_argument("--remote_by_hand", default=False, action="store_true", required=False, help="run another node by user if set")
 
 args = parser.parse_args()
 
-
 model_dict = {
   "resnet50": resnet_model.resnet50,
-  "vgg16":    vgg_model.vgg16,
+  "vgg16": vgg_model.vgg16,
+}
+
+optimizer_dict = {
+  "sgd": {"naive_conf": {}},
+  "adam": {"adam_conf": {"beta1": 0.9}},
+  "momentum": {"momentum_conf": {"beta": 0.9}},
 }
 
 
 @flow.function
 def TrainNet():
-    flow.config.train.primary_lr(args.learning_rate)
-    flow.config.train.model_update_conf(dict(naive_conf={}))
+  flow.config.train.primary_lr(args.learning_rate)
+  flow.config.train.model_update_conf(optimizer_dict[args.optimizer])
+  if args.weight_decay:
+    flow.config.train.weight_l2(args.weight_decay)
 
-    loss = model_dict[args.model](args)
-    flow.losses.add_loss(loss)
-    return loss
+  loss = model_dict[args.model](args)
+  flow.losses.add_loss(loss)
+  return loss
 
 
 def main():
@@ -76,17 +83,23 @@ def main():
 
   check_point = flow.train.CheckPoint()
   if not args.model_load_dir:
-      check_point.init()
+    check_point.init()
   else:
-      check_point.load(args.model_load_dir)
+    check_point.load(args.model_load_dir)
 
   num_nodes = len(args.node_list.strip().split(",")) if args.multinode else 1
   print("Traning {}: num_gpu_per_node = {}, num_nodes = {}.".format(args.model, args.gpu_num_per_node, num_nodes))
 
   fmt_str = "{:>12}  {:>12}  {:.6f}"
   for i in range(args.iter_num):
+    start_time = datetime.time()
     train_loss = TrainNet().get().mean()
-    print(fmt_str.format(i, "train loss:", train_loss))
+    duration = datetime.time() - start_time
+    images_per_sec = args.batch_size / duration
+
+    if (i + 1) % args.log_every_n_iter == 0:
+      print("iter {}, loss: {.3f}, speed: {.3f}(sec/batch), {.3f}(images/sec)".format(i, train_loss, duration,
+                                                                                      images_per_sec))
 
 
 if __name__ == '__main__':
