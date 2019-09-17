@@ -4,7 +4,7 @@ OneFlow models for benchmarking.
 ## cnns
 1 node, 1 gpu:
 ```
-python of_cnn_benchmarks.py \
+python cnn_benchmark/of_cnn_benchmarks.py \
 --gpu_num_per_node=1 \
 --model="vgg16" \
 --batch_size=8 \
@@ -17,7 +17,7 @@ python of_cnn_benchmarks.py \
 
 2 nodes, 2 gpu each node:
 ```
-python of_cnn_benchmarks.py \
+python cnn_benchmark/of_cnn_benchmarks.py \
 --gpu_num_per_node=2 \
 --multinode \
 --node_list="192.168.1.12,192.168.1.14" \
