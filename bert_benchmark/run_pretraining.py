@@ -1,17 +1,17 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
-import sys
 import time
+import random
 import argparse
-import shutil
-import numpy as np
 from datetime import datetime
 
 import oneflow as flow
-from pretrain import PreTrain#, Eval
 
-_MODEL_SAVE_DIR = "./model_save-{}".format(
-    str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))
-)
+from pretrain import PreTrain
+
 parser = argparse.ArgumentParser(description="flags for bert")
 
 # resouce
@@ -27,8 +27,17 @@ parser.add_argument("--iter_num", type=int, default=10, help="total iterations t
 parser.add_argument("--log_every_n_iter", type=int, default=1, help="print loss every n iteration")
 parser.add_argument("--data_dir", type=str, default=None)
 parser.add_argument("--data_part_num", type=int, default=32, help="data part number in dataset")
-parser.add_argument("--model_load_dir", type=str, default=None)
-parser.add_argument("--model_save_dir", type=str, default=_MODEL_SAVE_DIR)
+
+# log and resore/save
+parser.add_argument("--loss_print_every_n_iter", type=int, default=1, required=False,
+                    help="print loss every n iteration")
+parser.add_argument("--model_save_every_n_iter", type=int, default=200, required=False,
+                    help="save model every n iteration")
+parser.add_argument("--model_save_dir", type=str,
+                    default="./output/model_save-{}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
+                    required=False, help="model save directory")
+parser.add_argument("--model_load_dir", type=str, default=None, required=False, help="model load directory")
+parser.add_argument("--log_dir", type=str, default="./output", required=False, help="log info save directory")
 
 # bert
 parser.add_argument("--seq_length", type=int, default=512)
@@ -44,8 +53,10 @@ parser.add_argument("--hidden_size_per_head", type=int, default=64)
 
 args = parser.parse_args()
 
+
 def _blob_conf(name, shape, dtype=flow.int32):
   return flow.data.BlobConf(name=name, shape=shape, dtype=dtype, codec=flow.data.RawCodec())
+
 
 def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions_per_seq):
   blob_confs = []
@@ -61,12 +72,12 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
                                    name="decode",
                                    data_part_num=data_part_num)
 
+
 def BuildPreTrainNet(batch_size, data_part_num, seq_length=128, max_position_embeddings=512,
                      num_hidden_layers=12, num_attention_heads=12,
                      hidden_dropout_prob=0.1, attention_probs_dropout_prob=0.1,
                      vocab_size=30522, type_vocab_size=2, max_predictions_per_seq=20):
-
-  hidden_size = 64 * num_attention_heads#, H = 64, size per head
+  hidden_size = 64 * num_attention_heads  # , H = 64, size per head
   intermediate_size = hidden_size * 4
 
   decoders = BertDecoder(args.data_dir, batch_size, data_part_num, seq_length,
@@ -100,28 +111,30 @@ def BuildPreTrainNet(batch_size, data_part_num, seq_length=128, max_position_emb
                   max_predictions_per_seq=max_predictions_per_seq,
                   initializer_range=0.02)
 
+
 _BERT_MODEL_UPDATE_CONF = dict(
-  learning_rate_decay = dict(
-    polynomial_conf = dict(
-      decay_batches = 100000,
-      end_learning_rate = 0.0,
+  learning_rate_decay=dict(
+    polynomial_conf=dict(
+      decay_batches=100000,
+      end_learning_rate=0.0,
     )
   ),
-  warmup_conf = dict(
-    linear_conf = dict(
-      warmup_batches = 1000,
-      start_multiplier = 0,
+  warmup_conf=dict(
+    linear_conf=dict(
+      warmup_batches=1000,
+      start_multiplier=0,
     )
   ),
-  clip_conf = dict(
-    clip_by_global_norm = dict(
-      clip_norm = 1.0,
+  clip_conf=dict(
+    clip_by_global_norm=dict(
+      clip_norm=1.0,
     )
   ),
-  adam_conf = dict(
-    epsilon = 1e-6
+  adam_conf=dict(
+    epsilon=1e-6
   ),
 )
+
 
 @flow.function
 def PretrainJob():
@@ -145,25 +158,17 @@ def PretrainJob():
   flow.losses.add_loss(loss)
   return loss
 
-cur_step = 0
-def AsyncGetCallback(result):
-  global cur_step
-  print('{:>12}  {:>.10f}  {:.2f}'.format(cur_step, result.mean(), time.time()))
-  cur_step += 1
 
 if __name__ == '__main__':
   for arg in vars(args):
     print('{} = {}'.format(arg, getattr(args, arg)))
 
-  start_time = time.time()
   flow.config.gpu_device_num(args.gpu_num_per_node)
-  flow.config.ctrl_port(9788)
-  flow.config.data_port(9789)
+  flow.config.ctrl_port(random.randint(1, 10000))
   flow.config.default_data_type(flow.float)
-  flow.config.enable_inplace(False)
 
   if args.node_num > 1:
-    flow.config.ctrl_port(12138)
+    flow.config.ctrl_port(random.randint(1, 10000))
     nodes = []
     for n in args.node_list.strip().split(","):
       addr_dict = {}
@@ -173,47 +178,30 @@ if __name__ == '__main__':
     flow.config.machine(nodes)
 
   check_point = flow.train.CheckPoint()
-  if args.model_load_dir != '':
+  if args.model_load_dir:
     assert os.path.isdir(args.model_load_dir)
     check_point.load(args.model_load_dir)
-    print('init model from {}'.format(args.model_load_dir))
+    print('Restoring model from {}.'.format(args.model_load_dir))
   else:
     check_point.init()
-    print('init model on demand')
+    print('Init model on demand')
 
-  fmt_str = "{:>12}  {:>12}  {:>12.10f}"
-  print('{:>12}  {:14}  {}'.format( "step", "loss", "time"))
-  train_start_time = time.time()
-  step_time = []
+  print("Start traning bert: num_gpu_per_node = {}, num_nodes = {}."
+        .format(args.gpu_num_per_node, args.node_num))
+
   for step in range(args.iter_num):
-    if args.model_save_dir != '':
+    start_time = time.time()
+    train_loss = PretrainJob().get().mean()
+    duration = time.time() - start_time
+
+    if step % args.loss_print_every_n_iter == 0:
+      batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
+      images_per_sec = batch_size / duration
+      print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
+            .format(step, train_loss, duration, images_per_sec))
+
+    if (step + 1) % args.model_save_every_n_iter == 0:
       if not os.path.exists(args.model_save_dir):
         os.makedirs(args.model_save_dir)
-      assert args.log_every_n_iter > 0
-      if step % args.log_every_n_iter == 0:
-        snapshot_save_path = os.path.join(args.model_save_dir, 'snapshot_%d'%(step))
+        snapshot_save_path = os.path.join(args.model_save_dir, 'snapshot_%d' % (step + 1))
         check_point.save(snapshot_save_path)
-
-    loss_mean = PretrainJob().get().mean()
-    step_time.append(time.time())
-    train_step_time = step_time[step] - step_time[step-1]
-    print(fmt_str.format(step, loss_mean, train_step_time))
-  snapshot_save_path = os.path.join(args.model_save_dir, 'last_snapshot')
-  check_point.save(snapshot_save_path)
-
-
-  total_time = step_time[-1] - start_time
-  train_time = step_time[-1] - train_start_time
-  init_time = train_start_time - start_time
-  mean_batch_time = (step_time[-1] - step_time[0]) / (args.iter_num - 1)
-  total_batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
-  throughput = total_batch_size / mean_batch_time
-
-  print('total time', total_time)
-  print('init time', init_time)
-  print('first loss time', step_time[0] - start_time) #include model init and first batch cal time.
-  print('train time', train_time)
-  print('last - first loss time', step_time[-1] - step_time[0])
-  print('average batch time', mean_batch_time)
-  print('samples/sec', throughput)
-  print('destroy time', time.time() - step_time[-1])
