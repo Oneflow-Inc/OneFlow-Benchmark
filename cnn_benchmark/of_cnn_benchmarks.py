@@ -2,8 +2,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
+import os
 import time
+import random
+import argparse
 from datetime import datetime
 
 import oneflow as flow
@@ -11,26 +13,33 @@ import oneflow as flow
 import resnet_model
 import vgg_model
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--gpu_num_per_node", type=int, default=1, required=False, help="number of gpu(s) per node")
-parser.add_argument("--multinode", default=False, action="store_true", required=False, help="use mutinode if set")
+parser = argparse.ArgumentParser(description="flags for cnn benchmark")
+
+# resouce
+parser.add_argument("--gpu_num_per_node", type=int, default=1, required=False)
+parser.add_argument("--node_num", type=int, default=1)
 parser.add_argument("--node_list", type=str, default=None, required=False, help="nodes' IP address, split by comma")
+
+# train
 parser.add_argument("--model", type=str, default="vgg16", required=False, help="vgg16 or resnet50")
-parser.add_argument("--batch_size", type=int, default=8, required=False, help="batch size")
-parser.add_argument("--learning_rate", type=float, default=1e-4, required=False, help="Learning rate")
+parser.add_argument("--batch_size_per_device", type=int, default=8, required=False)
+parser.add_argument("--learning_rate", type=float, default=1e-4, required=False)
 parser.add_argument("--optimizer", type=str, default="sgd", required=False, help="sgd, adam, momentum")
-parser.add_argument("--weight_decay", type=float, default=None, required=False, help="weight decay parameter")
+parser.add_argument("--weight_l2", type=float, default=None, required=False, help="weight decay parameter")
 parser.add_argument("--iter_num", type=int, default=10, required=False, help="total iterations to run")
-parser.add_argument("--log_every_n_iter", type=int, default=1, required=False, help="print loss every n iteration")
+parser.add_argument("--data_dir", type=str, default=None, required=False, help="dataset directory")
+parser.add_argument("--data_part_num", type=int, default=32, required=False, help="data part number in dataset")
+
+# log and resore/save
+parser.add_argument("--loss_print_every_n_iter", type=int, default=1, required=False,
+                    help="print loss every n iteration")
+parser.add_argument("--model_save_every_n_iter", type=int, default=200, required=False,
+                    help="save model every n iteration")
 parser.add_argument("--model_save_dir", type=str,
                     default="./output/model_save-{}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
                     required=False, help="model save directory")
 parser.add_argument("--model_load_dir", type=str, default=None, required=False, help="model load directory")
-parser.add_argument("--data_dir", type=str, default=None, required=False, help="dataset directory")
-parser.add_argument("--data_part_num", type=int, default=32, required=False, help="data part number in dataset")
-parser.add_argument("--skip_scp_binary", default=False, action="store_true", required=False, help="copy binary to another node if set")
-parser.add_argument("--scp_binary_without_uuid", default=False, action="store_true", required=False, help="copy binary to another node without uuid if set")
-parser.add_argument("--remote_by_hand", default=False, action="store_true", required=False, help="run another node by user if set")
+parser.add_argument("--log_dir", type=str, default="./output", required=False, help="log info save directory")
 
 args = parser.parse_args()
 
@@ -50,8 +59,8 @@ optimizer_dict = {
 def TrainNet():
   flow.config.train.primary_lr(args.learning_rate)
   flow.config.train.model_update_conf(optimizer_dict[args.optimizer])
-  if args.weight_decay:
-    flow.config.train.weight_l2(args.weight_decay)
+  if args.weight_l2:
+    flow.config.train.weight_l2(args.weight_l2)
 
   loss = model_dict[args.model](args)
   flow.losses.add_loss(loss)
@@ -59,14 +68,17 @@ def TrainNet():
 
 
 def main():
+  for arg in vars(args):
+    print('{} = {}'.format(arg, getattr(args, arg)))
+
   flow.config.default_data_type(flow.float)
   flow.config.gpu_device_num(args.gpu_num_per_node)
   flow.config.grpc_use_no_signal()
-  flow.config.log_dir("./output/log")
-  flow.config.ctrl_port(12138)
+  flow.config.log_dir(args.log_dir)
+  flow.config.ctrl_port(random.randint(1, 10000))
 
-  if args.multinode:
-    flow.config.ctrl_port(12139)
+  if args.node_num > 1:
+    flow.config.ctrl_port(random.randint(1, 10000))
     nodes = []
     for n in args.node_list.strip().split(","):
       addr_dict = {}
@@ -75,32 +87,35 @@ def main():
 
     flow.config.machine(nodes)
 
-    if args.scp_binary_without_uuid:
-      flow.deprecated.init_worker(scp_binary=True, use_uuid=False)
-    elif args.skip_scp_binary:
-      flow.deprecated.init_worker(scp_binary=False, use_uuid=False)
-    else:
-      flow.deprecated.init_worker(scp_binary=True, use_uuid=True)
-
   check_point = flow.train.CheckPoint()
-  if not args.model_load_dir:
-    check_point.init()
-  else:
+  if args.model_load_dir:
+    assert os.path.isdir(args.model_load_dir)
+    print("Restoring model from {}.".format(args.model_load_dir))
     check_point.load(args.model_load_dir)
+  else:
+    print("Init model on demand.")
+    check_point.init()
 
-  num_nodes = len(args.node_list.strip().split(",")) if args.multinode else 1
-  print("Traning {}: num_gpu_per_node = {}, num_nodes = {}.".format(args.model, args.gpu_num_per_node, num_nodes))
+  print("Start traning {}: num_gpu_per_node = {}, num_nodes = {}."
+        .format(args.model, args.gpu_num_per_node, args.node_num))
 
-  fmt_str = "{:>12}  {:>12}  {:.6f}"
-  for i in range(args.iter_num):
+  for step in range(args.iter_num):
     start_time = time.time()
     train_loss = TrainNet().get().mean()
     duration = time.time() - start_time
-    images_per_sec = args.batch_size / duration
 
-    if (i + 1) % args.log_every_n_iter == 0:
-        print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)".format(i, train_loss, duration,
-                                                                                      images_per_sec))
+    if step % args.loss_print_every_n_iter == 0:
+      batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
+      images_per_sec = batch_size / duration
+      print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
+            .format(step, train_loss, duration, images_per_sec))
+
+    if (step + 1) % args.model_save_every_n_iter == 0:
+      if not os.path.exists(args.model_save_dir):
+        os.makedirs(args.model_save_dir)
+        snapshot_save_path = os.path.join(args.model_save_dir, 'snapshot_%d' % (step + 1))
+        check_point.save(snapshot_save_path)
+
 
 if __name__ == '__main__':
   main()
