@@ -189,18 +189,21 @@ if __name__ == '__main__':
   train_start_time = time.time()
   step_time = []
   for step in range(args.iter_num):
-    loss_mean = PretrainJob().get().mean()
-    step_time.append(time.time())
-    train_step_time = step_time[step] - step_time[step-1]
-    print(fmt_str.format(step, loss_mean, train_step_time))
-
     if args.model_save_dir != '':
       if not os.path.exists(args.model_save_dir):
         os.makedirs(args.model_save_dir)
       assert args.log_every_n_iter > 0
       if step % args.log_every_n_iter == 0:
-        snapshot_save_path = os.path.join(args.model_save_dir, 'snapshot_%d'%(step+1))
+        snapshot_save_path = os.path.join(args.model_save_dir, 'snapshot_%d'%(step))
         check_point.save(snapshot_save_path)
+
+    loss_mean = PretrainJob().get().mean()
+    step_time.append(time.time())
+    train_step_time = step_time[step] - step_time[step-1]
+    print(fmt_str.format(step, loss_mean, train_step_time))
+  snapshot_save_path = os.path.join(args.model_save_dir, 'last_snapshot')
+  check_point.save(snapshot_save_path)
+
 
   total_time = step_time[-1] - start_time
   train_time = step_time[-1] - train_start_time
