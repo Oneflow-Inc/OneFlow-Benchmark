@@ -18,7 +18,7 @@ NODE_LIST = "192.168.1.15,192.168.1.16"
 parser = argparse.ArgumentParser(description="flags for bert")
 
 # resouce
-parser.add_argument("--device_num_per_node", type=int, default=1)
+parser.add_argument("--gpu_num_per_node", type=int, default=1)
 parser.add_argument("--node_num", type=int, default=1)
 parser.add_argument("--node_list", type=str, default=NODE_LIST)
 
@@ -28,7 +28,7 @@ parser.add_argument("--weight_l2", type=float, default=0.01, help="weight l2 dec
 parser.add_argument("--batch_size_per_device", type=int, default=24)
 parser.add_argument("--iter_num", type=int, default=10, help="total iterations to run")
 parser.add_argument("--log_every_n_iter", type=int, default=1, help="print loss every n iteration")
-parser.add_argument("--train_dir", type=str, default=_DATA_DIR)
+parser.add_argument("--data_dir", type=str, default=_DATA_DIR)
 parser.add_argument("--data_part_num", type=int, default=32, help="data part number in dataset")
 parser.add_argument("--model_load_dir", type=str, default=_MODEL_LOAD)
 parser.add_argument("--model_save_dir", type=str, default=_MODEL_SAVE_DIR)
@@ -72,7 +72,7 @@ def BuildPreTrainNet(batch_size, data_part_num, seq_length=128, max_position_emb
   hidden_size = 64 * num_attention_heads#, H = 64, size per head
   intermediate_size = hidden_size * 4
 
-  decoders = BertDecoder(args.train_dir, batch_size, data_part_num, seq_length,
+  decoders = BertDecoder(args.data_dir, batch_size, data_part_num, seq_length,
                          max_predictions_per_seq)
 
   input_ids = decoders[0]
@@ -128,7 +128,7 @@ _BERT_MODEL_UPDATE_CONF = dict(
 
 @flow.function
 def PretrainJob():
-  total_device_num = args.node_num * args.device_num_per_node
+  total_device_num = args.node_num * args.gpu_num_per_node
   batch_size = total_device_num * args.batch_size_per_device
 
   flow.config.train.primary_lr(args.learning_rate)
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     print('{} = {}'.format(arg, getattr(args, arg)))
 
   start_time = time.time()
-  flow.config.gpu_device_num(args.device_num_per_node)
+  flow.config.gpu_device_num(args.gpu_num_per_node)
   flow.config.ctrl_port(9788)
   flow.config.data_port(9789)
   flow.config.default_data_type(flow.float)
@@ -206,7 +206,7 @@ if __name__ == '__main__':
   train_time = step_time[-1] - train_start_time
   init_time = train_start_time - start_time
   mean_batch_time = (step_time[-1] - step_time[0]) / (args.iter_num - 1)
-  total_batch_size = args.node_num * args.device_num_per_node * args.batch_size_per_device
+  total_batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
   throughput = total_batch_size / mean_batch_time
 
   print('total time', total_time)
