@@ -7,11 +7,11 @@ OneFlow models for benchmarking.
 python cnn_benchmark/of_cnn_benchmarks.py \
 --gpu_num_per_node=1 \
 --model="vgg16" \
---batch_size=8 \
+--batch_size_per_device=8 \
 --iter_num=5 \
 --learning_rate=0.01 \
 --optimizer="sgd" \
---log_every_n_iter=1 \
+--loss_print_every_n_iter=1 \
 --data_dir="/dataset/PNGS/PNG228/of_record_repeated"
 ```
 
@@ -19,16 +19,17 @@ python cnn_benchmark/of_cnn_benchmarks.py \
 ```
 python cnn_benchmark/of_cnn_benchmarks.py \
 --gpu_num_per_node=2 \
---multinode \
+--node_num=2 \
 --node_list="192.168.1.12,192.168.1.14" \
 --model="vgg16" \
---batch_size=8 \
+--batch_size_per_device=8 \
 --iter_num=5 \
 --learning_rate=0.01 \
 --optimizer="sgd" \
---log_every_n_iter=1 \
+--loss_print_every_n_iter=1 \
 --data_dir="/dataset/PNGS/PNG228/of_record_repeated"
 ```
+
 ## bert pretrain
 1 node, 1gpu:
 ```
@@ -39,12 +40,10 @@ python run_pretraining.py \
 --learning_rate=1e-4 \
 --weight_l2=0.01 \
 --batch_size_per_device=24 \
---iter_num=100 \
---log_every_n_iter=10 \
+--iter_num=5 \
+--loss_print_every_n_iter=1 \
 --data_dir="/dataset/bert/of_wiki_seq_len_128" \
 --data_part_num=1 \
---model_load_dir="" \
---model_save_dir="snapshots" \
 --seq_length=128 \
 --max_predictions_per_seq=20 \
 --num_hidden_layers=12 \
@@ -56,6 +55,7 @@ python run_pretraining.py \
 --hidden_dropout_prob=0.1 \
 --hidden_size_per_head=64
 ```
+
 2 nodes, 2 gpu each node:
 ```
 python run_pretraining.py \
@@ -65,12 +65,10 @@ python run_pretraining.py \
 --learning_rate=1e-4 \
 --weight_l2=0.01 \
 --batch_size_per_device=24 \
---iter_num=100 \
---log_every_n_iter=10 \
+--iter_num=15 \
+--loss_print_every_n_iter=1 \
 --data_dir="/dataset/bert/of_wiki_seq_len_128" \
 --data_part_num=1 \
---model_load_dir="" \
---model_save_dir="snapshots" \
 --seq_length=128 \
 --max_predictions_per_seq=20 \
 --num_hidden_layers=12 \
