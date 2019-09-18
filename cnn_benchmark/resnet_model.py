@@ -7,7 +7,6 @@ import oneflow.core.operator.op_conf_pb2 as op_conf_util
 
 import data_loader
 
-
 TRAINABLE = True
 
 IMAGE_SIZE = 228
@@ -27,171 +26,165 @@ def _conv2d(
     dilations=1,
     weight_initializer=flow.variance_scaling_initializer(data_format="NCHW"),
 ):
-    weight = flow.get_variable(
-        name + "-weight",
-        shape=(filters, input.static_shape[1], kernel_size, kernel_size),
-        dtype=input.dtype,
-        initializer=weight_initializer,
-        trainable=TRAINABLE,
-    )
-    return flow.nn.conv2d(
-        input, weight, strides, padding, data_format, dilations, name=name
-    )
+  weight = flow.get_variable(
+    name + "-weight",
+    shape=(filters, input.static_shape[1], kernel_size, kernel_size),
+    dtype=input.dtype,
+    initializer=weight_initializer,
+    trainable=TRAINABLE,
+  )
+  return flow.nn.conv2d(
+    input, weight, strides, padding, data_format, dilations, name=name
+  )
 
 
 def _batch_norm(inputs, name=None):
-    return flow.layers.batch_normalization(
-        inputs=inputs,
-        axis=1,
-        momentum=0.997,
-        epsilon=1.001e-5,
-        center=True,
-        scale=True,
-        trainable=TRAINABLE,
-        name=name,
-    )
+  return flow.layers.batch_normalization(
+    inputs=inputs,
+    axis=1,
+    momentum=0.997,
+    epsilon=1.001e-5,
+    center=True,
+    scale=True,
+    trainable=TRAINABLE,
+    name=name,
+  )
 
 
 def conv2d_affine(
     input, name, filters, kernel_size, strides, activation=op_conf_util.kNone
 ):
-    # input data_format must be NCHW, cannot check now
-    padding = "SAME" if strides > 1 or kernel_size > 1 else "VALID"
-    output = _conv2d(name, input, filters, kernel_size, strides, padding)
-    output = _batch_norm(output, name + "_bn")
-    if activation != op_conf_util.kNone:
-        output = flow.keras.activations.relu(output)
+  # input data_format must be NCHW, cannot check now
+  padding = "SAME" if strides > 1 or kernel_size > 1 else "VALID"
+  output = _conv2d(name, input, filters, kernel_size, strides, padding)
+  output = _batch_norm(output, name + "_bn")
+  if activation != op_conf_util.kNone:
+    output = flow.keras.activations.relu(output)
 
-    return output
+  return output
 
 
 def bottleneck_transformation(
     input, block_name, filters, filters_inner, strides
 ):
-    a = conv2d_affine(
-        input,
-        block_name + "_branch2a",
-        filters_inner,
-        1,
-        1,
-        activation=op_conf_util.kRelu,
-    )
+  a = conv2d_affine(
+    input,
+    block_name + "_branch2a",
+    filters_inner,
+    1,
+    1,
+    activation=op_conf_util.kRelu,
+  )
 
-    b = conv2d_affine(
-        a,
-        block_name + "_branch2b",
-        filters_inner,
-        3,
-        strides,
-        activation=op_conf_util.kRelu,
-    )
+  b = conv2d_affine(
+    a,
+    block_name + "_branch2b",
+    filters_inner,
+    3,
+    strides,
+    activation=op_conf_util.kRelu,
+  )
 
-    c = conv2d_affine(b, block_name + "_branch2c", filters, 1, 1)
+  c = conv2d_affine(b, block_name + "_branch2c", filters, 1, 1)
 
-    return c
+  return c
 
 
 def residual_block(input, block_name, filters, filters_inner, strides_init):
-    if strides_init != 1 or block_name == "res2_0":
-        shortcut = conv2d_affine(
-            input, block_name + "_branch1", filters, 1, strides_init
-        )
-    else:
-        shortcut = input
-
-    bottleneck = bottleneck_transformation(
-        input, block_name, filters, filters_inner, strides_init
+  if strides_init != 1 or block_name == "res2_0":
+    shortcut = conv2d_affine(
+      input, block_name + "_branch1", filters, 1, strides_init
     )
+  else:
+    shortcut = input
 
-    return flow.keras.activations.relu(shortcut + bottleneck)
+  bottleneck = bottleneck_transformation(
+    input, block_name, filters, filters_inner, strides_init
+  )
+
+  return flow.keras.activations.relu(shortcut + bottleneck)
 
 
 def residual_stage(
     input, stage_name, counts, filters, filters_inner, stride_init=2
 ):
-    output = input
-    for i in range(counts):
-        block_name = "%s_%d" % (stage_name, i)
-        output = residual_block(
-            output,
-            block_name,
-            filters,
-            filters_inner,
-            stride_init if i == 0 else 1,
-        )
+  output = input
+  for i in range(counts):
+    block_name = "%s_%d" % (stage_name, i)
+    output = residual_block(
+      output,
+      block_name,
+      filters,
+      filters_inner,
+      stride_init if i == 0 else 1,
+    )
 
-    return output
+  return output
 
 
 def resnet_conv_x_body(input, on_stage_end=lambda x: x):
-    output = input
-    for i, (counts, filters, filters_inner) in enumerate(
-        zip(BLOCK_COUNTS, BLOCK_FILTERS, BLOCK_FILTERS_INNER)
-    ):
-        stage_name = "res%d" % (i + 2)
-        output = residual_stage(
-            output,
-            stage_name,
-            counts,
-            filters,
-            filters_inner,
-            1 if i == 0 else 2,
-        )
-        on_stage_end(output)
+  output = input
+  for i, (counts, filters, filters_inner) in enumerate(
+      zip(BLOCK_COUNTS, BLOCK_FILTERS, BLOCK_FILTERS_INNER)
+  ):
+    stage_name = "res%d" % (i + 2)
+    output = residual_stage(
+      output,
+      stage_name,
+      counts,
+      filters,
+      filters_inner,
+      1 if i == 0 else 2,
+    )
+    on_stage_end(output)
 
-    return output
+  return output
 
 
 def resnet_stem(input):
-    conv1 = _conv2d("conv1", input, 64, 7, 2)
-    conv1_bn = flow.keras.activations.relu(_batch_norm(conv1, "conv1_bn"))
-    pool1 = flow.nn.max_pool2d(
-        conv1_bn,
-        ksize=3,
-        strides=2,
-        padding="VALID",
-        data_format="NCHW",
-        name="pool1",
-    )
-    return pool1
+  conv1 = _conv2d("conv1", input, 64, 7, 2)
+  conv1_bn = flow.keras.activations.relu(_batch_norm(conv1, "conv1_bn"))
+  pool1 = flow.nn.max_pool2d(
+    conv1_bn,
+    ksize=3,
+    strides=2,
+    padding="VALID",
+    data_format="NCHW",
+    name="pool1",
+  )
+  return pool1
 
 
 def resnet50(args):
-    (labels, images) = data_loader.load_imagenet(args.data_dir, IMAGE_SIZE, args.batch_size, args.data_part_num)
-    images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
+  total_device_num = args.node_num * args.gpu_num_per_node
+  batch_size = total_device_num * args.batch_size_per_device
 
-    with flow.deprecated.variable_scope("Resnet"):
-        stem = resnet_stem(images)
-        body = resnet_conv_x_body(stem, lambda x: x)
-        pool5 = flow.nn.avg_pool2d(
-            body,
-            ksize=7,
-            strides=1,
-            padding="VALID",
-            data_format="NCHW",
-            name="pool5",
-        )
+  (labels, images) = data_loader.load_imagenet(args.data_dir, IMAGE_SIZE, batch_size, args.data_part_num)
+  images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
 
-        fc1001 = flow.layers.dense(
-            flow.reshape(pool5, (pool5.shape[0], -1)),
-            units=1001,
-            use_bias=True,
-            kernel_initializer=flow.xavier_uniform_initializer(),
-            bias_initializer=flow.zeros_initializer(),
-            trainable=TRAINABLE,
-            name="fc1001",
-        )
+  with flow.deprecated.variable_scope("Resnet"):
+    stem = resnet_stem(images)
+    body = resnet_conv_x_body(stem, lambda x: x)
+    pool5 = flow.nn.avg_pool2d(
+      body,
+      ksize=7,
+      strides=1,
+      padding="VALID",
+      data_format="NCHW",
+      name="pool5",
+    )
 
+    fc1001 = flow.layers.dense(
+      flow.reshape(pool5, (pool5.shape[0], -1)),
+      units=1001,
+      use_bias=True,
+      kernel_initializer=flow.xavier_uniform_initializer(),
+      bias_initializer=flow.zeros_initializer(),
+      trainable=TRAINABLE,
+      name="fc1001",
+    )
 
-        loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-            labels, fc1001, name="softmax_loss")
+    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
+      labels, fc1001, name="softmax_loss")
 
-    return loss
-
-
-
-
-
-
-
-
+  return loss
