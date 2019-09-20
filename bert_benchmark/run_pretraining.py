@@ -24,6 +24,7 @@ parser.add_argument("--learning_rate", type=float, default=1e-4, help="Learning 
 parser.add_argument("--weight_l2", type=float, default=0.01, help="weight l2 decay parameter")
 parser.add_argument("--batch_size_per_device", type=int, default=24)
 parser.add_argument("--iter_num", type=int, default=10, help="total iterations to run")
+parser.add_argument("--warmup_iter_num", type=int, default=10, help="total iterations to run")
 parser.add_argument("--log_every_n_iter", type=int, default=1, help="print loss every n iteration")
 parser.add_argument("--data_dir", type=str, default=None)
 parser.add_argument("--data_part_num", type=int, default=32, help="data part number in dataset")
@@ -160,8 +161,13 @@ def PretrainJob():
 
 
 if __name__ == '__main__':
+  print("=".ljust(66, '='))
+  print("Running bert: num_gpu_per_node = {}, num_nodes = {}.".format(
+                                 args.gpu_num_per_node, args.node_num))
+  print("=".ljust(66, '='))
   for arg in vars(args):
     print('{} = {}'.format(arg, getattr(args, arg)))
+  print("=".ljust(66, '='))
 
   flow.config.gpu_device_num(args.gpu_num_per_node)
   flow.config.ctrl_port(random.randint(1, 10000))
@@ -186,22 +192,34 @@ if __name__ == '__main__':
     check_point.init()
     print('Init model on demand')
 
-  print("Start traning bert: num_gpu_per_node = {}, num_nodes = {}."
-        .format(args.gpu_num_per_node, args.node_num))
+  # warmups
+  print("Runing warm up for {} iterations.".format(args.warmup_iter_num))
+  for step in range(args.warmup_iter_num):
+    train_loss = PretrainJob().get().mean()
 
+  print("Start trainning.")
+  total_time = 0.0
+  batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
   for step in range(args.iter_num):
     start_time = time.time()
     train_loss = PretrainJob().get().mean()
     duration = time.time() - start_time
+    total_time += duration
 
     if step % args.loss_print_every_n_iter == 0:
-      batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
       images_per_sec = batch_size / duration
-      print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
+      print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(sentencs/sec)"
             .format(step, train_loss, duration, images_per_sec))
 
     if (step + 1) % args.model_save_every_n_iter == 0:
       if not os.path.exists(args.model_save_dir):
         os.makedirs(args.model_save_dir)
         snapshot_save_path = os.path.join(args.model_save_dir, 'snapshot_%d' % (step + 1))
+        print("Saving model to {}.".format(snapshot_save_path))
         check_point.save(snapshot_save_path)
+
+  avg_img_per_sec = batch_size * args.iter_num / total_time
+  print("-".ljust(66, '-'))
+  print("average speed: {:.3f}(sentences/sec)".format(avg_img_per_sec))
+  print("-".ljust(66, '-'))
+
