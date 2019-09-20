@@ -27,7 +27,7 @@ parser.add_argument("--learning_rate", type=float, default=1e-4, required=False)
 parser.add_argument("--optimizer", type=str, default="sgd", required=False, help="sgd, adam, momentum")
 parser.add_argument("--weight_l2", type=float, default=None, required=False, help="weight decay parameter")
 parser.add_argument("--iter_num", type=int, default=10, required=False, help="total iterations to run")
-parser.add_argument("--warmup_iter_num", type=int, default=2, required=False, help="total iterations to run")
+parser.add_argument("--warmup_iter_num", type=int, default=0, required=False, help="total iterations to run")
 parser.add_argument("--data_dir", type=str, default=None, required=False, help="dataset directory")
 parser.add_argument("--data_part_num", type=int, default=32, required=False, help="data part number in dataset")
 
@@ -75,7 +75,7 @@ def main():
   print("=".ljust(66, '='))
   for arg in vars(args):
     print('{} = {}'.format(arg, getattr(args, arg)))
-  print("=".ljust(66, '='))
+  print("-".ljust(66, '-'))
   flow.config.default_data_type(flow.float)
   flow.config.gpu_device_num(args.gpu_num_per_node)
   flow.config.grpc_use_no_signal()
