@@ -167,11 +167,12 @@ if __name__ == '__main__':
   print("=".ljust(66, '='))
   for arg in vars(args):
     print('{} = {}'.format(arg, getattr(args, arg)))
-  print("=".ljust(66, '='))
+  print("-".ljust(66, '-'))
 
   flow.config.gpu_device_num(args.gpu_num_per_node)
   flow.config.ctrl_port(random.randint(1, 10000))
   flow.config.default_data_type(flow.float)
+  flow.config.log_dir(args.log_dir)
 
   if args.node_num > 1:
     flow.config.ctrl_port(random.randint(1, 10000))
