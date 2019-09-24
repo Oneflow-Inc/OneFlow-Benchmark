@@ -168,14 +168,15 @@ if __name__ == '__main__':
   for arg in vars(args):
     print('{} = {}'.format(arg, getattr(args, arg)))
   print("-".ljust(66, '-'))
+  print("Time stamp: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
 
   flow.config.gpu_device_num(args.gpu_num_per_node)
-  flow.config.ctrl_port(random.randint(1, 10000))
+  flow.config.ctrl_port(19009)
   flow.config.default_data_type(flow.float)
   flow.config.log_dir(args.log_dir)
 
   if args.node_num > 1:
-    flow.config.ctrl_port(random.randint(1, 10000))
+    flow.config.ctrl_port(19008)
     nodes = []
     for n in args.node_list.strip().split(","):
       addr_dict = {}
