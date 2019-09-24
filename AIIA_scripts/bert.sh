@@ -8,7 +8,7 @@ RUN_SYNTHETIC_DATA=${5}
 LOGFILE=${6}
 
 # bert base
-CMD="python ../bert_benchmark/run_pretraining.py \
+CMD="python3 ../bert_benchmark/run_pretraining.py \
 --gpu_num_per_node=$GPU_NUM_PER_NODE \
 --node_num=$NODE_NUM \
 --node_list=$NODE_LIST \
@@ -31,7 +31,7 @@ CMD="python ../bert_benchmark/run_pretraining.py \
 --data_dir=/dataset/bert/of_wiki_seq_len_128"
 
 # bert large
-#CMD="python ../bert_benchmark/run_pretraining.py \
+#CMD="python3 ../bert_benchmark/run_pretraining.py \
 #--gpu_num_per_node=$GPU_NUM_PER_NODE \
 #--node_num=$NODE_NUM \
 #--node_list=$NODE_LIST \

@@ -4,7 +4,7 @@ OneFlow models for benchmarking.
 ## cnns
 1 node, 1 gpu:
 ```
-python cnn_benchmark/of_cnn_benchmarks.py \
+python3 cnn_benchmark/of_cnn_benchmarks.py \
 --gpu_num_per_node=1 \
 --model="vgg16" \
 --batch_size_per_device=8 \
@@ -17,7 +17,7 @@ python cnn_benchmark/of_cnn_benchmarks.py \
 
 2 nodes, 2 gpu each node:
 ```
-python cnn_benchmark/of_cnn_benchmarks.py \
+python3 cnn_benchmark/of_cnn_benchmarks.py \
 --gpu_num_per_node=2 \
 --node_num=2 \
 --node_list="192.168.1.12,192.168.1.14" \
@@ -33,7 +33,7 @@ python cnn_benchmark/of_cnn_benchmarks.py \
 ## bert pretrain
 1 node, 1gpu:
 ```
-python bert_benchmark/run_pretraining.py \
+python3 bert_benchmark/run_pretraining.py \
 --gpu_num_per_node=1 \
 --node_num=1 \
 --learning_rate=1e-4 \
@@ -57,7 +57,7 @@ python bert_benchmark/run_pretraining.py \
 
 2 nodes, 2 gpu each node:
 ```
-python bert_benchmark/run_pretraining.py \
+python3 bert_benchmark/run_pretraining.py \
 --gpu_num_per_node=2 \
 --node_num=2 \
 --node_list='192.168.1.12,192.168.1.14' \
