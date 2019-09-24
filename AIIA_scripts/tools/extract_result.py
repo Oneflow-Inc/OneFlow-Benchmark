@@ -43,9 +43,10 @@ def extract_result():
     tmp_dict = {}
     with open(l) as f:
       lines =  f.readlines()
-      tmp_dict['time_stamp'] = lines[0].strip().split(' ')[0] + '-' + lines[0].strip().split(' ')[1]
 
       for line in lines:
+        if "Time stamp" in line:
+          tmp_dict['time_stamp'] = line.strip().split(' ')[-1]
         if "batch_size_per_device" in line:
           tmp_dict['batch_size'] = int(line.strip().split('=')[-1].strip())
         if "average speed" in line:
