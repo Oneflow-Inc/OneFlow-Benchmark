@@ -80,3 +80,13 @@ python bert_benchmark/run_pretraining.py \
 --hidden_size_per_head=64
 ```
 
+## build docker images from wheel
+please put oneflow `*.whl` in docker/wheel folder, then build docker image use:
+```
+sh docker/build.sh
+```
+
+run docker image use:
+```
+sh docker/launch.sh
+```
