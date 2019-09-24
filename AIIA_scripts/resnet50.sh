@@ -7,7 +7,7 @@ RUN_REAL_DATA=${4}
 RUN_SYNTHETIC_DATA=${5}
 LOGFILE=${6}
 
-CMD="python ../cnn_benchmark/of_cnn_benchmarks.py \
+CMD="python3 ../cnn_benchmark/of_cnn_benchmarks.py \
 --model=resnet50 \
 --gpu_num_per_node=$GPU_NUM_PER_NODE \
 --node_num=$NODE_NUM \
