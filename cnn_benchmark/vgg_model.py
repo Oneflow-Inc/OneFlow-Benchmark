@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
 import oneflow as flow
 import oneflow.core.operator.op_conf_pb2 as op_conf_util
 
@@ -74,7 +76,13 @@ def vgg16(args):
   total_device_num = args.node_num * args.gpu_num_per_node
   batch_size = total_device_num * args.batch_size_per_device
 
-  (labels, images) = data_loader.load_imagenet(args.data_dir, IMAGE_SIZE, batch_size, args.data_part_num)
+  if args.data_dir:
+    assert os.path.exists(args.data_dir)
+    print("Loading data from {}".format(args.data_dir))
+    (labels, images) = data_loader.load_imagenet(args.data_dir, IMAGE_SIZE, batch_size, args.data_part_num)
+  else:
+    print("Loading synthetic data.")
+    (labels, images) = data_loader.load_synthetic(IMAGE_SIZE, batch_size)
 
   transposed = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
   conv1 = _conv_block(transposed, 0, 64, 2)

@@ -21,3 +21,12 @@ def load_imagenet(data_dir, image_size, batch_size, data_part_num):
   return flow.data.decode_ofrecord(
     data_dir, (label_blob_conf, image_blob_conf),
     batch_size=batch_size, data_part_num=data_part_num, name="decode")
+
+
+def load_synthetic(image_size, batch_size):
+  label = flow.data.decode_random(shape=(), dtype=flow.int32, batch_size=batch_size,
+                                  initializer=flow.zeros_initializer(flow.int32))
+
+  image = flow.data.decode_random(shape=(image_size, image_size, 3), dtype=flow.float, batch_size=batch_size)
+
+  return label, image

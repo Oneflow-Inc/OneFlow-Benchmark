@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import os
 import time
-import random
 import argparse
 from datetime import datetime
 
@@ -76,14 +75,15 @@ def main():
   for arg in vars(args):
     print('{} = {}'.format(arg, getattr(args, arg)))
   print("-".ljust(66, '-'))
+  print("Time stamp: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
   flow.config.default_data_type(flow.float)
   flow.config.gpu_device_num(args.gpu_num_per_node)
   flow.config.grpc_use_no_signal()
   flow.config.log_dir(args.log_dir)
-  flow.config.ctrl_port(random.randint(1, 10000))
+  flow.config.ctrl_port(12139)
 
   if args.node_num > 1:
-    flow.config.ctrl_port(random.randint(1, 10000))
+    flow.config.ctrl_port(12138)
     nodes = []
     for n in args.node_list.strip().split(","):
       addr_dict = {}
