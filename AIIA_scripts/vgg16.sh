@@ -17,18 +17,19 @@ CMD="python ../cnn_benchmark/of_cnn_benchmarks.py \
 --learning_rate=0.01 \
 --optimizer=sgd \
 --loss_print_every_n_iter=1 \
---warmup_iter_num=2"
+--warmup_iter_num=0"
+
+
 
 # synthetic data
-
+if [ $RUN_SYNTHETIC_DATA = "True" ] ; then
+    ${CMD} | tee ${LOGFILE}.sythetic
+fi
 
 # real data
 if [ $RUN_REAL_DATA = "True" ] ; then
-CMD+=" --data_dir=/dataset/PNGS/PNG228/of_record_repeated"
-#set -x
-    (
-     $CMD
-    ) |& tee $LOGFILE".real"
-
-#set +x
+    CMD+=" --data_dir=/dataset/PNGS/PNG228/of_record_repeated --data_part_num=15"
+    ${CMD} | tee ${LOGFILE}.real
 fi
+
+
