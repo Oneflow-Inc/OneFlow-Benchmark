@@ -1,4 +1,4 @@
-ARG CUDA=9
+ARG CUDA=10
 
 FROM nvidia/cuda:${CUDA}.0-cudnn7-devel-centos7
 RUN yum update -y && yum install -y epel-release
@@ -14,13 +14,13 @@ RUN if [ "${USE_PYTHON_3_OR_2}" -eq 2 ] ; then yum update -y \
 
 RUN if [ "${USE_PYTHON_3_OR_2}" -eq 3 ] ; then yum update -y \
     && yum install -y rh-python36 python36-devel.x86_64 \
+    && yum install openblas-devel \
     && python3 -m ensurepip \
     && pip3 install numpy protobuf ; fi
 
 
 ## INSTALL WHEEL
 RUN pip${USE_PYTHON_3_OR_2} install wheel
-COPY docker/wheel/:/wheel
+COPY docker/wheel/ /wheel
 RUN pip${USE_PYTHON_3_OR_2} install /wheel/*.whl
 
-WORKDIR /workspace/benchmark
