@@ -14,7 +14,7 @@ RUN if [ "${USE_PYTHON_3_OR_2}" -eq 2 ] ; then yum update -y \
 
 RUN if [ "${USE_PYTHON_3_OR_2}" -eq 3 ] ; then yum update -y \
     && yum install -y rh-python36 python36-devel.x86_64 \
-    && yum install openblas-devel \
+    && yum install openblas-devel -y \
     && python3 -m ensurepip \
     && pip3 install numpy protobuf ; fi
 
