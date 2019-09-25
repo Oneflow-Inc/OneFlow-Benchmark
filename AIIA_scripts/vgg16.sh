@@ -17,7 +17,8 @@ CMD="python3 ../cnn_benchmark/of_cnn_benchmarks.py \
 --learning_rate=0.01 \
 --optimizer=sgd \
 --loss_print_every_n_iter=1 \
---warmup_iter_num=0"
+--warmup_iter_num=0 \
+--data_part_num=32"
 
 
 
@@ -28,7 +29,7 @@ fi
 
 # real data
 if [ $RUN_REAL_DATA = "True" ] ; then
-    CMD+=" --data_dir=/dataset/PNGS/PNG228/of_record_repeated --data_part_num=15"
+    CMD+=" --data_dir=/dataset/ofrecord/imagenet/train"
     ${CMD} | tee ${LOGFILE}.real
 fi
 
