@@ -27,8 +27,8 @@ CMD="python3 ../bert_benchmark/run_pretraining.py \
 --attention_probs_dropout_prob=0.1 \
 --hidden_dropout_prob=0.1 \
 --hidden_size_per_head=64 \
---data_part_num=10 \
---data_dir=/dataset/bert/of_wiki_seq_len_128"
+--data_part_num=1 \
+--data_dir=/dataset/ofrecord/wiki_128"
 
 # bert large
 #CMD="python3 ../bert_benchmark/run_pretraining.py \
@@ -50,8 +50,8 @@ CMD="python3 ../bert_benchmark/run_pretraining.py \
 #--attention_probs_dropout_prob=0.1 \
 #--hidden_dropout_prob=0.1 \
 #--hidden_size_per_head=64 \
-#--data_part_num=10 \
-#--data_dir=/dataset/bert/of_wiki_seq_len_128"
+#--data_part_num=1 \
+#--data_dir=/dataset/ofrecord/wiki_512"
 
 
 $CMD | tee $LOGFILE

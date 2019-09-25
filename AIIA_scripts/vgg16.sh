@@ -28,7 +28,7 @@ fi
 
 # real data
 if [ $RUN_REAL_DATA = "True" ] ; then
-    CMD+=" --data_dir=/dataset/PNGS/PNG228/of_record_repeated --data_part_num=15"
+    CMD+=" --data_dir=/dataset/ofrecord/imagenet/train --data_part_num=1"
     ${CMD} | tee ${LOGFILE}.real
 fi
 
