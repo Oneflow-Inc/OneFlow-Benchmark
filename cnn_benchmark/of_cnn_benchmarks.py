@@ -107,18 +107,24 @@ def main():
     train_loss = TrainNet().get().mean()
 
   print("Start trainning.")
-  total_time = 0.0
-  batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
-  for step in range(args.iter_num):
-    start_time = time.time()
-    train_loss = TrainNet().get().mean()
-    duration = time.time() - start_time
-    total_time += duration
+  main.total_time = 0.0
+  main.batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
+  main.start_time = time.time()
+  def create_callback(step):
+    def callback(train_loss):
+      if step % args.loss_print_every_n_iter == 0:
+        cur_time = time.time()
+        duration = cur_time - main.start_time
+        main.total_time += duration
+        main.start_time = cur_time
+        images_per_sec = main.batch_size / duration
+        print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
+              .format(step, train_loss.mean(), duration, images_per_sec))
 
-    if step % args.loss_print_every_n_iter == 0:
-      images_per_sec = batch_size / duration
-      print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
-            .format(step, train_loss, duration, images_per_sec))
+    return callback
+
+  for step in range(args.iter_num):
+    TrainNet().async_get(create_callback(step))
 
     if (step + 1) % args.model_save_every_n_iter == 0:
       if not os.path.exists(args.model_save_dir):
@@ -127,7 +133,7 @@ def main():
         print("Saving model to {}.".format(snapshot_save_path))
         check_point.save(snapshot_save_path)
 
-  avg_img_per_sec = batch_size * args.iter_num / total_time
+  avg_img_per_sec = main.batch_size * args.iter_num / main.total_time
   print("-".ljust(66, '-'))
   print("average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
   print("-".ljust(66, '-'))
