@@ -12,7 +12,7 @@ def load_imagenet(data_dir, image_size, batch_size, data_part_num):
     dtype=flow.float,
     codec=flow.data.ImageCodec([flow.data.ImageResizePreprocessor(image_size, image_size)]),
     preprocessors=[
-      flow.data.NormByChannelPreprocessor((123.68, 116.78, 103.94))
+      flow.data.NormByChannelPreprocessor((123.68, 116.78, 103.94), (255.0, 255.0, 255.0))
     ])
 
   label_blob_conf = flow.data.BlobConf(

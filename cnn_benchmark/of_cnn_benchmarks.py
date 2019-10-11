@@ -80,7 +80,7 @@ def main():
   flow.config.gpu_device_num(args.gpu_num_per_node)
   flow.config.grpc_use_no_signal()
   flow.config.log_dir(args.log_dir)
-  flow.config.ctrl_port(12139)
+  flow.config.ctrl_port(12140)
 
   if args.node_num > 1:
     flow.config.ctrl_port(12138)
@@ -120,7 +120,11 @@ def main():
         images_per_sec = main.batch_size / duration
         print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
               .format(step, train_loss.mean(), duration, images_per_sec))
-
+        if step == args.iter_num - 1:
+          avg_img_per_sec = main.batch_size * args.iter_num / main.total_time
+          print("-".ljust(66, '-'))
+          print("average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
+          print("-".ljust(66, '-'))
     return callback
 
   for step in range(args.iter_num):
@@ -133,10 +137,6 @@ def main():
         print("Saving model to {}.".format(snapshot_save_path))
         check_point.save(snapshot_save_path)
 
-  avg_img_per_sec = main.batch_size * args.iter_num / main.total_time
-  print("-".ljust(66, '-'))
-  print("average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
-  print("-".ljust(66, '-'))
 
 if __name__ == '__main__':
   main()
