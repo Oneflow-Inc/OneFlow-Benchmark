@@ -7,8 +7,12 @@ RUN_REAL_DATA=${4}
 RUN_SYNTHETIC_DATA=${5}
 LOGFILE=${6}
 
+DATA_DIR=${OF_BERT_DATA_DIR}
+
+SHELL_FOLDER=$(dirname $(readlink -f "$0"))
+
 # bert base
-CMD="python3 ../bert_benchmark/run_pretraining.py \
+CMD="python3 $SHELL_FOLDER/../bert_benchmark/run_pretraining.py \
 --gpu_num_per_node=$GPU_NUM_PER_NODE \
 --node_num=$NODE_NUM \
 --node_list=$NODE_LIST \
@@ -28,10 +32,12 @@ CMD="python3 ../bert_benchmark/run_pretraining.py \
 --hidden_dropout_prob=0.1 \
 --hidden_size_per_head=64 \
 --data_part_num=32 \
---data_dir=/dataset/ofrecord/wiki_128"
+--data_dir=$DATA_DIR \
+--log_dir=$OUTPUT_DIR/oneflow/bert/log \
+--model_save_dir=$OUTPUT_DIR/oneflow/bert/model"
 
 # bert large
-#CMD="python3 ../bert_benchmark/run_pretraining.py \
+#CMD="python3 $SHELL_FOLDER/../bert_benchmark/run_pretraining.py \
 #--gpu_num_per_node=$GPU_NUM_PER_NODE \
 #--node_num=$NODE_NUM \
 #--node_list=$NODE_LIST \
@@ -51,9 +57,12 @@ CMD="python3 ../bert_benchmark/run_pretraining.py \
 #--hidden_dropout_prob=0.1 \
 #--hidden_size_per_head=64 \
 #--data_part_num=32 \
-#--data_dir=/dataset/ofrecord/wiki_512"
+# --data_dir=$DATA_DIR \
+# --log_dir=$OUTPUT_DIR/oneflow/bert/log \
+# --model_save_dir=$OUTPUT_DIR/oneflow/bert/model"
 
 
-$CMD | tee $LOGFILE
+$CMD | tee ${LOGFILE}.log
+echo "Saving log to ${LOGFILE}.log"
 
 

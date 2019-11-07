@@ -58,6 +58,11 @@ optimizer_dict = {
 @flow.function
 def TrainNet():
   flow.config.train.primary_lr(args.learning_rate)
+  flow.config.disable_all_reduce_sequence(True)
+  # flow.config.enable_nccl_hierarchical_all_reduce(True)
+  # flow.config.cudnn_buf_limit_mbyte(2048)
+  flow.config.all_reduce_group_num(128)
+  flow.config.all_reduce_group_min_mbyte(1)
   flow.config.train.model_update_conf(optimizer_dict[args.optimizer])
   if args.weight_l2:
     flow.config.train.weight_l2(args.weight_l2)
