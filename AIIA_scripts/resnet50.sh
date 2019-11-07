@@ -7,26 +7,34 @@ RUN_REAL_DATA=${4}
 RUN_SYNTHETIC_DATA=${5}
 LOGFILE=${6}
 
-CMD="python3 ../cnn_benchmark/of_cnn_benchmarks.py \
+DATA_DIR=${OF_CNN_DATA_DIR}
+
+SHELL_FOLDER=$(dirname $(readlink -f "$0"))
+
+CMD="python3 $SHELL_FOLDER/../cnn_benchmark/of_cnn_benchmarks.py \
 --model=resnet50 \
 --gpu_num_per_node=$GPU_NUM_PER_NODE \
 --node_num=$NODE_NUM \
 --node_list=$NODE_LIST \
---batch_size_per_device=8 \
---iter_num=5 \
---learning_rate=0.01 \
+--batch_size_per_device=32 \
+--iter_num=100 \
+--learning_rate=0.128 \
 --optimizer=sgd \
 --loss_print_every_n_iter=1 \
---warmup_iter_num=0 \
---data_part_num=32"
+--warmup_iter_num=20 \
+--data_part_num=16 \
+--log_dir=$OUTPUT_DIR/oneflow/cnns/log \
+--model_save_dir=$OUTPUT_DIR/oneflow/cnns/model"
 
 # synthetic data
 if [ $RUN_SYNTHETIC_DATA = "True" ] ; then
-    ${CMD} | tee ${LOGFILE}.sythetic
+    ${CMD} | tee ${LOGFILE}_sythetic.log
+    echo "Saving log to ${LOGFILE}_sythetic.log"
 fi
 
 # real data
-if [ $RUN_REAL_DATA = "True" ] ; then
-    CMD+=" --data_dir=/dataset/ofrecord/imagenet/train"
-    ${CMD} | tee ${LOGFILE}.real
+if [ $RUN_REAL_DATA = "True" ]; then
+    CMD+=" --data_dir=$DATA_DIR"
+    ${CMD} | tee ${LOGFILE}_real.log
+    echo "Saving log to ${LOGFILE}_real.log"
 fi

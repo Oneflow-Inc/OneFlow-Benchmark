@@ -10,21 +10,21 @@ parser.add_argument("--model", type=str, default="vgg16", required=False,
                     help="model(s) to run, split by comma")
 parser.add_argument("--case", type=str, default="1n1c", required=False, help="cases to run, split by comma")
 parser.add_argument("--node_list", type=str, default=None, required=False, help="nodes' IP address, split by comma")
-parser.add_argument("--run_real_data", type=bool, default=True, required=False)
-parser.add_argument("--run_synthetic_data", type=bool, default=True, required=False)
+parser.add_argument("--run_real_data", type=str, default="True", required=False)
+parser.add_argument("--run_synthetic_data", type=str, default="True", required=False)
 parser.add_argument("--output_dir", type=str, default="./output/benchmark_log", required=False)
 args = parser.parse_args()
 
+CURRENT_FILE_PATH=os.path.dirname(__file__) 
 
 def run_model(model, gpu_per_node=1, node_num=1, node_list=None, run_real_data=True, run_synthetic_data=True):
   log_dir = os.path.join(args.output_dir, model)
   if not os.path.exists(log_dir):
     os.makedirs(log_dir)
-  log_path = os.path.join(log_dir, "{}n{}c.log".format(node_num, gpu_per_node * node_num))
+  log_path = os.path.join(log_dir, "{}n{}c".format(node_num, gpu_per_node * node_num))
   os.system(
-    "sh {}.sh {} {} {} {} {} {}".format(model, gpu_per_node, node_num, node_list, run_real_data, run_synthetic_data,
+    "sh {}.sh {} {} {} {} {} {}".format(os.path.join(CURRENT_FILE_PATH,model), gpu_per_node, node_num, node_list, run_real_data, run_synthetic_data,
                                         log_path))
-  print("Saving log to: {}".format(log_path))
 
 
 def benchmark():
@@ -46,7 +46,7 @@ def benchmark():
         assert len(node_list) == node_num
 
       run_model(model, gpu_per_node=gpu_per_node, node_num=node_num, node_list=args.node_list,
-                run_real_data=args.run_real_data, run_synthetic_data=args.run_real_data)
+                run_real_data=args.run_real_data, run_synthetic_data=args.run_synthetic_data)
 
 
 if __name__ == "__main__":

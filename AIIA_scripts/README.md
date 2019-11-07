@@ -13,7 +13,7 @@
     ```
     node2(192.168.1.14):
     ```
-    python3 run_benchmark.py --model=vgg16,resnet50,bert --case=2n4c --node_list=192.168.1.12,192.168.1.14
+    python3 run_benchmark.py --model=vgg16 --case=2n4c --node_list=192.168.1.12,192.168.1.14
     ```
     The result only print on node1.
 
