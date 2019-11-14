@@ -85,6 +85,7 @@ def main():
   flow.config.gpu_device_num(args.gpu_num_per_node)
   flow.config.grpc_use_no_signal()
   flow.config.log_dir(args.log_dir)
+  # flow.config.enable_inplace(False)
   flow.config.ctrl_port(12140)
 
   if args.node_num > 1:

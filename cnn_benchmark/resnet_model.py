@@ -104,7 +104,7 @@ def residual_block(input, block_name, filters, filters_inner, strides_init):
     input, block_name, filters, filters_inner, strides_init
   )
 
-  return flow.keras.activations.relu(shortcut + bottleneck)
+  return flow.keras.activations.relu(bottleneck + shortcut)
 
 
 def residual_stage(
