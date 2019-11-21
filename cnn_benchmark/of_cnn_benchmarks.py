@@ -80,8 +80,10 @@ def TrainNet():
     flow.config.disable_all_reduce_sequence(True)
     # flow.config.enable_nccl_hierarchical_all_reduce(True)
     # flow.config.cudnn_buf_limit_mbyte(2048)
+    # flow.config.concurrency_width(2)
     flow.config.all_reduce_group_num(128)
-    flow.config.all_reduce_group_min_mbyte(1)
+    flow.config.all_reduce_group_min_mbyte(8)
+    
     flow.config.train.model_update_conf(optimizer_dict[args.optimizer])
 
     if args.weight_l2:
@@ -118,20 +120,20 @@ def main():
         str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
     flow.config.default_data_type(flow.float)
     flow.config.gpu_device_num(args.gpu_num_per_node)
-    flow.config.grpc_use_no_signal()
-    flow.config.log_dir(args.log_dir)
+    flow.env.grpc_use_no_signal()
+    flow.env.log_dir(args.log_dir)
     # flow.config.enable_inplace(False)
-    flow.config.ctrl_port(12140)
+    # flow.config.ctrl_port(12140)
 
     if args.node_num > 1:
-        flow.config.ctrl_port(12138)
+        # flow.config.ctrl_port(12138)
         nodes = []
         for n in args.node_list.strip().split(","):
             addr_dict = {}
             addr_dict["addr"] = n
             nodes.append(addr_dict)
 
-        flow.config.machine(nodes)
+        flow.env.machine(nodes)
 
     check_point = flow.train.CheckPoint()
     if args.model_load_dir:
