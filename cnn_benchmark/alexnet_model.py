@@ -6,7 +6,7 @@ import oneflow as flow
 from model_util import conv2d_layer
 
 
-def alexnet(images, labels):
+def alexnet(images, trainable=True):
 
     transposed = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
 
@@ -38,7 +38,7 @@ def alexnet(images, labels):
         use_bias=False,
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
-        trainable=True,
+        trainable=trainable,
         name="fc1",)
 
     dropout1 = flow.nn.dropout(fc1, rate=0.5)
@@ -50,7 +50,7 @@ def alexnet(images, labels):
         use_bias=False,
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
-        trainable=True,
+        trainable=trainable,
         name="fc2",)
 
     dropout2 = flow.nn.dropout(fc2, rate=0.5)
@@ -62,10 +62,7 @@ def alexnet(images, labels):
         use_bias=False,
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
-        trainable=True,
+        trainable=trainable,
         name="fc3",)
 
-    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-        labels, fc3, name="softmax_loss")
-
-    return loss
+    return fc3
