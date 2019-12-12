@@ -78,6 +78,8 @@ optimizer_dict = {
 def TrainNet():
     flow.config.train.primary_lr(args.learning_rate)
     flow.config.disable_all_reduce_sequence(True)
+    # flow.config.all_reduce_lazy_ratio(0)
+
     # flow.config.enable_nccl_hierarchical_all_reduce(True)
     # flow.config.cudnn_buf_limit_mbyte(2048)
     # flow.config.concurrency_width(2)
