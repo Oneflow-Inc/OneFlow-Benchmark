@@ -1,12 +1,12 @@
 ## Inference
 
-测试平台：Nvidia GTX2080Ti单卡
-CUDA版本：10.0
-CUDNN版本：7.5.0
-TensorRT版本：6.0.1
+测试平台：Nvidia GTX2080Ti单卡.  
+CUDA版本：10.0.  
+CUDNN版本：7.5.0.   
+TensorRT版本：6.0.1.  
 
-branch: of_xrt_tensorrt
-commit: 726c3a12b9d97b57f9fb7e3d212b63564e20e755
+branch: of_xrt_tensorrt.  
+commit: 726c3a12b9d97b57f9fb7e3d212b63564e20e755.  
 
 ### CV
 batch size为8，输入图片大小为224，预热5 batches，平均吞吐（img/s）为500个batches的平均值。
