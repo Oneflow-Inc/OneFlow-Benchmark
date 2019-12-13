@@ -70,15 +70,15 @@ def InferenceNet():
     batch_size = total_device_num * args.batch_size_per_device
 
     if args.use_tensorrt:
-      flow.config.use_tensorrt(True)
+        flow.config.use_tensorrt()
     if args.use_xla_jit:
-      flow.config.use_xla_jit(True)
+        flow.config.use_xla_jit()
 
     if args.precision == "float16":
-      if not args.use_tensorrt:
-        flow.config.enable_auto_mixed_precision()
-      else: 
-        os.environ['FLAGS_enable_fp16']='true'
+        if not args.use_tensorrt:
+            flow.config.enable_auto_mixed_precision()
+        else:
+            flow.config.tensorrt.use_fp16()
 
     if args.data_dir:
         assert os.path.exists(args.data_dir)
@@ -160,6 +160,7 @@ def main():
     for step in range(args.iter_num):
         InferenceNet().async_get(create_callback(step))
         #predictions = InferenceNet().get()
+        #create_callback(step)(predictions)
         #print(predictions)
 
 if __name__ == '__main__':
