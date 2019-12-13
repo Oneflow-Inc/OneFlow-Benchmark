@@ -28,12 +28,6 @@ parser.add_argument("--model", type=str, default="vgg16",
                     required=False, help="vgg16 or resnet50")
 parser.add_argument("--batch_size_per_device",
                     type=int, default=8, required=False)
-parser.add_argument("--learning_rate", type=float,
-                    default=1e-4, required=False)
-parser.add_argument("--optimizer", type=str, default="sgd",
-                    required=False, help="sgd, adam, momentum")
-parser.add_argument("--weight_l2", type=float, default=None,
-                    required=False, help="weight decay parameter")
 parser.add_argument("--iter_num", type=int, default=10,
                     required=False, help="total iterations to run")
 parser.add_argument("--warmup_iter_num", type=int, default=0,
@@ -45,15 +39,17 @@ parser.add_argument("--data_part_num", type=int, default=32,
 parser.add_argument("--image_size", type=int, default=228,
                     required=False, help="image size")
 
+parser.add_argument("--use_tensorrt", dest='use_tensorrt', action='store_true',
+                    default=False, required=False, help="inference with tensorrt")
+parser.add_argument("--use_xla_jit", dest='use_xla_jit', action='store_true',
+                    default=False, required=False, help="inference with xla jit")
+
+parser.add_argument("--precision", type=str, default="float32",
+                    required=False, help="inference with low precision")
+
 # log and resore/save
-parser.add_argument("--loss_print_every_n_iter", type=int, default=1, required=False,
-                    help="print loss every n iteration")
-parser.add_argument("--model_save_every_n_iter", type=int, default=200, required=False,
-                    help="save model every n iteration")
-parser.add_argument("--model_save_dir", type=str,
-                    default="./output/model_save-{}".format(
-                        str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
-                    required=False, help="model save directory")
+parser.add_argument("--print_every_n_iter", type=int, default=1, required=False,
+                    help="print log every n iterations")
 parser.add_argument("--model_load_dir", type=str, default=None,
                     required=False, help="model load directory")
 parser.add_argument("--log_dir", type=str, default="./output",
@@ -67,32 +63,22 @@ model_dict = {
     "alexnet": alexnet_model.alexnet,
 }
 
-optimizer_dict = {
-    "sgd": {"naive_conf": {}},
-    "adam": {"adam_conf": {"beta1": 0.9}},
-    "momentum": {"momentum_conf": {"beta": 0.9}},
-}
-
-
 @flow.function
-def TrainNet():
-    flow.config.train.primary_lr(args.learning_rate)
-    flow.config.disable_all_reduce_sequence(True)
-    # flow.config.all_reduce_lazy_ratio(0)
-
-    # flow.config.enable_nccl_hierarchical_all_reduce(True)
-    # flow.config.cudnn_buf_limit_mbyte(2048)
-    # flow.config.concurrency_width(2)
-    flow.config.all_reduce_group_num(128)
-    flow.config.all_reduce_group_min_mbyte(8)
-    
-    flow.config.train.model_update_conf(optimizer_dict[args.optimizer])
-
-    if args.weight_l2:
-        flow.config.train.weight_l2(args.weight_l2)
+def InferenceNet():
 
     total_device_num = args.node_num * args.gpu_num_per_node
     batch_size = total_device_num * args.batch_size_per_device
+
+    if args.use_tensorrt:
+        flow.config.use_tensorrt()
+    if args.use_xla_jit:
+        flow.config.use_xla_jit()
+
+    if args.precision == "float16":
+        if not args.use_tensorrt:
+            flow.config.enable_auto_mixed_precision()
+        else:
+            flow.config.tensorrt.use_fp16()
 
     if args.data_dir:
         assert os.path.exists(args.data_dir)
@@ -105,12 +91,8 @@ def TrainNet():
             args.image_size, batch_size)
 
     logits = model_dict[args.model](images)
-    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-        labels, logits, name="softmax_loss"
-    )
-    flow.losses.add_loss(loss)
-
-    return loss
+    softmax = flow.nn.softmax(logits)
+    return softmax
 
 
 def main():
@@ -131,7 +113,6 @@ def main():
     # flow.config.ctrl_port(12140)
 
     if args.node_num > 1:
-        # flow.config.ctrl_port(12138)
         nodes = []
         for n in args.node_list.strip().split(","):
             addr_dict = {}
@@ -152,23 +133,22 @@ def main():
     # warmups
     print("Runing warm up for {} iterations.".format(args.warmup_iter_num))
     for step in range(args.warmup_iter_num):
-        train_loss = TrainNet().get().mean()
+        predictions = InferenceNet().get()
 
-    print("Start trainning.")
     main.total_time = 0.0
     main.batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
     main.start_time = time.time()
 
     def create_callback(step):
-        def callback(train_loss):
-            if step % args.loss_print_every_n_iter == 0:
+        def callback(predictions):
+            if step % args.print_every_n_iter == 0:
                 cur_time = time.time()
                 duration = cur_time - main.start_time
                 main.total_time += duration
                 main.start_time = cur_time
                 images_per_sec = main.batch_size / duration
-                print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
-                      .format(step, train_loss.mean(), duration, images_per_sec))
+                print("iter {}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
+                      .format(step, duration, images_per_sec))
                 if step == args.iter_num - 1:
                     avg_img_per_sec = main.batch_size * args.iter_num / main.total_time
                     print("-".ljust(66, '-'))
@@ -178,16 +158,10 @@ def main():
         return callback
 
     for step in range(args.iter_num):
-        TrainNet().async_get(create_callback(step))
-
-        if (step + 1) % args.model_save_every_n_iter == 0:
-            if not os.path.exists(args.model_save_dir):
-                os.makedirs(args.model_save_dir)
-                snapshot_save_path = os.path.join(
-                    args.model_save_dir, 'snapshot_%d' % (step + 1))
-                print("Saving model to {}.".format(snapshot_save_path))
-                check_point.save(snapshot_save_path)
-
+        InferenceNet().async_get(create_callback(step))
+        #predictions = InferenceNet().get()
+        #create_callback(step)(predictions)
+        #print(predictions)
 
 if __name__ == '__main__':
     main()
