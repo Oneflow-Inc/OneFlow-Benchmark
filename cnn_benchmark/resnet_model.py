@@ -5,8 +5,6 @@ from __future__ import print_function
 import oneflow as flow
 
 
-TRAINABLE = True
-
 BLOCK_COUNTS = [3, 4, 6, 3]
 BLOCK_FILTERS = [256, 512, 1024, 2048]
 BLOCK_FILTERS_INNER = [64, 128, 256, 512]
@@ -21,6 +19,7 @@ def _conv2d(
     padding="SAME",
     data_format="NCHW",
     dilations=1,
+    trainable=True,
     weight_initializer=flow.variance_scaling_initializer(data_format="NCHW"),
 ):
     weight = flow.get_variable(
@@ -28,14 +27,14 @@ def _conv2d(
         shape=(filters, input.static_shape[1], kernel_size, kernel_size),
         dtype=input.dtype,
         initializer=weight_initializer,
-        trainable=TRAINABLE,
+        trainable=trainable,
     )
     return flow.nn.conv2d(
         input, weight, strides, padding, data_format, dilations, name=name
     )
 
 
-def _batch_norm(inputs, name=None):
+def _batch_norm(inputs, name=None, trainable=True):
     return flow.layers.batch_normalization(
         inputs=inputs,
         axis=1,
@@ -43,7 +42,7 @@ def _batch_norm(inputs, name=None):
         epsilon=1.001e-5,
         center=True,
         scale=True,
-        trainable=TRAINABLE,
+        trainable=trainable,
         name=name,
     )
 
@@ -152,7 +151,7 @@ def resnet_stem(input):
     return pool1
 
 
-def resnet50(images, labels):
+def resnet50(images, trainable=True):
 
     images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
 
@@ -174,11 +173,8 @@ def resnet50(images, labels):
             use_bias=True,
             kernel_initializer=flow.xavier_uniform_initializer(),
             bias_initializer=flow.zeros_initializer(),
-            trainable=TRAINABLE,
+            trainable=trainable,
             name="fc1001",
         )
 
-        loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-            labels, fc1001, name="softmax_loss")
-
-    return loss
+    return fc1001

@@ -1,7 +1,8 @@
 # OneFlow-Benchmark
 OneFlow models for benchmarking.
 
-## cnns
+## Training
+### cnns
 * 1 node, 1 gpu:
     ```
     python3 cnn_benchmark/of_cnn_benchmarks.py \
@@ -35,7 +36,7 @@ OneFlow models for benchmarking.
     --data_dir="/dataset/ofrecord/imagenet/train"
     ```
 
-## bert pretrain
+### bert pretrain
 * 1 node, 1gpu:
     * bert base:
     ```
@@ -91,6 +92,21 @@ OneFlow models for benchmarking.
 * 2 nodes, 2 gpu each node:
 
     simply add `--node_num=2 --node_list='192.168.1.12,192.168.1.14' `,see above.
+
+## Inference
+* 1 node, 1 gpu:
+    ```
+    python3 cnn_benchmark/of_cnn_infer_benchmarks.py \
+    --gpu_num_per_node=1 \
+    --model="vgg16" \
+    --batch_size_per_device=8 \
+    --iter_num=5 \
+    --print_every_n_iter=1 \
+    --warmup_iter_num=2 \
+    --data_dir="/dataset/ofrecord/imagenet/train"
+    ```
+    If you want to run the benchmark with TensorRT or XLA, only pass `--use_tensorrt` or `--use_xla_jit` to enable it. Low-precision arithmetics such as float16 or int8 are usually faster than 32bit float, and you can pass `--precision=float16` for acceleration.
+
 
 ## build docker images from wheel
 please put oneflow `*.whl` in docker/wheel folder, then build docker image use:
