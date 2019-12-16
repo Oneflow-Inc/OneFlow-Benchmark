@@ -13,7 +13,7 @@ import data_loader
 import vgg_model
 import resnet_model
 import alexnet_model
-
+import inceptionv3_model
 
 parser = argparse.ArgumentParser(description="flags for cnn benchmark")
 
@@ -59,6 +59,7 @@ args = parser.parse_args()
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
+    "inceptionv3": inceptionv3_model.inceptionv3,
     "vgg16": vgg_model.vgg16,
     "alexnet": alexnet_model.alexnet,
 }
