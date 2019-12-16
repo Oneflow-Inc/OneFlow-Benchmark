@@ -11,6 +11,7 @@ from datetime import datetime
 import oneflow as flow
 
 from pretrain import PreTrain
+import benchmark_util
 
 parser = argparse.ArgumentParser(description="flags for bert")
 
@@ -45,6 +46,8 @@ parser.add_argument("--model_save_dir", type=str,
                     default="./output/model_save-{}".format(
                         str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
                     required=False, help="model save directory")
+parser.add_argument("--save_last_snapshot", type=bool, default=False, required=False,
+                    help="save model snapshot for last iteration")    
 parser.add_argument("--model_load_dir", type=str, default=None,
                     required=False, help="model load directory")
 parser.add_argument("--log_dir", type=str, default="./output",
@@ -158,7 +161,7 @@ def PretrainJob():
     flow.config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
     flow.config.train.weight_l2(args.weight_l2)
 
-    loss = BuildPreTrainNet(batch_size, args.data_part_num,
+    total_loss, mlm_loss, nsp_loss = BuildPreTrainNet(batch_size, args.data_part_num,
                             seq_length=args.seq_length,
                             max_position_embeddings=args.max_position_embeddings,
                             num_hidden_layers=args.num_hidden_layers,
@@ -168,8 +171,8 @@ def PretrainJob():
                             vocab_size=args.vocab_size,
                             type_vocab_size=args.type_vocab_size,
                             max_predictions_per_seq=args.max_predictions_per_seq)
-    flow.losses.add_loss(loss)
-    return loss
+    flow.losses.add_loss(total_loss)
+    return total_loss, mlm_loss, nsp_loss
 
 
 def main():
@@ -184,14 +187,12 @@ def main():
         str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
 
     flow.config.gpu_device_num(args.gpu_num_per_node)
-    # flow.env.ctrl_port(19009)
     flow.config.default_data_type(flow.float)
     flow.env.log_dir(args.log_dir)
     if args.enable_auto_mixed_precision:
         flow.config.enable_auto_mixed_precision()
 
     if args.node_num > 1:
-        flow.env.ctrl_port(19008)
         nodes = []
         for n in args.node_list.strip().split(","):
             addr_dict = {}
@@ -209,45 +210,29 @@ def main():
         check_point.init()
         print('Init model on demand')
 
-    # warmups
-    print("Runing warm up for {} iterations.".format(args.warmup_iter_num))
-    for step in range(args.warmup_iter_num):
-        train_loss = PretrainJob().get().mean()
 
-    print("Start trainning.")
-    main.total_time = 0.0
-    main.batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
-    main.start_time = time.time()
+    total_batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
+    speedometer = benchmark_util.BERTSpeedometer()
 
-    def create_callback(step):
-        def callback(train_loss):
-            if step % args.loss_print_every_n_iter == 0:
-                cur_time = time.time()
-                duration = cur_time - main.start_time
-                main.total_time += duration
-                main.start_time = cur_time
-                images_per_sec = main.batch_size / duration
-                print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
-                      .format(step, train_loss.mean(), duration, images_per_sec))
-                if step == args.iter_num - 1:
-                    avg_img_per_sec = main.batch_size * args.iter_num / main.total_time
-                    print("-".ljust(66, '-'))
-                    print(
-                        "average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
-                    print("-".ljust(66, '-'))
-        return callback
-    
-    for step in range(args.iter_num):
-        
-        PretrainJob().async_get(create_callback(step))
+    for step in range(args.warmup_iter_num + args.iter_num):
+        cb = speedometer.speedometer_cb(step, total_batch_size, args.warmup_iter_num, args.iter_num, args.loss_print_every_n_iter)
+        PretrainJob().async_get(cb)
 
         if (step + 1) % args.model_save_every_n_iter == 0:
             if not os.path.exists(args.model_save_dir):
                 os.makedirs(args.model_save_dir)
-                snapshot_save_path = os.path.join(
-                    args.model_save_dir, 'snapshot_%d' % (step + 1))
-                print("Saving model to {}.".format(snapshot_save_path))
-                check_point.save(snapshot_save_path)
+            snapshot_save_path = os.path.join(
+                args.model_save_dir, 'snapshot_%d' % (step + 1))
+            print("Saving model to {}.".format(snapshot_save_path))
+            check_point.save(snapshot_save_path)
+    
+    if args.save_last_snapshot:
+        snapshot_save_path = os.path.join(args.model_save_dir, 'last_snapshot')
+        if not os.path.exists(snapshot_save_path):
+            os.makedirs(snapshot_save_path)
+        print("Saving model to {}.".format(snapshot_save_path))
+        check_point.save(snapshot_save_path)
+
 
 
 if __name__ == '__main__':

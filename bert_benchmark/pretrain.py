@@ -60,7 +60,7 @@ def PreTrain(input_ids_blob,
     initializer_range=initializer_range)
   with flow.deprecated.variable_scope("cls-loss"):
     total_loss = lm_loss + ns_loss
-  return total_loss
+  return total_loss, lm_loss, ns_loss
 
 
 def PooledOutput(sequence_output, hidden_size, initializer_range):

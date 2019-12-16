@@ -13,6 +13,7 @@ import data_loader
 import vgg_model
 import resnet_model
 import alexnet_model
+import benchmark_util
 
 
 parser = argparse.ArgumentParser(description="flags for cnn benchmark")
@@ -62,22 +63,6 @@ parser.add_argument("--log_dir", type=str, default="./output",
                     required=False, help="log info save directory")
 
 args = parser.parse_args()
-
-class StopWatch:
-    def __init__(self):
-        pass
-    def start(self):
-        self.start_time = time.time()
-        self.last_split = self.start_time
-    def split(self):
-        now = time.time()
-        duration = now - self.last_split
-        self.last_split = now
-        return duration
-    def stop(self):
-        self.stop_time = time.time()
-    def duration(self):
-        return self.stop_time - self.start_time
 
 
 model_dict = {
@@ -160,7 +145,6 @@ def main():
     # flow.config.ctrl_port(12140)
 
     if args.node_num > 1:
-        # flow.config.ctrl_port(12138)
         nodes = []
         for n in args.node_list.strip().split(","):
             addr_dict = {}
@@ -178,41 +162,12 @@ def main():
         print("Init model on demand.")
         check_point.init()
 
-    
-    # watch = StopWatch()
-
-    def speedometer_cb(watch, step, total_batch_size, warmup_num, iter_num, loss_print_every_n_iter):
-        def callback(train_loss):
-            if step < warmup_num:
-                print("Runing warm up for {}/{} iterations.".format(step + 1, warmup_num))
-                if (step + 1) == warmup_num:
-                    watch.start()
-                    print("Start trainning.")  
-            else:
-                train_step = step - warmup_num                               
-                
-                if (train_step + 1) % loss_print_every_n_iter == 0:
-                    loss = train_loss.mean()
-                    duration = watch.split()
-                    images_per_sec = total_batch_size * loss_print_every_n_iter / duration
-                    print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
-                        .format(train_step, loss, duration, images_per_sec))
-
-                if (train_step + 1) == iter_num:
-                    watch.stop()
-                    totoal_duration = watch.duration()
-                    avg_img_per_sec = total_batch_size * iter_num / totoal_duration
-                    print("-".ljust(66, '-'))
-                    print(
-                        "average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
-                    print("-".ljust(66, '-'))
-        return callback
 
     total_batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
-    watch = StopWatch()
+    speedometer = benchmark_util.CNNSpeedometer()
 
     for step in range(args.warmup_iter_num + args.iter_num):
-        cb = speedometer_cb(watch, step, total_batch_size, args.warmup_iter_num, args.iter_num, args.loss_print_every_n_iter)
+        cb = speedometer.speedometer_cb(step, total_batch_size, args.warmup_iter_num, args.iter_num, args.loss_print_every_n_iter)
         TrainNet().async_get(cb)
 
         if (step + 1) % args.model_save_every_n_iter == 0:
