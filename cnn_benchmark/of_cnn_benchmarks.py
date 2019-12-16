@@ -54,12 +54,31 @@ parser.add_argument("--model_save_dir", type=str,
                     default="./output/model_save-{}".format(
                         str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
                     required=False, help="model save directory")
+parser.add_argument("--save_last_snapshot", type=bool, default=False, required=False,
+                    help="save model snapshot for last iteration")    
 parser.add_argument("--model_load_dir", type=str, default=None,
                     required=False, help="model load directory")
 parser.add_argument("--log_dir", type=str, default="./output",
                     required=False, help="log info save directory")
 
 args = parser.parse_args()
+
+class StopWatch:
+    def __init__(self):
+        pass
+    def start(self):
+        self.start_time = time.time()
+        self.last_split = self.start_time
+    def split(self):
+        now = time.time()
+        duration = now - self.last_split
+        self.last_split = now
+        return duration
+    def stop(self):
+        self.stop_time = time.time()
+    def duration(self):
+        return self.stop_time - self.start_time
+
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
@@ -159,37 +178,42 @@ def main():
         print("Init model on demand.")
         check_point.init()
 
-    # warmups
-    print("Runing warm up for {} iterations.".format(args.warmup_iter_num))
-    for step in range(args.warmup_iter_num):
-        train_loss = TrainNet().get().mean()
+    
+    # watch = StopWatch()
 
-    print("Start trainning.")
-    main.total_time = 0.0
-    main.batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
-    main.start_time = time.time()
-
-    def create_callback(step):
+    def speedometer_cb(watch, step, total_batch_size, warmup_num, iter_num, loss_print_every_n_iter):
         def callback(train_loss):
-            if step % args.loss_print_every_n_iter == 0:
-                cur_time = time.time()
-                duration = cur_time - main.start_time
-                duration = duration / args.loss_print_every_n_iter
-                main.total_time += duration
-                main.start_time = cur_time
-                images_per_sec = main.batch_size / duration
-                print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
-                      .format(step, train_loss.mean(), duration, images_per_sec))
-                if step == args.iter_num - 1:
-                    avg_img_per_sec = main.batch_size * args.iter_num / main.total_time
+            if step < warmup_num:
+                print("Runing warm up for {}/{} iterations.".format(step + 1, warmup_num))
+                if (step + 1) == warmup_num:
+                    watch.start()
+                    print("Start trainning.")  
+            else:
+                train_step = step - warmup_num                               
+                
+                if (train_step + 1) % loss_print_every_n_iter == 0:
+                    loss = train_loss.mean()
+                    duration = watch.split()
+                    images_per_sec = total_batch_size * loss_print_every_n_iter / duration
+                    print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
+                        .format(train_step, loss, duration, images_per_sec))
+
+                if (train_step + 1) == iter_num:
+                    watch.stop()
+                    totoal_duration = watch.duration()
+                    avg_img_per_sec = total_batch_size * iter_num / totoal_duration
                     print("-".ljust(66, '-'))
                     print(
                         "average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
                     print("-".ljust(66, '-'))
         return callback
 
-    for step in range(args.iter_num):
-        TrainNet().async_get(create_callback(step))
+    total_batch_size = args.node_num * args.gpu_num_per_node * args.batch_size_per_device
+    watch = StopWatch()
+
+    for step in range(args.warmup_iter_num + args.iter_num):
+        cb = speedometer_cb(watch, step, total_batch_size, args.warmup_iter_num, args.iter_num, args.loss_print_every_n_iter)
+        TrainNet().async_get(cb)
 
         if (step + 1) % args.model_save_every_n_iter == 0:
             if not os.path.exists(args.model_save_dir):
@@ -198,9 +222,13 @@ def main():
                 args.model_save_dir, 'snapshot_%d' % (step + 1))
             print("Saving model to {}.".format(snapshot_save_path))
             check_point.save(snapshot_save_path)
-    snapshot_save_path = os.path.join(args.model_save_dir, 'last_snapshot')
-    print("Saving model to {}.".format(snapshot_save_path))
-    check_point.save(snapshot_save_path)
+    
+    if args.save_last_snapshot:
+        snapshot_save_path = os.path.join(args.model_save_dir, 'last_snapshot')
+        if not os.path.exists(snapshot_save_path):
+            os.makedirs(snapshot_save_path)
+        print("Saving model to {}.".format(snapshot_save_path))
+        check_point.save(snapshot_save_path)
 
 
 if __name__ == '__main__':
