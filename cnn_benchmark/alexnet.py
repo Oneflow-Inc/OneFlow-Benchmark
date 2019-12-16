@@ -1,7 +1,7 @@
 # ###################################################################
 # alexnet.py
 # 使用方法说明：
-#     单机运行： python alexnet.py -g 1 
+#     单机运行： python alexnet.py -g 1
 #               -g 指定使用的GPU个数
 #     多机运行： python alexnet.py -g 8 -m -n "192.168.1.15,192.168.1.16"
 #               -g 指定使用的GPU个数
@@ -12,37 +12,47 @@
 import oneflow as flow
 import argparse
 
-DATA_DIR='/dataset/imagenet_1k/oneflow/30/train'
+DATA_DIR = "/dataset/imagenet_1k/oneflow/30/train"
 parser = argparse.ArgumentParser(description="flags for multi-node and resource")
 parser.add_argument("-i", "--iter_num", type=int, default=10, required=False)
 parser.add_argument("-g", "--gpu_num_per_node", type=int, default=1, required=False)
-parser.add_argument("-m", "--multinode", default=False, action="store_true", required=False)
-parser.add_argument("-n","--node_list", type=str, default=None, required=False)
+parser.add_argument(
+    "-m", "--multinode", default=False, action="store_true", required=False
+)
+parser.add_argument("-n", "--node_list", type=str, default=None, required=False)
 parser.add_argument("-e", "--eval_dir", type=str, default=DATA_DIR, required=False)
 parser.add_argument("-t", "--train_dir", type=str, default=DATA_DIR, required=False)
 parser.add_argument("-load", "--model_load_dir", type=str, default="", required=False)
-parser.add_argument("-save", "--model_save_dir", type=str, default="./checkpoints", required=False)
+parser.add_argument(
+    "-save", "--model_save_dir", type=str, default="./checkpoints", required=False
+)
 args = parser.parse_args()
 
 
-def _data_load_layer(data_dir):    
+def _data_load_layer(data_dir):
     # 从数据集加载图像，并进行数据预处理
     image_blob_conf = flow.data.BlobConf(
         "encoded",
         shape=(227, 227, 3),
         dtype=flow.float,
         codec=flow.data.ImageCodec([flow.data.ImageResizePreprocessor(227, 227)]),
-        preprocessors=[flow.data.NormByChannelPreprocessor((123.68, 116.78, 103.94))],)
-    
+        preprocessors=[flow.data.NormByChannelPreprocessor((123.68, 116.78, 103.94))],
+    )
+
     # 从数据集加载标签
     label_blob_conf = flow.data.BlobConf(
-        "class/label", shape=(), dtype=flow.int32, codec=flow.data.RawCodec())
-    
+        "class/label", shape=(), dtype=flow.int32, codec=flow.data.RawCodec()
+    )
+
     # 解码
     labels, images = flow.data.decode_ofrecord(
-        data_dir, (label_blob_conf, image_blob_conf),
-        batch_size=12, data_part_num=8, name="decode")
-    
+        data_dir,
+        (label_blob_conf, image_blob_conf),
+        batch_size=12,
+        data_part_num=8,
+        name="decode",
+    )
+
     return labels, images
 
 
@@ -88,11 +98,10 @@ def _conv2d_layer(
     return output
 
 
-
 def alexnet(images, labels):
     # 数据数据集格式转换， NHWC -> NCHW
     transposed = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
-    
+
     conv1 = _conv2d_layer(
         "conv1", transposed, filters=64, kernel_size=11, strides=4, padding="VALID"
     )
@@ -122,7 +131,8 @@ def alexnet(images, labels):
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
         trainable=True,
-        name="fc1",)
+        name="fc1",
+    )
 
     dropout1 = flow.nn.dropout(fc1, rate=0.5)
 
@@ -134,7 +144,8 @@ def alexnet(images, labels):
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
         trainable=True,
-        name="fc2",)
+        name="fc2",
+    )
 
     dropout2 = flow.nn.dropout(fc2, rate=0.5)
 
@@ -146,11 +157,13 @@ def alexnet(images, labels):
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
         trainable=True,
-        name="fc3",)
+        name="fc3",
+    )
 
     # 损失函数
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-        labels, fc3, name="softmax_loss")
+        labels, fc3, name="softmax_loss"
+    )
 
     return loss
 
@@ -164,7 +177,7 @@ def alexnet_train_job():
 
     # 加载数据
     (labels, images) = _data_load_layer(args.train_dir)
-    
+
     # 构建网络
     loss = alexnet(images, labels)
 
@@ -208,21 +221,21 @@ def main():
         check_point.init()
     else:
         check_point.load(args.model_load_dir)
-    
+
     # 训练迭代过程
     print("{:>12}  {:>12}  {:>12}".format("iter", "loss type", "loss value"))
     for i in range(args.iter_num):
         fmt_str = "{:>12}  {:>12}  {:>12.10f}"
-        
+
         # 打印训练输出
         train_loss = alexnet_train_job().get().mean()
         print(fmt_str.format(i, "train loss:", train_loss))
-        
+
         # 打印预测输出
         if (i + 1) % 10 == 0:
             eval_loss = alexnet_eval_job().get().mean()
             print(fmt_str.format(i, "eval loss:", eval_loss))
-        
+
         # 保存模型
         if (i + 1) % 100 == 0:
             check_point.save(args.model_save_dir + str(i))

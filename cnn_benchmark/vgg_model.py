@@ -6,6 +6,7 @@ import oneflow as flow
 import oneflow.core.operator.op_conf_pb2 as op_conf_util
 from model_util import conv2d_layer
 
+
 def _conv_block(in_blob, index, filters, conv_times):
     conv_block = []
     conv_block.insert(0, in_blob)
@@ -61,7 +62,7 @@ def vgg16(images, trainable=True):
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
         trainable=trainable,
-        name="fc1"
+        name="fc1",
     )
 
     fc7 = flow.layers.dense(
@@ -72,7 +73,7 @@ def vgg16(images, trainable=True):
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
         trainable=trainable,
-        name="fc2"
+        name="fc2",
     )
     fc7 = flow.nn.dropout(fc7, rate=0.5)
 
@@ -83,7 +84,7 @@ def vgg16(images, trainable=True):
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
         trainable=trainable,
-        name="fc_final"
+        name="fc_final",
     )
     fc8 = flow.nn.dropout(fc8, rate=0.5)
 
