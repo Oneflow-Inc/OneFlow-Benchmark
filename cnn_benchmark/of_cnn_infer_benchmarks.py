@@ -20,40 +20,90 @@ parser = argparse.ArgumentParser(description="flags for cnn benchmark")
 # resouce
 parser.add_argument("--gpu_num_per_node", type=int, default=1, required=False)
 parser.add_argument("--node_num", type=int, default=1)
-parser.add_argument("--node_list", type=str, default=None,
-                    required=False, help="nodes' IP address, split by comma")
+parser.add_argument(
+    "--node_list",
+    type=str,
+    default=None,
+    required=False,
+    help="nodes' IP address, split by comma",
+)
 
 # train
-parser.add_argument("--model", type=str, default="vgg16",
-                    required=False, help="vgg16 or resnet50")
-parser.add_argument("--batch_size_per_device",
-                    type=int, default=8, required=False)
-parser.add_argument("--iter_num", type=int, default=10,
-                    required=False, help="total iterations to run")
-parser.add_argument("--warmup_iter_num", type=int, default=0,
-                    required=False, help="total iterations to run")
-parser.add_argument("--data_dir", type=str, default=None,
-                    required=False, help="dataset directory")
-parser.add_argument("--data_part_num", type=int, default=32,
-                    required=False, help="data part number in dataset")
-parser.add_argument("--image_size", type=int, default=228,
-                    required=False, help="image size")
+parser.add_argument(
+    "--model", type=str, default="vgg16", required=False, help="vgg16 or resnet50"
+)
+parser.add_argument("--batch_size_per_device", type=int, default=8, required=False)
+parser.add_argument(
+    "--iter_num", type=int, default=10, required=False, help="total iterations to run"
+)
+parser.add_argument(
+    "--warmup_iter_num",
+    type=int,
+    default=0,
+    required=False,
+    help="total iterations to run",
+)
+parser.add_argument(
+    "--data_dir", type=str, default=None, required=False, help="dataset directory"
+)
+parser.add_argument(
+    "--data_part_num",
+    type=int,
+    default=32,
+    required=False,
+    help="data part number in dataset",
+)
+parser.add_argument(
+    "--image_size", type=int, default=228, required=False, help="image size"
+)
 
-parser.add_argument("--use_tensorrt", dest='use_tensorrt', action='store_true',
-                    default=False, required=False, help="inference with tensorrt")
-parser.add_argument("--use_xla_jit", dest='use_xla_jit', action='store_true',
-                    default=False, required=False, help="inference with xla jit")
+parser.add_argument(
+    "--use_tensorrt",
+    dest="use_tensorrt",
+    action="store_true",
+    default=False,
+    required=False,
+    help="inference with tensorrt",
+)
+parser.add_argument(
+    "--use_xla_jit",
+    dest="use_xla_jit",
+    action="store_true",
+    default=False,
+    required=False,
+    help="inference with xla jit",
+)
 
-parser.add_argument("--precision", type=str, default="float32",
-                    required=False, help="inference with low precision")
+parser.add_argument(
+    "--precision",
+    type=str,
+    default="float32",
+    required=False,
+    help="inference with low precision",
+)
 
 # log and resore/save
-parser.add_argument("--print_every_n_iter", type=int, default=1, required=False,
-                    help="print log every n iterations")
-parser.add_argument("--model_load_dir", type=str, default=None,
-                    required=False, help="model load directory")
-parser.add_argument("--log_dir", type=str, default="./output",
-                    required=False, help="log info save directory")
+parser.add_argument(
+    "--print_every_n_iter",
+    type=int,
+    default=1,
+    required=False,
+    help="print log every n iterations",
+)
+parser.add_argument(
+    "--model_load_dir",
+    type=str,
+    default=None,
+    required=False,
+    help="model load directory",
+)
+parser.add_argument(
+    "--log_dir",
+    type=str,
+    default="./output",
+    required=False,
+    help="log info save directory",
+)
 
 args = parser.parse_args()
 
@@ -63,6 +113,7 @@ model_dict = {
     "vgg16": vgg_model.vgg16,
     "alexnet": alexnet_model.alexnet,
 }
+
 
 @flow.function
 def InferenceNet():
@@ -85,11 +136,11 @@ def InferenceNet():
         assert os.path.exists(args.data_dir)
         print("Loading data from {}".format(args.data_dir))
         (labels, images) = data_loader.load_imagenet(
-            args.data_dir, args.image_size, batch_size, args.data_part_num)
+            args.data_dir, args.image_size, batch_size, args.data_part_num
+        )
     else:
         print("Loading synthetic data.")
-        (labels, images) = data_loader.load_synthetic(
-            args.image_size, batch_size)
+        (labels, images) = data_loader.load_synthetic(args.image_size, batch_size)
 
     logits = model_dict[args.model](images)
     softmax = flow.nn.softmax(logits)
@@ -97,15 +148,17 @@ def InferenceNet():
 
 
 def main():
-    print("=".ljust(66, '='))
-    print("Running {}: num_gpu_per_node = {}, num_nodes = {}.".format(
-        args.model, args.gpu_num_per_node, args.node_num))
-    print("=".ljust(66, '='))
+    print("=".ljust(66, "="))
+    print(
+        "Running {}: num_gpu_per_node = {}, num_nodes = {}.".format(
+            args.model, args.gpu_num_per_node, args.node_num
+        )
+    )
+    print("=".ljust(66, "="))
     for arg in vars(args):
-        print('{} = {}'.format(arg, getattr(args, arg)))
-    print("-".ljust(66, '-'))
-    print("Time stamp: {}".format(
-        str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
+        print("{} = {}".format(arg, getattr(args, arg)))
+    print("-".ljust(66, "-"))
+    print("Time stamp: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
     flow.config.default_data_type(flow.float)
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.grpc_use_no_signal()
@@ -148,21 +201,25 @@ def main():
                 main.total_time += duration
                 main.start_time = cur_time
                 images_per_sec = main.batch_size / duration
-                print("iter {}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
-                      .format(step, duration, images_per_sec))
+                print(
+                    "iter {}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)".format(
+                        step, duration, images_per_sec
+                    )
+                )
                 if step == args.iter_num - 1:
                     avg_img_per_sec = main.batch_size * args.iter_num / main.total_time
-                    print("-".ljust(66, '-'))
-                    print(
-                        "average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
-                    print("-".ljust(66, '-'))
+                    print("-".ljust(66, "-"))
+                    print("average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
+                    print("-".ljust(66, "-"))
+
         return callback
 
     for step in range(args.iter_num):
         InferenceNet().async_get(create_callback(step))
-        #predictions = InferenceNet().get()
-        #create_callback(step)(predictions)
-        #print(predictions)
+        # predictions = InferenceNet().get()
+        # create_callback(step)(predictions)
+        # print(predictions)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
