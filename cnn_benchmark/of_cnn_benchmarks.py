@@ -71,8 +71,18 @@ optimizer_dict = {
     "sgd": {"naive_conf": {}},
     "adam": {"adam_conf": {"beta1": 0.9}},
     "momentum": {"momentum_conf": {"beta": 0.9}},
+    "momentum-decay": {
+        "momentum_conf": {"beta": 0.9},
+        "learning_rate_decay": {
+            "polynomial_conf": {
+                "decay_batches": 300000,
+                "end_learning_rate": 0.0001,
+            },
+        },
+    },
 }
 
+#        "warmup_conf": {"linear_conf": {"warmup_batches":10000, "start_multiplier":0}},
 
 @flow.function
 def TrainNet():
@@ -85,7 +95,7 @@ def TrainNet():
     # flow.config.concurrency_width(2)
     flow.config.all_reduce_group_num(128)
     flow.config.all_reduce_group_min_mbyte(8)
-    
+
     flow.config.train.model_update_conf(optimizer_dict[args.optimizer])
 
     if args.weight_l2:
@@ -161,9 +171,11 @@ def main():
             if step % args.loss_print_every_n_iter == 0:
                 cur_time = time.time()
                 duration = cur_time - main.start_time
+                duration = duration / args.loss_print_every_n_iter
                 main.total_time += duration
                 main.start_time = cur_time
                 images_per_sec = main.batch_size / duration
+                images_per_sec *= args.loss_print_every_n_iter
                 print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
                       .format(step, train_loss.mean(), duration, images_per_sec))
                 if step == args.iter_num - 1:
@@ -180,10 +192,14 @@ def main():
         if (step + 1) % args.model_save_every_n_iter == 0:
             if not os.path.exists(args.model_save_dir):
                 os.makedirs(args.model_save_dir)
-                snapshot_save_path = os.path.join(
-                    args.model_save_dir, 'snapshot_%d' % (step + 1))
-                print("Saving model to {}.".format(snapshot_save_path))
-                check_point.save(snapshot_save_path)
+            snapshot_save_path = os.path.join(
+                args.model_save_dir, 'snapshot_%d' % (step + 1))
+            print("Saving model to {}.".format(snapshot_save_path))
+    check_point.save(snapshot_save_path)
+    snapshot_save_path = os.path.join(
+        args.model_save_dir, 'last_snapshot')
+    print("Saving model to {}.".format(snapshot_save_path))
+    check_point.save(snapshot_save_path)
 
 
 if __name__ == '__main__':
