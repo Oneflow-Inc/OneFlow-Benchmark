@@ -195,7 +195,7 @@ def main():
             snapshot_save_path = os.path.join(
                 args.model_save_dir, 'snapshot_%d' % (step + 1))
             print("Saving model to {}.".format(snapshot_save_path))
-    check_point.save(snapshot_save_path)
+            check_point.save(snapshot_save_path)
     snapshot_save_path = os.path.join(args.model_save_dir, 'last_snapshot')
     print("Saving model to {}.".format(snapshot_save_path))
     check_point.save(snapshot_save_path)
