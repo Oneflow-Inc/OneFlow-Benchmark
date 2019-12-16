@@ -175,7 +175,6 @@ def main():
                 main.total_time += duration
                 main.start_time = cur_time
                 images_per_sec = main.batch_size / duration
-                images_per_sec *= args.loss_print_every_n_iter
                 print("iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)"
                       .format(step, train_loss.mean(), duration, images_per_sec))
                 if step == args.iter_num - 1:
