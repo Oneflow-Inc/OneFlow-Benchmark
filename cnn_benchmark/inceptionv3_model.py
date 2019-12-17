@@ -6,7 +6,7 @@ from __future__ import print_function
 import oneflow as flow
 import oneflow.core.operator.op_conf_pb2 as op_conf_util
 
-# TODO: add this interface to oneflow.layers
+
 def _conv2d_layer(
     name,
     input,
@@ -54,7 +54,6 @@ def _conv2d_layer(
             raise NotImplementedError
 
     return output
-
 
 
 def InceptionA(in_blob, index):
@@ -508,5 +507,4 @@ def inceptionv3(images, labels, trainable=True):
         fc1 = flow.nn.bias_add(fc1, bias)
 
     return fc1
-
 
