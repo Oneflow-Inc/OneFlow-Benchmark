@@ -39,7 +39,8 @@ def alexnet(images, trainable=True):
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
         trainable=trainable,
-        name="fc1",)
+        name="fc1",
+    )
 
     dropout1 = flow.nn.dropout(fc1, rate=0.5)
 
@@ -51,7 +52,8 @@ def alexnet(images, trainable=True):
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
         trainable=trainable,
-        name="fc2",)
+        name="fc2",
+    )
 
     dropout2 = flow.nn.dropout(fc2, rate=0.5)
 
@@ -63,6 +65,7 @@ def alexnet(images, trainable=True):
         kernel_initializer=flow.random_uniform_initializer(),
         bias_initializer=False,
         trainable=trainable,
-        name="fc3",)
+        name="fc3",
+    )
 
     return fc3
