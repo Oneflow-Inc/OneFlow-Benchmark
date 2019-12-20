@@ -34,7 +34,7 @@ class CNNSpeedometer:
                 print(
                     "Runing warm up for {}/{} iterations.".format(step + 1, warmup_num)
                 )
-                if (step + 1) == warmup_num:
+                if (step + 1) >= warmup_num:
                     self.watch.start()
                     print("Start trainning.")
             else:
@@ -42,9 +42,9 @@ class CNNSpeedometer:
 
                 if (train_step + 1) % loss_print_every_n_iter == 0:
                     loss = train_loss.mean()
-                    duration = self.watch.split()
+                    duration = self.watch.split() / loss_print_every_n_iter
                     images_per_sec = (
-                        total_batch_size * loss_print_every_n_iter / duration
+                        total_batch_size / duration
                     )
                     print(
                         "iter {}, loss: {:.3f}, speed: {:.3f}(sec/batch), {:.3f}(images/sec)".format(
