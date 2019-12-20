@@ -1,4 +1,5 @@
 import time
+import numpy as np
 
 
 class StopWatch:
@@ -25,6 +26,7 @@ class StopWatch:
 class CNNSpeedometer:
     def __init__(self):
         self.watch = StopWatch()
+        self.throughoutput_list = []
 
     def speedometer_cb(
         self, step, total_batch_size, warmup_num, iter_num, loss_print_every_n_iter
@@ -51,13 +53,12 @@ class CNNSpeedometer:
                             train_step, loss, duration, images_per_sec
                         )
                     )
+                    self.throughoutput_list.append(images_per_sec)
 
                 if (train_step + 1) == iter_num:
                     self.watch.stop()
-                    totoal_duration = self.watch.duration()
-                    avg_img_per_sec = total_batch_size * iter_num / totoal_duration
                     print("-".ljust(66, "-"))
-                    print("average speed: {:.3f}(images/sec)".format(avg_img_per_sec))
+                    print("average speed: {:.3f}(images/sec)".format(np.mean(self.throughoutput_list)))
                     print("-".ljust(66, "-"))
 
         return callback
