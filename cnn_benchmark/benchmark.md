@@ -21,21 +21,33 @@ commit: 726c3a12b9d97b57f9fb7e3d212b63564e20e755
 
 1. batch size为8
 
->| -            | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) |
->| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- |
->| alexnet      | 2637          | 1550          | 2540           | 2759           |                |
->| vgg16        | 371           | 332           | 377            | 1124           |                |
->| resnet50     | 657           | 541           | 729            | 940            |                |
->| inception-v3 | 433           | 434           | 489            | 999            |                |
+>| -            | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) | TensorRT official(fp32) | TensorRT official(fp16) | TensorRT official(int8) |
+>| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- | ----------------------- | ----------------------- | ----------------------- |
+>| alexnet      | 2637          | 1550          | 2540           | 2759           |                |                         |                         |                         |
+>| vgg16        | 371           | 332           | 377            | 1124           |                | 470                     | 1629                    |                         |
+>| resnet50     | 657           | 541           | 729            | 940            |                | 1025                    | 2500                    |                         |
+>| inception-v3 | 433           | 434           | 489            | 999            |                |                         |                         |                         |
+
+- 对vgg16 fp32结果的分析：
+  1. oneflow tensorrt的吞吐为377 images/s，即21.2 ms/batch，而tensorrt官方测的吞吐为470 images/s，即17.02 ms/batch。
+  2. 去除图片解码的耗时，oneflow tensorrt的吞吐可以达到407 images/s，即19.65 ms/batch。
+  3. 根据profile的结果，oneflow tensorrt每隔两个batch会出现2-3ms的空隙，平均每个batch 1-1.5 ms。
+  4. tensorrt不会自动做conv和bias的融合，需要手动将bias合并到conv中，tensorrt官方的benchmark是conv和bias融合后的结果。这里大概能优化2 ms左右。
+  5. 总结：对2、3和4进行优化后，理论上一个batch的耗时能达到 (19.65 - 1 - 2 =) 16.65 ms，与tensorrt官方测试的结果基本一致。
+
+- 对resnet50 fp32结果的分析：
+  1. 同样去除图片解码的耗时，oneflow tensorrt的吞吐可以达到800 images/s, 即10 ms/batch, 而tensorrt官方测的吞吐为1025 images/s，即7.8 ms/batch。
+  2. oneflow tensorrt没有支持batch normalization，导致整图被分割成多个tensorrt子图。如果oneflow tensorrt支持batch normalization，将减少4ms左右。但同时发现支持了batch normalization后，batch之间的空隙从几乎0ms增加到了5.32ms，导致即使支持了batch normalization后，吞吐并没有明显的变化。
+  3. 总结：如果对1、2优化后，理论上一个batch的耗时能达到 (10 - 4 =) 6ms。
 
 2. batch size为50
 
->| -            | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) |
->| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- |
->| alexnet      | 6999          | 3219          | 4306           | 7704           |                |
->| vgg16        | 497           | 476           | 404            | 1482           |                |
->| resnet50     | 810           | 619           | 830            | 1285           |                |
->| inception-v3 | 544           | 531           | 717            | 1839           |                |
+>| -            | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) | TensorRT official(fp32) | TensorRT official(fp16) | TensorRT official(int8) |
+>| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- | ----------------------- | ----------------------- | ----------------------- |
+>| alexnet      | 6999          | 3219          | 4306           | 7704           |                |                         |                         |                         |
+>| vgg16        | 497           | 476           | 404            | 1482           |                | 498                     | 1907                    |                         |
+>| resnet50     | 810           | 619           | 830            | 1285           |                | 1302                    | 3843                    |                         |
+>| inception-v3 | 544           | 531           | 717            | 1839           |                |                         |                         |                         |
 
 
 #### Precision
