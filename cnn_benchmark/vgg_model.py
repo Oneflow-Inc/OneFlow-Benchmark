@@ -65,6 +65,8 @@ def vgg16(images, trainable=True):
         name="fc1",
     )
 
+    fc6 = flow.nn.dropout(fc8, rate=0.5)
+
     fc7 = flow.layers.dense(
         inputs=fc6,
         units=4096,
@@ -86,6 +88,5 @@ def vgg16(images, trainable=True):
         trainable=trainable,
         name="fc_final",
     )
-    fc8 = flow.nn.dropout(fc8, rate=0.5)
 
     return fc8
