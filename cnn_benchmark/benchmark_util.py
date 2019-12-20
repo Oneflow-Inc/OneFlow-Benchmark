@@ -57,8 +57,6 @@ class CNNSpeedometer:
 
                 if (train_step + 1) == iter_num:
                     self.watch.stop()
-                    totoal_duration = self.watch.duration()
-                    avg_img_per_sec = total_batch_size * iter_num / totoal_duration
                     print("-".ljust(66, "-"))
                     print("average speed: {:.3f}(images/sec)".format(np.mean(self.throughoutput_list)))
                     print("-".ljust(66, "-"))
