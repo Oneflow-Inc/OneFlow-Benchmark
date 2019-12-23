@@ -188,15 +188,25 @@ _BERT_MODEL_UPDATE_CONF = dict(
     adam_conf=dict(epsilon=1e-6),
 )
 
+func_config = flow.FunctionConfig()
+func_config.default_distribute_strategy(flow.distribute.consistent_strategy())
+func_config.train.primary_lr(args.learning_rate)
+func_config.default_data_type(flow.float)
+func_config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
 
-@flow.function
+if args.weight_l2:
+    func_config.train.weight_l2(args.weight_l2)
+
+flow.config.gpu_device_num(args.gpu_num_per_node)
+#func_config.disable_all_reduce_sequence(True)
+#func_config.all_reduce_group_min_mbyte(8)
+#func_config.all_reduce_group_num(128)
+
+@flow.function(func_config)
 def PretrainJob():
     total_device_num = args.node_num * args.gpu_num_per_node
     batch_size = total_device_num * args.batch_size_per_device
 
-    flow.config.train.primary_lr(args.learning_rate)
-    flow.config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
-    flow.config.train.weight_l2(args.weight_l2)
 
     total_loss, mlm_loss, nsp_loss = BuildPreTrainNet(
         batch_size,
@@ -228,8 +238,6 @@ def main():
     print("-".ljust(66, "-"))
     print("Time stamp: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
 
-    flow.config.gpu_device_num(args.gpu_num_per_node)
-    flow.config.default_data_type(flow.float)
     flow.env.log_dir(args.log_dir)
     if args.enable_auto_mixed_precision:
         flow.config.enable_auto_mixed_precision()
