@@ -196,14 +196,16 @@ func_config.default_distribute_strategy(flow.distribute.consistent_strategy())
 func_config.train.primary_lr(args.learning_rate)
 func_config.default_data_type(flow.float)
 func_config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
+# func_config.disable_all_reduce_sequence(True)
+# func_config.all_reduce_group_min_mbyte(8)
+# func_config.all_reduce_group_num(128)
 
 if args.weight_l2:
     func_config.train.weight_l2(args.weight_l2)
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
-# func_config.disable_all_reduce_sequence(True)
-# func_config.all_reduce_group_min_mbyte(8)
-# func_config.all_reduce_group_num(128)
+if args.enable_auto_mixed_precision:
+    flow.config.enable_auto_mixed_precision()
 
 
 @flow.function(func_config)
@@ -242,8 +244,6 @@ def main():
     print("Time stamp: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
 
     flow.env.log_dir(args.log_dir)
-    if args.enable_auto_mixed_precision:
-        flow.config.enable_auto_mixed_precision()
 
     if args.node_num > 1:
         nodes = []
