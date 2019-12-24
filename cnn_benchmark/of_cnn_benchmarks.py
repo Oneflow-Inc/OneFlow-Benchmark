@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import time
 import argparse
 from datetime import datetime
 
@@ -48,11 +49,11 @@ parser.add_argument(
     "--iter_num", type=int, default=10, required=False, help="total iterations to run"
 )
 parser.add_argument(
-    "--warmup_iter_num",
+    "--skip_iter_num",
     type=int,
     default=0,
     required=False,
-    help="total iterations to run",
+    help="number of skipping iterations for benchmark purpose.",
 )
 parser.add_argument(
     "--data_dir", type=str, default=None, required=False, help="dataset directory"
@@ -137,23 +138,23 @@ optimizer_dict = {
 
 #        "warmup_conf": {"linear_conf": {"warmup_batches":10000, "start_multiplier":0}},
 
+func_config = flow.FunctionConfig()
+func_config.default_distribute_strategy(flow.distribute.consistent_strategy())
+func_config.train.primary_lr(args.learning_rate)
+func_config.default_data_type(flow.float)
+func_config.train.model_update_conf(optimizer_dict[args.optimizer])
+func_config.disable_all_reduce_sequence(True)
+func_config.all_reduce_group_min_mbyte(8)
+func_config.all_reduce_group_num(128)
 
-@flow.function
+if args.weight_l2:
+    func_config.train.weight_l2(args.weight_l2)
+
+flow.config.gpu_device_num(args.gpu_num_per_node)
+
+
+@flow.function(func_config)
 def TrainNet():
-    flow.config.train.primary_lr(args.learning_rate)
-    flow.config.disable_all_reduce_sequence(True)
-    # flow.config.all_reduce_lazy_ratio(0)
-
-    # flow.config.enable_nccl_hierarchical_all_reduce(True)
-    # flow.config.cudnn_buf_limit_mbyte(2048)
-    # flow.config.concurrency_width(2)
-    flow.config.all_reduce_group_num(128)
-    flow.config.all_reduce_group_min_mbyte(8)
-
-    flow.config.train.model_update_conf(optimizer_dict[args.optimizer])
-
-    if args.weight_l2:
-        flow.config.train.weight_l2(args.weight_l2)
 
     total_device_num = args.node_num * args.gpu_num_per_node
     batch_size = total_device_num * args.batch_size_per_device
@@ -189,12 +190,8 @@ def main():
         print("{} = {}".format(arg, getattr(args, arg)))
     print("-".ljust(66, "-"))
     print("Time stamp: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
-    flow.config.default_data_type(flow.float)
-    flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.grpc_use_no_signal()
     flow.env.log_dir(args.log_dir)
-    # flow.config.enable_inplace(False)
-    # flow.config.ctrl_port(12140)
 
     if args.node_num > 1:
         nodes = []
@@ -218,12 +215,14 @@ def main():
         args.node_num * args.gpu_num_per_node * args.batch_size_per_device
     )
     speedometer = benchmark_util.CNNSpeedometer()
+    start_time = time.time()
 
-    for step in range(args.warmup_iter_num + args.iter_num):
+    for step in range(args.skip_iter_num + args.iter_num):
         cb = speedometer.speedometer_cb(
             step,
+            start_time,
             total_batch_size,
-            args.warmup_iter_num,
+            args.skip_iter_num,
             args.iter_num,
             args.loss_print_every_n_iter,
         )
