@@ -28,7 +28,10 @@ parser.add_argument(
 parser.add_argument("--batch_size_per_device", type=int, default=24)
 parser.add_argument("--iter_num", type=int, default=10, help="total iterations to run")
 parser.add_argument(
-    "--warmup_iter_num", type=int, default=10, help="total iterations to run"
+    "--skip_iter_num",
+    type=int,
+    default=10,
+    help="number of skipping iterations for benchmark purpose.",
 )
 parser.add_argument(
     "--log_every_n_iter", type=int, default=1, help="print loss every n iteration"
@@ -198,15 +201,15 @@ if args.weight_l2:
     func_config.train.weight_l2(args.weight_l2)
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
-#func_config.disable_all_reduce_sequence(True)
-#func_config.all_reduce_group_min_mbyte(8)
-#func_config.all_reduce_group_num(128)
+# func_config.disable_all_reduce_sequence(True)
+# func_config.all_reduce_group_min_mbyte(8)
+# func_config.all_reduce_group_num(128)
+
 
 @flow.function(func_config)
 def PretrainJob():
     total_device_num = args.node_num * args.gpu_num_per_node
     batch_size = total_device_num * args.batch_size_per_device
-
 
     total_loss, mlm_loss, nsp_loss = BuildPreTrainNet(
         batch_size,
@@ -264,12 +267,14 @@ def main():
         args.node_num * args.gpu_num_per_node * args.batch_size_per_device
     )
     speedometer = benchmark_util.BERTSpeedometer()
+    start_time = time.time()
 
-    for step in range(args.warmup_iter_num + args.iter_num):
+    for step in range(args.skip_iter_num + args.iter_num):
         cb = speedometer.speedometer_cb(
             step,
+            start_time,
             total_batch_size,
-            args.warmup_iter_num,
+            args.skip_iter_num,
             args.iter_num,
             args.loss_print_every_n_iter,
         )

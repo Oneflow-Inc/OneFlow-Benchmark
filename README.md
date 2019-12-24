@@ -13,7 +13,6 @@ OneFlow models for benchmarking.
     --learning_rate=0.01 \
     --optimizer="sgd" \
     --loss_print_every_n_iter=1 \
-    --warmup_iter_num=2 \
     --data_dir="/dataset/ofrecord/imagenet/train"
     ```
 
@@ -32,7 +31,6 @@ OneFlow models for benchmarking.
     --learning_rate=0.01 \
     --optimizer="sgd" \
     --loss_print_every_n_iter=1 \
-    --warmup_iter_num=2 \
     --data_dir="/dataset/ofrecord/imagenet/train"
     ```
 
@@ -48,7 +46,6 @@ OneFlow models for benchmarking.
     --batch_size_per_device=24 \
     --iter_num=5 \
     --loss_print_every_n_iter=1 \
-    --warmup_iter_num=2 \
     --data_dir="/dataset/ofrecord/wiki_128" \
     --data_part_num=1 \
     --seq_length=128 \
@@ -74,7 +71,6 @@ OneFlow models for benchmarking.
     --batch_size_per_device=24 \
     --iter_num=5 \
     --loss_print_every_n_iter=1 \
-    --warmup_iter_num=2 \
     --seq_length=512 \
     --max_predictions_per_seq=80 \
     --num_hidden_layers=24 \
@@ -102,7 +98,6 @@ OneFlow models for benchmarking.
     --batch_size_per_device=8 \
     --iter_num=5 \
     --print_every_n_iter=1 \
-    --warmup_iter_num=2 \
     --data_dir="/dataset/ofrecord/imagenet/train"
     ```
     If you want to run the benchmark with TensorRT or XLA, only pass `--use_tensorrt` or `--use_xla_jit` to enable it. Low-precision arithmetics such as float16 or int8 are usually faster than 32bit float, and you can pass `--precision=float16` for acceleration.
