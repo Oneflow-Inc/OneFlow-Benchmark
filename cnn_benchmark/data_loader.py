@@ -11,7 +11,11 @@ def load_imagenet(data_dir, image_size, batch_size, data_part_num):
         shape=(image_size, image_size, 3),
         dtype=flow.float,
         codec=flow.data.ImageCodec(
-            [flow.data.ImageResizePreprocessor(image_size, image_size)]
+            [
+                flow.data.ImagePreprocessor('mirror'),
+                #flow.data.ImageCropPreprocessor(width=228, height=228),
+                flow.data.ImageResizePreprocessor(image_size, image_size),
+            ]
         ),
         preprocessors=[
             flow.data.NormByChannelPreprocessor(
@@ -29,6 +33,9 @@ def load_imagenet(data_dir, image_size, batch_size, data_part_num):
         (label_blob_conf, image_blob_conf),
         batch_size=batch_size,
         data_part_num=data_part_num,
+        #part_name_suffix_length=5,
+        shuffle = True,
+        buffer_size=16384,
         name="decode",
     )
 
