@@ -30,7 +30,7 @@ parser.add_argument("--iter_num", type=int, default=10, help="total iterations t
 parser.add_argument(
     "--skip_iter_num",
     type=int,
-    default=0,
+    default=10,
     help="number of skipping iterations for benchmark purpose.",
 )
 parser.add_argument(
