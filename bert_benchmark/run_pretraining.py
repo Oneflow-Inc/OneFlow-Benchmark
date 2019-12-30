@@ -7,6 +7,7 @@ import time
 import random
 import argparse
 from datetime import datetime
+from collections import OrderedDict
 
 import oneflow as flow
 
@@ -112,23 +113,31 @@ def _blob_conf(name, shape, dtype=flow.int32):
 def BertDecoder(
     data_dir, batch_size, data_part_num, seq_length, max_predictions_per_seq
 ):
+    config_ordered_dict = OrderedDict()
+    config_ordered_dict['input_ids'] = seq_length
+    config_ordered_dict['next_sentence_labels'] = 1
+    config_ordered_dict['input_mask'] = seq_length
+    config_ordered_dict['segment_ids'] = seq_length
+    config_ordered_dict['masked_lm_ids'] = max_predictions_per_seq
+    config_ordered_dict['masked_lm_positions'] = max_predictions_per_seq
+    config_ordered_dict['masked_lm_weights'] = max_predictions_per_seq
+
     blob_confs = []
-    blob_confs.append(_blob_conf("input_ids", [seq_length]))
-    blob_confs.append(_blob_conf("next_sentence_labels", [1]))
-    blob_confs.append(_blob_conf("input_mask", [seq_length]))
-    blob_confs.append(_blob_conf("segment_ids", [seq_length]))
-    blob_confs.append(_blob_conf("masked_lm_ids", [max_predictions_per_seq]))
-    blob_confs.append(_blob_conf("masked_lm_positions", [max_predictions_per_seq]))
-    blob_confs.append(
-        _blob_conf("masked_lm_weights", [max_predictions_per_seq], flow.float)
-    )
-    return flow.data.decode_ofrecord(
+    for k, v in config_ordered_dict.items():
+        blob_confs.append(_blob_conf(k, [v], flow.float if k=='masked_lm_weights' else flow.int32))
+
+    decoders = flow.data.decode_ofrecord(
         data_dir,
         blob_confs,
         batch_size=batch_size,
         name="decode",
         data_part_num=data_part_num,
     )
+
+    ret = {}
+    for i, k in enumerate(config_ordered_dict):
+        ret[k] = decoders[i]
+    return ret
 
 
 def BuildPreTrainNet(
@@ -151,13 +160,13 @@ def BuildPreTrainNet(
         args.data_dir, batch_size, data_part_num, seq_length, max_predictions_per_seq
     )
 
-    input_ids = decoders[0]
-    next_sentence_labels = decoders[1]
-    token_type_ids = decoders[2]
-    input_mask = decoders[3]
-    masked_lm_ids = decoders[4]
-    masked_lm_positions = decoders[5]
-    masked_lm_weights = decoders[6]
+    input_ids = decoders['input_ids']
+    next_sentence_labels = decoders['next_sentence_labels']
+    input_mask = decoders['input_mask']
+    token_type_ids = decoders['segment_ids'] # note: segment_ids = token_type_ids
+    masked_lm_ids = decoders['masked_lm_ids']
+    masked_lm_positions = decoders['masked_lm_positions']
+    masked_lm_weights = decoders['masked_lm_weights']
     return PreTrain(
         input_ids,
         input_mask,
