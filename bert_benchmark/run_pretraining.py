@@ -30,7 +30,7 @@ parser.add_argument("--iter_num", type=int, default=10, help="total iterations t
 parser.add_argument(
     "--skip_iter_num",
     type=int,
-    default=10,
+    default=0,
     help="number of skipping iterations for benchmark purpose.",
 )
 parser.add_argument(
@@ -119,16 +119,24 @@ def BertDecoder(
     blob_confs.append(_blob_conf("segment_ids", [seq_length]))
     blob_confs.append(_blob_conf("masked_lm_ids", [max_predictions_per_seq]))
     blob_confs.append(_blob_conf("masked_lm_positions", [max_predictions_per_seq]))
-    blob_confs.append(
-        _blob_conf("masked_lm_weights", [max_predictions_per_seq], flow.float)
-    )
-    return flow.data.decode_ofrecord(
+    blob_confs.append(_blob_conf("masked_lm_weights", [max_predictions_per_seq], flow.float))
+    decoders = flow.data.decode_ofrecord(
         data_dir,
         blob_confs,
         batch_size=batch_size,
         name="decode",
         data_part_num=data_part_num,
     )
+
+    ret = {}
+    ret['input_ids'] = decoders[0]
+    ret['next_sentence_labels'] = decoders[1]
+    ret['input_mask'] = decoders[2]
+    ret['token_type_ids'] = decoders[3] #note: token_type_ids = segment_ids
+    ret['masked_lm_ids'] = decoders[4]
+    ret['masked_lm_positions'] = decoders[5]
+    ret['masked_lm_weights'] = decoders[6]
+    return ret
 
 
 def BuildPreTrainNet(
@@ -151,13 +159,13 @@ def BuildPreTrainNet(
         args.data_dir, batch_size, data_part_num, seq_length, max_predictions_per_seq
     )
 
-    input_ids = decoders[0]
-    next_sentence_labels = decoders[1]
-    token_type_ids = decoders[2]
-    input_mask = decoders[3]
-    masked_lm_ids = decoders[4]
-    masked_lm_positions = decoders[5]
-    masked_lm_weights = decoders[6]
+    input_ids = decoders['input_ids']
+    next_sentence_labels = decoders['next_sentence_labels']
+    input_mask = decoders['input_mask']
+    token_type_ids = decoders['token_type_ids']
+    masked_lm_ids = decoders['masked_lm_ids']
+    masked_lm_positions = decoders['masked_lm_positions']
+    masked_lm_weights = decoders['masked_lm_weights']
     return PreTrain(
         input_ids,
         input_mask,
