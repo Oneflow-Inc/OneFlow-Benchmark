@@ -214,7 +214,7 @@ if args.weight_l2:
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
 if args.enable_auto_mixed_precision:
-    flow.config.enable_auto_mixed_precision()
+    func_config.enable_auto_mixed_precision()
 
 
 @flow.function(func_config)
