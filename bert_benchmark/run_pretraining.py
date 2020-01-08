@@ -41,7 +41,8 @@ parser.add_argument("--data_dir", type=str, default=None)
 parser.add_argument(
     "--data_part_num", type=int, default=32, help="data part number in dataset"
 )
-parser.add_argument("--enable_auto_mixed_precision", type=bool, default=False)
+parser.add_argument("--enable_auto_mixed_precision", default=False,
+        type=lambda x: (str(x).lower() == 'true'))
 
 # log and resore/save
 parser.add_argument(
