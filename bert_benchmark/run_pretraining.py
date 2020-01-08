@@ -101,6 +101,8 @@ parser.add_argument("--attention_probs_dropout_prob", type=float, default=0.1)
 parser.add_argument("--hidden_dropout_prob", type=float, default=0.1)
 parser.add_argument("--hidden_size_per_head", type=int, default=64)
 
+parser.add_argument("--warmup_batches", type=int, default=1000)
+
 args = parser.parse_args()
 
 
@@ -195,7 +197,7 @@ _BERT_MODEL_UPDATE_CONF = dict(
     learning_rate_decay=dict(
         polynomial_conf=dict(decay_batches=100000, end_learning_rate=0.0,)
     ),
-    warmup_conf=dict(linear_conf=dict(warmup_batches=1000, start_multiplier=0,)),
+    warmup_conf=dict(linear_conf=dict(warmup_batches=args.warmup_batches, start_multiplier=0,)),
     clip_conf=dict(clip_by_global_norm=dict(clip_norm=1.0,)),
     adam_conf=dict(epsilon=1e-6),
 )
