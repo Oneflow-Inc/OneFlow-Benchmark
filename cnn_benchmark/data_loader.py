@@ -33,9 +33,9 @@ def load_imagenet(data_dir, image_size, batch_size, data_part_num):
         (label_blob_conf, image_blob_conf),
         batch_size=batch_size,
         data_part_num=data_part_num,
-        #part_name_suffix_length=5,
-        shuffle = True,
-        buffer_size=16384,
+        part_name_suffix_length=5,
+        #shuffle = True,
+        #buffer_size=16384,
         name="decode",
     )
 
