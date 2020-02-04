@@ -5,6 +5,7 @@ from __future__ import print_function
 import os
 import time
 import numpy as np
+import logging
 
 import oneflow as flow
 
@@ -14,14 +15,13 @@ import resnet_model
 import alexnet_model
 
 import config as configs
-from util import Snapshot, Summary, print_args, make_lr
-from dali import get_rec_pipe
+from util import Snapshot, Summary, print_args, make_lr, nodes_init
+from dali import get_rec_iter
 
 
 parser = configs.get_parser()
 #args = parser.parse_known_args()[0]
 args = parser.parse_args()
-print(args)
 
 summary = Summary(args.log_dir, args)
 
@@ -47,7 +47,7 @@ optimizer_dict = {
 #        "warmup_conf": {"linear_conf": {"warmup_batches":10000, "start_multiplier":0}},
 
 
-total_device_num = args.node_num * args.gpu_num_per_node
+total_device_num = args.num_nodes * args.gpu_num_per_node
 train_batch_size = total_device_num * args.batch_size_per_device
 val_batch_size = total_device_num * args.val_batch_size_per_device
 (H, W, C) = (args.image_size, args.image_size, 3)
@@ -148,54 +148,54 @@ def InferenceNet():
     return (softmax, labels)
 
 
+def train_callback(step):
+    def callback(train_outputs):
+        loss = train_outputs['loss'].mean()
+        summary.scalar('loss', loss, step)
+        #summary.scalar('learning_rate', train_outputs['lr'], step)
+        if (step-1) % args.loss_print_every_n_iter == 0:
+            print("iter {}, loss: {:.6f}".format(step-1, loss))
+    return callback
+
+
+def do_predictions(step, predict_step, predictions):
+    classfications = np.argmax(predictions[0].ndarray(), axis=1)
+    labels = predictions[1]
+    if predict_step == 0:
+        main.correct = 0.0
+        main.total = 0.0
+    else:
+        main.correct += np.sum(classfications == labels);
+        main.total += len(labels)
+    if predict_step + 1 == args.val_step_num:
+        assert main.total > 0
+        summary.scalar('top1_accuracy', main.correct/main.total, step)
+        #summary.scalar('top1_correct', main.correct, step)
+        #summary.scalar('total_val_images', main.total, step)
+        print("iter {}, top 1 accuracy: {:.6f}".format(step, main.correct/main.total))
+
+
+def predict_callback(step, predict_step):
+    def callback(predictions):
+        do_predictions(step, predict_step, predictions)
+    return callback
+
+
 def main():
     print_args(args)
-    def train_callback(step):
-        def callback(train_outputs):
-            loss = train_outputs['loss'].mean()
-            summary.scalar('loss', loss, step)
-            #summary.scalar('learning_rate', train_outputs['lr'], step)
-            if (step-1) % args.loss_print_every_n_iter == 0:
-                print("iter {}, loss: {:.6f}".format(step-1, loss))
-        return callback
-
-    def do_predictions(step, predict_step, predictions):
-        classfications = np.argmax(predictions[0].ndarray(), axis=1)
-        labels = predictions[1]
-        if predict_step == 0:
-            main.correct = 0.0
-            main.total = 0.0
-        else:
-            main.correct += np.sum(classfications == labels);
-            main.total += len(labels)
-        if predict_step + 1 == args.val_step_num:
-            assert main.total > 0
-            summary.scalar('top1_accuracy', main.correct/main.total, step)
-            #summary.scalar('top1_correct', main.correct, step)
-            #summary.scalar('total_val_images', main.total, step)
-            print("iter {}, top 1 accuracy: {:.6f}".format(step, main.correct/main.total))
-
-    def predict_callback(step, predict_step):
-        def callback(predictions):
-            do_predictions(step, predict_step, predictions)
-        return callback
+    nodes_init(args)
 
     flow.env.grpc_use_no_signal()
     flow.env.log_dir(args.log_dir)
 
-    if args.node_num > 1:
-        nodes = []
-        for n in args.node_list.strip().split(","):
-            addr_dict = {}
-            addr_dict["addr"] = n
-            nodes.append(addr_dict)
-
-        flow.env.machine(nodes)
-
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
+    epoch=0
+    for epoch in range(args.num_epoch):
+        logging.info('Starting epoch {}'.format(epoch))
+        train_pipe, val_pipe = get_rec_pipe(args, True, seed=epoch)
+    exit()
 
-    train_pipe, _ = get_rec_pipe(args, True)
     for step in range(args.train_step_num):
         # save model every n iter
         images, labels = train_pipe.run()
@@ -207,8 +207,6 @@ def main():
             snapshot.save(step)
 
         #TrainNet().async_get(train_callback(step+1))
-        #print(images.as_cpu().as_array().shape)
-        #break
         NumpyTrainNet(images.as_cpu().as_array(), labels.as_array().astype(np.int32)).async_get(train_callback(step+1))
 
     step += 1
