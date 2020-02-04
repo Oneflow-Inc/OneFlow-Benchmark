@@ -1,6 +1,8 @@
 import argparse
 from datetime import datetime
 
+from dali import add_dali_args
+
 def get_parser(parser=None):
     def str_list(x):
         return x.split(',')
@@ -11,6 +13,8 @@ def get_parser(parser=None):
 
     if parser is None:
         parser = argparse.ArgumentParser("flags for cnn benchmark")
+
+    parser.add_argument("--dtype", type=str, default='float32', help="float16 float32")
 
     # resouce
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
@@ -28,7 +32,21 @@ def get_parser(parser=None):
     parser.add_argument("--train_step_num", type=int, default=10, help="total training step number")
     parser.add_argument("--data_dir", type=str, default=None, help="training dataset directory")
     parser.add_argument("--data_part_num", type=int, default=32, help="training data part number")
-    parser.add_argument("--image_size", type=int, default=228, help="image size")
+    parser.add_argument("--image_size", type=int, default=224, help="image size")#Todo, remove
+
+    # from mxnet
+    parser.add_argument("--input_layout", type=str, default='NHWC', help="NCHW or NHWC")
+    parser.add_argument('--image-shape', type=int_list, default=[3, 224, 224],
+                        help='the image shape feed into the network')
+    parser.add_argument('--rgb-mean', type=float_list, default=[123.68, 116.779, 103.939],
+                        help='a tuple of size 3 for the mean rgb')
+    parser.add_argument('--rgb-std', type=float_list, default=[58.393, 57.12, 57.375],
+                        help='a tuple of size 3 for the std rgb')
+    parser.add_argument('--data_train', type=str, help='the training data')
+    parser.add_argument('--data_train_idx', type=str, default='', help='the index of training data')
+    parser.add_argument('--data_val', type=str, help='the validation data')
+    parser.add_argument('--data_val_idx', type=str, default='', help='the index of validation data')
+    parser.add_argument("--num_examples", type=int, default=1281167, help="imagenet pic number")
 
     ## snapshot
     parser.add_argument(
@@ -64,7 +82,7 @@ def get_parser(parser=None):
         default=10,
         help="print loss every n iteration",
     )
-
+    add_dali_args(parser)
     return parser
 
 

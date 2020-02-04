@@ -15,11 +15,13 @@ import alexnet_model
 
 import config as configs
 from util import Snapshot, Summary, print_args, make_lr
+from dali import get_rec_pipe
 
 
 parser = configs.get_parser()
 #args = parser.parse_known_args()[0]
 args = parser.parse_args()
+print(args)
 
 summary = Summary(args.log_dir, args)
 
@@ -44,6 +46,11 @@ optimizer_dict = {
 
 #        "warmup_conf": {"linear_conf": {"warmup_batches":10000, "start_multiplier":0}},
 
+
+total_device_num = args.node_num * args.gpu_num_per_node
+train_batch_size = total_device_num * args.batch_size_per_device
+val_batch_size = total_device_num * args.val_batch_size_per_device
+(H, W, C) = (args.image_size, args.image_size, 3)
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
@@ -73,19 +80,16 @@ def get_train_config():
     return train_config
 
 
-@flow.function(get_train_config())
+#@flow.function(get_train_config())
 def TrainNet():
-    total_device_num = args.node_num * args.gpu_num_per_node
-    batch_size = total_device_num * args.batch_size_per_device
-
     if args.data_dir:
         assert os.path.exists(args.data_dir)
         print("Loading data from {}".format(args.data_dir))
         (labels, images) = data_loader.load_imagenet(
-            args.data_dir, args.image_size, batch_size, args.data_part_num)
+            args.data_dir, args.image_size, train_batch_size, args.data_part_num)
     else:
         print("Loading synthetic data.")
-        (labels, images) = data_loader.load_synthetic(args.image_size, batch_size)
+        (labels, images) = data_loader.load_synthetic(args.image_size, train_batch_size)
 
     logits = model_dict[args.model](images)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
@@ -109,6 +113,16 @@ def TrainNet():
     return outputs
 
 
+@flow.function(get_train_config())
+def NumpyTrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.float),
+                  labels=flow.FixedTensorDef((train_batch_size, 1), dtype=flow.int32)):
+    logits = model_dict[args.model](images)
+    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
+    flow.losses.add_loss(loss)
+    outputs = {"loss": loss}
+    return outputs
+
+
 def get_val_config():
     val_config = flow.function_config()
     val_config.default_distribute_strategy(flow.distribute.consistent_strategy())
@@ -118,19 +132,16 @@ def get_val_config():
 
 @flow.function(get_val_config())
 def InferenceNet():
-    total_device_num = args.node_num * args.gpu_num_per_node
-    batch_size = total_device_num * args.val_batch_size_per_device
-
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
         print("Loading data from {}".format(args.val_data_dir))
         # TODO: use different image preprocess
         (labels, images) = data_loader.load_imagenet(
-            args.val_data_dir, args.image_size, batch_size, args.val_data_part_num)
+            args.val_data_dir, args.image_size, val_batch_size, args.val_data_part_num)
     else:
         print("Loading synthetic data.")
         (labels, images) = data_loader.load_synthetic(
-            args.image_size, batch_size)
+            args.image_size, val_batch_size)
 
     logits = model_dict[args.model](images)
     softmax = flow.nn.softmax(logits)
@@ -183,10 +194,11 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    total_batch_size = (args.node_num * args.gpu_num_per_node * args.batch_size_per_device)
 
+    train_pipe, _ = get_rec_pipe(args, True)
     for step in range(args.train_step_num):
         # save model every n iter
+        images, labels = train_pipe.run()
         if step % args.model_save_every_n_iter == 0:
             # do validation when save model
             if step >= 0: # >=0 will trigger validation at step 0
@@ -194,7 +206,10 @@ def main():
                     InferenceNet().async_get(predict_callback(step, predict_step))
             snapshot.save(step)
 
-        TrainNet().async_get(train_callback(step+1))
+        #TrainNet().async_get(train_callback(step+1))
+        #print(images.as_cpu().as_array().shape)
+        #break
+        NumpyTrainNet(images.as_cpu().as_array(), labels.as_array().astype(np.int32)).async_get(train_callback(step+1))
 
     step += 1
     for predict_step in range(args.val_step_num):
