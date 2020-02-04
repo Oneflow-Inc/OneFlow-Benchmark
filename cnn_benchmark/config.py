@@ -18,8 +18,10 @@ def get_parser(parser=None):
 
     # resouce
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
-    parser.add_argument("--node_num", type=int, default=1)
-    parser.add_argument("--node_list", type=str, default=None, help="nodes' IP address, split by comma")
+    parser.add_argument('--num_nodes', type=int, default=1,
+                        help='node/machine number for training')
+    parser.add_argument('--node_ips', type=str_list, default=['192.168.1.15', '192.168.1.16'],
+                        help='nodes ip list for training, devided by ",", length >= num_nodes')
 
     parser.add_argument("--model", type=str, default="vgg16", help="vgg16 or resnet50")
 
@@ -35,6 +37,17 @@ def get_parser(parser=None):
     parser.add_argument("--image_size", type=int, default=224, help="image size")#Todo, remove
 
     # from mxnet
+    parser.add_argument('--num_epochs', type=int, default=90, help='number of epochs')
+    parser.add_argument('--lr', type=float, default=0.1, help='initial learning rate')
+    parser.add_argument('--lr-schedule', choices=('multistep', 'cosine'), default='cosine',
+                        help='learning rate schedule')
+    parser.add_argument('--lr-factor', type=float, default=0.256,
+                        help='the ratio to reduce lr on each step')
+    parser.add_argument('--lr-steps', type=float_list, default=[],
+                        help='the epochs to reduce the lr, e.g. 30,60')
+    parser.add_argument('--warmup-epochs', type=int, default=5,
+                        help='the epochs to ramp-up lr to scaled large-batch value')
+
     parser.add_argument("--input_layout", type=str, default='NHWC', help="NCHW or NHWC")
     parser.add_argument('--image-shape', type=int_list, default=[3, 224, 224],
                         help='the image shape feed into the network')
@@ -64,7 +77,7 @@ def get_parser(parser=None):
 
     # validation
     parser.add_argument("--val_step_num", type=int, default=10, help="total validation step number")
-    parser.add_argument("--val_batch_size_per_device", type=int, default=8)
+    parser.add_argument("--val_batch_size_per_device", type=int, default=100)
     parser.add_argument("--val_data_dir", type=str, default=None, help="validation dataset directory")
     parser.add_argument("--val_data_part_num", type=int, default=32, help="validation data part number")
 

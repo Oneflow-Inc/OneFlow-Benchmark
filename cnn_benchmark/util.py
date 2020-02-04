@@ -5,6 +5,18 @@ from datetime import datetime
 import oneflow as flow
 
 
+def nodes_init(args):
+    if args.num_nodes > 1:
+        assert args.num_nodes <= len(args.node_ips)
+        nodes = []
+        for n in args.node_list.strip().split(","):
+            addr_dict = {}
+            addr_dict["addr"] = n
+            nodes.append(addr_dict)
+
+        flow.env.machine(nodes)
+
+
 class Snapshot:
     def __init__(self, model_save_dir, model_load_dir):
         self._model_save_dir = model_save_dir
@@ -23,6 +35,7 @@ class Snapshot:
             os.makedirs(snapshot_save_path)
         print("Saving model to {}.".format(snapshot_save_path))
         self._check_point.save(snapshot_save_path)
+
 
 class Summary():
     def __init__(self, log_dir, config):
@@ -82,7 +95,7 @@ def make_lr(train_step_name, model_update_conf, primary_lr, secondary_lr=None):
 def print_args(args):
     print("=".ljust(66, "="))
     print("Running {}: num_gpu_per_node = {}, num_nodes = {}.".format(
-            args.model, args.gpu_num_per_node, args.node_num))
+            args.model, args.gpu_num_per_node, args.num_nodes))
     print("=".ljust(66, "="))
     for arg in vars(args):
         print("{} = {}".format(arg, getattr(args, arg)))
