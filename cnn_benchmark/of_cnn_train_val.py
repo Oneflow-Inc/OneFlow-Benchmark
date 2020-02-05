@@ -80,39 +80,6 @@ def get_train_config():
     return train_config
 
 
-#@flow.function(get_train_config())
-def TrainNet():
-    if args.data_dir:
-        assert os.path.exists(args.data_dir)
-        print("Loading data from {}".format(args.data_dir))
-        (labels, images) = data_loader.load_imagenet(
-            args.data_dir, args.image_size, train_batch_size, args.data_part_num)
-    else:
-        print("Loading synthetic data.")
-        (labels, images) = data_loader.load_synthetic(args.image_size, train_batch_size)
-
-    logits = model_dict[args.model](images)
-    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
-    flow.losses.add_loss(loss)
-    outputs = {"loss": loss}
-
-    #train_config = flow.function_config()
-    #print(dir(train_config.train))
-    #print(type(train_config.train))
-    #step_lr = make_lr("System-Train-TrainStep-TrainNet",
-    #    train_config.train.model_update_conf(),
-    #    train_config.train.primary_lr(),
-    #    train_config.train.secondary_lr())
-    #outputs.update(step_lr)
-
-    #lbi = logical_blob_id_util.LogicalBlobId()
-    #lbi.op_name = "System-Train-PrimaryLearningRate-Scheduler"
-    #lbi.blob_name = "out"
-    #lr = remote_blob_util.RemoteBlob(lbi)
-    #outputs.update({"lr": lr})
-    return outputs
-
-
 @flow.function(get_train_config())
 def NumpyTrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.float),
                   labels=flow.FixedTensorDef((train_batch_size, 1), dtype=flow.int32)):
@@ -131,34 +98,24 @@ def get_val_config():
 
 
 @flow.function(get_val_config())
-def InferenceNet():
-    if args.val_data_dir:
-        assert os.path.exists(args.val_data_dir)
-        print("Loading data from {}".format(args.val_data_dir))
-        # TODO: use different image preprocess
-        (labels, images) = data_loader.load_imagenet(
-            args.val_data_dir, args.image_size, val_batch_size, args.val_data_part_num)
-    else:
-        print("Loading synthetic data.")
-        (labels, images) = data_loader.load_synthetic(
-            args.image_size, val_batch_size)
-
+def InferenceNet(images=flow.FixedTensorDef((val_batch_size, H, W, C), dtype=flow.float),
+                 labels=flow.FixedTensorDef((val_batch_size, 1), dtype=flow.int32)):
     logits = model_dict[args.model](images)
     softmax = flow.nn.softmax(logits)
     return (softmax, labels)
 
 
-def train_callback(step):
+def train_callback(epoch, step):
     def callback(train_outputs):
         loss = train_outputs['loss'].mean()
         summary.scalar('loss', loss, step)
         #summary.scalar('learning_rate', train_outputs['lr'], step)
         if (step-1) % args.loss_print_every_n_iter == 0:
-            print("iter {}, loss: {:.6f}".format(step-1, loss))
+            print("epoch {}, iter {}, loss: {:.6f}".format(epoch, step-1, loss))
     return callback
 
 
-def do_predictions(step, predict_step, predictions):
+def do_predictions(epoch, predict_step, predictions):
     classfications = np.argmax(predictions[0].ndarray(), axis=1)
     labels = predictions[1]
     if predict_step == 0:
@@ -169,15 +126,15 @@ def do_predictions(step, predict_step, predictions):
         main.total += len(labels)
     if predict_step + 1 == args.val_step_num:
         assert main.total > 0
-        summary.scalar('top1_accuracy', main.correct/main.total, step)
-        #summary.scalar('top1_correct', main.correct, step)
-        #summary.scalar('total_val_images', main.total, step)
-        print("iter {}, top 1 accuracy: {:.6f}".format(step, main.correct/main.total))
+        summary.scalar('top1_accuracy', main.correct/main.total, epoch)
+        #summary.scalar('top1_correct', main.correct, epoch)
+        #summary.scalar('total_val_images', main.total, epoch)
+        print("epoch {}, top 1 accuracy: {:.6f}".format(epoch, main.correct/main.total))
 
 
-def predict_callback(step, predict_step):
+def predict_callback(epoch, predict_step):
     def callback(predictions):
-        do_predictions(step, predict_step, predictions)
+        do_predictions(epoch, predict_step, predictions)
     return callback
 
 
@@ -190,29 +147,30 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    epoch=0
-    for epoch in range(args.num_epoch):
-        logging.info('Starting epoch {}'.format(epoch))
-        train_pipe, val_pipe = get_rec_pipe(args, True, seed=epoch)
-    exit()
+    train_data_iter, val_data_iter = get_rec_iter(args, True)
+    for epoch in range(args.num_epochs):
+        print('Starting epoch {}'.format(epoch))
+        tic = time.time()
+        train_data_iter.reset()
+        for i, batches in enumerate(train_data_iter):
+            assert len(batches) == 1
+            images, labels = batches[0]
+            NumpyTrainNet(images, labels.astype(np.int32)).async_get(train_callback(epoch, i))
+        print(time.time() - tic)
+        if args.data_val:
+            tic = time.time()
+            val_data_iter.reset()
+            for i, batches in enumerate(val_data_iter):
+                assert len(batches) == 1
+                images, labels = batches[0]
+                InferenceNet(images, labels.astype(np.int32)).async_get(predict_callback(epoch, i))
+            print(time.time() - tic)
 
-    for step in range(args.train_step_num):
-        # save model every n iter
-        images, labels = train_pipe.run()
-        if step % args.model_save_every_n_iter == 0:
-            # do validation when save model
-            if step >= 0: # >=0 will trigger validation at step 0
-                for predict_step in range(args.val_step_num):
-                    InferenceNet().async_get(predict_callback(step, predict_step))
-            snapshot.save(step)
 
-        #TrainNet().async_get(train_callback(step+1))
-        NumpyTrainNet(images.as_cpu().as_array(), labels.as_array().astype(np.int32)).async_get(train_callback(step+1))
-
-    step += 1
-    for predict_step in range(args.val_step_num):
-        do_predictions(step, predict_step, InferenceNet().get()) #use sync mode
-    snapshot.save(step)
+    #step += 1
+    #for predict_step in range(args.val_step_num):
+    #    do_predictions(step, predict_step, InferenceNet().get()) #use sync mode
+    #snapshot.save(step)
     summary.save()
 
 
