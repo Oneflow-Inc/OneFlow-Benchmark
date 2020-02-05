@@ -14,6 +14,7 @@
 
 import numpy as np
 import time
+import logging
 import warnings
 from nvidia import dali
 from nvidia.dali.pipeline import Pipeline
@@ -123,14 +124,6 @@ class DALIGenericIterator(object):
     ----------
     pipelines : list of nvidia.dali.pipeline.Pipeline
                 List of pipelines to use
-    output_map : list of (str, str)
-                 List of pairs (output_name, tag) which maps consecutive
-                 outputs of DALI pipelines to proper field in MXNet's
-                 DataBatch.
-                 tag is one of DALIGenericIterator.DATA_TAG
-                 and DALIGenericIterator.LABEL_TAG mapping given output
-                 for data or label correspondingly.
-                 output_names should be distinct.
     size : int, Number of samples in the epoch (Usually the size of the dataset).
     data_layout : str, optional, default = 'NCHW'
                   Either 'NHWC' or 'NCHW' - layout of the pipeline outputs.
@@ -171,7 +164,6 @@ class DALIGenericIterator(object):
     """
     def __init__(self,
                  pipelines,
-                 output_map,
                  size,
                  data_layout='NCHW',
                  fill_last_batch=True,
@@ -199,41 +191,13 @@ class DALIGenericIterator(object):
         self._data_batches = [[None] for i in range(self._num_gpus)]
         self._counter = 0
         self._current_data_batch = 0
-        #self._output_names_map = [x[0] for x in output_map] # ['data', 'softmax_label']
-        #self._output_categories_map = [x[1] for x in output_map] # ['data', 'label']
-        #self._output_categories = {DALIGenericIterator.DATA_TAG, DALIGenericIterator.LABEL_TAG}
-        #assert set(self._output_categories_map) <= self._output_categories, \
-        #    "Only DATA_TAG and LABEL_TAG are allowed"
-        #assert len(set(self._output_names_map)) == len(self._output_names_map), \
-        #    "output_names in output_map should be distinct"
-        #self.output_map = output_map # [('data', 'data'), ('softmax_label', 'label')]
 
-        # We need data about the batches (like shape information),
-        # so we need to run a single batch as part of setup to get that info
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
                 p.schedule_run()
-        #self._first_batch = None
-        #self._first_batch = self.next()
-
-        #xuan category_names = {key : [] for key in self._output_categories}
-        #xuan for name, category in output_map:
-        #xuan     category_names[category].append(name)
-        #xuan for i, data in enumerate(self._first_batch[0].data):
-        #xuan     data_shape  = (data.shape[0] * self._num_gpus,) + data.shape[1:]
-        #xuan     self.provide_data.append(mx.io.DataDesc(category_names[DALIGenericIterator.DATA_TAG][i], \
-        #xuan         data_shape, data.dtype, layout=data_layout))
-        #xuan for i, label in enumerate(self._first_batch[0].label):
-        #xuan     label_shape = (label.shape[0] * self._num_gpus,) + label.shape[1:]
-        #xuan     self.provide_label.append(mx.io.DataDesc(category_names[DALIGenericIterator.LABEL_TAG][i], \
-        #xuan         label_shape, label.dtype))
 
 
     def __next__(self):
-        #if self._first_batch is not None:
-        #    batch = self._first_batch
-        #    self._first_batch = None
-        #    return batch
         if self._counter >= self._size:
             if self._auto_reset:
                 self.reset()
@@ -253,68 +217,6 @@ class DALIGenericIterator(object):
                 else:
                     raise
             self._data_batches[gpu_id][self._current_data_batch] = images_labels
-        '''
-        for i in range(self._num_gpus):
-            # MXNet wants batches with clear distinction between
-            # data and label entries, so segregate outputs into
-            # 2 categories
-            category_outputs = {key : [] for key in self._output_categories}
-            for j, out in enumerate(outputs[i]):
-                category_outputs[self._output_categories_map[j]].append(out)
-            # Change DALI TensorLists into Tensors
-            category_tensors = dict()
-            category_info = dict()
-            # For data proceed normally
-            category_tensors[DALIGenericIterator.DATA_TAG] = \
-                [x.as_tensor() for x in category_outputs[DALIGenericIterator.DATA_TAG]]
-            category_info[DALIGenericIterator.DATA_TAG] = \
-                [(x.shape(), np.dtype(x.dtype())) for x in category_tensors[DALIGenericIterator.DATA_TAG]]
-            # For labels we squeeze the tensors
-            category_tensors[DALIGenericIterator.LABEL_TAG] = \
-                [x.as_tensor() for x in category_outputs[DALIGenericIterator.LABEL_TAG]]
-            if self._squeeze_labels:
-                for label in category_tensors[DALIGenericIterator.LABEL_TAG]:
-                    label.squeeze()
-            category_info[DALIGenericIterator.LABEL_TAG] = \
-                [(x.shape(), np.dtype(x.dtype())) for x in category_tensors[DALIGenericIterator.LABEL_TAG]]
-
-            # If we did not yet allocate memory for that batch, do it now
-            if self._data_batches[i][self._current_data_batch] is None:
-                mx_gpu_device = mx.gpu(self._pipes[i].device_id)
-                mx_cpu_device = mx.cpu(0)
-                from nvidia.dali.backend import TensorGPU
-                category_device = {key : [] for key in self._output_categories}
-                for category in self._output_categories:
-                    for t in category_tensors[category]:
-                        if type(t) is TensorGPU:
-                            category_device[category].append(mx_gpu_device)
-                        else:
-                            category_device[category].append(mx_cpu_device)
-                d = []
-                l = []
-                for j, (shape, dtype) in enumerate(category_info[DALIGenericIterator.DATA_TAG]):
-                    d.append(mx.nd.zeros(shape, category_device[DALIGenericIterator.DATA_TAG][j], dtype = dtype))
-                for j, (shape, dtype) in enumerate(category_info[DALIGenericIterator.LABEL_TAG]):
-                    l.append(mx.nd.zeros(shape, category_device[DALIGenericIterator.LABEL_TAG][j], dtype = dtype))
-
-                self._data_batches[i][self._current_data_batch] = mx.io.DataBatch(data=d, label=l)
-
-            d = self._data_batches[i][self._current_data_batch].data
-            l = self._data_batches[i][self._current_data_batch].label
-            # Copy data from DALI Tensors to MXNet NDArrays
-            if self._dynamic_shape:
-                for j, (shape, dtype) in enumerate(category_info[DALIGenericIterator.DATA_TAG]):
-                    if list(d[j].shape) != shape:
-                        d[j] = mx.nd.zeros(shape, d[j].context, dtype = dtype)
-                for j, (shape, dtype) in enumerate(category_info[DALIGenericIterator.LABEL_TAG]):
-                    if list(l[j].shape) != shape:
-                        l[j] = mx.nd.zeros(shape, l[j].context, dtype = dtype)
-
-            for j, d_arr in enumerate(d):
-                feed_ndarray(category_tensors[DALIGenericIterator.DATA_TAG][j], d_arr)
-            for j, l_arr in enumerate(l):
-                feed_ndarray(category_tensors[DALIGenericIterator.LABEL_TAG][j], l_arr)
-        '''
 
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
@@ -342,7 +244,6 @@ class DALIGenericIterator(object):
             for db in self._data_batches:
                 db[copy_db_index].pad = 0
         '''
-
         return [db[copy_db_index] for db in self._data_batches]
 
     def next(self):
@@ -373,104 +274,13 @@ class DALIGenericIterator(object):
         else:
             logging.warning("DALI iterator does not support resetting while epoch is not finished. Ignoring...")
 
-    DATA_TAG = "data"
-    LABEL_TAG = "label"
 
-class DALIClassificationIterator(DALIGenericIterator):
-    """
-    DALI iterator for classification tasks for MXNet. It returns 2 outputs
-    (data and label) in the form of MXNet's DataBatch of NDArrays.
-
-    Calling
-
-    .. code-block:: python
-
-       DALIClassificationIterator(pipelines, size, data_name,
-                                  label_name, data_layout)
-
-    is equivalent to calling
-
-    .. code-block:: python
-
-       DALIGenericIterator(pipelines,
-                           [data_name, DALIClassificationIterator.DATA_TAG,
-                            label_name, DALIClassificationIterator.LABEL_TAG],
-                           size, data_name, label_name,
-                           data_layout)
-
-    Please keep in mind that NDArrays returned by the iterator are
-    still owned by DALI. They are valid till the next iterator call.
-    If the content needs to be preserved please copy it to another NDArray.
-
-    Parameters
-    ----------
-    pipelines : list of nvidia.dali.pipeline.Pipeline
-                List of pipelines to use
-    size : int
-           Number of samples in the epoch (Usually the size of the dataset).
-    data_name : str, optional, default = 'data'
-                Data name for provided symbols.
-    label_name : str, optional, default = 'softmax_label'
-                 Label name for provided symbols.
-    data_layout : str, optional, default = 'NCHW'
-                  Either 'NHWC' or 'NCHW' - layout of the pipeline outputs.
-    fill_last_batch : bool, optional, default = True
-                 Whether to fill the last batch with data up to 'self.batch_size'.
-                 The iterator would return the first integer multiple
-                 of self._num_gpus * self.batch_size entries which exceeds 'size'.
-                 Setting this flag to False will cause the iterator to return
-                 exactly 'size' entries.
-    auto_reset : bool, optional, default = False
-                 Whether the iterator resets itself for the next epoch
-                 or it requires reset() to be called separately.
-    squeeze_labels: bool, optional, default = True
-                 Whether the iterator should squeeze the labels before
-                 copying them to the ndarray.
-    dynamic_shape: bool, optional, default = False
-                 Whether the shape of the output of the DALI pipeline can
-                 change during execution. If True, the mxnet.ndarray will be resized accordingly
-                 if the shape of DALI returned tensors changes during execution.
-                 If False, the iterator will fail in case of change.
-    last_batch_padded : bool, optional, default = False
-                 Whether the last batch provided by DALI is padded with the last sample
-                 or it just wraps up. In the conjunction with `fill_last_batch` it tells
-                 if the iterator returning last batch with data only partially filled with
-                 data from the current epoch is dropping padding samples or samples from
-                 the next epoch. If set to False next epoch will end sooner as data from
-                 it was consumed but dropped. If set to True next epoch would be the
-                 same length as the first one.
-
-    Example
-    -------
-    With the data set [1,2,3,4,5,6,7] and the batch size 2:
-    fill_last_batch = False, last_batch_padded = True  -> last batch = [7], next iteration will return [1, 2]
-    fill_last_batch = False, last_batch_padded = False -> last batch = [7], next iteration will return [2, 3]
-    fill_last_batch = True, last_batch_padded = True   -> last batch = [7, 7], next iteration will return [1, 2]
-    fill_last_batch = True, last_batch_padded = False  -> last batch = [7, 1], next iteration will return [2, 3]
-    """
-    def __init__(self,
-                 pipelines,
-                 size,
-                 data_name='data',
-                 label_name='softmax_label',
-                 data_layout='NCHW',
-                 fill_last_batch=True,
-                 auto_reset=False,
-                 squeeze_labels=True,
-                 dynamic_shape=False,
-                 last_batch_padded=False):
-        super(DALIClassificationIterator, self).__init__(pipelines,
-                                                         [(data_name, DALIClassificationIterator.DATA_TAG),
-                                                          (label_name, DALIClassificationIterator.LABEL_TAG)],
-                                                         size,
-                                                         data_layout     = data_layout,
-                                                         fill_last_batch = fill_last_batch,
-                                                         auto_reset = auto_reset,
-                                                         squeeze_labels=squeeze_labels,
-                                                         dynamic_shape=dynamic_shape,
-                                                         last_batch_padded = last_batch_padded)
-def get_rec_iter(args, dali_cpu=False):
-    gpus = [0,1,2,3]#, 1, 2, 3] #TODO multi gpu decode
+def get_rec_iter(args, dali_cpu=False, todo=True):
+    # TBD dali_cpu only not work
+    if todo:
+        gpus = [0]
+    else:
+        gpus = range(args.num_gpu_per_node)
     rank = 0 #TODO
     nWrk = 1 #TODO
 
@@ -525,30 +335,30 @@ def get_rec_iter(args, dali_cpu=False):
         val_examples = valpipes[0].epoch_size("Reader")
 
     if args.num_examples < trainpipes[0].epoch_size("Reader"):
-        warnings.warn("{} training examples will be used, although full training set contains {} \
-                      examples".format(args.num_examples, trainpipes[0].epoch_size("Reader")))
+        warnings.warn("{} training examples will be used, although full training set contains {} examples".format(args.num_examples, trainpipes[0].epoch_size("Reader")))
 
-    dali_train_iter = DALIClassificationIterator(trainpipes, args.num_examples)
+    dali_train_iter = DALIGenericIterator(trainpipes, args.num_examples)
     if args.data_val:
-        dali_val_iter = DALIClassificationIterator(valpipes, val_examples, fill_last_batch = False)
+        dali_val_iter = DALIGenericIterator(valpipes, val_examples, fill_last_batch = False)
     else:
         dali_val_iter = None
 
     return dali_train_iter, dali_val_iter
 
 if __name__ == '__main__':
-    import logging
     import config as configs
     from util import print_args
     parser = configs.get_parser()
     args = parser.parse_args()
-    #print_args(args)
+    print_args(args)
     train_data_iter, val_data_iter = get_rec_iter(args, True)
     for epoch in range(args.num_epochs):
         tic = time.time()
         print('Starting epoch {}'.format(epoch))
-        val_data_iter.reset()
-        for i, batches in enumerate(val_data_iter):
+        train_data_iter.reset()
+        for i, batches in enumerate(train_data_iter):
+            print(batches[0][0].shape, batches[0][1].shape, len(batches))
+            break
             pass
-            #print(batches[0][1])
+            #print(batches[0][1].reshape((-1)))
         print(time.time() - tic)

@@ -77,7 +77,7 @@ def get_parser(parser=None):
 
     # validation
     parser.add_argument("--val_step_num", type=int, default=10, help="total validation step number")
-    parser.add_argument("--val_batch_size_per_device", type=int, default=100)
+    parser.add_argument("--val_batch_size_per_device", type=int, default=8)
     parser.add_argument("--val_data_dir", type=str, default=None, help="validation dataset directory")
     parser.add_argument("--val_data_part_num", type=int, default=32, help="validation data part number")
 
