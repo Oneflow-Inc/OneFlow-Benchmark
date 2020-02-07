@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import time
+import math
 import numpy as np
 import logging
 
@@ -20,11 +21,17 @@ from dali import get_rec_iter
 
 
 parser = configs.get_parser()
-#args = parser.parse_known_args()[0]
 args = parser.parse_args()
 
-summary = Summary(args.log_dir, args)
+total_device_num = args.num_nodes * args.gpu_num_per_node
+train_batch_size = total_device_num * args.batch_size_per_device
+val_batch_size = total_device_num * args.val_batch_size_per_device
+(H, W, C) = (args.image_size, args.image_size, 3)
+epoch_size = math.ceil(args.num_examples / train_batch_size)
+num_train_batches = epoch_size * args.num_epochs
+num_warmup_batches = epoch_size * args.warmup_epochs
 
+summary = Summary(args.log_dir, args)
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
@@ -42,15 +49,13 @@ optimizer_dict = {
             "polynomial_conf": {"decay_batches": 300000, "end_learning_rate": 0.0001,},
         },
     },
+    "momentum-cosine-decay": {
+        "momentum_conf": {"beta": 0.875},
+        "warmup_conf": {"linear_conf": {"warmup_batches":num_warmup_batches, "start_multiplier":0}},
+        "learning_rate_decay": {"cosine_conf": {"decay_batches": num_train_batches - num_warmup_batches}},
+    },
 }
 
-#        "warmup_conf": {"linear_conf": {"warmup_batches":10000, "start_multiplier":0}},
-
-
-total_device_num = args.num_nodes * args.gpu_num_per_node
-train_batch_size = total_device_num * args.batch_size_per_device
-val_batch_size = total_device_num * args.val_batch_size_per_device
-(H, W, C) = (args.image_size, args.image_size, 3)
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
@@ -60,8 +65,8 @@ def get_train_config():
     train_config.default_data_type(flow.float)
     train_config.train.primary_lr(args.learning_rate)
     train_config.disable_all_reduce_sequence(True)
-    train_config.all_reduce_group_min_mbyte(8)
-    train_config.all_reduce_group_num(128)
+    #train_config.all_reduce_group_min_mbyte(8)
+    #train_config.all_reduce_group_num(128)
     # train_config.all_reduce_lazy_ratio(0)
 
     # train_config.enable_nccl_hierarchical_all_reduce(True)
@@ -76,7 +81,6 @@ def get_train_config():
         train_config.train.weight_l2(args.weight_l2)
 
     train_config.enable_inplace(True)
-    # train_config.ctrl_port(12140)
     return train_config
 
 
@@ -86,7 +90,8 @@ def NumpyTrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=
     logits = model_dict[args.model](images)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
     flow.losses.add_loss(loss)
-    outputs = {"loss": loss}
+    softmax = flow.nn.softmax(logits)
+    outputs = {"loss": loss, "softmax":softmax, "labels": labels}
     return outputs
 
 
@@ -102,28 +107,51 @@ def InferenceNet(images=flow.FixedTensorDef((val_batch_size, H, W, C), dtype=flo
                  labels=flow.FixedTensorDef((val_batch_size, 1), dtype=flow.int32)):
     logits = model_dict[args.model](images)
     softmax = flow.nn.softmax(logits)
-    return (softmax, labels)
+    outputs = {"softmax":softmax, "labels": labels}
+    return outputs#(softmax, labels)
 
-
-def train_callback(epoch, step):
-    def callback(train_outputs):
-        loss = train_outputs['loss'].mean()
-        summary.scalar('loss', loss, step)
-        #summary.scalar('learning_rate', train_outputs['lr'], step)
-        if (step-1) % args.loss_print_every_n_iter == 0:
-            print("epoch {}, iter {}, loss: {:.6f}".format(epoch, step-1, loss))
-    return callback
-
-
-def do_predictions(epoch, predict_step, predictions):
-    classfications = np.argmax(predictions[0].ndarray(), axis=1)
-    labels = predictions[1]
-    if predict_step == 0:
+def acc_acc(step, predictions):
+    classfications = np.argmax(predictions['softmax'].ndarray(), axis=1)
+    labels = predictions['labels'].reshape(-1)
+    #print('cls')
+    #print(classfications)
+    #print('labels')
+    #print(labels.reshape(-1))
+    if step == 0:
         main.correct = 0.0
         main.total = 0.0
     else:
         main.correct += np.sum(classfications == labels);
         main.total += len(labels)
+
+
+def train_callback(epoch, step):
+    def callback(train_outputs):
+        acc_acc(step, train_outputs)
+        loss = train_outputs['loss'].mean()
+        summary.scalar('loss', loss, step)
+        #summary.scalar('learning_rate', train_outputs['lr'], step)
+        if (step-1) % args.loss_print_every_n_iter == 0:
+            accuracy = main.correct/main.total
+            print("epoch {}, iter {}, loss: {:.6f}, accuracy: {:.6f}".format(epoch, step-1, loss,
+                                                                             accuracy))
+            summary.scalar('train_accuracy', accuracy, step)
+            main.correct = 0.0
+            main.total = 0.0
+            #exit()
+    return callback
+
+
+def do_predictions(epoch, predict_step, predictions):
+    acc_acc(predict_step, predictions)
+    #classfications = np.argmax(predictions['softmax'].ndarray(), axis=1)
+    #labels = predictions['labels']
+    #if predict_step == 0:
+    #    main.correct = 0.0
+    #    main.total = 0.0
+    #else:
+    #    main.correct += np.sum(classfications == labels);
+    #    main.total += len(labels)
     if predict_step + 1 == args.val_step_num:
         assert main.total > 0
         summary.scalar('top1_accuracy', main.correct/main.total, epoch)

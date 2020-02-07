@@ -29,7 +29,8 @@ def get_parser(parser=None):
     parser.add_argument("--model_load_dir", type=str, default=None, help="model load directory if need")
     parser.add_argument("--batch_size_per_device", type=int, default=8)
     parser.add_argument("--learning_rate", type=float, default=1e-4)
-    parser.add_argument("--optimizer", type=str, default="sgd", help="sgd, adam, momentum")
+    parser.add_argument("--optimizer", type=str, default="momentum-cosine-decay",
+                        help="sgd, adam, momentum, momentum-cosine-decay")
     parser.add_argument("--weight_l2", type=float, default=None, help="weight decay parameter")
     parser.add_argument("--train_step_num", type=int, default=10, help="total training step number")
     parser.add_argument("--data_dir", type=str, default=None, help="training dataset directory")
