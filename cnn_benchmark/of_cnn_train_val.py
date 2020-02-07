@@ -16,7 +16,7 @@ import resnet_model
 import alexnet_model
 
 import config as configs
-from util import Snapshot, Summary, print_args, make_lr, nodes_init
+from util import Snapshot, Summary, print_args, make_lr, nodes_init, StopWatch
 from dali import get_rec_iter
 
 
@@ -32,6 +32,7 @@ num_train_batches = epoch_size * args.num_epochs
 num_warmup_batches = epoch_size * args.warmup_epochs
 
 summary = Summary(args.log_dir, args)
+timer = StopWatch()
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
@@ -85,8 +86,8 @@ def get_train_config():
 
 
 @flow.function(get_train_config())
-def NumpyTrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.float),
-                  labels=flow.FixedTensorDef((train_batch_size, 1), dtype=flow.int32)):
+def TrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.float),
+             labels=flow.FixedTensorDef((train_batch_size, 1), dtype=flow.int32)):
     logits = model_dict[args.model](images)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
     flow.losses.add_loss(loss)
@@ -110,13 +111,10 @@ def InferenceNet(images=flow.FixedTensorDef((val_batch_size, H, W, C), dtype=flo
     outputs = {"softmax":softmax, "labels": labels}
     return outputs#(softmax, labels)
 
+
 def acc_acc(step, predictions):
     classfications = np.argmax(predictions['softmax'].ndarray(), axis=1)
     labels = predictions['labels'].reshape(-1)
-    #print('cls')
-    #print(classfications)
-    #print('labels')
-    #print(labels.reshape(-1))
     if step == 0:
         main.correct = 0.0
         main.total = 0.0
@@ -132,9 +130,10 @@ def train_callback(epoch, step):
         summary.scalar('loss', loss, step)
         #summary.scalar('learning_rate', train_outputs['lr'], step)
         if (step-1) % args.loss_print_every_n_iter == 0:
+            throughput = args.loss_print_every_n_iter * train_batch_size / timer.split()
             accuracy = main.correct/main.total
-            print("epoch {}, iter {}, loss: {:.6f}, accuracy: {:.6f}".format(epoch, step-1, loss,
-                                                                             accuracy))
+            print("epoch {}, iter {}, loss: {:.6f}, accuracy: {:.6f}, samples/s: {:.3f}".format(
+                   epoch, step-1, loss, accuracy, throughput))
             summary.scalar('train_accuracy', accuracy, step)
             main.correct = 0.0
             main.total = 0.0
@@ -144,14 +143,6 @@ def train_callback(epoch, step):
 
 def do_predictions(epoch, predict_step, predictions):
     acc_acc(predict_step, predictions)
-    #classfications = np.argmax(predictions['softmax'].ndarray(), axis=1)
-    #labels = predictions['labels']
-    #if predict_step == 0:
-    #    main.correct = 0.0
-    #    main.total = 0.0
-    #else:
-    #    main.correct += np.sum(classfications == labels);
-    #    main.total += len(labels)
     if predict_step + 1 == args.val_step_num:
         assert main.total > 0
         summary.scalar('top1_accuracy', main.correct/main.total, epoch)
@@ -176,6 +167,7 @@ def main():
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
     train_data_iter, val_data_iter = get_rec_iter(args, True)
+    timer.start()
     for epoch in range(args.num_epochs):
         print('Starting epoch {}'.format(epoch))
         tic = time.time()
@@ -183,7 +175,10 @@ def main():
         for i, batches in enumerate(train_data_iter):
             assert len(batches) == 1
             images, labels = batches[0]
-            NumpyTrainNet(images, labels.astype(np.int32)).async_get(train_callback(epoch, i))
+            TrainNet(images, labels.astype(np.int32)).async_get(train_callback(epoch, i))
+            if i > 30:#debug
+                break
+        break
         print(time.time() - tic)
         if args.data_val:
             tic = time.time()
@@ -195,10 +190,7 @@ def main():
             print(time.time() - tic)
 
 
-    #step += 1
-    #for predict_step in range(args.val_step_num):
-    #    do_predictions(step, predict_step, InferenceNet().get()) #use sync mode
-    #snapshot.save(step)
+    snapshot.save('epoch_{}'.format(epoch+1))
     summary.save()
 
 

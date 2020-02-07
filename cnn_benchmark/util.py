@@ -29,8 +29,8 @@ class Snapshot:
             print("Init model on demand.")
             self._check_point.init()
 
-    def save(self, step):
-        snapshot_save_path = os.path.join(self._model_save_dir, "snapshot_%d" % step)
+    def save(self, name):
+        snapshot_save_path = os.path.join(self._model_save_dir, "snapshot_{}".format(name))
         if not os.path.exists(snapshot_save_path):
             os.makedirs(snapshot_save_path)
         print("Saving model to {}.".format(snapshot_save_path))
@@ -101,4 +101,25 @@ def print_args(args):
         print("{} = {}".format(arg, getattr(args, arg)))
     print("-".ljust(66, "-"))
     print("Time stamp: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
+
+
+class StopWatch:
+    def __init__(self):
+        pass
+
+    def start(self):
+        self.start_time = time.time()
+        self.last_split = self.start_time
+
+    def split(self):
+        now = time.time()
+        duration = now - self.last_split
+        self.last_split = now
+        return duration
+
+    def stop(self):
+        self.stop_time = time.time()
+
+    def duration(self):
+        return self.stop_time - self.start_time
 
