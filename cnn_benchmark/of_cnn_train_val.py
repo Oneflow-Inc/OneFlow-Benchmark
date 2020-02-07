@@ -30,6 +30,7 @@ val_batch_size = total_device_num * args.val_batch_size_per_device
 epoch_size = math.ceil(args.num_examples / train_batch_size)
 num_train_batches = epoch_size * args.num_epochs
 num_warmup_batches = epoch_size * args.warmup_epochs
+decay_batches = num_train_batches - num_warmup_batches
 
 summary = Summary(args.log_dir, args)
 timer = StopWatch()
@@ -53,7 +54,7 @@ optimizer_dict = {
     "momentum-cosine-decay": {
         "momentum_conf": {"beta": 0.875},
         "warmup_conf": {"linear_conf": {"warmup_batches":num_warmup_batches, "start_multiplier":0}},
-        "learning_rate_decay": {"cosine_conf": {"decay_batches": num_train_batches - num_warmup_batches}},
+        "learning_rate_decay": {"cosine_conf": {"decay_batches": decay_batches}},
     },
 }
 

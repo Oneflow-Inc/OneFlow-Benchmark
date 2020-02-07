@@ -54,6 +54,7 @@ class HybridTrainPipe(Pipeline):
         dali_device = "cpu" if dali_cpu else "mixed"
         dali_resize_device = "cpu" if dali_cpu else "gpu"
 
+        print(dali_device, dali_resize_device)
         if args.dali_fuse_decoder:
             self.decode = ops.ImageDecoderRandomCrop(device=dali_device, output_type=types.RGB,
                                                      device_memory_padding=nvjpeg_padding,
@@ -67,7 +68,7 @@ class HybridTrainPipe(Pipeline):
             self.resize = ops.RandomResizedCrop(device=dali_resize_device, size=crop_shape)
 
 
-        self.cmnp = ops.CropMirrorNormalize(device="gpu",
+        self.cmnp = ops.CropMirrorNormalize(device=dali_resize_device, #"gpu",
             output_dtype=types.FLOAT16 if dtype == 'float16' else types.FLOAT,
             output_layout=output_layout, crop=crop_shape, pad_output=pad_output,
             image_type=types.RGB, mean=args.rgb_mean, std=args.rgb_std)
@@ -100,8 +101,9 @@ class HybridValPipe(Pipeline):
             self.decode = ops.ImageDecoder(device="mixed", output_type=types.RGB,
                                            device_memory_padding=nvjpeg_padding,
                                            host_memory_padding=nvjpeg_padding)
+        print(dali_device)
         self.resize = ops.Resize(device=dali_device, resize_shorter=resize_shp) if resize_shp else None
-        self.cmnp = ops.CropMirrorNormalize(device="gpu",
+        self.cmnp = ops.CropMirrorNormalize(device=dali_device,#"gpu",
             output_dtype=types.FLOAT16 if dtype == 'float16' else types.FLOAT,
             output_layout=output_layout, crop=crop_shape, pad_output=pad_output,
             image_type=types.RGB, mean=args.rgb_mean, std=args.rgb_std)

@@ -38,8 +38,8 @@ def _batch_norm(inputs, name=None, trainable=True):
     return flow.layers.batch_normalization(
         inputs=inputs,
         axis=1,
-        momentum=0.997,
-        epsilon=1.001e-5,
+        momentum=0.9,#97,
+        epsilon=1e05,#1.001e-5,
         center=True,
         scale=True,
         trainable=trainable,
