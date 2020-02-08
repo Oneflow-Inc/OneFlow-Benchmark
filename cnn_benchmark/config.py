@@ -1,5 +1,7 @@
 import argparse
 from datetime import datetime
+import logging
+import oneflow
 
 from dali import add_dali_args
 
@@ -31,8 +33,7 @@ def get_parser(parser=None):
     parser.add_argument("--learning_rate", type=float, default=0.256)
     parser.add_argument("--optimizer", type=str, default="momentum-cosine-decay",
                         help="sgd, adam, momentum, momentum-cosine-decay")
-    parser.add_argument("--weight_l2", type=float, default=None, help="weight decay parameter")
-    parser.add_argument("--image_size", type=int, default=224, help="image size")#Todo, remove
+    parser.add_argument("--weight_l2", type=float, default=1.0/32768, help="weight decay parameter")
 
     # from mxnet
     parser.add_argument('--num_epochs', type=int, default=90, help='number of epochs')
@@ -79,7 +80,18 @@ def get_parser(parser=None):
     return parser
 
 
+def print_args(args):
+    print("=".ljust(66, "="))
+    print("Running {}: num_gpu_per_node = {}, num_nodes = {}.".format(
+            args.model, args.gpu_num_per_node, args.num_nodes))
+    print("=".ljust(66, "="))
+    for arg in vars(args):
+        print("{} = {}".format(arg, getattr(args, arg)))
+    print("-".ljust(66, "-"))
+    print("Time stamp: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
+
+
 if __name__ == '__main__':
-    parser = get_parser(None)
-    config = parser.parse_known_args()
-    print(config)
+    parser = get_parser()
+    args = parser.parse_args()
+    print_args(args)
