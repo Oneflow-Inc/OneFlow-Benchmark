@@ -277,12 +277,8 @@ class DALIGenericIterator(object):
             print("DALI iterator does not support resetting while epoch is not finished. Ignoring...")
 
 
-def get_rec_iter(args, train_batch_size, val_batch_size, dali_cpu=False, todo=True):
-    # TBD dali_cpu only not work
-    if todo:
-        gpus = [0]
-    else:
-        gpus = range(args.num_gpu_per_node)
+def get_rec_iter(args, dali_cpu=False, concat=True):
+    gpus = range(args.gpu_num_per_node)
     rank = 0 #TODO
     nWrk = 1 #TODO
 
@@ -294,7 +290,7 @@ def get_rec_iter(args, train_batch_size, val_batch_size, dali_cpu=False, todo=Tr
     output_layout = types.NHWC if args.input_layout == 'NHWC' else types.NCHW
 
     trainpipes = [HybridTrainPipe(args           = args,
-                                  batch_size     = train_batch_size,
+                                  batch_size     = args.batch_size_per_device,
                                   num_threads    = num_threads,
                                   device_id      = gpu_id,
                                   rec_path       = args.data_train,
@@ -311,7 +307,7 @@ def get_rec_iter(args, train_batch_size, val_batch_size, dali_cpu=False, todo=Tr
 
     if args.data_val:
         valpipes = [HybridValPipe(args           = args,
-                                  batch_size     = val_batch_size,
+                                  batch_size     = args.val_batch_size_per_device,
                                   num_threads    = num_validation_threads,
                                   device_id      = gpu_id,
                                   rec_path       = args.data_val,
@@ -342,20 +338,33 @@ def get_rec_iter(args, train_batch_size, val_batch_size, dali_cpu=False, todo=Tr
 
     return dali_train_iter, dali_val_iter
 
+def get_data(batches):
+    images = []
+    labels = []
+    for batch in batches:
+        images.append(batch[0])
+        labels.append(batch[1])
+    return np.concatenate(images), np.concatenate(labels)
 if __name__ == '__main__':
     import config as configs
-    from util import print_args
     parser = configs.get_parser()
     args = parser.parse_args()
-    print_args(args)
-    train_data_iter, val_data_iter = get_rec_iter(args, 256, 500, True)
+    configs.print_args(args)
+    train_data_iter, val_data_iter = get_rec_iter(args, True)
     for epoch in range(args.num_epochs):
         tic = time.time()
         print('Starting epoch {}'.format(epoch))
         train_data_iter.reset()
         for i, batches in enumerate(train_data_iter):
-            print(batches[0][0].shape, batches[0][1].shape, len(batches))
+            print(type(batches), type(batches[0]), type(batches[0][0]))
+            images, labels = get_data(batches)
+            print(images.shape)
+            print(labels.shape)
+            #print(batches[:][1])
+            #, batches[0][1].shape, len(batches))
+            #print(np.concatenate(batches[:][0], axis=0).shape)
             break
             pass
             #print(batches[0][1].reshape((-1)))
         print(time.time() - tic)
+        break

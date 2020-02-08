@@ -7,25 +7,24 @@ import time
 import math
 import numpy as np
 
-import oneflow as flow
+import config as configs
+parser = configs.get_parser()
+args = parser.parse_args()
+configs.print_args(args)
 
-import data_loader
+from util import Snapshot, Summary, nodes_init, StopWatch
+from dali import get_rec_iter
+import oneflow as flow
 import vgg_model
 import resnet_model
 import alexnet_model
 
-import config as configs
-from util import Snapshot, Summary, print_args, make_lr, nodes_init, StopWatch
-from dali import get_rec_iter
 
-
-parser = configs.get_parser()
-args = parser.parse_args()
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
 train_batch_size = total_device_num * args.batch_size_per_device
 val_batch_size = total_device_num * args.val_batch_size_per_device
-(H, W, C) = (args.image_size, args.image_size, 3)
+(C, H, W) = args.image_shape
 epoch_size = math.ceil(args.num_examples / train_batch_size)
 num_train_batches = epoch_size * args.num_epochs
 num_warmup_batches = epoch_size * args.warmup_epochs
@@ -157,9 +156,16 @@ def predict_callback(epoch, predict_step):
         do_predictions(epoch, predict_step, predictions)
     return callback
 
+def get_data(batches):
+    images = []
+    labels = []
+    for batch in batches:
+        images.append(batch[0])
+        labels.append(batch[1])
+    return np.concatenate(images), np.concatenate(labels)
+
 
 def main():
-    print_args(args)
     nodes_init(args)
 
     flow.env.grpc_use_no_signal()
@@ -167,15 +173,14 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    train_data_iter, val_data_iter = get_rec_iter(args, train_batch_size, val_batch_size, True)
+    train_data_iter, val_data_iter = get_rec_iter(args, True)
     timer.start()
     for epoch in range(args.num_epochs):
         tic = time.time()
         print('Starting epoch {} at {:.2f}'.format(epoch, tic))
         train_data_iter.reset()
         for i, batches in enumerate(train_data_iter):
-            assert len(batches) == 1
-            images, labels = batches[0]
+            images, labels = get_data(batches)
             TrainNet(images, labels.astype(np.int32)).async_get(train_callback(epoch, i))
         #    if i > 30:#debug
         #        break
@@ -185,8 +190,7 @@ def main():
             tic = time.time()
             val_data_iter.reset()
             for i, batches in enumerate(val_data_iter):
-                assert len(batches) == 1
-                images, labels = batches[0]
+                images, labels = get_data(batches)
                 InferenceNet(images, labels.astype(np.int32)).async_get(predict_callback(epoch, i))
                 #acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
 

@@ -1,7 +1,7 @@
-rm -rf core.*
+rm -rf core.* 
 #gdb --args \
-DATA_ROOT=/mnt/13_nfs/xuan/ImageNet/mxnet
-#DATA_ROOT=/dataset/imagenet-mxnet
+#DATA_ROOT=/mnt/13_nfs/xuan/ImageNet/mxnet
+DATA_ROOT=/dataset/imagenet-mxnet
 #nvprof -f -o resnet.nvvp \
   python3 cnn_benchmark/of_cnn_train_val.py \
     --data_train=$DATA_ROOT/train.rec \
@@ -10,7 +10,6 @@ DATA_ROOT=/mnt/13_nfs/xuan/ImageNet/mxnet
     --data_val_idx=$DATA_ROOT/val.idx \
     --gpu_num_per_node=4 \
     --optimizer="momentum-cosine-decay" \
-    --weight_l2=3.0517578125e-05 \
     --learning_rate=0.256 \
     --loss_print_every_n_iter=20 \
     --batch_size_per_device=64 \
