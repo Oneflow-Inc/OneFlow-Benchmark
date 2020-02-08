@@ -6,7 +6,6 @@ import os
 import time
 import math
 import numpy as np
-import logging
 
 import oneflow as flow
 
@@ -170,25 +169,31 @@ def main():
     train_data_iter, val_data_iter = get_rec_iter(args, True)
     timer.start()
     for epoch in range(args.num_epochs):
-        print('Starting epoch {}'.format(epoch))
         tic = time.time()
+        print('Starting epoch {} at {:.2f}'.format(epoch, tic))
         train_data_iter.reset()
         for i, batches in enumerate(train_data_iter):
             assert len(batches) == 1
             images, labels = batches[0]
             TrainNet(images, labels.astype(np.int32)).async_get(train_callback(epoch, i))
-            if i > 30:#debug
-                break
-        break
-        print(time.time() - tic)
+        #    if i > 30:#debug
+        #        break
+        #break
+        print('epoch {} training time: {:.2f}'.format(epoch, time.time() - tic))
         if args.data_val:
             tic = time.time()
             val_data_iter.reset()
             for i, batches in enumerate(val_data_iter):
                 assert len(batches) == 1
                 images, labels = batches[0]
-                InferenceNet(images, labels.astype(np.int32)).async_get(predict_callback(epoch, i))
-            print(time.time() - tic)
+                #InferenceNet(images, labels.astype(np.int32)).async_get(predict_callback(epoch, i))
+                acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
+
+            assert main.total > 0
+            top1_accuracy = main.correct/main.total
+            summary.scalar('top1_accuracy', top1_accuracy, epoch)
+            print("epoch {}, top 1 accuracy: {:.6f}, val_time: {:.2f}".format(epoch, top1_accuracy,
+                  time.time()-tic))
 
 
     snapshot.save('epoch_{}'.format(epoch+1))

@@ -14,7 +14,7 @@
 
 import numpy as np
 import time
-import logging
+#import logging
 import warnings
 from nvidia import dali
 from nvidia.dali.pipeline import Pipeline
@@ -68,7 +68,8 @@ class HybridTrainPipe(Pipeline):
             self.resize = ops.RandomResizedCrop(device=dali_resize_device, size=crop_shape)
 
 
-        self.cmnp = ops.CropMirrorNormalize(device=dali_resize_device, #"gpu",
+        #self.cmnp = ops.CropMirrorNormalize(device=dali_resize_device, #"gpu",
+        self.cmnp = ops.CropMirrorNormalize(device="gpu",
             output_dtype=types.FLOAT16 if dtype == 'float16' else types.FLOAT,
             output_layout=output_layout, crop=crop_shape, pad_output=pad_output,
             image_type=types.RGB, mean=args.rgb_mean, std=args.rgb_std)
@@ -103,7 +104,8 @@ class HybridValPipe(Pipeline):
                                            host_memory_padding=nvjpeg_padding)
         print(dali_device)
         self.resize = ops.Resize(device=dali_device, resize_shorter=resize_shp) if resize_shp else None
-        self.cmnp = ops.CropMirrorNormalize(device=dali_device,#"gpu",
+        #self.cmnp = ops.CropMirrorNormalize(device=dali_device,#"gpu",
+        self.cmnp = ops.CropMirrorNormalize(device="gpu",
             output_dtype=types.FLOAT16 if dtype == 'float16' else types.FLOAT,
             output_layout=output_layout, crop=crop_shape, pad_output=pad_output,
             image_type=types.RGB, mean=args.rgb_mean, std=args.rgb_std)
@@ -274,7 +276,7 @@ class DALIGenericIterator(object):
                     with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
                         p.schedule_run()
         else:
-            logging.warning("DALI iterator does not support resetting while epoch is not finished. Ignoring...")
+            print("DALI iterator does not support resetting while epoch is not finished. Ignoring...")
 
 
 def get_rec_iter(args, dali_cpu=False, todo=True):

@@ -39,7 +39,7 @@ def _batch_norm(inputs, name=None, trainable=True):
         inputs=inputs,
         axis=1,
         momentum=0.9,#97,
-        epsilon=1e05,#1.001e-5,
+        epsilon=1e-05,#1.001e-5,
         center=True,
         scale=True,
         trainable=trainable,
