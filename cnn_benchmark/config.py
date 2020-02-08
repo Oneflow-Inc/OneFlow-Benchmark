@@ -57,7 +57,8 @@ def get_parser(parser=None):
     parser.add_argument('--data_train_idx', type=str, default='', help='the index of training data')
     parser.add_argument('--data_val', type=str, help='the validation data')
     parser.add_argument('--data_val_idx', type=str, default='', help='the index of validation data')
-    parser.add_argument("--num_examples", type=int, default=1281167, help="imagenet pic number")
+    parser.add_argument("--num_examples", type=int, default=1281167, help="train pic number")
+    parser.add_argument("--num_val_examples", type=int, default=50000, help="validation pic number")
 
     ## snapshot
     parser.add_argument("--model_save_dir", type=str,
