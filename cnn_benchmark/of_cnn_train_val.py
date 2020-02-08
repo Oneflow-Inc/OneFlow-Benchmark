@@ -138,7 +138,6 @@ def train_callback(epoch, step):
             summary.scalar('train_accuracy', accuracy, step)
             main.correct = 0.0
             main.total = 0.0
-            #exit()
     return callback
 
 
@@ -149,7 +148,8 @@ def do_predictions(epoch, predict_step, predictions):
         summary.scalar('top1_accuracy', main.correct/main.total, epoch)
         #summary.scalar('top1_correct', main.correct, epoch)
         #summary.scalar('total_val_images', main.total, epoch)
-        print("epoch {}, top 1 accuracy: {:.6f}".format(epoch, main.correct/main.total))
+        print("epoch {}, top 1 accuracy: {:.6f}, time: {:.2f}".format(epoch,
+              main.correct/main.total, timer.split()))
 
 
 def predict_callback(epoch, predict_step):
@@ -189,13 +189,6 @@ def main():
                 images, labels = batches[0]
                 InferenceNet(images, labels.astype(np.int32)).async_get(predict_callback(epoch, i))
                 #acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
-
-            assert main.total > 0
-            top1_accuracy = main.correct/main.total
-            summary.scalar('top1_accuracy', top1_accuracy, epoch)
-            print("epoch {}, top 1 accuracy: {:.6f}, val_time: {:.2f}".format(epoch, top1_accuracy,
-                  time.time()-tic))
-
 
     snapshot.save('epoch_{}'.format(epoch+1))
     summary.save()
