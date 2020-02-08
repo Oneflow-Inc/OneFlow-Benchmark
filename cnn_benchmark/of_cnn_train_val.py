@@ -30,6 +30,7 @@ epoch_size = math.ceil(args.num_examples / train_batch_size)
 num_train_batches = epoch_size * args.num_epochs
 num_warmup_batches = epoch_size * args.warmup_epochs
 decay_batches = num_train_batches - num_warmup_batches
+num_val_steps = args.num_val_examples / val_batch_size
 
 summary = Summary(args.log_dir, args)
 timer = StopWatch()
@@ -143,7 +144,7 @@ def train_callback(epoch, step):
 
 def do_predictions(epoch, predict_step, predictions):
     acc_acc(predict_step, predictions)
-    if predict_step + 1 == args.val_step_num:
+    if predict_step + 1 == num_val_steps:
         assert main.total > 0
         summary.scalar('top1_accuracy', main.correct/main.total, epoch)
         #summary.scalar('top1_correct', main.correct, epoch)
@@ -166,7 +167,7 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    train_data_iter, val_data_iter = get_rec_iter(args, True)
+    train_data_iter, val_data_iter = get_rec_iter(args, train_batch_size, val_batch_size, True)
     timer.start()
     for epoch in range(args.num_epochs):
         tic = time.time()
@@ -186,8 +187,8 @@ def main():
             for i, batches in enumerate(val_data_iter):
                 assert len(batches) == 1
                 images, labels = batches[0]
-                #InferenceNet(images, labels.astype(np.int32)).async_get(predict_callback(epoch, i))
-                acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
+                InferenceNet(images, labels.astype(np.int32)).async_get(predict_callback(epoch, i))
+                #acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
 
             assert main.total > 0
             top1_accuracy = main.correct/main.total

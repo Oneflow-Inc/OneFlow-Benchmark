@@ -54,7 +54,6 @@ class HybridTrainPipe(Pipeline):
         dali_device = "cpu" if dali_cpu else "mixed"
         dali_resize_device = "cpu" if dali_cpu else "gpu"
 
-        print(dali_device, dali_resize_device)
         if args.dali_fuse_decoder:
             self.decode = ops.ImageDecoderRandomCrop(device=dali_device, output_type=types.RGB,
                                                      device_memory_padding=nvjpeg_padding,
@@ -68,8 +67,8 @@ class HybridTrainPipe(Pipeline):
             self.resize = ops.RandomResizedCrop(device=dali_resize_device, size=crop_shape)
 
 
-        #self.cmnp = ops.CropMirrorNormalize(device=dali_resize_device, #"gpu",
-        self.cmnp = ops.CropMirrorNormalize(device="gpu",
+        #self.cmnp = ops.CropMirrorNormalize(device="gpu",
+        self.cmnp = ops.CropMirrorNormalize(device=dali_resize_device, #"gpu",
             output_dtype=types.FLOAT16 if dtype == 'float16' else types.FLOAT,
             output_layout=output_layout, crop=crop_shape, pad_output=pad_output,
             image_type=types.RGB, mean=args.rgb_mean, std=args.rgb_std)
@@ -81,7 +80,7 @@ class HybridTrainPipe(Pipeline):
 
         images = self.decode(self.jpegs)
         images = self.resize(images)
-        output = self.cmnp(images.gpu(), mirror=rng)
+        output = self.cmnp(images, mirror=rng)
         return [output, self.labels]
 
 
@@ -102,10 +101,9 @@ class HybridValPipe(Pipeline):
             self.decode = ops.ImageDecoder(device="mixed", output_type=types.RGB,
                                            device_memory_padding=nvjpeg_padding,
                                            host_memory_padding=nvjpeg_padding)
-        print(dali_device)
         self.resize = ops.Resize(device=dali_device, resize_shorter=resize_shp) if resize_shp else None
-        #self.cmnp = ops.CropMirrorNormalize(device=dali_device,#"gpu",
-        self.cmnp = ops.CropMirrorNormalize(device="gpu",
+        #self.cmnp = ops.CropMirrorNormalize(device="gpu",
+        self.cmnp = ops.CropMirrorNormalize(device=dali_device,#"gpu",
             output_dtype=types.FLOAT16 if dtype == 'float16' else types.FLOAT,
             output_layout=output_layout, crop=crop_shape, pad_output=pad_output,
             image_type=types.RGB, mean=args.rgb_mean, std=args.rgb_std)
@@ -115,7 +113,7 @@ class HybridValPipe(Pipeline):
         images = self.decode(self.jpegs)
         if self.resize:
             images = self.resize(images)
-        output = self.cmnp(images.gpu())
+        output = self.cmnp(images)
         return [output, self.labels]
 
 
@@ -279,7 +277,7 @@ class DALIGenericIterator(object):
             print("DALI iterator does not support resetting while epoch is not finished. Ignoring...")
 
 
-def get_rec_iter(args, dali_cpu=False, todo=True):
+def get_rec_iter(args, train_batch_size, val_batch_size, dali_cpu=False, todo=True):
     # TBD dali_cpu only not work
     if todo:
         gpus = [0]
@@ -294,11 +292,6 @@ def get_rec_iter(args, dali_cpu=False, todo=True):
 
     # the input_layout w.r.t. the model is the output_layout of the image pipeline
     output_layout = types.NHWC if args.input_layout == 'NHWC' else types.NCHW
-
-    total_device_num = args.num_nodes * args.gpu_num_per_node
-    train_batch_size = total_device_num * args.batch_size_per_device
-    val_batch_size = total_device_num * args.val_batch_size_per_device
-    print(train_batch_size, val_batch_size)
 
     trainpipes = [HybridTrainPipe(args           = args,
                                   batch_size     = train_batch_size,
@@ -355,7 +348,7 @@ if __name__ == '__main__':
     parser = configs.get_parser()
     args = parser.parse_args()
     print_args(args)
-    train_data_iter, val_data_iter = get_rec_iter(args, True)
+    train_data_iter, val_data_iter = get_rec_iter(args, 256, 500, True)
     for epoch in range(args.num_epochs):
         tic = time.time()
         print('Starting epoch {}'.format(epoch))
