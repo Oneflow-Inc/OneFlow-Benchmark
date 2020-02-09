@@ -156,14 +156,6 @@ def predict_callback(epoch, predict_step):
         do_predictions(epoch, predict_step, predictions)
     return callback
 
-def get_data(batches):
-    images = []
-    labels = []
-    for batch in batches:
-        images.append(batch[0])
-        labels.append(batch[1])
-    return np.concatenate(images), np.concatenate(labels)
-
 
 def main():
     nodes_init(args)
@@ -180,8 +172,9 @@ def main():
         print('Starting epoch {} at {:.2f}'.format(epoch, tic))
         train_data_iter.reset()
         for i, batches in enumerate(train_data_iter):
-            images, labels = get_data(batches)
-            TrainNet(images, labels.astype(np.int32)).async_get(train_callback(epoch, i))
+            images, labels = batches
+            TrainNet(images, labels).async_get(train_callback(epoch, i))
+            #TrainNet(images, labels.astype(np.int32)).async_get(train_callback(epoch, i))
         #    if i > 30:#debug
         #        break
         #break
@@ -191,7 +184,7 @@ def main():
             val_data_iter.reset()
             for i, batches in enumerate(val_data_iter):
                 images, labels = get_data(batches)
-                InferenceNet(images, labels.astype(np.int32)).async_get(predict_callback(epoch, i))
+                InferenceNet(images, labels).async_get(predict_callback(epoch, i))
                 #acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
 
     snapshot.save('epoch_{}'.format(epoch+1))
