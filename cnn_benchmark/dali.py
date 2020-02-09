@@ -190,7 +190,8 @@ class DALIGenericIterator(object):
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
                 p.build()
         # Use double-buffering of data batches
-        self._data_batches = [[None] for i in range(self._num_gpus)]
+        # self._data_batches = [[None] for i in range(self._num_gpus)]
+        self._data_batches = [None, None]
         self._counter = 0
         self._current_data_batch = 0
 
@@ -209,16 +210,15 @@ class DALIGenericIterator(object):
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
                 outputs.append(p.share_outputs())
+        images, labels = [], []
+        tensor2np = lambda t: t.as_cpu().as_array() if type(t) is TensorListGPU else t.as_array()
         for gpu_id, output in enumerate(outputs):
-            images_labels = []
-            for t in output:
-                if type(t) is TensorListGPU:
-                    images_labels.append(t.as_cpu().as_array())
-                elif type(t) is TensorListCPU:
-                    images_labels.append(t.as_array())
-                else:
-                    raise
-            self._data_batches[gpu_id][self._current_data_batch] = images_labels
+            assert(len(output)) == 2
+            images.append(tensor2np(output[0]))
+            labels.append(tensor2np(output[1]).astype(np.int32))
+
+        self._data_batches[self._current_data_batch] = [np.concatenate(images),
+                                                        np.concatenate(labels)]
 
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
@@ -246,7 +246,7 @@ class DALIGenericIterator(object):
             for db in self._data_batches:
                 db[copy_db_index].pad = 0
         '''
-        return [db[copy_db_index] for db in self._data_batches]
+        return self._data_batches[copy_db_index]
 
     def next(self):
         """
@@ -338,13 +338,7 @@ def get_rec_iter(args, dali_cpu=False, concat=True):
 
     return dali_train_iter, dali_val_iter
 
-def get_data(batches):
-    images = []
-    labels = []
-    for batch in batches:
-        images.append(batch[0])
-        labels.append(batch[1])
-    return np.concatenate(images), np.concatenate(labels)
+
 if __name__ == '__main__':
     import config as configs
     parser = configs.get_parser()
@@ -356,8 +350,8 @@ if __name__ == '__main__':
         print('Starting epoch {}'.format(epoch))
         train_data_iter.reset()
         for i, batches in enumerate(train_data_iter):
-            print(type(batches), type(batches[0]), type(batches[0][0]))
-            images, labels = get_data(batches)
+            print(type(batches), type(batches[0]), type(batches[1]))
+            images, labels = batches
             print(images.shape)
             print(labels.shape)
             #print(batches[:][1])
