@@ -67,8 +67,7 @@ class HybridTrainPipe(Pipeline):
             self.resize = ops.RandomResizedCrop(device=dali_resize_device, size=crop_shape)
 
 
-        #self.cmnp = ops.CropMirrorNormalize(device="gpu",
-        self.cmnp = ops.CropMirrorNormalize(device=dali_resize_device, #"gpu",
+        self.cmnp = ops.CropMirrorNormalize(device=dali_resize_device,
             output_dtype=types.FLOAT16 if dtype == 'float16' else types.FLOAT,
             output_layout=output_layout, crop=crop_shape, pad_output=pad_output,
             image_type=types.RGB, mean=args.rgb_mean, std=args.rgb_std)
@@ -102,8 +101,7 @@ class HybridValPipe(Pipeline):
                                            device_memory_padding=nvjpeg_padding,
                                            host_memory_padding=nvjpeg_padding)
         self.resize = ops.Resize(device=dali_device, resize_shorter=resize_shp) if resize_shp else None
-        #self.cmnp = ops.CropMirrorNormalize(device="gpu",
-        self.cmnp = ops.CropMirrorNormalize(device=dali_device,#"gpu",
+        self.cmnp = ops.CropMirrorNormalize(device=dali_device,
             output_dtype=types.FLOAT16 if dtype == 'float16' else types.FLOAT,
             output_layout=output_layout, crop=crop_shape, pad_output=pad_output,
             image_type=types.RGB, mean=args.rgb_mean, std=args.rgb_std)
@@ -219,6 +217,7 @@ class DALIGenericIterator(object):
 
         self._data_batches[self._current_data_batch] = [np.concatenate(images),
                                                         np.concatenate(labels)]
+        #self._data_batches[self._current_data_batch] = [images, labels]
 
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
@@ -347,18 +346,14 @@ if __name__ == '__main__':
     train_data_iter, val_data_iter = get_rec_iter(args, True)
     for epoch in range(args.num_epochs):
         tic = time.time()
+        last_time = time.time()
         print('Starting epoch {}'.format(epoch))
         train_data_iter.reset()
         for i, batches in enumerate(train_data_iter):
-            print(type(batches), type(batches[0]), type(batches[1]))
             images, labels = batches
-            print(images.shape)
-            print(labels.shape)
-            #print(batches[:][1])
-            #, batches[0][1].shape, len(batches))
-            #print(np.concatenate(batches[:][0], axis=0).shape)
-            break
-            pass
-            #print(batches[0][1].reshape((-1)))
-        print(time.time() - tic)
-        break
+            if i % args.loss_print_every_n_iter == 0:
+                print(args.loss_print_every_n_iter * 256 / (time.time() - last_time))
+                last_time = time.time()
+            #print(images.shape)
+        epoch_time = time.time() - tic
+        print('epoch mena images/sec', 1281167 / epoch_time, epoch_time)
