@@ -215,9 +215,9 @@ class DALIGenericIterator(object):
             images.append(tensor2np(output[0]))
             labels.append(tensor2np(output[1]).astype(np.int32))
 
-        self._data_batches[self._current_data_batch] = [np.concatenate(images),
-                                                        np.concatenate(labels)]
-        #self._data_batches[self._current_data_batch] = [images, labels]
+        #self._data_batches[self._current_data_batch] = [np.concatenate(images),
+        #                                                np.concatenate(labels)]
+        self._data_batches[self._current_data_batch] = [images, labels]
 
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):

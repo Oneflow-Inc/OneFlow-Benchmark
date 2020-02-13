@@ -62,7 +62,7 @@ flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
 def get_train_config():
     train_config = flow.function_config()
-    train_config.default_distribute_strategy(flow.distribute.consistent_strategy())
+    #train_config.default_distribute_strategy(flow.distribute.consistent_strategy())
     train_config.default_data_type(flow.float)
     train_config.train.primary_lr(args.learning_rate)
     train_config.disable_all_reduce_sequence(True)
@@ -85,9 +85,12 @@ def get_train_config():
     return train_config
 
 
+image_shape = (args.batch_size_per_device, H, W, C)
+label_shape = (args.batch_size_per_device, 1)
 @flow.function(get_train_config())
-def TrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.float),
-             labels=flow.FixedTensorDef((train_batch_size, 1), dtype=flow.int32)):
+def TrainNet(image_and_label=[flow.MirroredTensorDef(image_shape, dtype=flow.float),
+             flow.MirroredTensorDef(label_shape, dtype=flow.int32)]):
+    images, labels = image_and_label
     logits = model_dict[args.model](images)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
     flow.losses.add_loss(loss)
@@ -98,14 +101,17 @@ def TrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.
 
 def get_val_config():
     val_config = flow.function_config()
-    val_config.default_distribute_strategy(flow.distribute.consistent_strategy())
+    #val_config.default_distribute_strategy(flow.distribute.consistent_strategy())
     val_config.default_data_type(flow.float)
     return val_config
 
 
+image_shape = (args.val_batch_size_per_device, H, W, C)
+label_shape = (args.val_batch_size_per_device, 1)
 @flow.function(get_val_config())
-def InferenceNet(images=flow.FixedTensorDef((val_batch_size, H, W, C), dtype=flow.float),
-                 labels=flow.FixedTensorDef((val_batch_size, 1), dtype=flow.int32)):
+def InferenceNet(image_and_label=[flow.MirroredTensorDef(image_shape, dtype=flow.float),
+                 flow.MirroredTensorDef(label_shape, dtype=flow.int32)]):
+    images, labels = image_and_label
     logits = model_dict[args.model](images)
     softmax = flow.nn.softmax(logits)
     outputs = {"softmax":softmax, "labels": labels}
@@ -172,9 +178,7 @@ def main():
         print('Starting epoch {} at {:.2f}'.format(epoch, tic))
         train_data_iter.reset()
         for i, batches in enumerate(train_data_iter):
-            images, labels = batches
-            TrainNet(images, labels).async_get(train_callback(epoch, i))
-            #TrainNet(images, labels.astype(np.int32)).async_get(train_callback(epoch, i))
+            TrainNet(batches).async_get(train_callback(epoch, i))
         #    if i > 30:#debug
         #        break
         #break
@@ -183,12 +187,11 @@ def main():
             tic = time.time()
             val_data_iter.reset()
             for i, batches in enumerate(val_data_iter):
-                images, labels = get_data(batches)
-                InferenceNet(images, labels).async_get(predict_callback(epoch, i))
+                InferenceNet(batches).async_get(predict_callback(epoch, i))
                 #acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
 
-    snapshot.save('epoch_{}'.format(epoch+1))
-    summary.save()
+        summary.save()
+        snapshot.save('epoch_{}'.format(epoch+1))
 
 
 if __name__ == "__main__":
