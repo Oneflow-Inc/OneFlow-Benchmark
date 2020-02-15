@@ -78,7 +78,7 @@ def get_train_config():
 
     train_config.train.model_update_conf(optimizer_dict[args.optimizer])
 
-    if args.weight_l2:
+    if args.weight_l2 and 0:
         train_config.train.weight_l2(args.weight_l2)
 
     train_config.enable_inplace(True)
