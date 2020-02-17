@@ -1,4 +1,6 @@
-## Inference
+[TOC]
+
+# Inference
 
 测试平台：Nvidia GTX2080Ti单卡.  
 CUDA版本：10.0  
@@ -13,13 +15,13 @@ Oneflow:
 branch: of_xrt_tensorrt   
 commit: 726c3a12b9d97b57f9fb7e3d212b63564e20e755   
 
-### CV
+## CV
 
-#### Speed
+### Speed
 
 输入图片大小为224 (inception-v3为299)，预热5 batches，平均吞吐（img/s）为500个batches的平均值。
 
-1. batch size为8
+#### 1. batch size为8
 
 >| -            | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) | TensorRT official(fp32) | TensorRT official(fp16) | TensorRT official(int8) |
 >| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- | ----------------------- | ----------------------- | ----------------------- |
@@ -40,17 +42,18 @@ commit: 726c3a12b9d97b57f9fb7e3d212b63564e20e755
   2. oneflow tensorrt没有支持batch normalization，导致整图被分割成多个tensorrt子图。如果oneflow tensorrt支持batch normalization，将减少4ms左右。但同时发现支持了batch normalization后，batch之间的空隙从几乎0ms增加到了5.32ms，导致即使支持了batch normalization后，吞吐并没有明显的变化。
   3. 总结：如果对1、2优化后，理论上一个batch的耗时能达到 (10 - 4 =) 6ms。
 
-- Update 2019.12.24：所有source op都通过device tick代理到cpu tick，减少event次数。
+- Update 2019.12.24: 所有source op都通过device tick代理到cpu tick，减少event次数。
+- Update 2020.2.17: 增加int8 benchmark。
 
 >| -            | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) | TensorRT official(fp32) | TensorRT official(fp16) | TensorRT official(int8) |
 >| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- | ----------------------- | ----------------------- | ----------------------- |
->| alexnet      | 2692          | 2022          | 2679           | 4060           |                |                         |                         |                         |
->| vgg16        | 398           | 346           | 425            | 1200           |                | 470                     | 1629                    |                         |
->| resnet50     | 735           | 570           | 945            | 2120           |                | 1025                    | 2500                    |                         |
->| inception-v3 | 538           | 510           | 572            | 1356           |                |                         |                         |                         |
+>| alexnet      | 2692          | 2022          | 2679           | 4060           | 5896           |                         |                         |                         |
+>| vgg16        | 398           | 346           | 425            | 1200           | 2054           | 470                     | 1629                    |                         |
+>| resnet50     | 735           | 570           | 945            | 2120           | 3512           | 1025                    | 2500                    |                         |
+>| inception-v3 | 538           | 510           | 572            | 1356           | 2094           |                         |                         |                         |
 
 
-2. batch size为50
+#### 2. batch size为50
 
 >| -            | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) | TensorRT official(fp32) | TensorRT official(fp16) | TensorRT official(int8) |
 >| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- | ----------------------- | ----------------------- | ----------------------- |
@@ -60,22 +63,25 @@ commit: 726c3a12b9d97b57f9fb7e3d212b63564e20e755
 >| inception-v3 | 544           | 531           | 717            | 1839           |                |                         |                         |                         |
 
 - Update 2019.12.24：所有source op都通过device tick代理到cpu tick，减少event次数。
+- Update 2020.2.17: 增加int8 benchmark。
 
 >| -            | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) | TensorRT official(fp32) | TensorRT official(fp16) | TensorRT official(int8) |
 >| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- | ----------------------- | ----------------------- | ----------------------- |
->| alexnet      | 6568          | 3341          | 5030           | 9076           |                |                         |                         |                         |
->| vgg16        | 528           | 498           | 459            | 1638           |                | 498                     | 1907                    |                         |
->| resnet50     | 888           | 685           | 1262           | 3989           |                | 1302                    | 3843                    |                         |
->| inception-v3 | 698           | 589           | 797            | 2363           |                |                         |                         |                         |
+>| alexnet      | 6568          | 3341          | 5030           | 9076           | 14378          |                         |                         |                         |
+>| vgg16        | 528           | 498           | 459            | 1638           | 2817           | 498                     | 1907                    |                         |
+>| resnet50     | 888           | 685           | 1262           | 3989           | 8239           | 1302                    | 3843                    |                         |
+>| inception-v3 | 698           | 589           | 797            | 2363           | 4022           |                         |                         |                         |
 
-#### Precision
+### Precision
 
 总共5w张图片, 统计Top1 accuracy和相对oneflow fp32的分类误差数量。
 
+- Update 2020.2.17: 增加int8 benchmark。
+
 >|  -           | Oneflow(fp32) | Oneflow(fp16) | TensorRT(fp32) | TensorRT(fp16) | TensorRT(int8) |
 >| ------------ | ------------- | ------------- | -------------- | -------------- | -------------- |
->| vgg16        | 0.495 / 0     | 0.495 / 61    | 0.495 / 0      | 0.495 / 101    |                |
+>| vgg16        | 0.495 / 0     | 0.495 / 61    | 0.495 / 0      | 0.495 / 101    | 0.493          |
 >| alexnet      |               |               |                |                |                |
->| resnet50     | 0.613 / 0     | 0.613 / 59    | 0.613 / 0      | 0.613 / 130    |                |
+>| resnet50     | 0.613 / 0     | 0.613 / 59    | 0.613 / 0      | 0.613 / 130    | 0.614          |
 >| inception-v3 |               |               |                |                |                |
 
