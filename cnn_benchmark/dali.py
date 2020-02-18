@@ -14,13 +14,14 @@
 
 import numpy as np
 import time
+import ctypes
 #import logging
 import warnings
 from nvidia import dali
 from nvidia.dali.pipeline import Pipeline
 import nvidia.dali.ops as ops
 import nvidia.dali.types as types
-from nvidia.dali.backend import TensorListCPU, TensorListGPU
+from nvidia.dali.backend import TensorGPU
 
 
 def add_dali_args(parser):
@@ -115,6 +116,27 @@ class HybridValPipe(Pipeline):
         return [output, self.labels]
 
 
+def feed_ndarray(dali_tensor, arr):
+    """
+    Copy contents of DALI tensor to numpy's NDArray.
+
+    Parameters
+    ----------
+    `dali_tensor` : nvidia.dali.backend.TensorCPU or nvidia.dali.backend.TensorGPU
+                    Tensor from which to copy
+    `arr` : numpy.NDArray
+            Destination of the copy
+    """
+    # Wait until arr is no longer used by the engine
+    assert dali_tensor.shape() == list(arr.shape), \
+            ("Shapes do not match: DALI tensor has shape {0}"
+            ", but NDArray has shape {1}".format(dali_tensor.shape(), list(arr.shape)))
+    # Get CTypes void pointer to the underlying memory held by arr
+    c_type_pointer = ctypes.c_void_p(arr.ctypes.data)
+    # Copy data from DALI tensor to ptr
+    dali_tensor.copy_to_external(c_type_pointer)
+
+
 class DALIGenericIterator(object):
     """
     General DALI iterator for Numpy. It can return any number of
@@ -141,7 +163,7 @@ class DALIGenericIterator(object):
                  copying them to the ndarray.
     dynamic_shape: bool, optional, default = False
                  Whether the shape of the output of the DALI pipeline can
-                 change during execution. If True, the mxnet.ndarray will be resized accordingly
+                 change during execution. If True, the ndarray will be resized accordingly
                  if the shape of DALI returned tensors changes during execution.
                  If False, the iterator will fail in case of change.
     last_batch_padded : bool, optional, default = False
@@ -165,8 +187,9 @@ class DALIGenericIterator(object):
     def __init__(self,
                  pipelines,
                  size,
+                 output_map=['data', 'label'],
                  data_layout='NCHW',
-                 fill_last_batch=True,
+                 fill_last_batch=False,
                  auto_reset=False,
                  squeeze_labels=True,
                  dynamic_shape=False,
@@ -188,17 +211,25 @@ class DALIGenericIterator(object):
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
                 p.build()
         # Use double-buffering of data batches
-        # self._data_batches = [[None] for i in range(self._num_gpus)]
-        self._data_batches = [None, None]
+        self._data_batches = [[None] for i in range(self._num_gpus)]
         self._counter = 0
         self._current_data_batch = 0
+        self.output_map = output_map
 
+        # We need data about the batches (like shape information),
+        # so we need to run a single batch as part of setup to get that info
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
                 p.schedule_run()
+        self._first_batch = None
+        self._first_batch = self.next()
 
 
     def __next__(self):
+        if self._first_batch is not None:
+            batch = self._first_batch
+            self._first_batch = None
+            return batch
         if self._counter >= self._size:
             if self._auto_reset:
                 self.reset()
@@ -208,16 +239,40 @@ class DALIGenericIterator(object):
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
                 outputs.append(p.share_outputs())
-        images, labels = [], []
-        tensor2np = lambda t: t.as_cpu().as_array() if type(t) is TensorListGPU else t.as_array()
-        for gpu_id, output in enumerate(outputs):
-            assert(len(output)) == 2
-            images.append(tensor2np(output[0]))
-            labels.append(tensor2np(output[1]).astype(np.int32))
+        for i in range(self._num_gpus):
+            # MXNet wants batches with clear distinction between
+            # data and label entries, so segregate outputs into
+            # 2 categories
+            # Change DALI TensorLists into Tensors
+            category_tensors = dict()
+            category_info = dict()
+            for j, out in enumerate(outputs[i]):
+                x = out.as_tensor()
+                category_tensors[self.output_map[j]] = x#.as_tensor()
+                if self._squeeze_labels and self.output_map[j]=='label':
+                    category_tensors[self.output_map[j]].squeeze()
+                category_info[self.output_map[j]] = (x.shape(), np.dtype(x.dtype()))
 
-        #self._data_batches[self._current_data_batch] = [np.concatenate(images),
-        #                                                np.concatenate(labels)]
-        self._data_batches[self._current_data_batch] = [images, labels]
+            # If we did not yet allocate memory for that batch, do it now
+            if self._data_batches[i][self._current_data_batch] is None:
+                for category in self.output_map:
+                    t = category_tensors[category]
+                    assert type(t) is not TensorGPU, "CPU data only"#TODO
+                d = []
+                for (shape, dtype) in category_info.values():
+                    d.append(np.zeros(shape, dtype = dtype))
+
+                self._data_batches[i][self._current_data_batch] = d
+
+            d = self._data_batches[i][self._current_data_batch]
+            # Copy data from DALI Tensors to NDArrays
+            if self._dynamic_shape:
+                for j, (shape, dtype) in enumerate(category_info):
+                    if list(d[j].shape) != shape:
+                        d[j] = np.zeros(shape, dtype = dtype)
+
+            for j, d_arr in enumerate(d):
+                feed_ndarray(category_tensors[self.output_map[j]], d_arr)
 
         for p in self._pipes:
             with p._check_api_type_scope(types.PipelineAPIType.ITERATOR):
@@ -229,23 +284,27 @@ class DALIGenericIterator(object):
         self._current_data_batch = (self._current_data_batch + 1) % 1
         self._counter += self._num_gpus * self.batch_size
 
-        # padding the last batch
-        '''
-        if (not self._fill_last_batch) and (self._counter > self._size):
-                # this is the last batch and we need to pad
-                overflow = self._counter - self._size
-                overflow_per_device = overflow // self._num_gpus
-                difference = self._num_gpus - (overflow % self._num_gpus)
-                for i in range(self._num_gpus):
-                    if i < difference:
-                        self._data_batches[i][copy_db_index].pad = overflow_per_device
-                    else:
-                        self._data_batches[i][copy_db_index].pad = overflow_per_device + 1
-        else:
-            for db in self._data_batches:
-                db[copy_db_index].pad = 0
-        '''
-        return self._data_batches[copy_db_index]
+        assert not self._fill_last_batch
+        ## padding the last batch
+        #if (not self._fill_last_batch) and (self._counter > self._size):
+        #        # this is the last batch and we need to pad
+        #        overflow = self._counter - self._size
+        #        overflow_per_device = overflow // self._num_gpus
+        #        difference = self._num_gpus - (overflow % self._num_gpus)
+        #        for i in range(self._num_gpus):
+        #            if i < difference:
+        #                self._data_batches[i][copy_db_index].pad = overflow_per_device
+        #            else:
+        #                self._data_batches[i][copy_db_index].pad = overflow_per_device + 1
+        #else:
+        #    for db in self._data_batches:
+        #        db[copy_db_index].pad = 0
+
+        #_data_batches[gpu_id][_current_data_batch][images, labels]
+        images = [db[copy_db_index][0] for db in self._data_batches]
+        labels = [db[copy_db_index][1] for db in self._data_batches]
+        return images, labels
+        #return [db[copy_db_index] for db in self._data_batches]
 
     def next(self):
         """
