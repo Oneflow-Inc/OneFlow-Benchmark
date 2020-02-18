@@ -88,9 +88,8 @@ def get_train_config():
 image_shape = (args.batch_size_per_device, H, W, C)
 label_shape = (args.batch_size_per_device, 1)
 @flow.function(get_train_config())
-def TrainNet(image_and_label=[flow.MirroredTensorDef(image_shape, dtype=flow.float),
-             flow.MirroredTensorDef(label_shape, dtype=flow.int32)]):
-    images, labels = image_and_label
+def TrainNet(images=flow.MirroredTensorDef(image_shape, dtype=flow.float),
+             labels=flow.MirroredTensorDef(label_shape, dtype=flow.int32)):
     logits = model_dict[args.model](images)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
     flow.losses.add_loss(loss)
@@ -109,9 +108,8 @@ def get_val_config():
 image_shape = (args.val_batch_size_per_device, H, W, C)
 label_shape = (args.val_batch_size_per_device, 1)
 @flow.function(get_val_config())
-def InferenceNet(image_and_label=[flow.MirroredTensorDef(image_shape, dtype=flow.float),
-                 flow.MirroredTensorDef(label_shape, dtype=flow.int32)]):
-    images, labels = image_and_label
+def InferenceNet(images=flow.MirroredTensorDef(image_shape, dtype=flow.float),
+                 labels=flow.MirroredTensorDef(label_shape, dtype=flow.int32)):
     logits = model_dict[args.model](images)
     softmax = flow.nn.softmax(logits)
     outputs = {"softmax":softmax, "labels": labels}
@@ -178,6 +176,7 @@ def main():
         print('Starting epoch {} at {:.2f}'.format(epoch, tic))
         train_data_iter.reset()
         for i, batches in enumerate(train_data_iter):
+            images, labels = batches
             TrainNet(batches).async_get(train_callback(epoch, i))
         #    if i > 30:#debug
         #        break
@@ -187,7 +186,8 @@ def main():
             tic = time.time()
             val_data_iter.reset()
             for i, batches in enumerate(val_data_iter):
-                InferenceNet(batches).async_get(predict_callback(epoch, i))
+                images, labels = batches
+                InferenceNet(images, labels).async_get(predict_callback(epoch, i))
                 #acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
 
         summary.save()
