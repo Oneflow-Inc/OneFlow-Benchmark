@@ -2,8 +2,9 @@ rm -rf core.*
 #gdb --args \
 DATA_ROOT=/mnt/13_nfs/xuan/ImageNet/mxnet
 #DATA_ROOT=/dataset/imagenet-mxnet
+  #python3 cnn_benchmark/of_cnn_train_val.py \
 #nvprof -f -o resnet.nvvp \
-  python3 cnn_benchmark/of_cnn_train_val.py \
+  python3 cnn_benchmark/of_cnn_train_val_consistent.py \
     --data_train=$DATA_ROOT/train.rec \
     --data_train_idx=$DATA_ROOT/train.idx \
     --data_val=$DATA_ROOT/val.rec \
