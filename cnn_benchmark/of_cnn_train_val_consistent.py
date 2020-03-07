@@ -90,7 +90,7 @@ def TrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.
              labels=flow.FixedTensorDef((train_batch_size, ), dtype=flow.int32)):
     logits = model_dict[args.model](images)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
-    loss = flow.math.reduce_mean(loss)
+    #loss = flow.math.reduce_mean(loss)
     flow.losses.add_loss(loss)
     softmax = flow.nn.softmax(logits)
     outputs = {"loss": loss, "softmax":softmax, "labels": labels}
