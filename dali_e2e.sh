@@ -4,7 +4,7 @@ DATA_ROOT=/mnt/13_nfs/xuan/ImageNet/mxnet
   #python3 cnn_benchmark/of_cnn_train_val.py \
 #gdb --args \
 #nvprof -f -o resnet.nvvp \
-  python3 cnn_e2e/of_cnn_train_val.py \
+  python3 cnn_e2e/dali_cnn_train_val.py \
     --data_train=$DATA_ROOT/train.rec \
     --data_train_idx=$DATA_ROOT/train.idx \
     --data_val=$DATA_ROOT/val.rec \
