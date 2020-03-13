@@ -13,7 +13,8 @@ args = parser.parse_args()
 configs.print_args(args)
 
 from util import Snapshot, Summary, InitNodes, StopWatch
-from dali_util import get_rec_iter
+#from dali_util import get_rec_iter
+import ofrecord_util
 from job_function_util import get_train_config, get_val_config
 import oneflow as flow
 #import vgg_model
@@ -25,6 +26,7 @@ total_device_num = args.num_nodes * args.gpu_num_per_node
 train_batch_size = total_device_num * args.batch_size_per_device
 val_batch_size = total_device_num * args.val_batch_size_per_device
 (C, H, W) = args.image_shape
+epoch_size = math.ceil(args.num_examples / train_batch_size)
 num_val_steps = args.num_val_examples / val_batch_size
 
 summary = Summary(args.log_dir, args)
@@ -41,8 +43,15 @@ flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
 
 @flow.function(get_train_config(args))
-def TrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.float),
-             labels=flow.FixedTensorDef((train_batch_size, ), dtype=flow.int32)):
+def TrainNet():
+    if args.train_data_dir:
+        assert os.path.exists(args.train_data_dir)
+        print("Loading data from {}".format(args.train_data_dir))
+        (labels, images) = ofrecord_util.load_imagenet_for_training(args)
+    else:
+        print("Loading synthetic data.")
+        (labels, images) = ofrecord_util.load_synthetic(args)
+
     logits = model_dict[args.model](images)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
     #loss = flow.math.reduce_mean(loss)
@@ -53,8 +62,15 @@ def TrainNet(images=flow.FixedTensorDef((train_batch_size, H, W, C), dtype=flow.
 
 
 @flow.function(get_val_config(args))
-def InferenceNet(images=flow.FixedTensorDef((val_batch_size, H, W, C), dtype=flow.float),
-                 labels=flow.FixedTensorDef((val_batch_size, ), dtype=flow.int32)):
+def InferenceNet():
+    if args.val_data_dir:
+        assert os.path.exists(args.val_data_dir)
+        print("Loading data from {}".format(args.val_data_dir))
+        (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
+    else:
+        print("Loading synthetic data.")
+        (labels, images) = ofrecord_util.load_synthetic(args)
+
     logits = model_dict[args.model](images)
     softmax = flow.nn.softmax(logits)
     outputs = {"softmax":softmax, "labels": labels}
@@ -114,26 +130,20 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    train_data_iter, val_data_iter = get_rec_iter(args, True)
     timer.start()
     for epoch in range(args.num_epochs):
         tic = time.time()
         print('Starting epoch {} at {:.2f}'.format(epoch, tic))
-        train_data_iter.reset()
-        for i, batches in enumerate(train_data_iter):
-            images, labels = batches
-            TrainNet(images, labels).async_get(train_callback(epoch, i))
+        for i in range(epoch_size):
+            TrainNet().async_get(train_callback(epoch, i))
         #    if i > 30:#debug
         #        break
         #break
         print('epoch {} training time: {:.2f}'.format(epoch, time.time() - tic))
-        if args.data_val:
+        if args.val_data_dir:
             tic = time.time()
-            val_data_iter.reset()
-            for i, batches in enumerate(val_data_iter):
-                images, labels = batches
-                InferenceNet(images, labels).async_get(predict_callback(epoch, i))
-                #acc_acc(i, InferenceNet(images, labels.astype(np.int32)).get())
+            for i in range(num_val_steps):
+                InferenceNet().async_get(predict_callback(epoch, i))
 
         summary.save()
         snapshot.save('epoch_{}'.format(epoch+1))
