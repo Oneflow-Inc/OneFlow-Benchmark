@@ -22,6 +22,7 @@ def get_parser(parser=None):
         parser = argparse.ArgumentParser("flags for cnn benchmark")
 
     parser.add_argument("--dtype", type=str, default='float32', help="float16 float32")
+    parser.add_argument("--dataloader", type=str, default='oneflow', help="oneflow or dali")
 
     # resouce
     parser.add_argument("--gpu_num_per_node", type=int, default=1)

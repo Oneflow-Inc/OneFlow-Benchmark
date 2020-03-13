@@ -50,12 +50,12 @@ def load_imagenet_for_training(args):
                          codec)
 
 
-def load_imagenet_for_validation(data_dir, image_size, batch_size, data_part_num):
+def load_imagenet_for_validation(args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     val_batch_size = total_device_num * args.val_batch_size_per_device
     codec=flow.data.ImageCodec(
         [
-            flow.data.ImageResizePreprocessor(image_size, image_size),
+            flow.data.ImageResizePreprocessor(args.image_size, args.image_size),
         ]
     )
     return load_imagenet(args, val_batch_size, args.val_data_dir, args.val_data_part_num, codec)
