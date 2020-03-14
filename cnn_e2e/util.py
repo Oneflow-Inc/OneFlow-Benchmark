@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import time
+import numpy as np
 import pandas as pd
 from datetime import datetime
 import oneflow as flow
@@ -78,4 +79,64 @@ class StopWatch:
 
     def duration(self):
         return self.stop_time - self.start_time
+
+
+def match_top_k(predictions, labels, top_k=1):
+    max_k_preds = predictions.argsort(axis=1)[:, -top_k:][:, ::-1]
+    match_array = np.logical_or.reduce(max_k_preds==labels.reshape((-1, 1)), axis=1)
+    num_matched = match_array.sum()
+    #topk_acc_score = match_array.sum().astype(float) / match_array.shape[0]
+    return num_matched, match_array.shape[0]
+
+class Metric():
+    def __init__(self, desc='train', calculate_batches=-1, batch_size=256, top_k=5,
+                 prediction_key='predictions', label_key='labels', loss_key=None):
+        self.desc = desc
+        self.calculate_batches = calculate_batches
+        self.top_k = top_k
+        self.prediction_key = prediction_key
+        self.label_key = label_key
+        self.loss_key = loss_key
+        if loss_key:
+            self.fmt = "{}: epoch {}, iter {}, loss: {:.6f}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
+        else:
+            self.fmt = "{}: epoch {}, iter {}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
+
+        self.timer = StopWatch()
+        self.timer.start()
+        self._clear()
+    
+    def _clear(self):
+        self.top_1_num_matched = 0
+        self.top_k_num_matched = 0
+        self.num_samples = 0.0
+
+    def metric_cb(self, epoch, step):
+        def callback(outputs):
+            if step == 0: self._clear()
+            num_matched, num_samples = match_top_k(outputs[self.prediction_key], 
+                                                   outputs[self.label_key])
+            self.top_1_num_matched += num_matched 
+            self.num_samples += num_samples
+            num_matched, _ = match_top_k(outputs[self.prediction_key], 
+                                         outputs[self.label_key], self.top_k)
+            self.top_k_num_matched += num_matched 
+
+            if (step+1) % self.calculate_batches == 0:
+                throughput = self.num_samples / self.timer.split()
+                top_1_accuracy = self.top_1_num_matched / self.num_samples
+                top_k_accuracy = self.top_k_num_matched / self.num_samples
+                if self.loss_key:
+                    loss = outputs[self.loss_key].mean()
+                    print(self.fmt.format(self.desc, epoch, step, loss, top_1_accuracy, 
+                                          top_k_accuracy, throughput))
+                    #summary.scalar('loss', loss, step)
+                else:
+                    print(self.fmt.format(self.desc, epoch, step, top_1_accuracy, top_k_accuracy,
+                                          throughput))
+
+                #summary.scalar('train_accuracy', accuracy, step)
+                self._clear()
+        return callback
+    
 
