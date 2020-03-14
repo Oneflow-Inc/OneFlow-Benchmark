@@ -72,7 +72,7 @@ def InferenceNet():
     logits = model_dict[args.model](images)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions":predictions, "labels": labels}
-    return outputs#(softmax, labels)
+    return outputs
 
 
 def main():
@@ -84,7 +84,7 @@ def main():
     summary = Summary(args.log_dir, args)
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    for epoch in range(3):#args.num_epochs):
+    for epoch in range(args.num_epochs):
         metric = Metric(desc='train', calculate_batches=args.loss_print_every_n_iter, 
                         summary=summary, save_summary_steps=epoch_size, 
                         batch_size=train_batch_size, loss_key='loss')
