@@ -22,7 +22,7 @@ def _conv2d(
     trainable=True,
     weight_initializer=flow.variance_scaling_initializer(data_format="NCHW"),
     #weight_initializer=flow.variance_scaling_initializer(3, 'fan_in', 'random_normal', data_format="NCHW"),
-    weight_regularizer=flow.regularizers.l2(1.0/32768),
+    weight_regularizer=flow.regularizers.l2(1e-4),
 ):
     weight = flow.get_variable(
         name + "-weight",
@@ -143,7 +143,7 @@ def resnet50(images, trainable=True):
             #kernel_initializer=flow.variance_scaling_initializer(3, 'fan_in', 'random_normal'),
             kernel_initializer=flow.xavier_uniform_initializer(),
             bias_initializer=flow.zeros_initializer(),
-            kernel_regularizer=flow.regularizers.l2(1.0/32768),
+            kernel_regularizer=flow.regularizers.l2(1e-4),
             trainable=trainable,
             name="fc1001",
         )
