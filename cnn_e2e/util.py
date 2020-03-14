@@ -13,10 +13,11 @@ import oneflow as flow
 def InitNodes(args):
     if args.num_nodes > 1:
         assert args.num_nodes <= len(args.node_ips)
+        flow.env.ctrl_port(12138)
         nodes = []
-        for n in args.node_list.strip().split(","):
+        for ip in args.node_ips:
             addr_dict = {}
-            addr_dict["addr"] = n
+            addr_dict["addr"] = ip 
             nodes.append(addr_dict)
 
         flow.env.machine(nodes)

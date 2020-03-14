@@ -13,7 +13,6 @@ args = parser.parse_args()
 configs.print_args(args)
 
 from util import Snapshot, Summary, InitNodes, Metric
-#from dali_util import get_rec_iter
 import ofrecord_util
 from job_function_util import get_train_config, get_val_config
 import oneflow as flow
@@ -98,9 +97,6 @@ def main():
                             save_summary_steps=num_val_steps, batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
-
-        #summary.save()
-        #snapshot.save('epoch_{}'.format(epoch+1))
 
 
 if __name__ == "__main__":
