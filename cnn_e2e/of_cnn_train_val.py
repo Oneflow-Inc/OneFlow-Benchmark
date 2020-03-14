@@ -90,8 +90,8 @@ def main():
                         batch_size=train_batch_size, loss_key='loss')
         for i in range(epoch_size):
             TrainNet().async_get(metric.metric_cb(epoch, i))
-            if i > 40:#debug
-                break
+        #    if i > 40:#debug
+        #        break
         #break
         if args.val_data_dir:
             metric = Metric(desc='validataion', calculate_batches=num_val_steps, 
