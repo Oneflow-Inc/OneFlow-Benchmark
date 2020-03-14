@@ -12,7 +12,7 @@ parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
 
-from util import Snapshot, Summary, InitNodes, StopWatch, Metric
+from util import Snapshot, Summary, InitNodes, Metric
 #from dali_util import get_rec_iter
 import ofrecord_util
 from job_function_util import get_train_config, get_val_config
@@ -29,8 +29,6 @@ val_batch_size = total_device_num * args.val_batch_size_per_device
 epoch_size = math.ceil(args.num_examples / train_batch_size)
 num_val_steps = int(args.num_val_examples / val_batch_size)
 
-#summary = Summary(args.log_dir, args)
-timer = StopWatch()
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
@@ -83,10 +81,12 @@ def main():
     flow.env.grpc_use_no_signal()
     flow.env.log_dir(args.log_dir)
 
+    summary = Summary(args.log_dir, args)
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    for epoch in range(args.num_epochs):
+    for epoch in range(3):#args.num_epochs):
         metric = Metric(desc='train', calculate_batches=args.loss_print_every_n_iter, 
+                        summary=summary, save_summary_steps=epoch_size, 
                         batch_size=train_batch_size, loss_key='loss')
         for i in range(epoch_size):
             TrainNet().async_get(metric.metric_cb(epoch, i))
@@ -94,8 +94,8 @@ def main():
         #        break
         #break
         if args.val_data_dir:
-            metric = Metric(desc='validataion', calculate_batches=num_val_steps, 
-                            batch_size=val_batch_size)
+            metric = Metric(desc='validataion', calculate_batches=num_val_steps, summary=summary, 
+                            save_summary_steps=num_val_steps, batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
 
