@@ -46,7 +46,7 @@ def load_imagenet_for_training(args):
         flow.data.ImageResizePreprocessor(args.image_size, args.image_size),
         flow.data.ImagePreprocessor('mirror'),
     ])
-    return load_imagenet(args, train_batch_size, args.train_data_dir, args.train_data_part_num, 
+    return load_imagenet(args, train_batch_size, args.train_data_dir, args.train_data_part_num,
                          codec)
 
 
@@ -55,7 +55,9 @@ def load_imagenet_for_validation(args):
     val_batch_size = total_device_num * args.val_batch_size_per_device
     codec=flow.data.ImageCodec(
         [
-            flow.data.ImageResizePreprocessor(args.image_size, args.image_size),
+            flow.data.ImageTargetResizePreprocessor(resize_shorter=256),
+            flow.data.ImageCenterCropPreprocessor(args.image_size, args.image_size),
+            #flow.data.ImageResizePreprocessor(args.image_size, args.image_size),
         ]
     )
     return load_imagenet(args, val_batch_size, args.val_data_dir, args.val_data_part_num, codec)
