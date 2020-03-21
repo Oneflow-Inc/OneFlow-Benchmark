@@ -64,7 +64,7 @@ def main():
     summary = Summary(args.log_dir, args)
 
     for epoch in range(args.num_epochs):
-        model_load_dir = os.path.join(args.model_load_dir, 'snapshot_epoch_{}'.format(epoch+1))
+        model_load_dir = os.path.join(args.model_load_dir, 'snapshot_epoch_{}'.format(epoch))
         snapshot = Snapshot(args.model_save_dir, model_load_dir)
         metric = Metric(desc='validataion', calculate_batches=num_val_steps, summary=summary,
                         save_summary_steps=num_val_steps, batch_size=val_batch_size)
