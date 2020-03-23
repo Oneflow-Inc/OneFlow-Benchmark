@@ -64,7 +64,7 @@ def main():
         val_data_iter.reset()
         for i, batches in enumerate(val_data_iter):
             images, labels = batches
-            InferenceNet(images, labels).async_get(predict_callback(epoch, i))
+            InferenceNet(images, labels).async_get(metric.metric_cb(epoch, i))
         summary.save()
 
 
