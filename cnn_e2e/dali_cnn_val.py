@@ -42,7 +42,7 @@ def InferenceNet(images=flow.FixedTensorDef((val_batch_size, H, W, C), dtype=flo
                  labels=flow.FixedTensorDef((val_batch_size, ), dtype=flow.int32)):
     logits = model_dict[args.model](images)
     softmax = flow.nn.softmax(logits)
-    outputs = {"softmax":softmax, "labels": labels}
+    outputs = {"predictions":softmax, "labels": labels}
     return outputs#(softmax, labels)
 
 
