@@ -93,7 +93,7 @@ def main():
         #        break
         #break
         if args.val_data_dir:
-            metric = Metric(desc='validataion', calculate_batches=num_val_steps, summary=summary,
+            metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
                             save_summary_steps=num_val_steps, batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
