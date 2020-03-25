@@ -19,7 +19,7 @@ def load_imagenet(args, batch_size, data_dir, data_part_num, codec):
         shape=(args.image_size, args.image_size, 3),
         dtype=flow.float,
         codec=codec,
-        preprocessors=[flow.data.NormByChannelPreprocessor(args.rgb_mean[::-1], args.rgb_stdi[::-1])],
+        preprocessors=[flow.data.NormByChannelPreprocessor(args.rgb_mean[::-1], args.rgb_std[::-1])],
     )
 
     label_blob_conf = flow.data.BlobConf(
