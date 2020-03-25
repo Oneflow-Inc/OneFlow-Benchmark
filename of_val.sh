@@ -1,12 +1,12 @@
 rm -rf core.* 
-DATA_ROOT=/mnt/13_nfs/xuan/ImageNet/ofrecord
-#DATA_ROOT=/dataset/ImageNet/ofrecord
+#DATA_ROOT=/mnt/13_nfs/xuan/ImageNet/ofrecord
+DATA_ROOT=/dataset/ImageNet/ofrecord
 #DATA_ROOT=/dataset/imagenet-mxnet
   #python3 cnn_benchmark/of_cnn_train_val.py \
 #gdb --args \
 #nvprof -f -o resnet.nvvp \
   python3 cnn_e2e/of_cnn_val.py \
-    --model_load_dir=output/models \
+    --model_load_dir=output/snapshots_0323 \
     --train_data_dir=$DATA_ROOT/train \
     --train_data_part_num=256 \
     --val_data_dir=$DATA_ROOT/validation \
