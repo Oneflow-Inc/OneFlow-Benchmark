@@ -23,8 +23,6 @@ def get_train_config(args):
     # train_config.enable_nccl_hierarchical_all_reduce(True)
     # train_config.cudnn_buf_limit_mbyte(2048)
     # train_config.concurrency_width(2)
-    train_config.all_reduce_group_num(128)
-    train_config.all_reduce_group_min_mbyte(8)
 
     train_config.train.model_update_conf(get_optimizer(args))
 
