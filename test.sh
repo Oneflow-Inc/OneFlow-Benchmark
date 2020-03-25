@@ -2,7 +2,7 @@ rm -rf core.*
 #gdb --args \
 #DATA_ROOT=/dataset/imagenet_10pics
 DATA_ROOT=/dataset/imagenet_1pic
-python cnn_e2e/test_dali.py \
+python cnn_e2e/test_data_loader.py \
   --data_train=$DATA_ROOT/mxnet/train.rec \
   --data_train_idx=$DATA_ROOT/mxnet/train.idx \
   --data_val=$DATA_ROOT/mxnet/train.rec \
