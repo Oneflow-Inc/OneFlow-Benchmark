@@ -19,7 +19,9 @@ def load_imagenet(args, batch_size, data_dir, data_part_num, codec):
         shape=(args.image_size, args.image_size, 3),
         dtype=flow.float,
         codec=codec,
-        preprocessors=[flow.data.NormByChannelPreprocessor(args.rgb_mean[::-1], args.rgb_std[::-1])],
+        preprocessors=[flow.data.NormByChannelPreprocessor(args.rgb_mean[::-1],
+                                                           args.rgb_std[::-1])],
+        #preprocessors=[flow.data.NormByChannelPreprocessor(args.rgb_mean, args.rgb_std)], #bgr2rgb
     )
 
     label_blob_conf = flow.data.BlobConf(
@@ -42,6 +44,7 @@ def load_imagenet_for_training(args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     train_batch_size = total_device_num * args.batch_size_per_device
     codec=flow.data.ImageCodec([
+        #flow.data.ImagePreprocessor('bgr2rgb'),
         flow.data.ImageCropWithRandomSizePreprocessor(area=(0.08, 1)),
         flow.data.ImageResizePreprocessor(args.image_size, args.image_size),
         flow.data.ImagePreprocessor('mirror'),
@@ -55,6 +58,7 @@ def load_imagenet_for_validation(args):
     val_batch_size = total_device_num * args.val_batch_size_per_device
     codec=flow.data.ImageCodec(
         [
+            #flow.data.ImagePreprocessor('bgr2rgb'),
             flow.data.ImageTargetResizePreprocessor(resize_shorter=256),
             flow.data.ImageCenterCropPreprocessor(args.image_size, args.image_size),
             #flow.data.ImageResizePreprocessor(args.image_size, args.image_size),
