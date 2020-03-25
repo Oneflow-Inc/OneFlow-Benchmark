@@ -16,8 +16,8 @@ def get_train_config(args):
     train_config.train.primary_lr(args.learning_rate)
     train_config.disable_all_reduce_sequence(False)
     #train_config.cudnn_conv_enable_pseudo_half(True)
-    #train_config.all_reduce_group_min_mbyte(8)
-    #train_config.all_reduce_group_num(128)
+    train_config.all_reduce_group_min_mbyte(8)
+    train_config.all_reduce_group_num(128)
     # train_config.all_reduce_lazy_ratio(0)
 
     # train_config.enable_nccl_hierarchical_all_reduce(True)
