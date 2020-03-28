@@ -52,7 +52,8 @@ def get_parser(parser=None):
 
     ## snapshot
     parser.add_argument("--model_save_dir", type=str,
-        default="./output/model_save-{}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
+        #default="./output/model_save-{}".format(str(datetime.now().strftime("%Y%m%d%H%M%S"))),
+        default="./output/snapshots",
         help="model save directory",
     )
 
