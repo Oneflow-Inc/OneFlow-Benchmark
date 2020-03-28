@@ -17,7 +17,7 @@ def InitNodes(args):
         nodes = []
         for ip in args.node_ips:
             addr_dict = {}
-            addr_dict["addr"] = ip 
+            addr_dict["addr"] = ip
             nodes.append(addr_dict)
 
         flow.env.machine(nodes)
@@ -32,8 +32,9 @@ class Snapshot(object):
             print("Restoring model from {}.".format(model_load_dir))
             self._check_point.load(model_load_dir)
         else:
-            print("Init model on demand.")
             self._check_point.init()
+            self.save('initial_model')
+            print("Init model on demand.")
 
     def save(self, name):
         snapshot_save_path = os.path.join(self._model_save_dir, "snapshot_{}".format(name))
@@ -89,8 +90,8 @@ def match_top_k(predictions, labels, top_k=1):
 
 
 class Metric(object):
-    def __init__(self, summary=None, save_summary_steps=-1, desc='train', calculate_batches=-1, 
-                 batch_size=256, top_k=5, prediction_key='predictions', label_key='labels', 
+    def __init__(self, summary=None, save_summary_steps=-1, desc='train', calculate_batches=-1,
+                 batch_size=256, top_k=5, prediction_key='predictions', label_key='labels',
                  loss_key=None):
         self.summary = summary
         self.save_summary = isinstance(self.summary, Summary)
@@ -118,13 +119,13 @@ class Metric(object):
     def metric_cb(self, epoch, step):
         def callback(outputs):
             if step == 0: self._clear()
-            num_matched, num_samples = match_top_k(outputs[self.prediction_key], 
+            num_matched, num_samples = match_top_k(outputs[self.prediction_key],
                                                    outputs[self.label_key])
-            self.top_1_num_matched += num_matched 
+            self.top_1_num_matched += num_matched
             self.num_samples += num_samples
-            num_matched, _ = match_top_k(outputs[self.prediction_key], 
+            num_matched, _ = match_top_k(outputs[self.prediction_key],
                                          outputs[self.label_key], self.top_k)
-            self.top_k_num_matched += num_matched 
+            self.top_k_num_matched += num_matched
 
             if (step + 1) % self.calculate_batches == 0:
                 throughput = self.num_samples / self.timer.split()
@@ -132,19 +133,19 @@ class Metric(object):
                 top_k_accuracy = self.top_k_num_matched / self.num_samples
                 if self.loss_key:
                     loss = outputs[self.loss_key].mean()
-                    print(self.fmt.format(self.desc, epoch, step + 1, loss, top_1_accuracy, 
+                    print(self.fmt.format(self.desc, epoch, step + 1, loss, top_1_accuracy,
                                           top_k_accuracy, throughput))
                     if self.save_summary:
                         self.summary.scalar(self.desc+"_" + self.loss_key, loss, epoch, step)
                 else:
-                    print(self.fmt.format(self.desc, epoch, step + 1, top_1_accuracy, 
+                    print(self.fmt.format(self.desc, epoch, step + 1, top_1_accuracy,
                                           top_k_accuracy, throughput))
 
                 self._clear()
                 if self.save_summary:
                     self.summary.scalar(self.desc + "_throughput", throughput, epoch, step)
                     self.summary.scalar(self.desc + "_top_1", top_1_accuracy, epoch, step)
-                    self.summary.scalar(self.desc + "_top_{}".format(self.top_k), top_k_accuracy, 
+                    self.summary.scalar(self.desc + "_top_{}".format(self.top_k), top_k_accuracy,
                                         epoch, step)
 
             if self.save_summary:
@@ -152,5 +153,5 @@ class Metric(object):
                     self.summary.save()
 
         return callback
-    
+
 
