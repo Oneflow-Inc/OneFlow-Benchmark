@@ -1,4 +1,5 @@
 rm -rf core.* 
+rm -rf ./output/snapshots/*
 #DATA_ROOT=/mnt/13_nfs/xuan/ImageNet/ofrecord
 DATA_ROOT=/dataset/ImageNet/ofrecord
 #DATA_ROOT=/dataset/imagenet-mxnet
