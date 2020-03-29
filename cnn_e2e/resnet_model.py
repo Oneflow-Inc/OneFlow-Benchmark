@@ -138,7 +138,7 @@ def resnet50(images, trainable=True):
 
         fc1001 = flow.layers.dense(
             flow.reshape(pool5, (pool5.shape[0], -1)),
-            units=1001,
+            units=1000,
             use_bias=True,
             kernel_initializer=flow.variance_scaling_initializer(1.5, 'fan_in', 'random_normal'),
             #kernel_initializer=flow.xavier_uniform_initializer(),
