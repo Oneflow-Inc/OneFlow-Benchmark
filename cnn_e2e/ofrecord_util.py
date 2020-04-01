@@ -109,3 +109,38 @@ def load_imagenet_for_training2(args):
             mean=args.rgb_mean, std=args.rgb_std, output_dtype = flow.float)
         print(normal.shape)
         return label, normal
+
+
+if __name__ == "__main__":
+    import os
+    import config as configs
+    from util import Summary, InitNodes, Metric
+    from job_function_util import get_val_config
+    parser = configs.get_parser()
+    args = parser.parse_args()
+    configs.print_args(args)
+
+    flow.config.gpu_device_num(args.gpu_num_per_node)
+    flow.config.enable_debug_mode(True)
+    @flow.function(get_val_config(args))
+    def IOTest():
+        if args.train_data_dir:
+            assert os.path.exists(args.train_data_dir)
+            print("Loading data from {}".format(args.train_data_dir))
+            (labels, images) = load_imagenet_for_training(args)
+            #(labels, images) = load_imagenet_for_training2(args)
+        else:
+            print("Loading synthetic data.")
+            (labels, images) = load_synthetic(args)
+        predictions = labels
+        outputs = {"predictions":predictions, "labels": labels}
+        return outputs
+
+    total_device_num = args.num_nodes * args.gpu_num_per_node
+    train_batch_size = total_device_num * args.batch_size_per_device
+    summary = Summary(args.log_dir, args, filename='io_test.csv')
+    metric = Metric(desc='io_test', calculate_batches=args.loss_print_every_n_iter,
+                    summary=summary, save_summary_steps=args.loss_print_every_n_iter,
+                    batch_size=train_batch_size)
+    for i in range(1000):
+        IOTest().async_get(metric.metric_cb(0, i))
