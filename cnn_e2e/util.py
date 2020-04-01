@@ -45,7 +45,8 @@ class Snapshot(object):
 
 
 class Summary(object):
-    def __init__(self, log_dir, config):
+    def __init__(self, log_dir, config, filename='summary.csv'):
+        self._filename = filename
         self._log_dir = log_dir
         self._metrics = pd.DataFrame({"epoch":0, "iter": 0, "legend": "cfg", "note": str(config)}, index=[0])
 
@@ -57,7 +58,7 @@ class Summary(object):
         self._metrics = pd.concat([self._metrics, df], axis=0, sort=False)
 
     def save(self):
-        save_path = os.path.join(self._log_dir, "summary.csv")
+        save_path = os.path.join(self._log_dir, self._filename)
         self._metrics.to_csv(save_path, index=False)
 
 
