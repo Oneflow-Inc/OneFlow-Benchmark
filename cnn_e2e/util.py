@@ -120,18 +120,27 @@ class Metric(object):
     def metric_cb(self, epoch, step):
         def callback(outputs):
             if step == 0: self._clear()
-            num_matched, num_samples = match_top_k(outputs[self.prediction_key],
-                                                   outputs[self.label_key])
-            self.top_1_num_matched += num_matched
+            if self.prediction_key:
+                num_matched, num_samples = match_top_k(outputs[self.prediction_key],
+                                                       outputs[self.label_key])
+                self.top_1_num_matched += num_matched
+                num_matched, _ = match_top_k(outputs[self.prediction_key],
+                                             outputs[self.label_key], self.top_k)
+                self.top_k_num_matched += num_matched
+            else:
+                num_samples = outputs[self.label_key].shape[0]
+
             self.num_samples += num_samples
-            num_matched, _ = match_top_k(outputs[self.prediction_key],
-                                         outputs[self.label_key], self.top_k)
-            self.top_k_num_matched += num_matched
 
             if (step + 1) % self.calculate_batches == 0:
                 throughput = self.num_samples / self.timer.split()
-                top_1_accuracy = self.top_1_num_matched / self.num_samples
-                top_k_accuracy = self.top_k_num_matched / self.num_samples
+                if self.prediction_key:
+                    top_1_accuracy = self.top_1_num_matched / self.num_samples
+                    top_k_accuracy = self.top_k_num_matched / self.num_samples
+                else:
+                    top_1_accuracy = 0.0
+                    top_k_accuracy = 0.0
+
                 if self.loss_key:
                     loss = outputs[self.loss_key].mean()
                     print(self.fmt.format(self.desc, epoch, step + 1, loss, top_1_accuracy,
@@ -145,9 +154,10 @@ class Metric(object):
                 self._clear()
                 if self.save_summary:
                     self.summary.scalar(self.desc + "_throughput", throughput, epoch, step)
-                    self.summary.scalar(self.desc + "_top_1", top_1_accuracy, epoch, step)
-                    self.summary.scalar(self.desc + "_top_{}".format(self.top_k), top_k_accuracy,
-                                        epoch, step)
+                    if self.prediction_key:
+                        self.summary.scalar(self.desc + "_top_1", top_1_accuracy, epoch, step)
+                        self.summary.scalar(self.desc + "_top_{}".format(self.top_k),
+                                            top_k_accuracy, epoch, step)
 
             if self.save_summary:
                 if (step + 1) % self.save_summary_steps == 0:
