@@ -44,7 +44,8 @@ def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
         print("Loading data from {}".format(args.train_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_training(args)
+        (labels, images) = ofrecord_util.load_imagenet_for_training2(args)
+        # note: images.shape = (N C H W) in cc's new dataloader(load_imagenet_for_training2)
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
@@ -63,7 +64,7 @@ def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
         print("Loading data from {}".format(args.val_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
+        (labels, images) = ofrecord_util.load_imagenet_for_validation2(args)
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)

@@ -6,7 +6,7 @@ import argparse
 from datetime import datetime
 import logging
 
-from dali_util import add_dali_args
+#from dali_util import add_dali_args
 from optimizer_util import add_optimizer_args
 from ofrecord_util import add_ofrecord_args
 
@@ -40,7 +40,7 @@ def get_parser(parser=None):
     parser.add_argument("--batch_size_per_device", type=int, default=64)
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
-    # for data process 
+    # for data process
     parser.add_argument("--num_examples", type=int, default=1281167, help="train pic number")
     parser.add_argument("--num_val_examples", type=int, default=50000, help="validation pic number")
     parser.add_argument('--rgb-mean', type=float_list, default=[123.68, 116.779, 103.939],
@@ -48,6 +48,8 @@ def get_parser(parser=None):
     parser.add_argument('--rgb-std', type=float_list, default=[58.393, 57.12, 57.375],
                         help='a tuple of size 3 for the std rgb')
     parser.add_argument("--input_layout", type=str, default='NHWC', help="NCHW or NHWC")
+    parser.add_argument('--image-shape', type=int_list, default=[3, 224, 224],
+                        help='the image shape feed into the network')
 
 
     ## snapshot
@@ -65,7 +67,7 @@ def get_parser(parser=None):
         default=1,
         help="print loss every n iteration",
     )
-    add_dali_args(parser)
+    #add_dali_args(parser)
     add_ofrecord_args(parser)
     add_optimizer_args(parser)
     return parser

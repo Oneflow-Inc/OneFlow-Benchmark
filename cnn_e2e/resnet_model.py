@@ -127,7 +127,9 @@ def resnet_stem(input):
 
 def resnet50(images, trainable=True):
 
-    images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
+    # note: images.shape = (N C H W) in cc's new dataloader, transpose is not needed anymore
+    # images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
+    print(images.shape, "******************************")
 
     with flow.deprecated.variable_scope("Resnet"):
         stem = resnet_stem(images)

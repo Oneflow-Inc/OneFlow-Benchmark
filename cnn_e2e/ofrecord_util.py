@@ -59,9 +59,9 @@ def load_imagenet_for_validation(args):
     codec=flow.data.ImageCodec(
         [
             #flow.data.ImagePreprocessor('bgr2rgb'),
-            flow.data.ImageTargetResizePreprocessor(resize_shorter=256),
-            flow.data.ImageCenterCropPreprocessor(args.image_size, args.image_size),
-            #flow.data.ImageResizePreprocessor(args.image_size, args.image_size),
+            # flow.data.ImageTargetResizePreprocessor(resize_shorter=256),
+            # flow.data.ImageCenterCropPreprocessor(args.image_size, args.image_size),
+            flow.data.ImageResizePreprocessor(args.image_size, args.image_size),
         ]
     )
     return load_imagenet(args, val_batch_size, args.val_data_dir, args.val_data_part_num, codec)
@@ -98,15 +98,37 @@ def load_imagenet_for_training2(args):
         image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded", seed=seed,
                                                          color_space=color_space)
         label = flow.data.OFRecordRawDecoder(ofrecord, "class/label", shape=(), dtype=flow.int32)
-        rsz = flow.image.Resize(image, resize_x=float(args.image_size),
-                                resize_y=float(args.image_size),
+        rsz = flow.image.Resize(image, resize_x=args.image_size,
+                                resize_y=args.image_size,
                                 color_space=color_space)
 
-        rng = flow.image.CoinFlip(batch_size=train_batch_size, seed=seed)
+        rng = flow.random.CoinFlip(batch_size=train_batch_size, seed=seed)
         normal = flow.image.CropMirrorNormalize(rsz, mirror_blob=rng, color_space=color_space,
             mean=args.rgb_mean, std=args.rgb_std, output_dtype = flow.float)
         return label, normal
 
+def load_imagenet_for_validation2(args):
+    total_device_num = args.num_nodes * args.gpu_num_per_node
+    val_batch_size = total_device_num * args.val_batch_size_per_device
+
+    seed = 0
+    color_space = 'RGB'
+    with flow.fixed_placement("cpu", "0:0"):
+        ofrecord = flow.data.ofrecord_loader(args.val_data_dir,
+                                             batch_size=val_batch_size,
+                                             data_part_num=args.val_data_part_num,
+                                             part_name_suffix_length=5)
+        image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded", seed=seed,
+                                                         color_space=color_space)
+        label = flow.data.OFRecordRawDecoder(ofrecord, "class/label", shape=(), dtype=flow.int32)
+        rsz = flow.image.Resize(image, resize_x=args.image_size,
+                                resize_y=args.image_size,
+                                color_space=color_space)
+
+        rng = flow.random.CoinFlip(batch_size=val_batch_size, seed=seed)
+        normal = flow.image.CropMirrorNormalize(rsz, mirror_blob=rng, color_space=color_space,
+            mean=args.rgb_mean, std=args.rgb_std, output_dtype = flow.float)
+        return label, normal
 
 if __name__ == "__main__":
     import os
