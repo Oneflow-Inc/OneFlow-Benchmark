@@ -91,10 +91,11 @@ def load_imagenet_for_training2(args):
     seed = 0
     color_space = 'RGB'
     with flow.fixed_placement("cpu", "0:0"):
-        ofrecord = flow.data.ofrecord_loader(args.train_data_dir,
+        ofrecord = flow.data.ofrecord_reader(args.train_data_dir,
                                              batch_size=train_batch_size,
                                              data_part_num=args.train_data_part_num,
-                                             part_name_suffix_length=5)
+                                             part_name_suffix_length=5,
+                                             shuffle_after_epoch=True)
         image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded", seed=seed,
                                                          color_space=color_space)
         label = flow.data.OFRecordRawDecoder(ofrecord, "class/label", shape=(), dtype=flow.int32)
@@ -114,10 +115,11 @@ def load_imagenet_for_validation2(args):
     seed = 0
     color_space = 'RGB'
     with flow.fixed_placement("cpu", "0:0"):
-        ofrecord = flow.data.ofrecord_loader(args.val_data_dir,
+        ofrecord = flow.data.ofrecord_reader(args.val_data_dir,
                                              batch_size=val_batch_size,
                                              data_part_num=args.val_data_part_num,
-                                             part_name_suffix_length=5)
+                                             part_name_suffix_length=5,
+                                             shuffle_after_epoch=False)
         image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded", seed=seed,
                                                          color_space=color_space)
         label = flow.data.OFRecordRawDecoder(ofrecord, "class/label", shape=(), dtype=flow.int32)
