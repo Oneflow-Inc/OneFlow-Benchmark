@@ -9,6 +9,8 @@ def _default_config(args):
     config = flow.function_config()
     config.default_distribute_strategy(flow.distribute.consistent_strategy())
     config.default_data_type(flow.float)
+    if args.use_fp16:
+        config.enable_auto_mixed_precision(True)
     return config
 
 def get_train_config(args):
@@ -24,10 +26,13 @@ def get_train_config(args):
     # train_config.cudnn_buf_limit_mbyte(2048)
     # train_config.concurrency_width(2)
 
+    if args.use_boxing_v2:
+        train_config.use_boxing_v2(True)
+    train_config.prune_parallel_cast_ops(True)
     train_config.train.model_update_conf(get_optimizer(args))
 
-    if args.use_fp16:
-        train_config.enable_auto_mixed_precision()
+    #if args.use_fp16:
+    #    train_config.enable_auto_mixed_precision()
 
     train_config.enable_inplace(True)
     return train_config
