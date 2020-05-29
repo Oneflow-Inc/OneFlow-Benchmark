@@ -39,18 +39,25 @@ model_dict = {
 flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
 
+if args.use_boxing_v2:
+    flow.config.collective_boxing.nccl_fusion_threshold_mb(8)
+    flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
+
 @flow.function(get_train_config(args))
 def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
         print("Loading data from {}".format(args.train_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_training2(args)
+        if args.use_new_dataloader:
+            (labels, images) = ofrecord_util.load_imagenet_for_training2(args)
+        else:
+            (labels, images) = ofrecord_util.load_imagenet_for_training(args)
         # note: images.shape = (N C H W) in cc's new dataloader(load_imagenet_for_training2)
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](images)
+    logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
     loss = flow.math.reduce_mean(loss)
     flow.losses.add_loss(loss)
@@ -64,12 +71,15 @@ def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
         print("Loading data from {}".format(args.val_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_validation2(args)
+        if args.use_new_dataloader:
+            (labels, images) = ofrecord_util.load_imagenet_for_validation2(args)
+        else:
+            (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](images)
+    logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions":predictions, "labels": labels}
     return outputs
