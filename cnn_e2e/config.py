@@ -31,6 +31,8 @@ def get_parser(parser=None):
 
     parser.add_argument("--model", type=str, default="vgg16", help="vgg16 or resnet50")
     parser.add_argument("--use_fp16", type=bool, default=False, help="fp16")
+    parser.add_argument("--use_boxing_v2", type=bool, default=False, help="use boxing v2")
+    parser.add_argument("--use_new_dataloader", type=bool, default=False, help="use new dataloader")
 
     # train and validaion
     parser.add_argument('--num_epochs', type=int, default=90, help='number of epochs')
