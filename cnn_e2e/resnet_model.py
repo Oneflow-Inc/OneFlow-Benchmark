@@ -26,7 +26,7 @@ def _conv2d(
 ):
     weight = flow.get_variable(
         name + "-weight",
-        shape=(filters, input.static_shape[1], kernel_size, kernel_size),
+        shape=(filters, input.shape[1], kernel_size, kernel_size),
         dtype=input.dtype,
         initializer=weight_initializer,
         regularizer=weight_regularizer,
@@ -125,10 +125,11 @@ def resnet_stem(input):
     return pool1
 
 
-def resnet50(images, trainable=True):
+def resnet50(images, trainable=True, need_transpose=False):
 
     # note: images.shape = (N C H W) in cc's new dataloader, transpose is not needed anymore
-    # images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
+    if need_transpose:
+        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
 
     with flow.deprecated.variable_scope("Resnet"):
         stem = resnet_stem(images)
