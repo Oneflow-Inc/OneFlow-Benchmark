@@ -22,6 +22,7 @@ def _conv2d(
     weight_initializer=flow.variance_scaling_initializer(
         2, 'fan_in', 'random_normal', data_format="NCHW"),
     weight_regularizer=flow.regularizers.l2(1.0/32768),
+    trainable=True,
 ):
     weight = flow.get_variable(
         name + "-weight",
