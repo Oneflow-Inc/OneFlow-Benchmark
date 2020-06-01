@@ -20,6 +20,7 @@ import oneflow as flow
 import alexnet_model
 import vgg_model
 import resnet_model
+import inception_model
 
 
 
@@ -35,6 +36,7 @@ model_dict = {
     "resnet50": resnet_model.resnet50,
     "vgg16": vgg_model.vgg16,
     "alexnet": alexnet_model.alexnet,
+    "inceptionv3":inception_model.inceptionv3,
 }
 
 
