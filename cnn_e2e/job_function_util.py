@@ -28,12 +28,9 @@ def get_train_config(args):
 
     if args.use_boxing_v2:
         train_config.use_boxing_v2(True)
+        
     train_config.prune_parallel_cast_ops(True)
     train_config.train.model_update_conf(get_optimizer(args))
-
-    #if args.use_fp16:
-    #    train_config.enable_auto_mixed_precision()
-
     train_config.enable_inplace(True)
     return train_config
 
