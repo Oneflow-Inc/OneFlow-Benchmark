@@ -16,9 +16,11 @@ from util import Snapshot, Summary, InitNodes, Metric
 import ofrecord_util
 from job_function_util import get_train_config, get_val_config
 import oneflow as flow
-#import vgg_model
+
+import alexnet_model
+import vgg_model
 import resnet_model
-#import alexnet_model
+
 
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
@@ -31,8 +33,8 @@ num_val_steps = int(args.num_val_examples / val_batch_size)
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
-    #"vgg16": vgg_model.vgg16,
-    #"alexnet": alexnet_model.alexnet,
+    "vgg16": vgg_model.vgg16,
+    "alexnet": alexnet_model.alexnet,
 }
 
 
