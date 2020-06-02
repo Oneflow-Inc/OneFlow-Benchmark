@@ -3,25 +3,23 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import time
 import math
-import numpy as np
 
+import oneflow as flow
+
+import ofrecord_util
 import config as configs
+from util import Snapshot, Summary, InitNodes, Metric
+from job_function_util import get_train_config, get_val_config
+import inception_model
+import resnet_model
+import vgg_model
+import alexnet_model
+
+
 parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
-
-from util import Snapshot, Summary, InitNodes, Metric
-import ofrecord_util
-from job_function_util import get_train_config, get_val_config
-import oneflow as flow
-
-import alexnet_model
-import vgg_model
-import resnet_model
-import inception_model
-
 
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
@@ -36,7 +34,7 @@ model_dict = {
     "resnet50": resnet_model.resnet50,
     "vgg16": vgg_model.vgg16,
     "alexnet": alexnet_model.alexnet,
-    "inceptionv3":inception_model.inceptionv3,
+    "inceptionv3": inception_model.inceptionv3,
 }
 
 
@@ -46,6 +44,7 @@ flow.config.enable_debug_mode(True)
 if args.use_boxing_v2:
     flow.config.collective_boxing.nccl_fusion_threshold_mb(8)
     flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
+
 
 @flow.function(get_train_config(args))
 def TrainNet():
@@ -61,12 +60,14 @@ def TrainNet():
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader)
-    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
+    logits = model_dict[args.model](
+        images, need_transpose=not args.use_new_dataloader)
+    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
+        labels, logits, name="softmax_loss")
     loss = flow.math.reduce_mean(loss)
     flow.losses.add_loss(loss)
     predictions = flow.nn.softmax(logits)
-    outputs = {"loss": loss, "predictions":predictions, "labels": labels}
+    outputs = {"loss": loss, "predictions": predictions, "labels": labels}
     return outputs
 
 
@@ -83,9 +84,10 @@ def InferenceNet():
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader)
+    logits = model_dict[args.model](
+        images, need_transpose=not args.use_new_dataloader)
     predictions = flow.nn.softmax(logits)
-    outputs = {"predictions":predictions, "labels": labels}
+    outputs = {"predictions": predictions, "labels": labels}
     return outputs
 
 
@@ -104,9 +106,7 @@ def main():
                         batch_size=train_batch_size, loss_key='loss')
         for i in range(epoch_size):
             TrainNet().async_get(metric.metric_cb(epoch, i))
-        #    if i > 40:#debug
-        #        break
-        #break
+
         if args.val_data_dir:
             metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
                             save_summary_steps=num_val_steps, batch_size=val_batch_size)

@@ -3,22 +3,23 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import time
 import math
-import numpy as np
 
+import oneflow as flow
+
+import ofrecord_util
 import config as configs
+from util import Snapshot, Summary, InitNodes, Metric
+from job_function_util import get_val_config
+
+import alexnet_model
+import resnet_model
+import vgg_model
+
+
 parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
-
-from util import Snapshot, Summary, InitNodes, Metric
-import ofrecord_util
-from job_function_util import get_train_config, get_val_config
-import oneflow as flow
-#import vgg_model
-import resnet_model
-#import alexnet_model
 
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
@@ -31,13 +32,15 @@ num_val_steps = int(args.num_val_examples / val_batch_size)
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
-    #"vgg16": vgg_model.vgg16,
-    #"alexnet": alexnet_model.alexnet,
+    "vgg16": vgg_model.vgg16,
+    "alexnet": alexnet_model.alexnet,
+    "inceptionv3": inception_model.inceptionv3,
 }
-
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
+
+
 @flow.function(get_val_config(args))
 def InferenceNet():
     if args.val_data_dir:
@@ -50,7 +53,7 @@ def InferenceNet():
 
     logits = model_dict[args.model](images)
     predictions = flow.nn.softmax(logits)
-    outputs = {"predictions":predictions, "labels": labels}
+    outputs = {"predictions": predictions, "labels": labels}
     return outputs
 
 
@@ -64,7 +67,8 @@ def main():
     summary = Summary(args.log_dir, args)
 
     for epoch in range(args.num_epochs):
-        model_load_dir = os.path.join(args.model_load_dir, 'snapshot_epoch_{}'.format(epoch))
+        model_load_dir = os.path.join(
+            args.model_load_dir, 'snapshot_epoch_{}'.format(epoch))
         snapshot = Snapshot(args.model_save_dir, model_load_dir)
         metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
                         save_summary_steps=num_val_steps, batch_size=val_batch_size)
