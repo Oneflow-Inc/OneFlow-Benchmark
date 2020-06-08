@@ -1,23 +1,29 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import time
+import numpy as np
 import pandas as pd
 from datetime import datetime
 import oneflow as flow
 
 
-def nodes_init(args):
+def InitNodes(args):
     if args.num_nodes > 1:
         assert args.num_nodes <= len(args.node_ips)
+        flow.env.ctrl_port(12138)
         nodes = []
-        for n in args.node_list.strip().split(","):
+        for ip in args.node_ips:
             addr_dict = {}
-            addr_dict["addr"] = n
+            addr_dict["addr"] = ip
             nodes.append(addr_dict)
 
         flow.env.machine(nodes)
 
 
-class Snapshot:
+class Snapshot(object):
     def __init__(self, model_save_dir, model_load_dir):
         self._model_save_dir = model_save_dir
         self._check_point = flow.train.CheckPoint()
@@ -26,8 +32,9 @@ class Snapshot:
             print("Restoring model from {}.".format(model_load_dir))
             self._check_point.load(model_load_dir)
         else:
-            print("Init model on demand.")
             self._check_point.init()
+            self.save('initial_model')
+            print("Init model on demand.")
 
     def save(self, name):
         snapshot_save_path = os.path.join(self._model_save_dir, "snapshot_{}".format(name))
@@ -37,25 +44,25 @@ class Snapshot:
         self._check_point.save(snapshot_save_path)
 
 
-class Summary():
-    def __init__(self, log_dir, config):
+class Summary(object):
+    def __init__(self, log_dir, config, filename='summary.csv'):
+        self._filename = filename
         self._log_dir = log_dir
-        self._metrics = pd.DataFrame({"iter": 0, "legend": "cfg", "note": str(config)}, index=[0])
+        self._metrics = pd.DataFrame({"epoch":0, "iter": 0, "legend": "cfg", "note": str(config)}, index=[0])
 
-    def scalar(self, legend, value, step=-1):
+    def scalar(self, legend, value, epoch, step=-1):
         # TODO: support rank(which device/gpu)
         df = pd.DataFrame(
-            {"iter": step, "legend": legend, "value": value, "rank": 0, "time": time.time()},
+            {"epoch": epoch, "iter": step, "legend": legend, "value": value, "rank": 0},
             index=[0])
         self._metrics = pd.concat([self._metrics, df], axis=0, sort=False)
 
     def save(self):
-        save_path = os.path.join(self._log_dir, "summary.csv")
+        save_path = os.path.join(self._log_dir, self._filename)
         self._metrics.to_csv(save_path, index=False)
-        print("saved: {}".format(save_path))
 
 
-class StopWatch:
+class StopWatch(object):
     def __init__(self):
         pass
 
@@ -74,4 +81,88 @@ class StopWatch:
 
     def duration(self):
         return self.stop_time - self.start_time
+
+
+def match_top_k(predictions, labels, top_k=1):
+    max_k_preds = predictions.argsort(axis=1)[:, -top_k:][:, ::-1]
+    match_array = np.logical_or.reduce(max_k_preds==labels.reshape((-1, 1)), axis=1)
+    num_matched = match_array.sum()
+    return num_matched, match_array.shape[0]
+
+
+class Metric(object):
+    def __init__(self, summary=None, save_summary_steps=-1, desc='train', calculate_batches=-1,
+                 batch_size=256, top_k=5, prediction_key='predictions', label_key='labels',
+                 loss_key=None):
+        self.summary = summary
+        self.save_summary = isinstance(self.summary, Summary)
+        self.save_summary_steps = save_summary_steps
+        self.desc = desc
+        self.calculate_batches = calculate_batches
+        self.top_k = top_k
+        self.prediction_key = prediction_key
+        self.label_key = label_key
+        self.loss_key = loss_key
+        if loss_key:
+            self.fmt = "{}: epoch {}, iter {}, loss: {:.6f}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
+        else:
+            self.fmt = "{}: epoch {}, iter {}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
+
+        self.timer = StopWatch()
+        self.timer.start()
+        self._clear()
+
+    def _clear(self):
+        self.top_1_num_matched = 0
+        self.top_k_num_matched = 0
+        self.num_samples = 0.0
+
+    def metric_cb(self, epoch, step):
+        def callback(outputs):
+            if step == 0: self._clear()
+            if self.prediction_key:
+                num_matched, num_samples = match_top_k(outputs[self.prediction_key],
+                                                       outputs[self.label_key])
+                self.top_1_num_matched += num_matched
+                num_matched, _ = match_top_k(outputs[self.prediction_key],
+                                             outputs[self.label_key], self.top_k)
+                self.top_k_num_matched += num_matched
+            else:
+                num_samples = outputs[self.label_key].shape[0]
+
+            self.num_samples += num_samples
+
+            if (step + 1) % self.calculate_batches == 0:
+                throughput = self.num_samples / self.timer.split()
+                if self.prediction_key:
+                    top_1_accuracy = self.top_1_num_matched / self.num_samples
+                    top_k_accuracy = self.top_k_num_matched / self.num_samples
+                else:
+                    top_1_accuracy = 0.0
+                    top_k_accuracy = 0.0
+
+                if self.loss_key:
+                    loss = outputs[self.loss_key].mean()
+                    print(self.fmt.format(self.desc, epoch, step + 1, loss, top_1_accuracy,
+                                          top_k_accuracy, throughput))
+                    if self.save_summary:
+                        self.summary.scalar(self.desc+"_" + self.loss_key, loss, epoch, step)
+                else:
+                    print(self.fmt.format(self.desc, epoch, step + 1, top_1_accuracy,
+                                          top_k_accuracy, throughput))
+
+                self._clear()
+                if self.save_summary:
+                    self.summary.scalar(self.desc + "_throughput", throughput, epoch, step)
+                    if self.prediction_key:
+                        self.summary.scalar(self.desc + "_top_1", top_1_accuracy, epoch, step)
+                        self.summary.scalar(self.desc + "_top_{}".format(self.top_k),
+                                            top_k_accuracy, epoch, step)
+
+            if self.save_summary:
+                if (step + 1) % self.save_summary_steps == 0:
+                    self.summary.save()
+
+        return callback
+
 

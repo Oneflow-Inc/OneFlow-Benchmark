@@ -3,7 +3,6 @@ from __future__ import division
 from __future__ import print_function
 
 import oneflow as flow
-import oneflow.core.operator.op_conf_pb2 as op_conf_util
 from model_util import conv2d_layer
 
 
@@ -24,10 +23,12 @@ def _conv_block(in_blob, index, filters, conv_times):
     return conv_block
 
 
-def vgg16(images, trainable=True):
+def vgg16(images, need_transpose=False):
 
-    transposed = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
-    conv1 = _conv_block(transposed, 0, 64, 2)
+    if need_transpose:
+        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
+
+    conv1 = _conv_block(images, 0, 64, 2)
     pool1 = flow.nn.max_pool2d(conv1[-1], 2, 2, "VALID", "NCHW", name="pool1")
 
     conv2 = _conv_block(pool1, 2, 128, 2)
@@ -42,26 +43,13 @@ def vgg16(images, trainable=True):
     conv5 = _conv_block(pool4, 10, 512, 3)
     pool5 = flow.nn.max_pool2d(conv5[-1], 2, 2, "VALID", "NCHW", name="pool5")
 
-    def _get_kernel_initializer():
-        kernel_initializer = op_conf_util.InitializerConf()
-        kernel_initializer.truncated_normal_conf.std = 0.816496580927726
-        return kernel_initializer
-
-    def _get_bias_initializer():
-        bias_initializer = op_conf_util.InitializerConf()
-        bias_initializer.constant_conf.value = 0.0
-        return bias_initializer
-
-    pool5 = flow.reshape(pool5, [pool5.shape[0], -1])
-
     fc6 = flow.layers.dense(
-        inputs=pool5,
+        inputs=flow.reshape(pool5, [pool5.shape[0], -1]),
         units=4096,
         activation=flow.keras.activations.relu,
         use_bias=True,
-        kernel_initializer=_get_kernel_initializer(),
-        bias_initializer=_get_bias_initializer(),
-        trainable=trainable,
+        kernel_initializer=flow.truncated_normal(0.816496580927726),
+        bias_initializer=flow.constant_initializer(),
         name="fc1",
     )
 
@@ -72,9 +60,8 @@ def vgg16(images, trainable=True):
         units=4096,
         activation=flow.keras.activations.relu,
         use_bias=True,
-        kernel_initializer=_get_kernel_initializer(),
-        bias_initializer=_get_bias_initializer(),
-        trainable=trainable,
+        kernel_initializer=flow.truncated_normal(0.816496580927726),
+        bias_initializer=flow.constant_initializer(),
         name="fc2",
     )
     fc7 = flow.nn.dropout(fc7, rate=0.5)
@@ -83,9 +70,8 @@ def vgg16(images, trainable=True):
         inputs=fc7,
         units=1001,
         use_bias=True,
-        kernel_initializer=_get_kernel_initializer(),
-        bias_initializer=_get_bias_initializer(),
-        trainable=trainable,
+        kernel_initializer=flow.truncated_normal(0.816496580927726),
+        bias_initializer=flow.constant_initializer(),
         name="fc_final",
     )
 
