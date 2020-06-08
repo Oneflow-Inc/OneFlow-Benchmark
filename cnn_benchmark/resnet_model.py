@@ -19,14 +19,18 @@ def _conv2d(
     padding="SAME",
     data_format="NCHW",
     dilations=1,
+    weight_initializer=flow.variance_scaling_initializer(
+        2, 'fan_in', 'random_normal', data_format="NCHW"),
+    weight_regularizer=flow.regularizers.l2(1.0/32768),
     trainable=True,
-    weight_initializer=flow.variance_scaling_initializer(data_format="NCHW"),
 ):
     weight = flow.get_variable(
         name + "-weight",
-        shape=(filters, input.static_shape[1], kernel_size, kernel_size),
+        shape=(filters, input.shape[1], kernel_size, kernel_size),
         dtype=input.dtype,
         initializer=weight_initializer,
+        regularizer=weight_regularizer,
+        model_name="weight",
         trainable=trainable,
     )
     return flow.nn.conv2d(
@@ -38,7 +42,7 @@ def _batch_norm(inputs, name=None, trainable=True):
     return flow.layers.batch_normalization(
         inputs=inputs,
         axis=1,
-        momentum=0.9,#97,
+        momentum=0.9,  # 97,
         epsilon=1.001e-5,
         center=True,
         scale=True,
@@ -121,9 +125,11 @@ def resnet_stem(input):
     return pool1
 
 
-def resnet50(images, trainable=True):
+def resnet50(images, trainable=True, need_transpose=False):
 
-    images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
+    # note: images.shape = (N C H W) in cc's new dataloader, transpose is not needed anymore
+    if need_transpose:
+        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
 
     with flow.deprecated.variable_scope("Resnet"):
         stem = resnet_stem(images)
@@ -134,10 +140,13 @@ def resnet50(images, trainable=True):
 
         fc1001 = flow.layers.dense(
             flow.reshape(pool5, (pool5.shape[0], -1)),
-            units=1001,
+            units=1000,
             use_bias=True,
-            kernel_initializer=flow.xavier_uniform_initializer(),
+            kernel_initializer=flow.variance_scaling_initializer(
+                2, 'fan_in', 'random_normal'),
+            # kernel_initializer=flow.xavier_uniform_initializer(),
             bias_initializer=flow.zeros_initializer(),
+            kernel_regularizer=flow.regularizers.l2(1.0/32768),
             trainable=trainable,
             name="fc1001",
         )

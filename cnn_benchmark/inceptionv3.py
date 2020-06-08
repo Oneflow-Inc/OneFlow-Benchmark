@@ -1,12 +1,64 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-
 import oneflow as flow
 import oneflow.core.operator.op_conf_pb2 as op_conf_util
+from datetime import datetime
+import argparse
+import os
+import numpy
 
+_DATA_DIR = "/dataset/PNGS/PNG299/of_record_repeated"
+_EVAL_DIR = _DATA_DIR
+_TRAIN_DIR = _DATA_DIR
+_MODEL_LOAD = "/dataset/PNGS/cnns_model_for_test/inceptionv3/models/of_model"
+_MODEL_SAVE_DIR = "./model_save-{}".format(
+    str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))
+)
+NODE_LIST = "192.168.1.12,192.168.1.14"
 
+class DLNetSpec(object):
+  def __init__(self, enable_auto_mixed_precision):
+    self.batch_size = 8
+    self.data_part_num = 32
+    self.eval_dir = _DATA_DIR
+    self.train_dir = _DATA_DIR
+    self.model_save_dir = _MODEL_SAVE_DIR
+    self.model_load_dir = _MODEL_LOAD
+    self.num_nodes = 1
+    self.gpu_num_per_node = 1
+    self.iter_num = 10
+    self.enable_auto_mixed_precision = enable_auto_mixed_precision
+
+parser = argparse.ArgumentParser(description="flags for multi-node and resource")
+parser.add_argument("-g", "--gpu_num_per_node", type=int, default=1, required=False)
+parser.add_argument("-i", "--iter_num", type=int, default=10, required=False)
+parser.add_argument("-b", "--batch_size", type=int, default=8, required=False)
+parser.add_argument(
+    "-m", "--multinode", default=False, action="store_true", required=False
+)
+parser.add_argument("-n", "--node_list", type=str, default=NODE_LIST, required=False)
+parser.add_argument(
+    "-s", "--skip_scp_binary", default=False, action="store_true", required=False
+)
+parser.add_argument(
+    "-c",
+    "--scp_binary_without_uuid",
+    default=False,
+    action="store_true",
+    required=False,
+)
+parser.add_argument(
+    "-r", "--remote_by_hand", default=False, action="store_true", required=False
+)
+parser.add_argument("-e", "--eval_dir", type=str, default=_DATA_DIR, required=False)
+parser.add_argument("-t", "--train_dir", type=str, default=_DATA_DIR, required=False)
+parser.add_argument(
+    "-load", "--model_load_dir", type=str, default=_MODEL_LOAD, required=False
+)
+parser.add_argument(
+    "-save", "--model_save_dir", type=str, default=_MODEL_SAVE_DIR, required=False
+)
+parser.add_argument("-dn", "--data_part_num", type=int, default=32, required=False)
+
+# TODO: add this interface to oneflow.layers
 def _conv2d_layer(
     name,
     input,
@@ -18,7 +70,6 @@ def _conv2d_layer(
     dilation_rate=1,
     activation=op_conf_util.kSigmoid,
     use_bias=True,
-    trainable=True,
     weight_initializer=flow.random_uniform_initializer(),
     bias_initializer=flow.constant_initializer(),
 ):
@@ -26,7 +77,7 @@ def _conv2d_layer(
         kernel_size = (kernel_size, kernel_size)
     else:
         kernel_size = tuple(kernel_size)
-    weight_shape = (filters, input.static_shape[1]) + kernel_size
+    weight_shape = (filters, input.shape[1]) + kernel_size
     weight = flow.get_variable(
         name + "-weight",
         shape=weight_shape,
@@ -54,6 +105,25 @@ def _conv2d_layer(
             raise NotImplementedError
 
     return output
+
+
+def _data_load_layer(args, data_dir):
+    image_blob_conf = flow.data.BlobConf(
+        "encoded",
+        shape=(299, 299, 3),
+        dtype=flow.float,
+        codec=flow.data.ImageCodec([flow.data.ImagePreprocessor("bgr2rgb")]),
+        preprocessors=[flow.data.NormByChannelPreprocessor((123.68, 116.78, 103.94))],
+    )
+    label_blob_conf = flow.data.BlobConf(
+        "class/label", shape=(), dtype=flow.int32, codec=flow.data.RawCodec()
+    )
+    node_num = args.num_nodes
+    total_batch_size = args.batch_size * args.gpu_num_per_node * node_num
+    return flow.data.decode_ofrecord(
+        data_dir, (image_blob_conf, label_blob_conf),
+        batch_size=total_batch_size, data_part_num=args.data_part_num, name="decode",
+    )
 
 
 def InceptionA(in_blob, index):
@@ -425,7 +495,7 @@ def InceptionE(in_blob, index):
     return concat_total
 
 
-def inceptionv3(images, labels, trainable=True):
+def InceptionV3(images, labels, trainable=True):
     images = flow.transpose(images, perm=[0, 3, 1, 2])
 
     conv0 = _conv2d_layer(
@@ -506,5 +576,75 @@ def inceptionv3(images, labels, trainable=True):
         fc1 = flow.matmul(pool3, weight)
         fc1 = flow.nn.bias_add(fc1, bias)
 
-    return fc1
+    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
+        labels=labels, logits=fc1, name="softmax_loss"
+    )
 
+    return loss
+
+
+def main(args):
+  flow.config.machine_num(args.num_nodes)
+  flow.config.gpu_device_num(args.gpu_num_per_node)
+  func_config = flow.FunctionConfig()
+  func_config.default_distribute_strategy(flow.distribute.consistent_strategy())
+  func_config.default_data_type(flow.float)
+  func_config.train.primary_lr(0.0001)
+  func_config.train.model_update_conf(dict(naive_conf={}))
+  func_config.enable_auto_mixed_precision(args.enable_auto_mixed_precision)
+  @flow.function(func_config)
+  def TrainNet():
+      (images, labels) = _data_load_layer(args, args.train_dir)
+      loss = InceptionV3(images, labels)
+      flow.losses.add_loss(loss)
+      return loss
+  check_point = flow.train.CheckPoint()
+  if not args.model_load_dir:
+    check_point.init()
+  else:
+    check_point.load(args.model_load_dir)
+
+  num_nodes = args.num_nodes
+  print("Traning inceptionv3: num_gpu_per_node = {}, num_nodes = {}.".format(args.gpu_num_per_node, num_nodes))
+
+  print("{:>12}  {:>12}  {:>12}".format("iter", "loss type", "loss value"))
+  loss = []
+  for i in range(args.iter_num):
+    train_loss = TrainNet().get().mean()
+    loss.append(train_loss)
+
+    fmt_str = "{:>12}  {:>12}  {:>12.6f}"
+    print(fmt_str.format(i, "train loss:", train_loss))
+
+    if (i + 1) % 100 == 0:
+      check_point.save(_MODEL_SAVE_DIR + str(i))
+
+  # save loss to file
+  loss_file = "{}n{}c.npy".format(str(num_nodes), str(args.gpu_num_per_node * num_nodes))
+  loss_path = "./of_loss/inceptionv3"
+  if not os.path.exists(loss_path): os.makedirs(loss_path)
+  numpy.save(os.path.join(loss_path, loss_file), loss)
+
+if __name__ == "__main__":
+  args = parser.parse_args()
+  if args.multinode:
+    flow.env.ctrl_port(12138)
+    nodes = []
+    for n in args.node_list.strip().split(","):
+      addr_dict = {}
+      addr_dict["addr"] = n
+      nodes.append(addr_dict)
+
+    flow.env.machine(nodes)
+    if args.remote_by_hand is False:
+      if args.scp_binary_without_uuid:
+        flow.deprecated.init_worker(scp_binary=True, use_uuid=False)
+      elif args.skip_scp_binary:
+        flow.deprecated.init_worker(scp_binary=False, use_uuid=False)
+      else:
+        flow.deprecated.init_worker(scp_binary=True, use_uuid=True)
+
+  main(args)
+  if (args.multinode and args.skip_scp_binary is False
+      and args.scp_binary_without_uuid is False):
+    flow.deprecated.delete_worker()
