@@ -60,8 +60,9 @@ def TrainNet():
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
+    
     logits = model_dict[args.model](
-        images, need_transpose=not args.use_new_dataloader)
+        images, need_transpose=False if (args.use_new_dataloader and args.train_data_dir) else True)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
         labels, logits, name="softmax_loss")
     loss = flow.math.reduce_mean(loss)
@@ -85,7 +86,7 @@ def InferenceNet():
         (labels, images) = ofrecord_util.load_synthetic(args)
 
     logits = model_dict[args.model](
-        images, need_transpose=not args.use_new_dataloader)
+        images, need_transpose=False if (args.use_new_dataloader and args.train_data_dir) else True)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs
