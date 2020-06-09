@@ -1,8 +1,8 @@
 # OneFlow-Benchmark
 OneFlow models for benchmarking.
 
-## Training
-### cnns
+## CNNs
+### Train
 * 1 node, 1 gpu:
     ```
     python3 cnn_benchmark/of_cnn_train_val.py \
@@ -40,10 +40,24 @@ OneFlow models for benchmarking.
         --use_fp16=False \
         --use_boxing_v2=True \
         --model="resnet50" 
+ 
     ```
+### Validation
+```
+python3 cnn_benchmark/of_cnn_val.py \
+    --model_load_dir=output/snapshots_0323 \
+    --val_data_dir=$DATA_ROOT/validation \
+    --val_data_part_num=256 \
+    --gpu_num_per_node=4 \
+    --loss_print_every_n_iter=20 \
+    --val_batch_size_per_device=125 \
+    --model="resnet50"
+```
 
-### bert pretrain
+## BERT
+### Pretrain
 * 1 node, 1gpu:
+    
     * bert base:
     ```
     python3 bert_benchmark/run_pretraining.py \
