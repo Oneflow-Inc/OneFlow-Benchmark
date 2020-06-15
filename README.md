@@ -13,7 +13,7 @@ OneFlow models for benchmarking.
         --train_data_part_num=256 \
         --val_data_part_num=256 \
         --num_epochs=1 \
-        --optimizer="sgd" \
+        --model_update="momentum" \
         --learning_rate=0.256 \
         --use_fp16=False \
         --use_boxing_v2=True \
@@ -35,7 +35,7 @@ OneFlow models for benchmarking.
         --train_data_part_num=256 \
         --val_data_part_num=256 \
         --num_epochs=1 \
-        --optimizer="sgd" \
+        --model_update="momentum" \
         --learning_rate=0.256 \
         --use_fp16=False \
         --use_boxing_v2=True \
