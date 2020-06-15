@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import oneflow as flow
-from optimizer_util import get_optimizer
+from optimizer_util import gen_model_update_conf
 
 
 def _default_config(args):
@@ -32,7 +32,7 @@ def get_train_config(args):
         train_config.use_boxing_v2(True)
 
     train_config.prune_parallel_cast_ops(True)
-    train_config.train.model_update_conf(get_optimizer(args))
+    train_config.train.model_update_conf(gen_model_update_conf(args))
     train_config.enable_inplace(True)
     return train_config
 
