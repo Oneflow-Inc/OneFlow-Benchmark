@@ -15,7 +15,6 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --loss_print_every_n_iter=1 \
     --batch_size_per_device=8 \
     --val_batch_size_per_device=8 \
-    --use_new_dataloader=false \
     --num_epoch=90 \
     --use_fp16=false \
     --use_boxing_v2=true \

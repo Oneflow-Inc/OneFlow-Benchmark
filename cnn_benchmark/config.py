@@ -57,13 +57,6 @@ def get_parser(parser=None):
         help='Whether to use boxing v2'
     )
 
-    parser.add_argument(
-        '--use_new_dataloader',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        help='Whether to use new dataloader'
-    )
     # train and validaion
     parser.add_argument('--num_epochs', type=int,
                         default=90, help='number of epochs')
