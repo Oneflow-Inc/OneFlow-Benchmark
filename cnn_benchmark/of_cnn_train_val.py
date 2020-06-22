@@ -11,10 +11,8 @@ import ofrecord_util
 import config as configs
 from util import Snapshot, Summary, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
-import inception_model
 import resnet_model
-import vgg_model
-import alexnet_model
+
 
 
 parser = configs.get_parser()
@@ -32,9 +30,6 @@ num_val_steps = int(args.num_val_examples / val_batch_size)
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
-    "vgg16": vgg_model.vgg16,
-    "alexnet": alexnet_model.alexnet,
-    "inceptionv3": inception_model.inceptionv3,
 }
 
 
