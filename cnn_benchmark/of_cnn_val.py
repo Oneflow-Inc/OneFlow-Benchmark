@@ -35,7 +35,7 @@ flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
 
 
-@flow.function(get_val_config(args))
+@flow.global_function(get_val_config(args))
 def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
