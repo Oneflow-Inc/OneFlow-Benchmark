@@ -48,14 +48,15 @@ class Summary(object):
     def __init__(self, log_dir, config, filename='summary.csv'):
         self._filename = filename
         self._log_dir = log_dir
-        self._metrics = pd.DataFrame({"epoch":0, "iter": 0, "legend": "cfg", "note": str(config)}, 
+        if not os.path.exists(log_dir): os.makedirs(log_dir)
+        self._metrics = pd.DataFrame({"epoch":0, "iter": 0, "legend": "cfg", "note": str(config)},
                                      index=[0])
         from optimizer_util import gen_model_update_conf
-        df = pd.DataFrame({"epoch":0, "iter": 0, "legend": "optimizer", 
+        df = pd.DataFrame({"epoch":0, "iter": 0, "legend": "optimizer",
                            "note": str(gen_model_update_conf(config))}, index=[0])
         self._metrics = pd.concat([self._metrics, df], axis=0, sort=False)
         self.save()
-        
+
 
     def scalar(self, legend, value, epoch, step=-1):
         # TODO: support rank(which device/gpu)
