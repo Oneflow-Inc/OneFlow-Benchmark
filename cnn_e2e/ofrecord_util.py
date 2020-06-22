@@ -89,43 +89,43 @@ def load_imagenet_for_training2(args):
     train_batch_size = total_device_num * args.batch_size_per_device
 
     color_space = 'RGB'
-    with flow.fixed_placement("cpu", "0:0-{}".format(args.gpu_num_per_node - 1)):
-        ofrecord = flow.data.ofrecord_reader(args.train_data_dir,
-                                             batch_size=train_batch_size,
-                                             data_part_num=args.train_data_part_num,
-                                             part_name_suffix_length=5,
-                                             random_shuffle = True,
-                                             shuffle_after_epoch=True)
-        image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded", #seed=seed,
-                                                         color_space=color_space)
-        label = flow.data.OFRecordRawDecoder(ofrecord, "class/label", shape=(), dtype=flow.int32)
-        rsz = flow.image.Resize(image, resize_x=args.image_size, resize_y=args.image_size,
-                                color_space=color_space)
+    #with flow.fixed_placement("cpu", "0:0-{}".format(args.gpu_num_per_node - 1)):
+    ofrecord = flow.data.ofrecord_reader(args.train_data_dir,
+                                         batch_size=train_batch_size,
+                                         data_part_num=args.train_data_part_num,
+                                         part_name_suffix_length=5,
+                                         random_shuffle = True,
+                                         shuffle_after_epoch=True)
+    image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded", #seed=seed,
+                                                     color_space=color_space)
+    label = flow.data.OFRecordRawDecoder(ofrecord, "class/label", shape=(), dtype=flow.int32)
+    rsz = flow.image.Resize(image, resize_x=args.image_size, resize_y=args.image_size,
+                            color_space=color_space)
 
-        rng = flow.random.CoinFlip(batch_size=train_batch_size)#, seed=seed)
-        normal = flow.image.CropMirrorNormalize(rsz, mirror_blob=rng, color_space=color_space,
-            mean=args.rgb_mean, std=args.rgb_std, output_dtype = flow.float)
-        return label, normal
+    rng = flow.random.CoinFlip(batch_size=train_batch_size)#, seed=seed)
+    normal = flow.image.CropMirrorNormalize(rsz, mirror_blob=rng, color_space=color_space,
+        mean=args.rgb_mean, std=args.rgb_std, output_dtype = flow.float)
+    return label, normal
 
 def load_imagenet_for_validation2(args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     val_batch_size = total_device_num * args.val_batch_size_per_device
 
     color_space = 'RGB'
-    with flow.fixed_placement("cpu", "0:0-{}".format(args.gpu_num_per_node - 1)):
-        ofrecord = flow.data.ofrecord_reader(args.val_data_dir,
-                                             batch_size=val_batch_size,
-                                             data_part_num=args.val_data_part_num,
-                                             part_name_suffix_length=5,
-                                             shuffle_after_epoch=False)
-        image = flow.data.OFRecordImageDecoder(ofrecord, "encoded", color_space=color_space)
-        label = flow.data.OFRecordRawDecoder(ofrecord, "class/label", shape=(), dtype=flow.int32)
-        rsz = flow.image.Resize(image, resize_shorter=256, color_space=color_space)
+    #with flow.fixed_placement("cpu", "0:0-{}".format(args.gpu_num_per_node - 1)):
+    ofrecord = flow.data.ofrecord_reader(args.val_data_dir,
+                                         batch_size=val_batch_size,
+                                         data_part_num=args.val_data_part_num,
+                                         part_name_suffix_length=5,
+                                         shuffle_after_epoch=False)
+    image = flow.data.OFRecordImageDecoder(ofrecord, "encoded", color_space=color_space)
+    label = flow.data.OFRecordRawDecoder(ofrecord, "class/label", shape=(), dtype=flow.int32)
+    rsz = flow.image.Resize(image, resize_shorter=256, color_space=color_space)
 
-        normal = flow.image.CropMirrorNormalize(rsz, color_space=color_space,
-            crop_h = args.image_size, crop_w = args.image_size, crop_pos_y = 0.5, crop_pos_x = 0.5,
-            mean=args.rgb_mean, std=args.rgb_std, output_dtype = flow.float)
-        return label, normal
+    normal = flow.image.CropMirrorNormalize(rsz, color_space=color_space,
+        crop_h = args.image_size, crop_w = args.image_size, crop_pos_y = 0.5, crop_pos_x = 0.5,
+        mean=args.rgb_mean, std=args.rgb_std, output_dtype = flow.float)
+    return label, normal
 
 if __name__ == "__main__":
     import os

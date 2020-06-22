@@ -41,12 +41,15 @@ def get_parser(parser=None):
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
     # for data process
+    parser.add_argument("--num_classes", type=int, default=1000, help="num of pic classes")
     parser.add_argument("--num_examples", type=int, default=1281167, help="train pic number")
     parser.add_argument("--num_val_examples", type=int, default=50000, help="validation pic number")
     parser.add_argument('--rgb-mean', type=float_list, default=[123.68, 116.779, 103.939],
                         help='a tuple of size 3 for the mean rgb')
     parser.add_argument('--rgb-std', type=float_list, default=[58.393, 57.12, 57.375],
                         help='a tuple of size 3 for the std rgb')
+    parser.add_argument('--label-smoothing', type=float, default=0.1, help='label smoothing factor')
+
     #parser.add_argument('--image-shape', type=int_list, default=[3, 224, 224],
     #                    help='the image shape feed into the network')
 
