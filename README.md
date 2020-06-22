@@ -9,7 +9,6 @@ OneFlow models for benchmarking.
         --gpu_num_per_node=1 \
         --batch_size_per_device=32 \
         --val_batch_size_per_device=32 \
-        --use_new_dataloader=True \
         --train_data_part_num=256 \
         --val_data_part_num=256 \
         --num_epochs=1 \
@@ -31,7 +30,6 @@ OneFlow models for benchmarking.
         --gpu_num_per_node=1 \
         --batch_size_per_device=32 \
         --val_batch_size_per_device=32 \
-        --use_new_dataloader=True \
         --train_data_part_num=256 \
         --val_data_part_num=256 \
         --num_epochs=1 \

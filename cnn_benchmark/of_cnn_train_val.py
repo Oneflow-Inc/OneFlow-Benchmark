@@ -51,18 +51,14 @@ def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
         print("Loading data from {}".format(args.train_data_dir))
-        if args.use_new_dataloader:
-            (labels, images) = ofrecord_util.load_imagenet_for_training2(args)
-        else:
-            (labels, images) = ofrecord_util.load_imagenet_for_training(args)
-        # note: images.shape = (N C H W) in cc's new dataloader(load_imagenet_for_training2)
+        (labels, images) = ofrecord_util.load_imagenet_for_training(args)
+
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    
     logits = model_dict[args.model](
-        images, need_transpose=False if (args.use_new_dataloader and args.train_data_dir) else True)
+        images, need_transpose=False if args.train_data_dir else True)
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
         labels, logits, name="softmax_loss")
     loss = flow.math.reduce_mean(loss)
@@ -77,16 +73,14 @@ def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
         print("Loading data from {}".format(args.val_data_dir))
-        if args.use_new_dataloader:
-            (labels, images) = ofrecord_util.load_imagenet_for_validation2(args)
-        else:
-            (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
+        (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
+
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
     logits = model_dict[args.model](
-        images, need_transpose=False if (args.use_new_dataloader and args.train_data_dir) else True)
+        images, need_transpose=False if args.train_data_dir else True)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs
