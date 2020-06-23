@@ -194,16 +194,17 @@ def BuildPreTrainNet(
 
 _BERT_MODEL_UPDATE_CONF = dict(
     learning_rate_decay=dict(
-        polynomial_conf=dict(decay_batches=100000, end_learning_rate=0.0,)
+        polynomial_conf=dict(decay_batches=1000000, end_learning_rate=0.0,)
     ),
     warmup_conf=dict(linear_conf=dict(
-        warmup_batches=1000, start_multiplier=0,)),
+        warmup_batches=10000, start_multiplier=0,)),
     clip_conf=dict(clip_by_global_norm=dict(clip_norm=1.0,)),
     adam_conf=dict(epsilon=1e-6),
 )
 
 config = flow.function_config()
 config.default_data_type(flow.float)
+config.default_distribute_strategy(flow.distribute.consistent_strategy())
 config.train.primary_lr(args.learning_rate)
 config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
 # config.train.weight_l2(args.weight_l2) ??
@@ -282,11 +283,10 @@ def main():
     )
     speedometer = benchmark_util.BERTSpeedometer()
 
-    for step in range(args.warmup_iter_num + args.iter_num):
+    for step in range(args.iter_num):
         cb = speedometer.speedometer_cb(
             step,
             total_batch_size,
-            args.warmup_iter_num,
             args.iter_num,
             args.loss_print_every_n_iter,
         )
