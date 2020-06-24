@@ -41,7 +41,7 @@ if args.use_boxing_v2:
     flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
 
 
-@flow.function(get_train_config(args))
+@flow.global_function(get_train_config(args))
 def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
@@ -63,7 +63,7 @@ def TrainNet():
     return outputs
 
 
-@flow.function(get_val_config(args))
+@flow.global_function(get_val_config(args))
 def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
