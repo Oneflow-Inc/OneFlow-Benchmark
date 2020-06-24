@@ -161,7 +161,7 @@ if args.use_boxing_v2:
     config.use_boxing_v2(True)
 
 
-@flow.function(config)
+@flow.global_function(config)
 def PretrainJob():
     total_device_num = args.node_num * args.gpu_num_per_node
     batch_size = total_device_num * args.batch_size_per_device
