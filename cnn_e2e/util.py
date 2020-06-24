@@ -92,7 +92,8 @@ class StopWatch(object):
 
 
 def match_top_k(predictions, labels, top_k=1):
-    max_k_preds = predictions.argsort(axis=1)[:, -top_k:][:, ::-1]
+    #max_k_preds = predictions.argsort(axis=1)[:, -top_k:][:, ::-1]
+    max_k_preds = np.argpartition(predictions.ndarray(), -top_k)[:, -top_k:]
     match_array = np.logical_or.reduce(max_k_preds==labels.reshape((-1, 1)), axis=1)
     num_matched = match_array.sum()
     return num_matched, match_array.shape[0]
