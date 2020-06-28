@@ -48,6 +48,7 @@ class Summary(object):
     def __init__(self, log_dir, config, filename='summary.csv'):
         self._filename = filename
         self._log_dir = log_dir
+        if not os.path.exists(log_dir): os.makedirs(log_dir)
         self._metrics = pd.DataFrame({"epoch":0, "iter": 0, "legend": "cfg", "note": str(config)}, index=[0])
 
     def scalar(self, legend, value, epoch, step=-1):
@@ -84,7 +85,7 @@ class StopWatch(object):
 
 
 def match_top_k(predictions, labels, top_k=1):
-    max_k_preds = predictions.argsort(axis=1)[:, -top_k:][:, ::-1]
+    max_k_preds = np.argpartition(predictions.ndarray(), -top_k)[:, -top_k:]
     match_array = np.logical_or.reduce(max_k_preds==labels.reshape((-1, 1)), axis=1)
     num_matched = match_array.sum()
     return num_matched, match_array.shape[0]

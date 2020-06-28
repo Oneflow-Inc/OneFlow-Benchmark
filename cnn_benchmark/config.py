@@ -66,6 +66,7 @@ def get_parser(parser=None):
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
     # for data process
+    parser.add_argument("--num_classes", type=int, default=1000, help="num of pic classes")
     parser.add_argument("--num_examples", type=int,
                         default=1281167, help="train pic number")
     parser.add_argument("--num_val_examples", type=int,
@@ -78,6 +79,7 @@ def get_parser(parser=None):
                         default='NHWC', help="NCHW or NHWC")
     parser.add_argument('--image-shape', type=int_list, default=[3, 224, 224],
                         help='the image shape feed into the network')
+    parser.add_argument('--label-smoothing', type=float, default=0.1, help='label smoothing factor')
 
     # snapshot
     parser.add_argument("--model_save_dir", type=str,
