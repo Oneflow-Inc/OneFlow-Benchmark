@@ -14,7 +14,6 @@ from job_function_util import get_train_config, get_val_config
 import resnet_model
 
 
-
 parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
@@ -41,6 +40,14 @@ if args.use_boxing_v2:
     flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
 
 
+def label_smoothing(labels, classes, eta, dtype):
+    assert classes > 0
+    assert eta >= 0.0 and eta < 1.0
+
+    return flow.one_hot(labels, depth=classes, dtype=dtype,
+                        on_value=1 - eta + eta / classes, off_value=eta/classes)
+
+
 @flow.global_function(get_train_config(args))
 def TrainNet():
     if args.train_data_dir:
@@ -54,9 +61,12 @@ def TrainNet():
 
     logits = model_dict[args.model](
         images, need_transpose=False if args.train_data_dir else True)
-    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-        labels, logits, name="softmax_loss")
-    loss = flow.math.reduce_mean(loss)
+    # loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
+    #     labels, logits, name="softmax_loss")
+    # loss = flow.math.reduce_mean(loss)
+    one_hot_labels = label_smoothing(labels, args.num_classes, args.label_smoothing, logits.dtype)
+    loss = flow.nn.softmax_cross_entropy_with_logits(one_hot_labels, logits, name="softmax_loss")
+    
     flow.losses.add_loss(loss)
     predictions = flow.nn.softmax(logits)
     outputs = {"loss": loss, "predictions": predictions, "labels": labels}
