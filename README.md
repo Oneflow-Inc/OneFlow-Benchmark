@@ -5,7 +5,7 @@ OneFlow models for benchmarking.
 ### Train
 * 1 node, 1 gpu:
     ```
-    python3 cnn_benchmark/of_cnn_train_val.py \
+    python3 Classification/resnet50v1.5/of_cnn_train_val.py \
         --gpu_num_per_node=1 \
         --batch_size_per_device=32 \
         --val_batch_size_per_device=32 \
@@ -21,10 +21,10 @@ OneFlow models for benchmarking.
 
 * 2 nodes:
 
-    simply add `--num_nodes=2 --node_ips="192.168.1.12,192.168.1.14" ` :
+    simply add `--num_nodes=2 --node_ips="192.168.1.12,192.168.1.14" ` in run scripts, for example:
 
     ```
-       python3 cnn_benchmark/of_cnn_train_val.py \
+       python3 Classification/resnet50v1.5/of_cnn_train_val.py \
         --num_nodes=2 \
         --node_ips="192.168.1.12,192.168.1.14" \
         --gpu_num_per_node=1 \
@@ -42,7 +42,7 @@ OneFlow models for benchmarking.
     ```
 ### Validation
 ```
-python3 cnn_benchmark/of_cnn_val.py \
+python3 Classification/resnet50v1.5/of_cnn_val.py \
     --model_load_dir=output/snapshots_0323 \
     --val_data_dir=$DATA_ROOT/validation \
     --val_data_part_num=256 \
@@ -58,7 +58,7 @@ python3 cnn_benchmark/of_cnn_val.py \
     
     * bert base:
     ```
-    python3 bert_benchmark/run_pretraining.py \
+    python3 LanguageModeling/BERT/run_pretraining.py \
     --gpu_num_per_node=1 \
     --learning_rate=1e-4 \
     --batch_size_per_device=12 \
@@ -83,7 +83,7 @@ python3 cnn_benchmark/of_cnn_val.py \
     `--max_predictions_per_seq=80 --num_hidden_layers=24 --num_attention_heads=16 --max_position_embeddings=512`
 
     ```
-    python3 bert_benchmark/run_pretraining.py \
+    python3 LanguageModeling/BERT/run_pretraining.py \
     --gpu_num_per_node=1 \
     --learning_rate=1e-4 \
     --batch_size_per_device=12 \
