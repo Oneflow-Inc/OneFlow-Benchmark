@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 from datetime import datetime
 
+
 from optimizer_util import add_optimizer_args
 from ofrecord_util import add_ofrecord_args
 
@@ -64,6 +65,9 @@ def get_parser(parser=None):
                         default=None, help="model load directory if need")
     parser.add_argument("--batch_size_per_device", type=int, default=64)
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
+
+    # inference
+    parser.add_argument("--image_path", type=str, default='tiger.jpg', help="image path")
 
     # for data process
     parser.add_argument("--num_classes", type=int, default=1000, help="num of pic classes")
