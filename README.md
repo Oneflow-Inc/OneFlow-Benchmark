@@ -1,56 +1,22 @@
+# Branch Notes
+
+请大家管理一下自己的分支，有用的分支写在下面，说明用途。过时没用的分支及时删除。
+
+* (default)of_develop_py3: fllow oneflow:devevop, python3
+* (useful)of_develop_py3_4cnns_back: 
+    1) vgg16,alexnet,inceptionv3 old backup, fllow develop, still useful.
+    2) of_cnn_val.py backup.
+    3) dockerfile backup.
+* ...
+
+
+
+
 # OneFlow-Benchmark
 OneFlow models for benchmarking.
 
-## CNNs
-### Train
-* 1 node, 1 gpu:
-    ```
-    python3 Classification/resnet50v1.5/of_cnn_train_val.py \
-        --gpu_num_per_node=1 \
-        --batch_size_per_device=32 \
-        --val_batch_size_per_device=32 \
-        --train_data_part_num=256 \
-        --val_data_part_num=256 \
-        --num_epochs=1 \
-        --model_update="momentum" \
-        --learning_rate=0.256 \
-        --use_fp16=False \
-        --use_boxing_v2=True \
-        --model="resnet50" 
-    ```
-
-* 2 nodes:
-
-    simply add `--num_nodes=2 --node_ips="192.168.1.12,192.168.1.14" ` in run scripts, for example:
-
-    ```
-       python3 Classification/resnet50v1.5/of_cnn_train_val.py \
-        --num_nodes=2 \
-        --node_ips="192.168.1.12,192.168.1.14" \
-        --gpu_num_per_node=1 \
-        --batch_size_per_device=32 \
-        --val_batch_size_per_device=32 \
-        --train_data_part_num=256 \
-        --val_data_part_num=256 \
-        --num_epochs=1 \
-        --model_update="momentum" \
-        --learning_rate=0.256 \
-        --use_fp16=False \
-        --use_boxing_v2=True \
-        --model="resnet50" 
- 
-    ```
-### Validation
-```
-python3 Classification/resnet50v1.5/of_cnn_val.py \
-    --model_load_dir=output/snapshots_0323 \
-    --val_data_dir=$DATA_ROOT/validation \
-    --val_data_part_num=256 \
-    --gpu_num_per_node=4 \
-    --loss_print_every_n_iter=20 \
-    --val_batch_size_per_device=125 \
-    --model="resnet50"
-```
+## Classification
+see: https://github.com/Oneflow-Inc/OneFlow-Benchmark/tree/of_develop_py3/Classification/resnet50v1.5
 
 ## BERT
 ### Pretrain
@@ -107,14 +73,3 @@ python3 Classification/resnet50v1.5/of_cnn_val.py \
 
     simply add `--num_nodes=2 --node_ips="192.168.1.12,192.168.1.14" ` :
 
-
-## build docker images from wheel
-please put oneflow `*.whl` in docker/wheel folder, then build docker image use:
-```
-sh docker/build.sh
-```
-
-run docker image use:
-```
-sh docker/launch.sh
-```
