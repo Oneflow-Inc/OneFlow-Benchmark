@@ -41,7 +41,7 @@ python dcgan.py
 - 模型的结构和参数参考了tensorflow的[官方示例](https://www.tensorflow.org/tutorials/generative/dcgan)，可以通过-c参数来跟tensorflow的实现进行对齐测试
 - 模型会定期将生成的图片存储到`.gout/`目录，并在训练结束后生成图片演化的动图,生成动图的过程会依赖python包`imageio`
 
-![](https://raw.githubusercontent.com/JamiePlur/picgo/master/20200615170256.png)
+![dcgan demo](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_gan/Generative/pic/1.png)
 
 # Pix2Pix
 
@@ -71,4 +71,4 @@ python pix2pix.py
 - 模型的结构和参数参考了tensorflow的[官方示例](https://www.tensorflow.org/tutorials/generative/pix2pix)，可以通过-c参数来跟tensorflow的实现进行对齐测试
 - 模型会在训练中定期将生成的图片存储到`.gout/`目录
 
-![image-20200701153752019](https://raw.githubusercontent.com/JamiePlur/picgo/master/20200701153829.png)
+![pix2pix demo](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_gan/Generative/pic/2.png)
