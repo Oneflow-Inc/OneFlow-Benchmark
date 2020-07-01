@@ -285,6 +285,8 @@ class Pix2Pix:
             _PATH = os.path.join(os.getcwd(), "data/facades.tar.gz")
             _URL = "https://people.eecs.berkeley.edu/~tinghuiz/projects/pix2pix/datasets/facades.tar.gz"
             path_to_zip = tf.keras.utils.get_file(_PATH, origin=_URL, extract=True)
+        else:
+            print("Found Facades - skip download")
 
         input_imgs, real_imgs = [], []
         for d in os.listdir(os.path.join("data/facades/", mode)):
@@ -437,7 +439,7 @@ class Pix2Pix:
             if not os.path.exists("checkpoint"):
                 os.mkdir("checkpoint")
             check_point.save(
-                "checkpoint/cp_{}".format(
+                "checkpoint/pix2pix_{}".format(
                     str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))
                 )
             )

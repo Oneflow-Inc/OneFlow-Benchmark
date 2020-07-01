@@ -63,7 +63,7 @@ class DCGAN:
             nodes.append(addr_dict)
         flow.env.machine(nodes)
 
-    def train(self, epochs=1, model_dir=None, save=False):
+    def train(self, epochs=1, model_dir=None, save=True):
         func_config = flow.FunctionConfig()
         func_config.default_data_type(flow.float)
         func_config.default_distribute_strategy(flow.distribute.consistent_strategy())
@@ -149,6 +149,15 @@ class DCGAN:
                     self._eval_model_and_save_images(
                         eval_generator, batch_idx + 1, epoch_idx + 1
                     )
+        if save:
+            from datetime import datetime
+            if not os.path.exists("checkpoint"):
+                os.mkdir("checkpoint")
+            check_point.save(
+                "checkpoint/dcgan_{}".format(
+                    str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))
+                )
+            )
 
     def save_to_gif(self):
         anim_file = "dcgan.gif"

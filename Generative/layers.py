@@ -103,8 +103,8 @@ def conv2d(
     return output
 
 
-def batchnorm(input, name, axis=1):
-    return flow.layers.batch_normalization(input, axis=axis, name=name)
+def batchnorm(input, name, axis=1, reuse=False):
+    return flow.layers.batch_normalization(input, axis=axis)
 
 
 def dense(
