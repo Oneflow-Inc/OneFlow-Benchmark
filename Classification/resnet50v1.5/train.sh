@@ -17,4 +17,5 @@ python3 of_cnn_train_val.py \
     --batch_size_per_device=64 \
     --val_batch_size_per_device=125 \
     --num_epoch=90 \
-    --model="resnet50" 
+    --model="resnet50"
+    # --channel_last=True
