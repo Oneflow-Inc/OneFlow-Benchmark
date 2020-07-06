@@ -257,28 +257,162 @@ https://github.com/Oneflow-Inc/OneFlow-Benchmark
 
 
 
-在XX中，提供了下载ImageNet-2012数据集，并将其转换成OFRecord格式的脚本。
+在OneFlow中，提供了将原始ImageNet-2012数据集文件转换成OFRecord格式的脚本。如果您已经准备好了ImageNet-2012数据集(训练集和验证集)，并且训练集/验证集的格式如下：
 
-一键执行：
-
-```
-TODO:待补充
-```
-
-
-
-若已有ImagNet-2012数据集，执行：
-
-```
-TODO:待补充
+```shell
+│   ├── train
+│   │   ├── n01440764
+│   │   └── n01443537
+                                 ...
+│   └── validation
+│       ├── n01440764
+│       └── n01443537
+                                 ...
 ```
 
+那么，一键执行以下脚本即可完成训练集和验证集 > OFRecord的转换：
+**转换训练集**
+
+```shell
+python3 imagenet_ofrecord.py  \
+--train_directory ../data/imagenet/train  \
+--output_directory ../data/imagenet/ofrecord/train   \
+--label_file imagenet_lsvrc_2015_synsets.txt   \
+--shards 256  --num_threads 8 --name train  \
+--bounding_box_file imagenet_2012_bounding_boxes.csv   \
+--height 224 --width 224
+```
+
+**转换验证集**
+
+```shell
+python3 imagenet_ofrecord.py  \
+--validation_directory ../data/imagenet/validation  \
+--output_directory ../data/imagenet/ofrecord/validation  \
+--label_file imagenet_lsvrc_2015_synsets.txt --name validation  \
+--shards 256 --num_threads 8 --name validation \
+--bounding_box_file imagenet_2012_bounding_boxes.csv  \
+--height 224 --width 224
+```
+
+**参数说明：**
+
+```shell
+--train_directory
+# 指定待转换的训练集文件夹路径
+--validation_directory
+# 指定待转换的验证集文件夹路径
+--name
+# 指定转换的是训练集还是验证集
+--output_directory
+# 指定转换后的ofrecord存储位置
+ --num_threads
+# 任务运行线程数
+--shards
+# 指定ofrecord分片数量，建议shards = 256
+#（shards数量越大，则转换后的每个ofrecord分片数据量就越少）
+--bounding_box_file
+# 该参数指定的csv文件中标记了所有目标box的坐标，使转换后的ofrecord同时支持分类和目标检测任务
+```
+
+运行以上脚本后，你可以在../data/imagenet/ofrecord/validation、../data/imagenet/ofrecord/train下看到转换好的ofrecord文件：
+
+```shell
+.
+├── train
+│   ├── part-00000
+│   └── part-00001
+                             ...
+└── validation
+    ├── part-00000
+    └── part-00001
+                             ...
+```
 
 
+
+如果您尚未下载过Imagenet数据集，请自行下载和准备以下文件：
+
+- ILSVRC2012_img_train.tar
+
+- ILSVRC2012_img_val.tar
+
+我们将用以下两个步骤，帮您完成数据集的预处理。之后，您就可以使用上面介绍的转换脚本进行OFReciord的转换了。下面假设您已经下载好了原始数据集，并存放在data/imagenet目录下：
+
+```shell
+├── data
+│   └── imagenet
+│       ├── ILSVRC2012_img_train.tar
+│       ├── ILSVRC2012_img_val.tar
+├── imagenet_utils
+│   ├── extract_trainval.sh
+│   ├── imagenet_2012_bounding_boxes.csv
+│   ├── imagenet_2012_validation_synset_labels.txt
+│   ├── imagenet_lsvrc_2015_synsets.txt
+│   ├── imagenet_metadata.txt
+│   ├── imagenet_ofrecord.py
+│   └── preprocess_imagenet_validation_data.py
+```
+
+**步骤一：extract imagenet**
+
+这一步主要是将ILSVRC2012_img_train.tar和ILSVRC2012_img_val.tar解压缩，生成train、validation文件夹。train文件夹下是1000个虚拟lebel分类文件夹(如：n01443537)，训练集图片解压后根据分类放入这些label文件夹中；validation文件夹下是解压后的原图。
+
+```shell
+sh extract_trainval.sh ../data/imagenet # 参数指定存放imagenet元素数据的文件夹路径
+```
+```shell
+解压后，文件夹结构示意如下：
+.
+├── extract_trainval.sh
+├── imagenet
+│   ├── ILSVRC2012_img_train.tar
+│   ├── ILSVRC2012_img_val.tar
+│   ├── train
+│   │   ├── n01440764
+│   │   │   ├── n01440764_10026.JPEG
+│   │   │   ├── n01440764_10027.JPEG 
+                                               ...
+│   │   └── n01443537
+│   │       ├── n01443537_10007.JPEG
+│   │       ├── n01443537_10014.JPEG
+											 ...
+│   └── validation
+│       ├── ILSVRC2012_val_00000236.JPEG
+│       ├── ILSVRC2012_val_00000262.JPEG        
+											...
+```
+
+**步骤二：validation数据处理**
+
+经过上一步，train数据集已经放入了1000个分类label文件夹中形成了规整的格式，而验证集部分的图片还全部堆放在validation文件夹中，这一步，我们就用preprocess_imagenet_validation_data.py对其进行处理，使其也按类别存放到label文件夹下。
+```shell
+python3 preprocess_imagenet_validation_data.py  ../data/imagenet/validation
+# 参数 ../data/imagenet/validation为ILSVRC2012_img_val.tar解压后验证集图像存放的路径。
+```
+处理后项目文件夹格式如下：
+```shell
+.
+├── extract_trainval.sh
+├── imagenet
+│   ├── ILSVRC2012_img_train.tar
+│   ├── ILSVRC2012_img_val.tar
+│   ├── train
+│   │   ├── n01440764
+│   │   └── n01443537
+                                ...
+│   └── validation
+│       ├── n01440764
+│       └── n01443537
+                               ...
+```
+
+至此，已经完成了全部的数据预处理，您可以直接跳转至**转换训练集**和**转换验证集**，轻松完成ImageNet-2012数据集到OFRecord的转换过程了。
 
 
 
 ### 模型转换
+
 从tf转of，或者是从ONNX转of，这部分待补充。
 TODO: 联系Jianhao Zhang 补充ONNX转of
 
@@ -289,3 +423,7 @@ TODO: 联系Jianhao Zhang 补充ONNX转of
 和tf的对比
 
 
+
+```
+
+```
