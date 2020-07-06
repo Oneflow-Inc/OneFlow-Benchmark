@@ -22,8 +22,8 @@ class BertBackbone(object):
                type_vocab_size=16,
                initializer_range=0.02):
 
-    with flow.deprecated.variable_scope("bert"):
-      with flow.deprecated.variable_scope("embeddings"):
+    with flow.name_scope("bert"):
+      with flow.name_scope("embeddings"):
         (self.embedding_output_, self.embedding_table_) = _EmbeddingLookup(
             input_ids_blob=input_ids_blob,
             vocab_size=vocab_size,
@@ -43,7 +43,7 @@ class BertBackbone(object):
             initializer_range=initializer_range,
             max_position_embeddings=max_position_embeddings,
             dropout_prob=hidden_dropout_prob)
-      with flow.deprecated.variable_scope("encoder"):
+      with flow.name_scope("encoder"):
         attention_mask_blob = _CreateAttentionMaskFromInputMask(
           input_mask_blob, from_seq_length=seq_length, to_seq_length=seq_length)
         self.all_encoder_layers_ = _TransformerModel(
@@ -91,10 +91,10 @@ def _TransformerModel(input_blob,
   prev_output_blob = flow.reshape(input_blob, (-1, input_width))
   all_layer_output_blobs = []
   for layer_idx in range(num_hidden_layers):
-    with flow.deprecated.variable_scope("layer_%d"%layer_idx):
+    with flow.name_scope("layer_%d"%layer_idx):
       layer_input_blob = prev_output_blob
-      with flow.deprecated.variable_scope("attention"):
-        with flow.deprecated.variable_scope("self"):
+      with flow.name_scope("attention"):
+        with flow.name_scope("self"):
           attention_output_blob = _AttentionLayer(
               from_blob=layer_input_blob,
               to_blob=layer_input_blob,
@@ -106,7 +106,7 @@ def _TransformerModel(input_blob,
               do_return_2d_tensor=True,
               from_seq_length=seq_length,
               to_seq_length=seq_length)
-        with flow.deprecated.variable_scope("output"):
+        with flow.name_scope("output"):
           attention_output_blob = _FullyConnected(
               attention_output_blob,
               input_size=num_attention_heads * attention_head_size,
@@ -116,7 +116,7 @@ def _TransformerModel(input_blob,
           attention_output_blob = _Dropout(attention_output_blob, hidden_dropout_prob)
           attention_output_blob = attention_output_blob + layer_input_blob
           attention_output_blob = _LayerNorm(attention_output_blob, hidden_size)
-      with flow.deprecated.variable_scope("intermediate"):
+      with flow.name_scope("intermediate"):
         if callable(intermediate_act_fn):
           act_fn = op_conf_util.kNone
         else:
@@ -130,7 +130,7 @@ def _TransformerModel(input_blob,
             name='dense')
         if callable(intermediate_act_fn):
           intermediate_output_blob = intermediate_act_fn(intermediate_output_blob)
-      with flow.deprecated.variable_scope("output"):
+      with flow.name_scope("output"):
         layer_output_blob = _FullyConnected(
             intermediate_output_blob,
             input_size=intermediate_size,
