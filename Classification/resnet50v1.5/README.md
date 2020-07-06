@@ -216,7 +216,37 @@ TODO：shengjian，先略。
 
 ### 半精度训练与预测
 
-TODO：等niuchong 完成fp16的调试后补充。
+Oneflow原生支持半精度(fp16)模型的训练。所谓的半精度训练通常意味着混合精度模型训练，训练时候参数float16格式存储和训练，同时保留float32权重文件用作梯度更新和计算过程。由于参数的存储减半（fp32->> fp16），会带来训练过程的加速，在oneflow中开启半精度模式后，resnet50的训练通常能达到1.7倍的加速。
+
+在Oneflow中开启fp16半精度模型的训练很简单，您只需要在train.sh脚本中指定参数：--use_fp16 True即可。
+
+完整的脚本如下：
+```shell
+DATA_ROOT=/DATA/disk1/ImageNet/ofrecord
+#gdb --args \
+  python3 of_cnn_train_val.py \
+    --num_epochs=100 \
+    --train_data_dir=$DATA_ROOT/train \
+    --train_data_part_num=256 \
+    --val_data_dir=$DATA_ROOT/validation \
+    --val_data_part_num=256 \
+    --num_nodes=1 \
+    --gpu_num_per_node=4 \
+    --optimizer="momentum" \
+    --learning_rate=0.256 \
+    --loss_print_every_n_iter=200 \
+    --batch_size_per_device=32 \
+    --val_batch_size_per_device=100 \
+    --use_new_dataloader=True \
+    --model="resnet50" \
+    --use_fp16 true \
+    --label-smoothing=0.1 \
+    --use_boxing_v2 True
+```
+
+除了指定--use_fp16以外，半精度模型的训练、输出、测试过程与之前正常的resnet50模型的训练过程完全一致。
+
+
 
 
 
