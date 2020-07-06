@@ -158,7 +158,7 @@ sh inference.sh
 若输出下面的内容，则表示预测成功：
 
 ```
-image_demo/tiger.jpg
+test_img/tiger.jpg
 0.81120294 tiger, Panthera tigris
 ```
 

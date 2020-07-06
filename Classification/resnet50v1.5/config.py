@@ -67,7 +67,7 @@ def get_parser(parser=None):
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
     # inference
-    parser.add_argument("--image_path", type=str, default='tiger.jpg', help="image path")
+    parser.add_argument("--image_path", type=str, default='test_img/tiger.jpg', help="image path")
 
     # for data process
     parser.add_argument("--num_classes", type=int, default=1000, help="num of pic classes")

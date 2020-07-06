@@ -13,8 +13,9 @@ python3 of_cnn_train_val.py \
     --gpu_num_per_node=4 \
     --model_update="momentum" \
     --learning_rate=0.256 \
-    --loss_print_every_n_iter=200 \
+    --loss_print_every_n_iter=1 \
     --batch_size_per_device=64 \
     --val_batch_size_per_device=125 \
-    --num_epoch=90 \
+    --num_epoch=2 \
+    --num_examples=80 \
     --model="resnet50" 

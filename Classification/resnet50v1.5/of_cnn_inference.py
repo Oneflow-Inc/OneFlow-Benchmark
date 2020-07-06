@@ -16,7 +16,7 @@ from resnet_model import resnet50
 from imagenet1000_clsidx_to_labels import clsidx_2_labels
 
 
-def load_image(image_path='image_demo/ILSVRC2012_val_00020287.JPEG'):
+def load_image(image_path='test_img/ILSVRC2012_val_00020287.JPEG'):
     print(image_path)
     im = Image.open(image_path)
     im = im.resize((224, 224))
@@ -38,11 +38,6 @@ def main():
     assert os.path.isdir(args.model_load_dir)
     check_point = flow.train.CheckPoint()
     check_point.load(args.model_load_dir)
-
-    image = load_image()
-    predictions = InferenceNet(image).get()
-    clsidx = predictions.ndarray().argmax()
-    print(predictions.ndarray().max(), clsidx_2_labels[clsidx])
 
     image = load_image(args.image_path)
     predictions = InferenceNet(image).get()
