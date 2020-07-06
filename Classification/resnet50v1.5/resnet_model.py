@@ -47,9 +47,12 @@ class ResnetBuilder(object):
 
     def _batch_norm(self, inputs, name=None, last=False):
         initializer = flow.zeros_initializer() if last else flow.ones_initializer()
+        axis = 1
+        if self.data_format =="NHWC":
+            axis = 3
         return flow.layers.batch_normalization(
             inputs=inputs,
-            axis=1,
+            axis=axis,
             momentum=0.9,  # 97,
             epsilon=1e-5,
             center=True,
