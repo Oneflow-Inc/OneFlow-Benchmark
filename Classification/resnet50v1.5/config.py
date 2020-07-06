@@ -58,6 +58,14 @@ def get_parser(parser=None):
         help='Whether to use boxing v2'
     )
 
+    parser.add_argument(
+        '--channel_last',
+        type=str2bool,
+        nargs='?',
+        const=False,
+        help='Whether to use use channel last mode(nhwc)'
+    )
+
     # train and validaion
     parser.add_argument('--num_epochs', type=int,
                         default=90, help='number of epochs')
