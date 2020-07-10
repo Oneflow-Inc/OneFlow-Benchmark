@@ -225,7 +225,7 @@ python3 of_cnn_train_val.py \
 
 
 
-#### 将ImageNet转换成OFRecord （TODO：由zhaoluyang补充）
+#### 将ImageNet转换成OFRecord
 
 在OneFlow中，提供了将原始ImageNet-2012数据集文件转换成OFRecord格式的脚本。如果您已经准备好了ImageNet-2012数据集(训练集和验证集)，并且训练集/验证集的格式如下：
 
