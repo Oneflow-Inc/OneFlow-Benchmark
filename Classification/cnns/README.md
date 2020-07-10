@@ -179,7 +179,32 @@ Optimizer  配置
 
 ####  多机分布式训练如何配置？
 
-TODO：待补充，多机的配置方式，补充多机的脚本；
+使用多机多卡训练，首先要确保每台服务器上都安装了相同版本的 OneFlow，以及相同数据集路径在各个服务器上都可以访问，复制或者使用NFS均可。为启动命令添加以下参数
+
+- --num_nodes 表示要使用的服务器的数量
+- --node_ips 是每个服务器的 ip 地址，其中第一个将会作为 master
+
+例如：
+
+```python
+python3 of_cnn_train_val.py \
+    --train_data_dir=$DATA_ROOT/train \
+    --train_data_part_num=256 \
+    --val_data_dir=$DATA_ROOT/validation \
+    --val_data_part_num=256 \
+    --num_nodes=2 \
+    --node_ips=192.168.1.15,192.168.1.16 \
+    --gpu_num_per_node=4 \
+    --model_update="momentum" \
+    --learning_rate=0.256 \
+    --loss_print_every_n_iter=1 \
+    --batch_size_per_device=64 \
+    --val_batch_size_per_device=125 \
+    --num_epoch=90 \
+    --model="resnet50"
+```
+
+将本代码库复制到各个服务器，并在每台服务器执行相同的启动命令，即可开始多机训练。
 
 更进一步介绍链接：
 分布式策略
@@ -191,10 +216,6 @@ TODO：待补充，多机的配置方式，补充多机的脚本；
 TODO：shengjian，先略。
 
 更多问题补充。
-
-
-
-
 
 
 
