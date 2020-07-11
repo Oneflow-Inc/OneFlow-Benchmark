@@ -14,7 +14,7 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 
 [ResNet](https://arxiv.org/abs/1512.03385) 是2015年ImageNet竞赛的冠军。目前，ResNet相对对于传统的机器学习分类算法而言，效果已经相当的出色，之后大量的检测，分割，识别等任务也都在ResNet基础上完成。
 
-[OneFlow-Benchmark](xxx)中，我们提供了ResNet50 v1.5的OneFlow实现。该实现对标和超越了[英伟达的Mxnet版实现](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5)。我们在ImageNet-2012数据集上训练90轮后，验证集上的准确率能够达到：77.318%(top1)，93.622%(top5)  更详细的网络参数对齐工作，见下面【进阶 Advanced】部分。
+[OneFlow-Benchmark](xxx)中，我们提供了ResNet50 v1.5的OneFlow实现。该实现对标了[英伟达的Mxnet版实现](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5)。我们在ImageNet-2012数据集上训练90轮后，验证集上的准确率能够达到：77.318%(top1)，93.622%(top5)  更详细的网络参数对齐工作，见下面【进阶 Advanced】部分。
 
 ![resnet50_validation_acuracy](docs/resnet50_validation_acuracy.png)
 
@@ -248,10 +248,10 @@ Oneflow保持了和Mxnet一致的初始学习率以及衰减方式。具体来�
 
 [![image](docs/resnet50_lr_schedule.png)
 
-| item        | oneflow | nvidia  | tricks       |
-| ----------- | ------- | ------ | ------ |
-| start lr    | 0.256   | 0.256  | lr = 0.1*bs/256 |
-| lr schedule | cosine  | cosine  | cosine       |
+| item        | oneflow | nvidia  |
+| ----------- | ------- | ------ |
+| start lr    | 0.256   | 0.256  |
+| lr schedule | cosine  | cosine  |
 
 #### Optimizer
 
@@ -272,24 +272,28 @@ Oneflow保持了和Mxnet一致的初始学习率以及衰减方式。具体来�
 
 #### Weight Decay
 
-| item         | oneflow   | nvidia    | tricks |
-| ------------ | --------- | --------- | ------ |
-| weight_decay | 1.0/32768 | 1.0/32768 | cosine |
-| conv weight  | Yes       | Yes       | Yes    |
-| conv bias    | NA        | NA        | Yes    |
-| fc weight    | Yes       | Yes       | Yes    |
-| fc bias      | Yes       | NA        | Yes    |
-| bn gamma     | Yes       | TBD       | No     |
-| bn beta      | Yes       | TBD       | No     |
+| item         | oneflow   | nvidia    |
+| ------------ | --------- | --------- |
+| weight_decay | 1.0/32768 | 1.0/32768 |
+| conv weight  | Yes       | Yes       |
+| conv bias    | NA        | NA        |
+| fc weight    | Yes       | Yes       |
+| fc bias      | Yes       | NA        |
+| bn gamma     | No        | No        |
+| bn beta      | No        | No        |
 
 #### Batch Norm
 
-| param    | oneflow | nvidia | tricks |
-| -------- | ------- | ------ | ------ |
-| momentum | 0.9     | 0.9    | TBD    |
-| epsilon  | 1e-5    | 1e-5   | TBD    |
+| param    | oneflow | nvidia |
+| -------- | ------- | ------ |
+| momentum | 0.9     | 0.9    |
+| epsilon  | 1e-5    | 1e-5   |
 
+#### Label Smoothing
 
+| item            | oneflow | nvidia |
+| --------------- | ------- | ------ |
+| label smoothing | 0.1     | 0.1    |
 
 ###  数据集制作
 
