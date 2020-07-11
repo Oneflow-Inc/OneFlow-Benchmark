@@ -46,16 +46,20 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
   `git clone git@github.com:Oneflow-Inc/OneFlow-Benchmark.git`
 
 - 准备数据集（可选）
-  - 下载示例数据集：`wget https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenet_ofrecord_example/part-00000`（TOOD：后续确认这个链接，最好和readme打包）
+  - 下载示例数据集：
+  
+    `wget https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenet_ofrecord_example/part-00000`
+  
   - 或者：制作完整OFRecord格式的ImageNet数据集（见下文进阶部分）
-  - 再或者：直接使用“合成数据”。
+  
+  - 再或者：直接使用虚拟“合成数据”。
 
 
 
 **关于数据集的说明：**
 
 
-> 1）本文的展示的代码中，使用OFRcord格式的数据集可以提高数据加载效率（但这非必须，参考XXX，oneflow支持直接加载numpy数据）。（TODO：补充mnist 文档链接）
+> 1）本文的展示的代码中，使用OFRcord格式的数据集可以提高数据加载效率（但这非必须，参考[数据输入](http://183.81.182.202:8000/basics_topics/data_input.html)，oneflow支持直接加载numpy数据）。
 >
 > 2）为了使读者快速上手，我们提供了一个小的示例数据集。直接下载，即可快速开始训练过程。读者可以在熟悉了流程后，可以参考数据集制作部分，制作完整的数据集。
 >
@@ -184,14 +188,20 @@ python3 of_cnn_train_val.py \
 
 ### 混合精度训练与预测
 
-目前，OneFlow已经原生支持半精度/全精度的混合精度训练。训练时，模型参数（权重）使用float16进行训练，同时保留float32用作梯度更新和计算过程。由于参数的存储减半，会带来训练速度的提升。
+目前，OneFlow已经原生支持半精度/全精度的混合精度训练。训练时，模型参数（权重）使用float16进行训练，同时保留float32用作梯度更新和计算过程。由于参数的存储减半，会带来训练速度的提升。
 
-在OneFlow中开启半精度/全精度的混合精度训练模式，ResNet50的训练速度通常能达到`1.7`倍的加速。
+在OneFlow中开启半精度/全精度的混合精度训练模式，ResNet50的训练速度理论上能达到`1.7`倍的加速。
 
 
 #### 如何开启半精度/全精度混合精度训练？
 
 只需要在`train.sh`脚本中添加参数`--use_fp16=True`即可。
+
+#### 预训练模型
+
+我们为您提供了一个在Imagenet2014完整训练了90epoch的混合精度模型，top_1：77.33%
+
+您可以直接下载使用：[resnet50_v15_fp16](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_fp16_of_best_model_val_top1_77330.zip)
 
 
 
@@ -221,7 +231,7 @@ python3 of_cnn_train_val.py \
 
 内部借助“Protocol Buffer”二进制数据编码方案，它只占用一个内存块，只需要一次性加载一个二进制文件的方式即可，简单，快速，尤其对大型训练数据很友好。另外，当我们的训练数据量比较大的时候，可以将数据分成多个OFRecord文件，来提高处理效率。
 
-关于OFRecord的详细说明请参考：[OFRecord数据格式](http://183.81.182.202:8000/basics_topics/ofrecord.html) （TODO：确定这个链接）
+关于OFRecord的详细说明请参考：[OFRecord数据格式](http://183.81.182.202:8000/basics_topics/ofrecord.html)
 
 
 
