@@ -7,12 +7,12 @@ import argparse
 
 def _get_regularizer(model_name):
     #all decay
-    return 0.00004
+    return flow.regularizers.l2(0.00004)
 
 
 def _get_initializer(model_name):
     if model_name == "weight":
-        return flow.variance_scaling_initializer(1.0, mode="fan_out", distribution="random_normal", data_format="NCHW")
+        return flow.variance_scaling_initializer(2.0, mode="fan_out", distribution="random_normal", data_format="NCHW")
     elif model_name == "bias":
         return flow.zeros_initializer()
     elif model_name == "gamma":
