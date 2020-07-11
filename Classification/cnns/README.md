@@ -14,7 +14,7 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 
 [ResNet](https://arxiv.org/abs/1512.03385) 是2015年ImageNet竞赛的冠军。目前，ResNet相对对于传统的机器学习分类算法而言，效果已经相当的出色，之后大量的检测，分割，识别等任务也都在ResNet基础上完成。
 
-[OneFlow-Benchmark](xxx)中，提供了ResNet50 v1.5的OneFlow实现。我们在ImageNet-2012数据集上训练90轮后，验证集上的准确率能够达到：77.318%(top1)，93.622%(top5)。
+[OneFlow-Benchmark](xxx)中，我们提供了ResNet50 v1.5的OneFlow实现。该实现对标和超越了[英伟达的Mxnet版实现](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5)。我们在ImageNet-2012数据集上训练90轮后，验证集上的准确率能够达到：77.318%(top1)，93.622%(top5)  更详细的网络参数对齐工作，见下面【进阶 Advanced】部分。
 
 ![resnet50_validation_acuracy](docs/resnet50_validation_acuracy.png)
 
@@ -22,7 +22,6 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 **关于ResNet50 v1.5的说明：**
 
 > ResNet50 v1.5是原始[ResNet50 v1](https://arxiv.org/abs/1512.03385)的一个改进版本，相对于原始的模型，精度稍有提升 (~0.5% top1)，详细说明参见[这里](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5) 。
->
 
 
 
@@ -199,13 +198,98 @@ python3 of_cnn_train_val.py \
 
 #### 预训练模型
 
-我们为您提供了一个在Imagenet2014完整训练了90epoch的混合精度模型，top_1：77.33%
+我们为您提供了一个在Imagenet2012完整训练了90个epoch的混合精度模型，top_1：77.33%
 
 您可以直接下载使用：[resnet50_v15_fp16](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_fp16_of_best_model_val_top1_77330.zip)
 
 
 
 ## 进阶 Advanced
+
+### 参数对齐
+
+Oneflow的ResNet50实现，为了保证和[英伟达的Mxnet版实现](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5)对齐，我们从learning rate学习率，优化器Optimizer的选择，数据增强的图像参数设定，到更细的每一层网络的形态，bias,weight初始化等都做了细致且几乎完全一致的对齐工作。
+
+#### Data Augmentation
+
+##### 训练
+
+1. 随机采样图像并将其解码为[0; 255]。
+2. 随机裁剪一个矩形区域，该矩形区域的长宽比以[3/4; 4/3]和以[8％；100％]，然后将裁剪的区域调整为224 x 224平方的图像。
+3. 以0.5的概率水平翻转。
+4. 色彩增强，比例色相，饱和度和亮度，其系数从[0.6; 1.4]。
+5. 将PCA噪声与从正态分布N（0，0.1）采样的系数相加。
+6. 通过分别减去123.68、116.779、103.939并除以58.393、57.12、57.375来标准化RGB通道。
+7. 调整图像的大小，使其较短的一面在[256，480]中随机采样以进行缩放。随机抽取224×224区域。
+
+| item                     | oneflow       | nvidia |
+| ------------------------ | ------------- | ------ |
+| 1 random sample          | within buffer | Yes    |
+| 2 random crop resize     | Yes           | Yes    |
+| 7 short side resize crop | No            | No     |
+| 3 Flip horizontally      | Yes           | Yes    |
+| 4 Color augmentation     | No            | No     |
+| 5 PCA Noise              | No            | No     |
+| 6.1 Normalize mean       | Yes           | Yes    |
+| 6.2 Normalize std        | Yes           | Yes    |
+
+##### 验证
+
+- 将每个图像的短边调整为256像素，同时保持其宽高比。
+- 裁剪中心的224×224区域
+- 标准化RGB通道，类似于训练。
+
+#### Learning Rate Schedule
+
+Oneflow保持了和Mxnet一致的初始学习率以及衰减方式。具体来说，我们采用了5个epoch的warmup，初始学习率lr = 0.256，lr衰减方式采用cosine decay（初始lr可根据batch_size和gpu数量可线性缩放）
+
+- warmup + cosine decay
+- warmup + step decay
+
+[![image](docs/resnet50_lr_schedule.png)
+
+| item        | oneflow | nvidia  | tricks       |
+| ----------- | ------- | ------ | ------ |
+| start lr    | 0.256   | 0.256  | lr = 0.1*bs/256 |
+| lr schedule | cosine  | cosine  | cosine       |
+
+#### Optimizer
+
+| oneflow  | nvidia   | tricks                        |
+| -------- | -------- | ----------------------------- |
+| momentum | momentum | Nesterov Accelerated Gradient |
+
+#### Weight Initializer
+
+| variable    | oneflow              | nvidia                       |
+| ----------- | -------------------- | ---------------------------- |
+| conv weight | variance_scaling[^1] | Xavier( 'gaussian', 'in', 2) |
+| conv bias   | NA                   | NA                           |
+| fc weight   | random_normal        | Xavier( 'gaussian', 'in', 2) |
+| fc bias     | 0                    | NA                           |
+| bn gamma    | 1                    | 1                            |
+| bn beta     | 0                    | 0                            |
+
+#### Weight Decay
+
+| item         | oneflow   | nvidia    | tricks |
+| ------------ | --------- | --------- | ------ |
+| weight_decay | 1.0/32768 | 1.0/32768 | cosine |
+| conv weight  | Yes       | Yes       | Yes    |
+| conv bias    | NA        | NA        | Yes    |
+| fc weight    | Yes       | Yes       | Yes    |
+| fc bias      | Yes       | NA        | Yes    |
+| bn gamma     | Yes       | TBD       | No     |
+| bn beta      | Yes       | TBD       | No     |
+
+#### Batch Norm
+
+| param    | oneflow | nvidia | tricks |
+| -------- | ------- | ------ | ------ |
+| momentum | 0.9     | 0.9    | TBD    |
+| epsilon  | 1e-5    | 1e-5   | TBD    |
+
+
 
 ###  数据集制作
 
@@ -387,7 +471,7 @@ python3 preprocess_imagenet_validation_data.py  ../data/imagenet/validation
                                ...
 ```
 
-至此，已经完成了全部的数据预处理，您可以直接跳转至**转换训练集**和**转换验证集**，轻松完成ImageNet-2012数据集到OFRecord的转换过程了。
+至此，已经完成了全部的数据预处理，您可以直接跳转至**转换训练集**和**转换验证集**部分，轻松完成ImageNet-2012数据集到OFRecord的转换过程了。
 
 
 
