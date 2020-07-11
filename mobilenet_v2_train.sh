@@ -12,13 +12,13 @@ DATA_ROOT=/DATA/disk1/ImageNet/ofrecord
     --node_ips='11.11.1.12,11.11.1.14' \
     --gpu_num_per_node=8 \
     --model_update="momentum" \
-    --learning_rate=0.1 \
+    --learning_rate=0.05 \
     --loss_print_every_n_iter=200 \
     --batch_size_per_device=32 \
     --val_batch_size_per_device=125 \
     --use_new_dataloader=true \
     --num_epoch=150 \
     --model="mobilenet_v2" \
-    --wd=0.00004 --warmup_epochs=5 --lr_decay='cosine' \
+    --wd=0.00004 --warmup_epochs=0 --lr_decay='cosine' \
     --mom=0.9 \
     --use_boxing_v2=true 

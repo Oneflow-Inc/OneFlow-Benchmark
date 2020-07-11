@@ -18,6 +18,7 @@ from job_function_util import get_train_config, get_val_config
 import oneflow as flow
 #import vgg_model
 from resnet_model import resnet50
+from mobilenet_v2 import Mobilenet
 #import alexnet_model
 
 
@@ -31,6 +32,7 @@ num_val_steps = int(args.num_val_examples / val_batch_size)
 
 model_dict = {
     "resnet50": resnet50,
+    "mobilenet_v2": Mobilenet,
     #"vgg16": vgg_model.vgg16,
     #"alexnet": alexnet_model.alexnet,
 }
@@ -66,7 +68,8 @@ def TrainNet():
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader, wd=args.wd)
+    #logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader, wd=args.wd)
+    logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader)
     #loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
 
     one_hot_labels = label_smoothing(labels, args.num_classes, args.label_smoothing, logits.dtype)
@@ -90,7 +93,7 @@ def InferenceNet():
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader, training=False)
+    logits = model_dict[args.model](images, need_transpose=not args.use_new_dataloader)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions":predictions, "labels": labels}
     return outputs
@@ -116,7 +119,8 @@ def main():
                             save_summary_steps=num_val_steps, batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
-        snapshot.save('epoch_{}'.format(epoch))
+        if epoch > 140:
+            snapshot.save('epoch_{}'.format(epoch))
 
 
 if __name__ == "__main__":
