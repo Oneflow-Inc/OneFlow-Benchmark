@@ -38,50 +38,20 @@ DEEP_HIDDEN_UNITS = [FLAGS.hidden_size for i in range(FLAGS.hidden_units_num)]
 print(DEEP_HIDDEN_UNITS)
 
 
-def _raw_blob_conf(name, shape, data_type):
-    return flow.data.BlobConf(name=name, shape=shape, dtype=data_type, codec=flow.data.RawCodec())
-
-
-def _data_loader(data_dir, data_part_num, batch_size):
-    blob_conf = [
-        _raw_blob_conf('labels', (1,), flow.int32),
-        _raw_blob_conf('dense_fields', (FLAGS.num_dense_fields,), flow.float),
-        _raw_blob_conf('wide_sparse_fields', (FLAGS.num_wide_sparse_fields,), flow.int32),
-        _raw_blob_conf('deep_sparse_fields', (FLAGS.num_deep_sparse_fields,), flow.int32)
-    ]
-    blobs = flow.data.decode_ofrecord(
-        data_dir,
-        blobs=blob_conf,
-        batch_size=batch_size,
-        name="decode",
-        data_part_num=data_part_num,
-        part_name_suffix_length=FLAGS.train_part_name_suffix_length,
-    )
-    # copy to gpu
-    blobs = tuple(map(lambda blob: flow.identity(blob), blobs))
-    return blobs
-
-def _data_loader_ofrecord_new(data_dir, data_part_num, batch_size, shuffle=True):
+def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_length=-1,
+                          shuffle=True):
     ofrecord = flow.data.ofrecord_reader(data_dir,
-                                        batch_size=batch_size,
-                                        data_part_num=data_part_num,
-                                        part_name_suffix_length=FLAGS.train_part_name_suffix_length,
-					random_shuffle=shuffle,
-                                        shuffle_after_epoch=shuffle)
-    labels = flow.data.OFRecordRawDecoder(ofrecord, "labels", shape=(1,), dtype=flow.int32)
-    dense_fields = flow.data.OFRecordRawDecoder(ofrecord, "dense_fields", shape=(FLAGS.num_dense_fields,), dtype=flow.float)
-    wide_sparse_fields = flow.data.OFRecordRawDecoder(ofrecord, "wide_sparse_fields", shape=(FLAGS.num_wide_sparse_fields,), dtype=flow.int32)
-    deep_sparse_fields = flow.data.OFRecordRawDecoder(ofrecord, "deep_sparse_fields", shape=(FLAGS.num_deep_sparse_fields,), dtype=flow.int32)
-    return flow.identity_n([labels, dense_fields, wide_sparse_fields, deep_sparse_fields])
-
-
-def _data_loader_onerec(data_dir, data_part_num, batch_size):
-    files = glob.glob(os.path.join(data_dir, '*.onerec'))
-    readdata = flow.data.onerec_reader(files=files, batch_size=batch_size)
-    labels = flow.data.onerec_decoder(readdata, key='labels', dtype=flow.int32, shape=(1,))
-    dense_fields = flow.data.onerec_decoder(readdata, key='dense_fields', dtype=flow.float, shape=(FLAGS.num_dense_fields,))
-    wide_sparse_fields = flow.data.onerec_decoder(readdata, key='wide_sparse_fields', dtype=flow.int32, shape=(FLAGS.num_wide_sparse_fields,))
-    deep_sparse_fields = flow.data.onerec_decoder(readdata, key='deep_sparse_fields', dtype=flow.int32, shape=(FLAGS.num_deep_sparse_fields,))
+                                         batch_size=batch_size,
+                                         data_part_num=data_part_num,
+                                         part_name_suffix_length=part_name_suffix_length,
+                                         random_shuffle=shuffle,
+                                         shuffle_after_epoch=shuffle)
+    def _blob_decoder(bn, shape, dtype=flow.int32):
+        return flow.data.OFRecordRawDecoder(ofrecord, bn, shape=shape, dtype=dtype)
+    labels = _blob_decoder("labels", (1,))
+    dense_fields = _blob_decoder("dense_fields", (FLAGS.num_dense_fields,), flow.float)
+    wide_sparse_fields = _blob_decoder("wide_sparse_fields", (FLAGS.num_wide_sparse_fields,))
+    deep_sparse_fields = _blob_decoder("deep_sparse_fields", (FLAGS.num_deep_sparse_fields,))
     return flow.identity_n([labels, dense_fields, wide_sparse_fields, deep_sparse_fields])
 
 
@@ -174,9 +144,11 @@ def _create_train_callback(step):
 @flow.global_function(_get_train_conf())
 def train_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
-        _data_loader_ofrecord_new(data_dir=FLAGS.train_data_dir,
-                                  data_part_num=FLAGS.train_data_part_num,
-                                  batch_size=FLAGS.batch_size)
+        _data_loader_ofrecord(data_dir=FLAGS.train_data_dir,
+                              data_part_num=FLAGS.train_data_part_num,
+                              batch_size=FLAGS.batch_size,
+                              part_name_suffix_length=FLAGS.train_part_name_suffix_length,
+                              shuffle=True)
     logits = _model(dense_fields, wide_sparse_fields, deep_sparse_fields)
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
     flow.losses.add_loss(loss)
@@ -186,10 +158,11 @@ def train_job():
 @flow.global_function(_get_eval_conf())
 def eval_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
-        _data_loader_ofrecord_new(data_dir=FLAGS.eval_data_dir,
-                                  data_part_num=FLAGS.eval_data_part_num,
-                                  batch_size=FLAGS.batch_size,
-                                  shuffle=False)
+        _data_loader_ofrecord(data_dir=FLAGS.eval_data_dir,
+                              data_part_num=FLAGS.eval_data_part_num,
+                              batch_size=FLAGS.batch_size,
+                              part_name_suffix_length=FLAGS.eval_part_name_suffix_length,
+                              shuffle=False)
     logits = _model(dense_fields, wide_sparse_fields, deep_sparse_fields)
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
     predict = flow.math.sigmoid(logits)
