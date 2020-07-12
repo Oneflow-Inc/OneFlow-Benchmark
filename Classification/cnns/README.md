@@ -12,7 +12,14 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 
 OneFlow-Benchmark下的cnn仓库目前已支持resnet50、vgg、alexnet等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
 
-#### 训练&验证
+#### 1.克隆此仓库
+```shell
+git clone https://github.com/Oneflow-Inc/OneFlow-Benchmark
+cd ./OneFlow-Benchmark/Classification/cnns
+```
+
+
+#### 2.训练&验证
 
 ```shell
 sh train.sh
@@ -48,7 +55,7 @@ sh train.sh
 
 - --model                                        使用的模型
 
-#### 推理
+#### 3.推理
 ```shell
 sh inference.sh
 ```
