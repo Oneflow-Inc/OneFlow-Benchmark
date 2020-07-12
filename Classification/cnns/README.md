@@ -535,15 +535,3 @@ python3 preprocess_imagenet_validation_data.py  ../data/imagenet/validation
 至此，已经完成了全部的数据预处理，您可以直接跳转至**转换训练集**和**转换验证集**部分，轻松完成ImageNet-2012数据集到OFRecord的转换过程了。
 
 
-
-### 模型转换
-
-从tf转of，或者是从ONNX转of，这部分待补充。
-TODO: 联系Jianhao Zhang 补充ONNX转of
-
-
-### 训练过程可视化？如何得到训练的中间状态？
-
-TODO：shengjian，先略。
-
-
