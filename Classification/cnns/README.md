@@ -21,15 +21,13 @@ OneFlow-Benchmark下的cnn仓库目前已支持resnet50、vgg、alexnet等经典
   - 直接通过pip安装：`pip install oneflow`  （TODO：确定我们的pip源是否做好,问caishenghang）
   - 其他安装方式：参考[这里](XXX)（TOOD：待补充链接，链接到编译安装的文档说明） 。
 
-- 下载[OneFlow-Benchmark](https://github.com/Oneflow-Inc/OneFlow-Benchmark/tree/of_develop_py3/cnn_benchmark)仓库。
+- 下载[OneFlow-Benchmark](https://github.com/Oneflow-Inc/OneFlow-Benchmark)仓库。
 
   `git clone git@github.com:Oneflow-Inc/OneFlow-Benchmark.git`
 
 - 准备数据集（可选）
 
-  - 下载示例数据集：
-
-    `wget https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenet_ofrecord_example/part-00000`
+  - 下载[示例数据集](https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenet_ofrecord_example/part-00000`)
 
   - 或者：制作完整OFRecord格式的ImageNet数据集（见下文进阶部分）
 
@@ -38,14 +36,14 @@ OneFlow-Benchmark下的cnn仓库目前已支持resnet50、vgg、alexnet等经典
 **关于数据集的说明：**
 
 
-> 1）本文的展示的代码中，使用OFRcord格式的数据集可以提高数据加载效率（但这非必须，参考[数据输入](http://183.81.182.202:8000/basics_topics/data_input.html)，oneflow支持直接加载numpy数据）。
+> 1）本文的展示的代码中，使用OFRcord格式的数据集可以提高数据加载效率（但这非必须，参考[数据输入](https://github.com/Oneflow-Inc/oneflow-documentation/docs/basics_topics/data_input.md)，oneflow支持直接加载numpy数据）。
 >
 > 2）为了使读者快速上手，我们提供了一个小的示例数据集。直接下载，即可快速开始训练过程。读者可以在熟悉了流程后，可以参考数据集制作部分，制作完整的数据集。
 >
 > 3）“合成数据”是指不通过磁盘加载数据，而是直接在内存中生成一些随机数据，作为网络的数据输入源。
 
 
-### 1.训练&验证
+### 训练&验证
 
 ```shell
 sh train.sh
@@ -81,7 +79,7 @@ sh train.sh
 
 - --model                                        使用的模型
 
-### 2.推理
+### 预测/推理
 ```shell
 sh inference.sh
 ```
@@ -92,15 +90,13 @@ sh inference.sh
 - --image_path 待检测图片路径
 - --model_load_dir 模型文件路径
 
-
-
-下面，我们将重点介绍经典CNN网络：Resnet，以及如何利用OneFlow训练Resnet50，并对标Nvidia的Mxnet版实现。
+以上，是针对cnns文件夹下所有CNN模型的训练、验证的通用脚本，下面，我们将重点介绍经典CNN网络：Resnet，以及如何利用OneFlow训练Resnet50，并对标Nvidia的Mxnet版实现。
 
 ## ResNet
 
 [ResNet](https://arxiv.org/abs/1512.03385) 是2015年ImageNet竞赛的冠军。目前，ResNet相对对于传统的机器学习分类算法而言，效果已经相当的出色，之后大量的检测，分割，识别等任务也都在ResNet基础上完成。
 
-[OneFlow-Benchmark](xxx)中，我们提供了ResNet50 v1.5的OneFlow实现。该实现对标了[英伟达的Mxnet版实现](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5)。我们在ImageNet-2012数据集上训练90轮后，验证集上的准确率能够达到：77.318%(top1)，93.622%(top5)  更详细的网络参数对齐工作，见下面【进阶 Advanced】部分。
+[OneFlow-Benchmark](https://github.com/Oneflow-Inc/OneFlow-Benchmark)仓库中，我们提供了ResNet50 v1.5的OneFlow实现。该实现对标了[英伟达的Mxnet版实现](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5)。我们在ImageNet-2012数据集上训练90轮后，验证集上的准确率能够达到：77.318%(top1)，93.622%(top5)  更详细的网络参数对齐工作，见下面【进阶 Advanced】部分。
 
 ![resnet50_validation_acuracy](docs/resnet50_validation_acuracy.png)
 
@@ -117,13 +113,15 @@ sh inference.sh
 
 ### 训练和验证（Train & Validation）
 
+训练开始前，需要提前准备好数据集，具体见上面的【准备工作 Requirements】部分，准备好之后就可以进行下面的步骤了。
+
 先切换到代码目录：
 
 ```
 cd OneFlow-Benchmark/Classification/cnns
 ```
 
-在命令行执行：
+设置train.sh脚本中的训练集/验证集的路径等参数，然后在命令行执行：
 
 ```
 sh train.sh
@@ -154,8 +152,6 @@ validation: epoch 0, iter 100, top_1: 0.074620, top_k: 0.194120, samples/s: 2014
 >
 > 在GPU环境下，使用单机8卡（NVIDIA TITAN V），完成90个epoch的完整训练过程，大概需要15小时。
 >
-> 
->
 > Q2. 在ImageNet-2012数据集上训练90个epoch后，准确率能达到多少？
 >
 > 训练集：80.57%（top1）
@@ -168,9 +164,7 @@ validation: epoch 0, iter 100, top_1: 0.074620, top_k: 0.194120, samples/s: 2014
 
 恭喜，到这里，您已经知道如何用OneFlow训练模型，接下来，试试用训练好的模型对新图片进行分类预测吧！
 
-预测之前，需要准备你自己训练的模型，或者用我们在下面提供的在完整Imagenet(2012)上训练好的模型。
-
-准备好模型后，将模型目录填入`inference.sh` 脚本的`MODEL_LOAD_DIR`变量中，然后执行以下命令，开始对图片`test_img/tiger.jpg`的类别的进行预测：
+在预测之前，需要准备你自己训练的模型，或者用我们在下面提供的在完整Imagenet(2012)上训练好的模型。准备好模型后，将模型目录填入`inference.sh` 脚本的`MODEL_LOAD_DIR`变量中，然后执行以下命令，开始对图片`test_img/tiger.jpg`的类别的进行预测：
 
 ```
 sh inference.sh
@@ -189,8 +183,10 @@ test_img/tiger.jpg
 
 - 自己训练的模型
 
-- 或者，下载我们已训练好的模型：[resnet_v1.5_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_v15_of_best_model_val_top1_77318.tgz ) (validation accuracy: 77.318% top1，93.622% top5 )。
+- 或者，下载我们已训练好的模型：[resnet_v1.5_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_v15_of_best_model_val_top1_77318.tgz ) 
 
+  (validation accuracy: 77.318% top1，93.622% top5 )
+  
   
 
 
@@ -361,7 +357,7 @@ OneFlow和英伟达保持了相同的初始化方式，只是在两个框架中�
 
 内部借助“Protocol Buffer”二进制数据编码方案，它只占用一个内存块，只需要一次性加载一个二进制文件的方式即可，简单，快速，尤其对大型训练数据很友好。另外，当我们的训练数据量比较大的时候，可以将数据分成多个OFRecord文件，来提高处理效率。
 
-关于OFRecord的详细说明请参考：[OFRecord数据格式](http://183.81.182.202:8000/basics_topics/ofrecord.html)
+关于OFRecord的详细说明请参考：[OFRecord数据格式](https://github.com/Oneflow-Inc/oneflow-documentation/docs/basics_topics/ofrecord.md)
 
 
 
