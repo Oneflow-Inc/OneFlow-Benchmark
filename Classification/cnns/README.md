@@ -255,20 +255,20 @@ Oneflow保持了和Mxnet一致的初始学习率以及衰减方式。具体来�
 
 #### Optimizer
 
-| oneflow  | nvidia   | tricks                        |
-| -------- | -------- | ----------------------------- |
-| momentum | momentum | Nesterov Accelerated Gradient |
+| oneflow  | nvidia   |
+| -------- | -------- |
+| momentum | momentum |
 
 #### Weight Initializer
 
-| variable    | oneflow              | nvidia                       |
-| ----------- | -------------------- | ---------------------------- |
-| conv weight | variance_scaling[^1] | Xavier( 'gaussian', 'in', 2) |
-| conv bias   | NA                   | NA                           |
-| fc weight   | random_normal        | Xavier( 'gaussian', 'in', 2) |
-| fc bias     | 0                    | NA                           |
-| bn gamma    | 1                    | 1                            |
-| bn beta     | 0                    | 0                            |
+| variable    | oneflow       | nvidia                       |
+| ----------- | ------------- | ---------------------------- |
+| conv weight | random_normal | Xavier( 'gaussian', 'in', 2) |
+| conv bias   | NA            | NA                           |
+| fc weight   | random_normal | Xavier( 'gaussian', 'in', 2) |
+| fc bias     | 0             | NA                           |
+| bn gamma    | 1             | 1                            |
+| bn beta     | 0             | 0                            |
 
 #### Weight Decay
 
