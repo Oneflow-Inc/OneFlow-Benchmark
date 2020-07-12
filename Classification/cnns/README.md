@@ -8,6 +8,66 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 
 在2012年的ImageNet竞赛中，深度卷积网络AlexNet横空出世。以超出第二名10%以上的top-5准确率，勇夺ImageNet2012比赛的冠军。从此，以 CNN（卷积神经网络） 为代表的深度学习方法开始在计算机视觉领域的应用开始大放异彩，更多的更深的CNN网络被提出，比如ImageNet2014比赛的冠军VGGNet, ImageNet2015比赛的冠军ResNet。
 
+### 使用说明
+
+OneFlow-Benchmark下的cnn仓库目前已支持resnet50、vgg、alexnet等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
+
+#### 训练
+
+```shell
+sh train.sh
+```
+
+默认情况下，我们使用resnet50，您也可以通过改动脚本中的--model参数指定其他模型，如：--model="resnet50"，--model="vgg"等。
+
+**参数说明**(部分)
+
+- --train_data_dir                Imagenet2012训练集文件夹路径(ofrecord格式)
+
+- --train_data_part_num   训练所用的ofrecord分片数量
+
+- --val_data_dir                    Imagenet2012验证集文件夹路径(ofrecord格式)
+
+- --val_data_part_num       验证所用的ofrecord分片数量
+
+- --num_nodes=1                训练使用的机器节点数
+
+- --gpu_num_per_node      每个机器节点使用的gpu数量
+
+- --model_update="momentum"    学习率更新方式
+
+- --learning_rate=0.256               初始学习率
+
+- --loss_print_every_n_iter          打印loss间隔 
+
+- --batch_size_per_device            训练时每个gpu的batch大小
+
+- --val_batch_size_per_device     验证时每个gpu的batch大小
+
+- --num_epoch                              迭代总轮数
+
+- --model                                        使用的模型
+
+
+#### 验证
+
+（脚本待乔晶补充）
+
+#### 推理
+```shell
+sh inference.sh
+```
+
+**参数说明**(部分)
+
+- --model 指定要加载的模型
+- --image_path 待检测图片路径
+- --model_load_dir 模型文件路径
+
+
+
+下面，我们将重点介绍经典CNN网络：Resnet，以及如何利用OneFlow训练Resnet50，并对标Nvidia的Mxnet版实现。
+
 
 
 ### ResNet
@@ -222,16 +282,16 @@ Oneflow的ResNet50实现，为了保证和[英伟达的Mxnet版实现](https://g
 6. 通过分别减去123.68、116.779、103.939并除以58.393、57.12、57.375来标准化RGB通道。
 7. 调整图像的大小，使其较短的一面在[256，480]中随机采样以进行缩放。随机抽取224×224区域。
 
-| item                     | oneflow       | nvidia |
-| ------------------------ | ------------- | ------ |
-| 1 random sample          | within buffer | Yes    |
-| 2 random crop resize     | Yes           | Yes    |
-| 7 short side resize crop | No            | No     |
-| 3 Flip horizontally      | Yes           | Yes    |
-| 4 Color augmentation     | No            | No     |
-| 5 PCA Noise              | No            | No     |
-| 6.1 Normalize mean       | Yes           | Yes    |
-| 6.2 Normalize std        | Yes           | Yes    |
+| item                     | oneflow | nvidia |
+| ------------------------ | ------- | ------ |
+| 1 random sample          | Yes     | Yes    |
+| 2 random crop resize     | Yes     | Yes    |
+| 7 short side resize crop | No      | No     |
+| 3 Flip horizontally      | Yes     | Yes    |
+| 4 Color augmentation     | No      | No     |
+| 5 PCA Noise              | No      | No     |
+| 6.1 Normalize mean       | Yes     | Yes    |
+| 6.2 Normalize std        | Yes     | Yes    |
 
 ##### 验证
 
@@ -261,12 +321,14 @@ Oneflow保持了和Mxnet一致的初始学习率以及衰减方式。具体来�
 
 #### Weight Initializer
 
+OneFlow和英伟达保持了相同的初始化方式，只是在两个框架中部分api的名称不同。
+
 | variable    | oneflow       | nvidia                       |
 | ----------- | ------------- | ---------------------------- |
 | conv weight | random_normal | Xavier( 'gaussian', 'in', 2) |
 | conv bias   | NA            | NA                           |
 | fc weight   | random_normal | Xavier( 'gaussian', 'in', 2) |
-| fc bias     | 0             | NA                           |
+| fc bias     | 0             | 0                            |
 | bn gamma    | 1             | 1                            |
 | bn beta     | 0             | 0                            |
 
