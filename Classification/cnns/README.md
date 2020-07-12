@@ -12,13 +12,13 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 
 OneFlow-Benchmark下的cnn仓库目前已支持resnet50、vgg、alexnet等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
 
-#### 训练
+#### 训练&验证
 
 ```shell
 sh train.sh
 ```
 
-默认情况下，我们使用resnet50，您也可以通过改动脚本中的--model参数指定其他模型，如：--model="resnet50"，--model="vgg"等。
+执行脚本开始模型的训练，每轮(epoch)训练后，将自动执行模型的验证。默认情况下，我们使用resnet50，您也可以通过改动脚本中的--model参数指定其他模型，如：--model="resnet50"，--model="vgg"等。
 
 **参数说明**(部分)
 
@@ -47,11 +47,6 @@ sh train.sh
 - --num_epoch                              迭代总轮数
 
 - --model                                        使用的模型
-
-
-#### 验证
-
-（脚本待乔晶补充）
 
 #### 推理
 ```shell
