@@ -516,3 +516,33 @@ python3 preprocess_imagenet_validation_data.py  ../data/imagenet/validation
 至此，已经完成了全部的数据预处理，您可以直接跳转至**转换训练集**和**转换验证集**部分，轻松完成ImageNet-2012数据集到OFRecord的转换过程了。
 
 
+### OneFlow 模型转 ONNX 模型
+
+ONNX (Open Neural Network Exchange) 是一种较为广泛使用的神经网络中间格式，通过 ONNX 格式，OneFlow 模型可以被许多部署框架（如 OpenVINO、ONNX Runtime 和移动端的 ncnn、tnn、TEngine 等）所使用。这一节介绍如何将训练好的 resnet50 v1.5 模型转换为 ONNX 模型并验证正确性，可以在 resnet\_to\_onnx.py 中找到参考代码。
+
+#### 如何生成 ONNX 模型
+
+**步骤一：将网络权重保存到磁盘**
+
+首先将训练得到的网络权重保存到磁盘，例如我们保存到 /tmp/resnet50_weights 这个文件夹下
+
+```python
+check_point = flow.train.CheckPoint()
+check_point.save("/tmp/resnet50_weights")
+```
+
+**步骤二：新建一个用于推理的 job function**
+
+然后新建一个用于推理的 job function，它只包含网络结构本身，不包含读取 OFRecord 的算子，并且直接接受 numpy 数组形式的输入。可参考 resnet\_to\_onnx.py 中的 `InferenceNet`。
+
+**步骤三：调用 flow.onnx.export 方法**
+
+接下来调用 `flow.onnx.export` 方法，从 OneFlow 网络得到 ONNX 模型，它的第一个参数是上文所说的专用于推理的 job function，第二个参数是 /tmp/resnet50_weights 这个保存了网络权重的文件夹，第三个参数是 ONNX 模型文件的路径。
+
+```python
+flow.onnx.export(InferenceNet, '/tmp/resnet50_weights', 'resnet50_v1.5.onnx')
+```
+
+#### 验证 ONNX 模型的正确性
+
+生成 ONNX 模型之后可以使用 ONNX Runtime 运行 ONNX 模型，以验证 OneFlow 模型和 ONNX 模型能够在相同的输入下产生相同的结果。相应的代码在 resnet\_to\_onnx.py 的 `check_equality`。
