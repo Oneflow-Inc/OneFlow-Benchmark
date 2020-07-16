@@ -2,20 +2,22 @@
 # from __future__ import division
 # from __future__ import print_function
 
-import os
-import oneflow as flow
-import onnxruntime as ort
-import numpy as np
-
-import time
-from PIL import Image
 from collections import OrderedDict
+import os
+from PIL import Image
+import time
+from typing import Callable, Text
+
+import numpy as np
+import oneflow as flow
+import onnx
+import onnxruntime as ort
 
 from resnet_model import resnet50
 from imagenet1000_clsidx_to_labels import clsidx_2_labels
 
 
-def load_image(image_path):
+def load_image(image_path: Text) -> np.ndarray:
     rgb_mean = [123.68, 116.779, 103.939]
     rgb_std = [58.393, 57.12, 57.375]
     print(image_path)
@@ -42,74 +44,62 @@ def InferenceNet(images=flow.FixedTensorDef((1, 3, 224, 224))):
     return predictions
 
 
-def onnx_inference(image_path, onnx_model_path, ort_optimize=True):
+def onnx_inference(image: np.ndarray, onnx_model: onnx.ModelProto):
     """
     test onnx model with onnx runtime
-    :param image_path:      input image path
-    :param onnx_model_path: path of model.onnx
-    :param ort_optimize:
+    :param image:           input image, a numpy array
+    :param onnx_model:      onnx model
     :return:
     """
-    assert os.path.isfile(image_path) and os.path.isfile(onnx_model_path)
-    ort_sess_opt = ort.SessionOptions()
-    ort_sess_opt.graph_optimization_level = \
-        ort.GraphOptimizationLevel.ORT_ENABLE_EXTENDED if ort_optimize else \
-        ort.GraphOptimizationLevel.ORT_DISABLE_ALL
-    sess = ort.InferenceSession(onnx_model_path, sess_options=ort_sess_opt)
+    assert os.path.isfile(image_path)
+    sess = ort.InferenceSession(onnx_model.SerializeToString())
     assert len(sess.get_outputs()) == 1 and len(sess.get_inputs()) <= 1
     ipt_dict = OrderedDict()
     for ipt in sess.get_inputs():
-        ipt_dict[ipt.name] = load_image(image_path)
-    start = time.time()
+        ipt_dict[ipt.name] = image
     onnx_res = sess.run([], ipt_dict)[0]
-    print('Cost: %.4f s' % (time.time() - start))
-    clsidx_onnx = onnx_res.argmax()
-    print('Onnx >> ', onnx_res.max(), clsidx_2_labels[clsidx_onnx])
+    return onnx_res
 
 
-def oneflow_to_onnx(job_func, flow_model_path, onnx_model_dir, external_data=False):
+def oneflow_to_onnx(job_func: Callable, flow_weights_path: Text, onnx_model_dir: Text, external_data: bool=False):
     """
     convert oneflow model to onnx model
-    :param job_func:        inference function in oneflow
-    :param flow_model_path: input oneflow model path
-    :param onnx_model_dir:  output dir path to save model.onnx
-    :param external_data:
-    :return: ture or false
+    :param job_func:            inference function in oneflow
+    :param flow_weights_path:   input oneflow model path
+    :param onnx_model_dir:      output dir path to save model.onnx
+    :return: onnx model
     """
     if not os.path.exists(onnx_model_dir): os.makedirs(onnx_model_dir)
-    assert os.path.exists(flow_model_path) and os.path.isdir(onnx_model_dir)
+    assert os.path.exists(flow_weights_path) and os.path.isdir(onnx_model_dir)
 
-    check_point = flow.train.CheckPoint()
-    # it is a trick to keep check_point.save() from hanging when there is no variable
-    @flow.global_function(flow.FunctionConfig())
-    def add_var():
-        return flow.get_variable(
-            name="trick",
-            shape=(1,),
-            dtype=flow.float,
-            initializer=flow.random_uniform_initializer(),
-        )
-    check_point.init()
-
-    onnx_model_path = os.path.join(onnx_model_dir, os.path.basename(flow_model_path) + '.onnx')
-    flow.onnx.export(job_func, flow_model_path, onnx_model_path, opset=11, external_data=external_data)
+    onnx_model_path = os.path.join(onnx_model_dir, os.path.basename(flow_weights_path) + '.onnx')
+    flow.onnx.export(job_func, flow_weights_path, onnx_model_path, opset=11, external_data=external_data)
     print('Convert to onnx success! >> ', onnx_model_path)
-    return onnx_model_path
+    return onnx.load_model(onnx_model_path)
+
+
+def check_equality(job_func: Callable, onnx_model: onnx.ModelProto, image_path: Text) -> (bool, np.ndarray):
+    image = load_image(image_path)
+    onnx_res = onnx_inference(image, onnx_model)
+    oneflow_res = job_func(image).get().ndarray()
+    is_equal = np.allclose(onnx_res, oneflow_res, rtol=1e-4, atol=1e-5)
+    return is_equal, onnx_res
 
 
 if __name__ == "__main__":
-    # path = 'tiger.jpg'
-    path = 'test_img/ILSVRC2012_val_00020287.JPEG'
-    flow_model_path = '/your/oneflow/model/path'
+    # image_path = 'tiger.jpg'
+    image_path = 'test_img/ILSVRC2012_val_00020287.JPEG'
+    flow_weights_path = '/your/oneflow/weights/path'
     onnx_model_dir = 'onnx/model'
 
+    check_point = flow.train.CheckPoint()
+    check_point.load(flow_weights_path)
+
     # conver oneflow to onnx
-    onnx_model_path = oneflow_to_onnx(InferenceNet, flow_model_path, onnx_model_dir, external_data=False)
+    onnx_model = oneflow_to_onnx(InferenceNet, flow_weights_path, onnx_model_dir, external_data=False)
 
-    # inference
-    onnx_inference(path, onnx_model_path)
-
-    # Output:
-    # ILSVRC2012_val_00020287.JPEG
-    # Cost: 0.0319s
-    # Onnx >> 0.9924272 hay
+    # check equality
+    are_equal, onnx_res = check_equality(InferenceNet, onnx_model, image_path)
+    clsidx_onnx = onnx_res.argmax()
+    print('Are the results equal? {}'.format('Yes' if are_equal else 'No'))
+    print('Class: {}; score: {}'.format(clsidx_2_labels[clsidx_onnx], onnx_res.max()))
