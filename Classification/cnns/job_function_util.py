@@ -18,22 +18,7 @@ def _default_config(args):
 def get_train_config(args):
     train_config = _default_config(args)
     train_config.train.primary_lr(args.learning_rate)
-    train_config.disable_all_reduce_sequence(False)
-    # train_config.cudnn_conv_enable_pseudo_half(True)
-    train_config.all_reduce_group_min_mbyte(8)
-    train_config.all_reduce_group_num(128)
-    # train_config.all_reduce_lazy_ratio(0)
-
-    # train_config.enable_nccl_hierarchical_all_reduce(True)
-    # train_config.cudnn_buf_limit_mbyte(2048)
-    # train_config.concurrency_width(2)
-
-    if args.use_boxing_v2:
-        train_config.use_boxing_v2(True)
-
-    train_config.prune_parallel_cast_ops(True)
     train_config.train.model_update_conf(gen_model_update_conf(args))
-    train_config.enable_inplace(True)
     return train_config
 
 

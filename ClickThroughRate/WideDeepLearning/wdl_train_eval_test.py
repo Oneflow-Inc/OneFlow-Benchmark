@@ -118,7 +118,6 @@ def _get_train_conf():
         'lazy_adam_conf': {
         }
     })
-    train_conf.use_boxing_v2(True)
     train_conf.default_distribute_strategy(flow.distribute.consistent_strategy())
     train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
