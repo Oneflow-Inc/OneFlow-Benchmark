@@ -1,12 +1,9 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 import os
 import math
-
 import oneflow as flow
-
 import ofrecord_util
 import config as configs
 from util import Snapshot, Summary, InitNodes, Metric
@@ -15,13 +12,9 @@ import resnet_model
 import vgg_model
 import alexnet_model
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
-
-
 parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
-
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
 train_batch_size = total_device_num * args.batch_size_per_device
