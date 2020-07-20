@@ -54,13 +54,15 @@ def TrainBert(
         scope_name='classification'
     )
 
-    return loss,logit_blob
+    return loss, logit_blob
 
 
 def PooledOutput(sequence_output, hidden_size, initializer_range):
     with flow.deprecated.variable_scope("bert-pooler"):
-        first_token_tensor = flow.slice(sequence_output, [None, 0, 0], [None, 1, -1])
-        first_token_tensor = flow.reshape(first_token_tensor, [-1, hidden_size])
+        first_token_tensor = flow.slice(
+            sequence_output, [None, 0, 0], [None, 1, -1])
+        first_token_tensor = flow.reshape(
+            first_token_tensor, [-1, hidden_size])
         pooled_output = bert_util._FullyConnected(
             first_token_tensor,
             input_size=hidden_size,
@@ -74,14 +76,15 @@ def PooledOutput(sequence_output, hidden_size, initializer_range):
 
 def _AddClassficationLoss(input_blob, label_blob, hidden_size, label_num, initializer_range,
                           scope_name='classification'):
-    print(label_num,hidden_size)
+    print(label_num, hidden_size)
     with flow.deprecated.variable_scope(scope_name):
         output_weight_blob = flow.get_variable(
             name="output_weights",
             shape=[label_num, hidden_size],
             dtype=input_blob.dtype,
-            #initializer=bert_util.CreateInitializer(initializer_range),
-            initializer=flow.random_normal_initializer(mean=0.0, stddev=initializer_range, seed=None, dtype=None)
+            # initializer=bert_util.CreateInitializer(initializer_range),
+            initializer=flow.random_normal_initializer(
+                mean=0.0, stddev=initializer_range, seed=None, dtype=None)
         )
         output_bias_blob = flow.get_variable(
             name="output_bias",
@@ -89,13 +92,11 @@ def _AddClassficationLoss(input_blob, label_blob, hidden_size, label_num, initia
             dtype=input_blob.dtype,
             initializer=flow.constant_initializer(0.0),
         )
-        logit_blob = flow.matmul(input_blob, output_weight_blob, transpose_b=True)
+        logit_blob = flow.matmul(
+            input_blob, output_weight_blob, transpose_b=True)
         logit_blob = flow.nn.bias_add(logit_blob, output_bias_blob)
         pre_example_loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
             logits=logit_blob, labels=label_blob
         )
         loss = pre_example_loss
         return loss, pre_example_loss, logit_blob
-
-
-

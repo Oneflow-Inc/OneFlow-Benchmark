@@ -1,5 +1,8 @@
+# download the dataset with ofrecord format
+    ./download_dataset.sh
 # down pretrain tensorflow bert model and convert to oneflow bert model
-    ./build_checkpoiny.sh
+    ./build_checkpoint.sh
+
 # fitune the model on CoLA dataset (mcc can reach 0.401)
 python run_glue.py --task 'CoLA' --data_dir glue_data_bin/CoLA/train --val_data_dir glue_data_bin/CoLA/eval \
 --model_load_dir="./log/of_uncased_L-12_H-768_A-12"  --iter_num 1100 --learning_rate 1e-5 --batch_size_per_device=128 \

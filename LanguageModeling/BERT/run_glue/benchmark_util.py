@@ -88,7 +88,8 @@ class BERTSpeedometer:
                     print("-".ljust(66, "-"))
                     print(
                         "average speed: {:.3f}(sentences/sec), new_cal_method: {:.3f}(sentences/sec)".format(
-                            avg_sentences_per_sec, np.mean(self.throughoutput_list)
+                            avg_sentences_per_sec, np.mean(
+                                self.throughoutput_list)
                         )
                     )
                     print("-".ljust(66, "-"))
