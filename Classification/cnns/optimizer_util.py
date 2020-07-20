@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import math
+import pprint
 
 def add_optimizer_args(parser):
     group = parser.add_argument_group('optimizer parameters',
@@ -59,16 +60,7 @@ def gen_model_update_conf(args):
             "decay_batches": decay_batches, 
             "end_learning_rate": 0.00001,
         }}
-    
-    # weight decay
-    # if args.wd > 0:
-    #     assert args.wd < 1.0
-    #     model_update_conf['weight_decay_conf'] = {
-    #         "weight_decay_rate": args.wd, 
-    #         "excludes": {"pattern": ['_bn-']}
-    #     }
 
-    import pprint
     pprint.pprint(model_update_conf)
     return model_update_conf
 
