@@ -258,7 +258,7 @@ def EvalModel(step):
     train_predictions = []
     for index in range(len_train_data//(args.node_num * args.gpu_num_per_node * args.batch_size_per_device)):
         train_logits, train_label = BertGlueEvalTrainJob().get()
-        train_predictions.extend(list(train_logits.ndarray().argmax(axis=1)))
+        train_predictions.extend(list(train_logits.numpy().argmax(axis=1)))
         train_labels.extend(list(train_label))
 
     if args.task == 'CoLA':
@@ -277,7 +277,7 @@ def EvalModel(step):
     val_predictions = []
     for index in range(len_val_data//(args.node_num * args.gpu_num_per_node * args.batch_size_per_device)):
         val_logits, val_label = BertGlueEvalValJob().get()
-        val_predictions.extend(list(val_logits.ndarray().argmax(axis=1)))
+        val_predictions.extend(list(val_logits.numpy().argmax(axis=1)))
         val_labels.extend(list(val_label))
 
     if args.task == 'CoLA':
