@@ -363,7 +363,7 @@ OneFlow和英伟达保持了相同的初始化方式，只是在两个框架中�
 
 #### 将ImageNet转换成OFRecord
 
-在OneFlow中，提供了将原始ImageNet-2012数据集文件转换成OFRecord格式的脚本。如果您已经准备好了ImageNet-2012数据集(训练集和验证集)，并且训练集/验证集的格式如下：
+在OneFlow中，提供了将原始ImageNet-2012数据集文件转换成OFRecord格式的脚本，如果您已经准备好了ImageNet-2012数据集(训练集和验证集)，并且训练集/验证集的格式如下：
 
 ```shell
 │   ├── train
@@ -376,7 +376,10 @@ OneFlow和英伟达保持了相同的初始化方式，只是在两个框架中�
                                  ...
 ```
 
-那么，一键执行以下脚本即可完成训练集和验证集 > OFRecord的转换：
+那么，您只需要下载：[imagenet_2012_bounding_boxes.csv](https://oneflow-public.oss-cn-beijing.aliyuncs.com/online_document/dataset/imagenet/imagenet_2012_bounding_boxes.zip)
+
+然后执行以下脚本即可完成训练集/验证集 > OFRecord的转换：
+
 ##### 转换训练集
 
 ```shell
@@ -437,22 +440,28 @@ python3 imagenet_ofrecord.py  \
 
 
 
-如果您尚未下载过Imagenet数据集，请自行下载和准备以下文件：
+如果您尚未下载过Imagenet数据集，准备以下文件：
 
 - ILSVRC2012_img_train.tar
-
 - ILSVRC2012_img_val.tar
+- ILSVRC2012_bbox_train_v2.tar.gz（非必须）
 
-我们将用以下两个步骤，帮您完成数据集的预处理。之后，您就可以使用上面介绍的转换脚本进行OFReciord的转换了。下面假设您已经下载好了原始数据集，并存放在data/imagenet目录下：
+其中训练集和验证集的图片请自行下载，bbox标注可以点此下载：[ILSVRC2012_bbox_train_v2.tar.gz](https://oneflow-public.oss-cn-beijing.aliyuncs.com/online_document/dataset/imagenet/ILSVRC2012_bbox_train_v2.tar.gz)
+
+我们将用下面三个步骤，帮您完成数据集的预处理。之后，您就可以使用上面介绍的转换脚本进行OFReciord的转换了。
+
+
+
+下面假设您已经下载好了原始数据集和bbox标注文件，并存放在data/imagenet目录下：
 
 ```shell
 ├── data
 │   └── imagenet
 │       ├── ILSVRC2012_img_train.tar
 │       ├── ILSVRC2012_img_val.tar
-├── imagenet_utils
+│       ├── ILSVRC2012_bbox_train_v2.tar.gz
+├── tools
 │   ├── extract_trainval.sh
-│   ├── imagenet_2012_bounding_boxes.csv
 │   ├── imagenet_2012_validation_synset_labels.txt
 │   ├── imagenet_lsvrc_2015_synsets.txt
 │   ├── imagenet_metadata.txt
@@ -460,7 +469,25 @@ python3 imagenet_ofrecord.py  \
 │   └── preprocess_imagenet_validation_data.py
 ```
 
-**步骤一：extract imagenet**
+**步骤一：process_bounding_boxes**
+
+这一步，主要是将标注好的包含bboxs的xml文件提取到一个.csv文件中，方便后面代码中直接使用。完整的转换过程大约需要5分钟。
+
+当然，你也可以直接使用我们转换好的文件：[imagenet_2012_bounding_boxes.csv](https://oneflow-public.oss-cn-beijing.aliyuncs.com/online_document/dataset/imagenet/imagenet_2012_bounding_boxes.zip)
+
+1.解压ILSVRC2012_bbox_train_v2.tar.gz
+
+```shell
+cd data/imagenet && mkdir bounding_boxes && tar -zxvf ILSVRC2012_bbox_train_v2.tar.gz -C bounding_boxes
+```
+
+2.提取bboxs至.csv文件
+
+```shell
+cd ../.. && python process_bounding_boxes.py  data/imagenet/bounding_boxes   imagenet_lsvrc_2015_synsets.txt  | sort > imagenet_2012_bounding_boxes.csv
+```
+
+**步骤二：extract imagenet**
 
 这一步主要是将ILSVRC2012_img_train.tar和ILSVRC2012_img_val.tar解压缩，生成train、validation文件夹。train文件夹下是1000个虚拟lebel分类文件夹(如：n01443537)，训练集图片解压后根据分类放入这些label文件夹中；validation文件夹下是解压后的原图。
 
@@ -474,6 +501,8 @@ sh extract_trainval.sh ../data/imagenet # 参数指定存放imagenet元素数据
 ├── imagenet
 │   ├── ILSVRC2012_img_train.tar
 │   ├── ILSVRC2012_img_val.tar
+│   ├── ILSVRC2012_bbox_train_v2.tar.gz
+│   ├── bounding_boxes
 │   ├── train
 │   │   ├── n01440764
 │   │   │   ├── n01440764_10026.JPEG
@@ -489,7 +518,7 @@ sh extract_trainval.sh ../data/imagenet # 参数指定存放imagenet元素数据
 											...
 ```
 
-**步骤二：validation数据处理**
+**步骤三：validation数据处理**
 
 经过上一步，train数据集已经放入了1000个分类label文件夹中形成了规整的格式，而验证集部分的图片还全部堆放在validation文件夹中，这一步，我们就用preprocess_imagenet_validation_data.py对其进行处理，使其也按类别存放到label文件夹下。
 ```shell
@@ -503,6 +532,8 @@ python3 preprocess_imagenet_validation_data.py  ../data/imagenet/validation
 ├── imagenet
 │   ├── ILSVRC2012_img_train.tar
 │   ├── ILSVRC2012_img_val.tar
+│   ├── ILSVRC2012_bbox_train_v2.tar.gz
+│   ├── bounding_boxes
 │   ├── train
 │   │   ├── n01440764
 │   │   └── n01443537
@@ -546,3 +577,33 @@ flow.onnx.export(InferenceNet, '/tmp/resnet50_weights', 'resnet50_v1.5.onnx')
 #### 验证 ONNX 模型的正确性
 
 生成 ONNX 模型之后可以使用 ONNX Runtime 运行 ONNX 模型，以验证 OneFlow 模型和 ONNX 模型能够在相同的输入下产生相同的结果。相应的代码在 resnet\_to\_onnx.py 的 `check_equality`。
+
+#### 训练AlexNet
+
+```
+export ENABLE_USER_OP=True
+rm -rf core.* 
+rm -rf ./output/snapshots/*
+DATA_ROOT=/dataset/ImageNet/ofrecord
+#Please change this to your data root.
+python3 cnn_benchmark/of_cnn_train_val.py \
+    --train_data_dir=$DATA_ROOT/train \
+    --val_data_dir=$DATA_ROOT/validation \
+    --train_data_part_num=256 \
+    --val_data_part_num=256 \
+    --num_nodes=1 \
+    --gpu_num_per_node=1 \
+    --model_update="momentum" \
+    --mom=0.9 \
+    --learning_rate=0.01 \
+    --loss_print_every_n_iter=100 \
+    --batch_size_per_device=512 \
+    --val_batch_size_per_device=512 \
+    --num_epoch=90 \
+    --use_fp16=false \
+    --use_boxing_v2=false \
+    --model="alexnet" \
+```
+
+The top1 accuracy and the top5 acuuracy are 54.762% and 78.1914%, respectively for our oneflow model after 90 epochs of training.
+For reference, the top1 accuracy and the top5 accuracy are 54.6% and 78.33%, respectively for the model from the tensorflow benchmarks after 90 epochs of training.
