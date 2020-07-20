@@ -15,6 +15,8 @@ import resnet_model
 import vgg_model
 import alexnet_model
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
+
 
 parser = configs.get_parser()
 args = parser.parse_args()
