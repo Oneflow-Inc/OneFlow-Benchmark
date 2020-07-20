@@ -41,7 +41,7 @@ flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
 
 
-@flow.function(get_val_config(args))
+@flow.global_function(get_val_config(args))
 def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
@@ -65,7 +65,7 @@ def main():
     flow.env.log_dir(args.log_dir)
 
     summary = Summary(args.log_dir, args)
-
+    
     for epoch in range(args.num_epochs):
         model_load_dir = os.path.join(
             args.model_load_dir, 'snapshot_epoch_{}'.format(epoch))

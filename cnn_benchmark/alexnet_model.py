@@ -3,11 +3,69 @@ from __future__ import division
 from __future__ import print_function
 
 import oneflow as flow
-from model_util import conv2d_layer
 
+def _get_kernel_initializer():
+    return flow.variance_scaling_initializer(distribution="random_normal", data_format="NCHW")
+
+def _get_regularizer():
+    return flow.regularizers.l2(0.00005)
+
+def _get_bias_initializer():
+    return flow.zeros_initializer()
+
+def conv2d_layer(
+    name,
+    input,
+    filters,
+    kernel_size=3,
+    strides=1,
+    padding="SAME",
+    data_format="NCHW",
+    dilation_rate=1,
+    activation="Relu",
+    use_bias=True,
+    weight_initializer=_get_kernel_initializer(),
+    bias_initializer=_get_bias_initializer(),
+    weight_regularizer=_get_regularizer(),
+    bias_regularizer=_get_regularizer(),
+):
+    if isinstance(kernel_size, int):
+        kernel_size_1 = kernel_size
+        kernel_size_2 = kernel_size
+    if isinstance(kernel_size, list):
+        kernel_size_1 = kernel_size[0]
+        kernel_size_2 = kernel_size[1]
+
+    weight_shape = (filters, input.shape[1], kernel_size_1, kernel_size_2)
+    weight = flow.get_variable(
+        name + "-weight",
+        shape=weight_shape,
+        dtype=input.dtype,
+        initializer=weight_initializer,
+        regularizer=weight_regularizer,
+    )
+    output = flow.nn.conv2d(
+        input, weight, strides, padding, data_format, dilation_rate, name=name
+    )
+    if use_bias:
+        bias = flow.get_variable(
+            name + "-bias",
+            shape=(filters,),
+            dtype=input.dtype,
+            initializer=bias_initializer,
+            regularizer=bias_regularizer,
+        )
+        output = flow.nn.bias_add(output, bias, data_format)
+
+    if activation is not None:
+        if activation == "Relu":
+            output = flow.keras.activations.relu(output)
+        else:
+            raise NotImplementedError
+
+    return output
 
 def alexnet(images, need_transpose=False):
-
     if need_transpose:
         images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
 
@@ -36,9 +94,12 @@ def alexnet(images, need_transpose=False):
         inputs=pool5,
         units=4096,
         activation=flow.keras.activations.relu,
-        use_bias=False,
-        kernel_initializer=flow.random_uniform_initializer(),
-        bias_initializer=False,
+        use_bias=True,
+        #kernel_initializer=flow.random_uniform_initializer(),
+        kernel_initializer=_get_kernel_initializer(),
+        bias_initializer=_get_bias_initializer(),
+        kernel_regularizer=_get_regularizer(),
+        bias_regularizer=_get_regularizer(),
         name="fc1",
     )
 
@@ -48,9 +109,11 @@ def alexnet(images, need_transpose=False):
         inputs=dropout1,
         units=4096,
         activation=flow.keras.activations.relu,
-        use_bias=False,
-        kernel_initializer=flow.random_uniform_initializer(),
-        bias_initializer=False,
+        use_bias=True,        
+        kernel_initializer=_get_kernel_initializer(),
+        bias_initializer=_get_bias_initializer(),
+        kernel_regularizer=_get_regularizer(),
+        bias_regularizer=_get_regularizer(),
         name="fc2",
     )
 
@@ -58,10 +121,11 @@ def alexnet(images, need_transpose=False):
 
     fc3 = flow.layers.dense(
         inputs=dropout2,
-        units=1001,
+        units=1000,
         activation=None,
         use_bias=False,
-        kernel_initializer=flow.random_uniform_initializer(),
+        kernel_initializer=_get_kernel_initializer(),
+        kernel_regularizer=_get_regularizer(),
         bias_initializer=False,
         name="fc3",
     )

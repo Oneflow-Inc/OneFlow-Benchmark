@@ -15,7 +15,10 @@ import inception_model
 import resnet_model
 import vgg_model
 import alexnet_model
+import time
 
+# 指定GPU
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 parser = configs.get_parser()
 args = parser.parse_args()
@@ -39,6 +42,7 @@ model_dict = {
 
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
+flow.config
 flow.config.enable_debug_mode(True)
 
 if args.use_boxing_v2:
@@ -46,7 +50,7 @@ if args.use_boxing_v2:
     flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
 
 
-@flow.function(get_train_config(args))
+@flow.global_function(get_train_config(args))
 def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
@@ -68,7 +72,7 @@ def TrainNet():
     return outputs
 
 
-@flow.function(get_val_config(args))
+@flow.global_function(get_val_config(args))
 def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
@@ -94,7 +98,7 @@ def main():
 
     summary = Summary(args.log_dir, args)
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
-
+    start_time = time.time()
     for epoch in range(args.num_epochs):
         metric = Metric(desc='train', calculate_batches=args.loss_print_every_n_iter,
                         summary=summary, save_summary_steps=epoch_size,
@@ -108,6 +112,10 @@ def main():
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
         snapshot.save('epoch_{}'.format(epoch))
+        current_time = time.time()
+        print("epoch", epoch)
+        print("---------------------------------")
+        print("Used Time", current_time-start_time)
 
 
 if __name__ == "__main__":
