@@ -586,7 +586,7 @@ rm -rf core.*
 rm -rf ./output/snapshots/*
 DATA_ROOT=/dataset/ImageNet/ofrecord
 #Please change this to your data root.
-python3 cnn_benchmark/of_cnn_train_val.py \
+python3 of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
     --val_data_dir=$DATA_ROOT/validation \
     --train_data_part_num=256 \
