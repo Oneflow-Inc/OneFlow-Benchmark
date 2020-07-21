@@ -14,9 +14,10 @@ def add_optimizer_args(parser):
     group.add_argument("--mom", type=float, default=0.875, help="momentum")
     group.add_argument('--lr_decay', type=str, default='cosine', help='cosine, step, polynomial, exponential, None')
     group.add_argument('--lr_decay_rate', type=float, default='0.94', help='exponential learning decay rate')
+    group.add_argument('--lr_decay_epochs', type=int, default=2, help='exponential learning rate decay every n epochs')
     group.add_argument('--warmup_epochs', type=int, default=5,
                        help='the epochs to ramp-up lr to scaled large-batch value')
-    group.add_argument('--decay_rate', type=float, default='0.9', help='decay rate of RMSProp')    
+    group.add_argument('--decay_rate', type=float, default='0.9', help='decay rate of RMSProp')
     group.add_argument('--epsilon', type=float, default='1', help='epsilon')
     group.add_argument('--gradient_clipping', type=float, default=0.0, help='gradient clipping')
     return parser
@@ -32,6 +33,7 @@ def gen_model_update_conf(args):
     decay_rate = args.decay_rate
     epsilon = args.epsilon
     clipping_threshold = args.gradient_clipping
+    exponential_decay_batches = epoch_size * args.lr_decay_epochs
 
     model_update_conf = {}
     # basic model update
@@ -72,7 +74,7 @@ def gen_model_update_conf(args):
         }}
     elif args.lr_decay == 'exponential':
         model_update_conf['learning_rate_decay'] = {"exponential_conf": {
-            "decay_batches": decay_batches,
+            "decay_batches": exponential_decay_batches,
             "decay_rate": lr_decay_rate,
 
         }}

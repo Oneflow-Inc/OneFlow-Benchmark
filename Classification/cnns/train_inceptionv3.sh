@@ -16,6 +16,7 @@ python3 of_cnn_train_val.py \
     --learning_rate=0.045 \
     --lr_decay="exponential" \
     --lr_decay_rate=0.94 \
+    --lr_decay_epochs=2 \
     --loss_print_every_n_iter=10 \
     --batch_size_per_device=16 \
     --val_batch_size_per_device=16 \
@@ -25,3 +26,4 @@ python3 of_cnn_train_val.py \
     --image_size=299 \
     --resize_shorter=256 \
     --gradient_clipping=2 \
+    --warmup_epochs=0 \
