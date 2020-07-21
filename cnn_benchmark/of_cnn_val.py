@@ -15,7 +15,7 @@ from job_function_util import get_val_config
 import alexnet_model
 import resnet_model
 import vgg_model
-
+import inception_model
 
 parser = configs.get_parser()
 args = parser.parse_args()
@@ -41,7 +41,7 @@ flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
 
 
-@flow.function(get_val_config(args))
+@flow.global_function(get_val_config(args))
 def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)

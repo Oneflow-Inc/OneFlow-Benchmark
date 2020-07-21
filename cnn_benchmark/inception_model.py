@@ -7,12 +7,12 @@ from model_util import conv2d_layer_with_bn
 
 
 def InceptionA(in_blob, index):
-    with flow.deprecated.variable_scope("mixed_{}".format(index)):
-        with flow.deprecated.variable_scope("branch1x1"):
+    with flow.scope.namespace("mixed_{}".format(index)):
+        with flow.scope.namespace("branch1x1"):
             branch1x1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=64, kernel_size=1, strides=1, padding="SAME"
             )
-        with flow.deprecated.variable_scope("branch5x5"):
+        with flow.scope.namespace("branch5x5"):
             branch5x5_1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=48, kernel_size=1, strides=1, padding="SAME"
             )
@@ -24,7 +24,7 @@ def InceptionA(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-        with flow.deprecated.variable_scope("branch3x3dbl"):
+        with flow.scope.namespace("branch3x3dbl"):
             branch3x3dbl_1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=64, kernel_size=1, strides=1, padding="SAME"
             )
@@ -44,7 +44,7 @@ def InceptionA(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-        with flow.deprecated.variable_scope("branch_pool"):
+        with flow.scope.namespace("branch_pool"):
             branch_pool_1 = flow.nn.avg_pool2d(
                 in_blob,
                 ksize=3,
@@ -74,12 +74,12 @@ def InceptionA(in_blob, index):
 
 
 def InceptionB(in_blob, index):
-    with flow.deprecated.variable_scope("mixed_{}".format(index)):
-        with flow.deprecated.variable_scope("branch3x3"):
+    with flow.scope.namespace("mixed_{}".format(index)):
+        with flow.scope.namespace("branch3x3"):
             branch3x3 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=384, kernel_size=3, strides=2, padding="VALID"
             )
-        with flow.deprecated.variable_scope("branch3x3dbl"):
+        with flow.scope.namespace("branch3x3dbl"):
             branch3x3dbl_1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=64, kernel_size=1, strides=1, padding="SAME"
             )
@@ -99,7 +99,7 @@ def InceptionB(in_blob, index):
                 strides=2,
                 padding="VALID",
             )
-        with flow.deprecated.variable_scope("branch_pool"):
+        with flow.scope.namespace("branch_pool"):
             branch_pool = flow.nn.max_pool2d(
                 in_blob,
                 ksize=3,
@@ -119,12 +119,12 @@ def InceptionB(in_blob, index):
 
 
 def InceptionC(in_blob, index, filters):
-    with flow.deprecated.variable_scope("mixed_{}".format(index)):
-        with flow.deprecated.variable_scope("branch1x1"):
+    with flow.scope.namespace("mixed_{}".format(index)):
+        with flow.scope.namespace("branch1x1"):
             branch1x1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=192, kernel_size=1, strides=1, padding="SAME"
             )
-        with flow.deprecated.variable_scope("branch7x7"):
+        with flow.scope.namespace("branch7x7"):
             branch7x7_1 = conv2d_layer_with_bn(
                 "conv0",
                 in_blob,
@@ -149,7 +149,7 @@ def InceptionC(in_blob, index, filters):
                 strides=[1, 1],
                 padding="SAME",
             )
-        with flow.deprecated.variable_scope("branch7x7dbl"):
+        with flow.scope.namespace("branch7x7dbl"):
             branch7x7dbl_1 = conv2d_layer_with_bn(
                 "conv0",
                 in_blob,
@@ -190,7 +190,7 @@ def InceptionC(in_blob, index, filters):
                 strides=1,
                 padding="SAME",
             )
-        with flow.deprecated.variable_scope("branch_pool"):
+        with flow.scope.namespace("branch_pool"):
             branch_pool_1 = flow.nn.avg_pool2d(
                 in_blob,
                 ksize=3,
@@ -219,8 +219,8 @@ def InceptionC(in_blob, index, filters):
 
 
 def InceptionD(in_blob, index):
-    with flow.deprecated.variable_scope("mixed_{}".format(index)):
-        with flow.deprecated.variable_scope("branch3x3"):
+    with flow.scope.namespace("mixed_{}".format(index)):
+        with flow.scope.namespace("branch3x3"):
             branch3x3_1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=192, kernel_size=1, strides=1, padding="SAME"
             )
@@ -232,7 +232,7 @@ def InceptionD(in_blob, index):
                 strides=2,
                 padding="VALID",
             )
-        with flow.deprecated.variable_scope("branch7x7x3"):
+        with flow.scope.namespace("branch7x7x3"):
             branch7x7x3_1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=192, kernel_size=1, strides=1, padding="SAME"
             )
@@ -260,7 +260,7 @@ def InceptionD(in_blob, index):
                 strides=2,
                 padding="VALID",
             )
-        with flow.deprecated.variable_scope("branch_pool"):
+        with flow.scope.namespace("branch_pool"):
             branch_pool = flow.nn.max_pool2d(
                 in_blob,
                 ksize=3,
@@ -281,12 +281,12 @@ def InceptionD(in_blob, index):
 
 
 def InceptionE(in_blob, index):
-    with flow.deprecated.variable_scope("mixed_{}".format(index)):
-        with flow.deprecated.variable_scope("branch1x1"):
+    with flow.scope.namespace("mixed_{}".format(index)):
+        with flow.scope.namespace("branch1x1"):
             branch1x1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=320, kernel_size=1, strides=1, padding="SAME"
             )
-        with flow.deprecated.variable_scope("branch3x3"):
+        with flow.scope.namespace("branch3x3"):
             branch3x3_1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=384, kernel_size=1, strides=1, padding="SAME"
             )
@@ -312,7 +312,7 @@ def InceptionE(in_blob, index):
             concat_branch3x3 = flow.concat(
                 values=inceptionE_1_bn, axis=1, name="concat"
             )
-        with flow.deprecated.variable_scope("branch3x3dbl"):
+        with flow.scope.namespace("branch3x3dbl"):
             branch3x3dbl_1 = conv2d_layer_with_bn(
                 "conv0", in_blob, filters=448, kernel_size=1, strides=1, padding="SAME"
             )
@@ -346,7 +346,7 @@ def InceptionE(in_blob, index):
             concat_branch3x3dbl = flow.concat(
                 values=inceptionE_2_bn, axis=1, name="concat"
             )
-        with flow.deprecated.variable_scope("branch_pool"):
+        with flow.scope.namespace("branch_pool"):
             branch_pool_1 = flow.nn.avg_pool2d(
                 in_blob,
                 ksize=3,
@@ -381,7 +381,7 @@ def inceptionv3(images, trainable=True, need_transpose=False):
     if need_transpose:
         images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
 
-    with flow.deprecated.variable_scope("InceptionV3"):
+    with flow.scope.namespace("InceptionV3"):
         # conv0: 299 x 299 x 3
         conv0 = conv2d_layer_with_bn(
             "conv0", images, filters=32, kernel_size=3, strides=2, padding="VALID"

@@ -15,8 +15,9 @@ import inception_model
 import resnet_model
 import vgg_model
 import alexnet_model
+import time
 
-
+os.environ['CUDA_VISIBLE_DEVICES'] = "1,2,3"
 parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
@@ -46,7 +47,7 @@ if args.use_boxing_v2:
     flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
 
 
-@flow.function(get_train_config(args))
+@flow.global_function(get_train_config(args))
 def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
@@ -68,7 +69,7 @@ def TrainNet():
     return outputs
 
 
-@flow.function(get_val_config(args))
+@flow.global_function(get_val_config(args))
 def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
