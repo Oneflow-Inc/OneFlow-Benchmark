@@ -51,14 +51,6 @@ def get_parser(parser=None):
         help='Whether to use use fp16'
     )
     parser.add_argument(
-        '--use_boxing_v2',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        help='Whether to use boxing v2'
-    )
-
-    parser.add_argument(
         '--channel_last',
         type=str2bool,
         nargs='?',
