@@ -150,7 +150,7 @@ _BERT_MODEL_UPDATE_CONF = dict(
 
 config = flow.function_config()
 config.default_data_type(flow.float)
-config.default_distribute_strategy(flow.distribute.consistent_strategy())
+config.default_distribute_strategy(flow.scope.consistent_view())
 
 if args.use_fp16:
     config.enable_auto_mixed_precision(True)
