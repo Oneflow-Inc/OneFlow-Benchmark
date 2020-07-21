@@ -17,6 +17,8 @@ def _batch_norm(inputs, name=None, trainable=True):
         name=name,
     )
 
+def _get_regularizer():
+    return flow.regularizers.l2(0.00005)
 
 def conv2d_layer(
     name,
@@ -29,11 +31,14 @@ def conv2d_layer(
     dilation_rate=1,
     activation="Relu",
     use_bias=True,
-    weight_initializer=flow.variance_scaling_initializer(2, 'fan_out', 'random_normal',
-                                                         data_format="NCHW"),
+    weight_initializer=flow.variance_scaling_initializer(2, 'fan_out', 'random_normal', data_format="NCHW"),
     bias_initializer=flow.zeros_initializer(),
+
+    weight_regularizer=_get_regularizer(), # weight_decay
+    bias_regularizer=_get_regularizer(),
+
     bn=True,
-):
+):   
     weight_shape = (filters, input.shape[1], kernel_size, kernel_size)
     weight = flow.get_variable(
         name + "_weight",
@@ -85,12 +90,12 @@ def _conv_block(in_blob, index, filters, conv_times):
     return conv_block
 
 
-def vgg16bn(images, trainable=True, need_transpose=False, training=True, wd=1.0 / 32768, channel_last=False):
+def vgg16bn(images, trainable=True, need_transpose=False, training=True, wd=1.0/32768):
     if need_transpose:
         images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
     conv1 = _conv_block(images, 0, 64, 2)
     pool1 = flow.nn.max_pool2d(conv1[-1], 2, 2, "VALID", "NCHW", name="pool1")
-
+    
     conv2 = _conv_block(pool1, 2, 128, 2)
     pool2 = flow.nn.max_pool2d(conv2[-1], 2, 2, "VALID", "NCHW", name="pool2")
 
@@ -117,6 +122,8 @@ def vgg16bn(images, trainable=True, need_transpose=False, training=True, wd=1.0 
         use_bias=True,
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
+        kernel_regularizer=_get_regularizer(),  # weght_decay
+        bias_regularizer=_get_regularizer(),
         trainable=trainable,
         name="dense0",
     )

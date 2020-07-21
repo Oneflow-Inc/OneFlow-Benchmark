@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import math
+import pprint
 
 def add_optimizer_args(parser):
     group = parser.add_argument_group('optimizer parameters',
@@ -68,7 +69,6 @@ def gen_model_update_conf(args):
     #         "excludes": {"pattern": ['_bn-']}
     #     }
 
-    import pprint
     pprint.pprint(model_update_conf)
     return model_update_conf
 
