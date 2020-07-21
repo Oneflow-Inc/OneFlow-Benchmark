@@ -22,8 +22,6 @@ def get_train_config(args):
     train_config.all_reduce_group_min_mbyte(8)
     train_config.all_reduce_group_num(128)
 
-    if args.use_boxing_v2:
-        train_config.use_boxing_v2(True)
 
     train_config.prune_parallel_cast_ops(True)
     train_config.train.model_update_conf(gen_model_update_conf(args))

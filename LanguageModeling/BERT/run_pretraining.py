@@ -37,8 +37,6 @@ parser.add_argument("--log_every_n_iter", type=int, default=1, help="print loss 
 parser.add_argument("--data_dir", type=str, default=None)
 parser.add_argument("--data_part_num", type=int, default=32, help="data part number in dataset")
 parser.add_argument('--use_fp16', type=str2bool, nargs='?', const=True, help='use use fp16 or not')
-parser.add_argument('--use_boxing_v2', type=str2bool, nargs='?', const=True,
-    help='use boxing v2 or not')
 
 # log and resore/save
 parser.add_argument("--loss_print_every_n_iter", type=int, default=10, required=False,
@@ -164,8 +162,6 @@ config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
 
 if args.use_fp16:
     config.enable_auto_mixed_precision(True)
-if args.use_boxing_v2:
-    config.use_boxing_v2(True)
 
 
 @flow.global_function(config)
@@ -206,9 +202,6 @@ def main():
 
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.log_dir(args.log_dir)
-    if args.use_boxing_v2:
-        flow.config.collective_boxing.nccl_fusion_threshold_mb(8)
-        flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
 
 
     if args.node_num > 1:

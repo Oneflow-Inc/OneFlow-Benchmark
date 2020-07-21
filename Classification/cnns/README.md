@@ -601,7 +601,6 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --val_batch_size_per_device=512 \
     --num_epoch=90 \
     --use_fp16=false \
-    --use_boxing_v2=false \
     --model="alexnet" \
 ```
 
@@ -630,7 +629,6 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --val_batch_size_per_device=128 \
     --num_epoch=90 \
     --use_fp16=false \
-    --use_boxing_v2=false \
     --model="vgg" \
 ```
 
