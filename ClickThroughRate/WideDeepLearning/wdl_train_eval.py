@@ -182,9 +182,9 @@ def main():
             eval_loss = 0.0
             for j in range(FLAGS.eval_batchs):
                 loss, pred, ref = eval_job().get()
-                label_ = ref.ndarray().astype(np.float32)
+                label_ = ref.numpy().astype(np.float32)
                 labels = np.concatenate((labels, label_), axis=0)
-                preds = np.concatenate((preds, pred.ndarray()), axis=0)
+                preds = np.concatenate((preds, pred.numpy()), axis=0)
                 eval_loss += loss.mean()
             auc = roc_auc_score(labels[1:], preds[1:])
             print(i+1, "eval_loss", eval_loss/FLAGS.eval_batchs, "eval_auc", auc)
