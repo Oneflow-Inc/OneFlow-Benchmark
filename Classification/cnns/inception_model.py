@@ -4,6 +4,55 @@ from __future__ import print_function
 
 import oneflow as flow
 
+def conv2d_layer(
+    name,
+    input,
+    filters,
+    kernel_size=3,
+    strides=1,
+    padding="SAME",
+    data_format="NCHW",
+    dilation_rate=1,
+    activation="Relu",
+    use_bias=True,
+    weight_initializer=flow.random_uniform_initializer(),
+    bias_initializer=flow.constant_initializer(),
+):
+    if isinstance(kernel_size, int):
+        kernel_size_1 = kernel_size
+        kernel_size_2 = kernel_size
+    if isinstance(kernel_size, list):
+        kernel_size_1 = kernel_size[0]
+        kernel_size_2 = kernel_size[1]
+
+    weight_shape = (filters, input.shape[1], kernel_size_1, kernel_size_2)
+    weight = flow.get_variable(
+        name + "-weight",
+        shape=weight_shape,
+        dtype=input.dtype,
+        initializer=weight_initializer,
+    )
+    output = flow.nn.conv2d(
+        input, weight, strides, padding, data_format, dilation_rate, name=name
+    )
+    if use_bias:
+        bias = flow.get_variable(
+            name + "-bias",
+            shape=(filters,),
+            dtype=input.dtype,
+            initializer=bias_initializer,
+        )
+        output = flow.nn.bias_add(output, bias, data_format)
+
+    if activation is not None:
+        if activation == "Relu":
+            output = flow.keras.activations.relu(output)
+        else:
+            raise NotImplementedError
+
+    return output
+
+
 def conv2d_layer_with_bn(
     name,
     input,
@@ -413,7 +462,7 @@ def InceptionE(in_blob, index):
     return concat_total
 
 
-def inceptionv3(images, trainable=True, need_transpose=False, channel_last=False ):
+def inceptionv3(images, trainable=True, need_transpose=False, channel_last=False):
     if need_transpose:
         images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
     if channel_last:
@@ -471,7 +520,7 @@ def inceptionv3(images, trainable=True, need_transpose=False, channel_last=False
         # you want to use layers.dense interface.
         fc1 = flow.layers.dense(
             inputs=flow.reshape(pool3, [pool3.shape[0], -1]),
-            units=1001,
+            units=1000,
             activation=None,
             use_bias=True,
             kernel_initializer=flow.truncated_normal(0.816496580927726),
