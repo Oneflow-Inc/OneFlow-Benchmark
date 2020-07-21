@@ -43,8 +43,8 @@ def main():
 
     image = load_image(args.image_path)
     predictions = InferenceNet(image).get()
-    clsidx = predictions.ndarray().argmax()
-    print(predictions.ndarray().max(), clsidx_2_labels[clsidx])
+    clsidx = predictions.numpy().argmax()
+    print(predictions.numpy().max(), clsidx_2_labels[clsidx])
 
 
 if __name__ == "__main__":

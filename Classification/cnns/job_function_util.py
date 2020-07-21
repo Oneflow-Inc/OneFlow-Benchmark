@@ -8,7 +8,7 @@ from optimizer_util import gen_model_update_conf
 
 def _default_config(args):
     config = flow.function_config()
-    config.default_distribute_strategy(flow.distribute.consistent_strategy())
+    config.default_distribute_strategy(flow.scope.consistent_view())
     config.default_data_type(flow.float)
     if args.use_fp16:
         config.enable_auto_mixed_precision(True)
