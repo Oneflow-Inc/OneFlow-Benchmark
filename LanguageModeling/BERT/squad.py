@@ -46,7 +46,7 @@ def SQuADEval(
         initializer_range=initializer_range,
     )
 
-    with flow.name_scope("cls-squad"):
+    with flow.scope.namespace("cls-squad"):
         final_hidden = backbone.sequence_output()
         final_hidden_matrix = flow.reshape(final_hidden, [-1, hidden_size])
         logits = bert_util._FullyConnected(
@@ -100,7 +100,7 @@ def SQuADTrain(
         type_vocab_size=type_vocab_size,
         initializer_range=initializer_range,
     )
-    with flow.name_scope("cls-squad"):
+    with flow.scope.namespace("cls-squad"):
         final_hidden = backbone.sequence_output()
         final_hidden_matrix = flow.reshape(final_hidden, [-1, hidden_size])
         logits = bert_util._FullyConnected(
