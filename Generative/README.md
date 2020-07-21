@@ -28,17 +28,16 @@ python dcgan.py
 
 - `-lr` 学习率，默认为1e-4
 -  `-e` 设置训练epoch次数，默认为10
-- `-c` 与tensorflow进行对齐测试
 - `-b` 设置batchsize
 - `-g` 设置gpu数量
-- `-m` 多机训练
+
 
 
 其他需要注意的是：
 
 - 训练将会默认使用minst数据集，如果第一次使用脚本，将会默认将数据集下载到`.data/`目录
 - 训练结束后，将会默认保存模型到`.checkpoint/`目录下
-- 模型的结构和参数参考了tensorflow的[官方示例](https://www.tensorflow.org/tutorials/generative/dcgan)，可以通过-c参数来跟tensorflow的实现进行对齐测试
+- 模型的结构和参数参考了tensorflow的[官方示例](https://www.tensorflow.org/tutorials/generative/dcgan)
 - 模型会定期将生成的图片存储到`.gout/`目录，并在训练结束后生成图片演化的动图,生成动图的过程会依赖python包`imageio`
 
 ![](https://raw.githubusercontent.com/JamiePlur/picgo/master/20200615170256.png)
@@ -57,10 +56,9 @@ python pix2pix.py
 
 - `-lr` 学习率，默认为1e-4
 -  `-e` 设置训练epoch次数，默认为10
-- `-c` 进行对齐测试
 - `-b` 设置batchsize
 - `-g` 设置gpu数量
-- `-m` 多机训练
+
 
 
 
@@ -68,7 +66,7 @@ python pix2pix.py
 
 - 训练将会默认使用CMP Facade数据集，如果第一次使用脚本，将会默认将数据集下载到`.data/`目录
 - 训练结束后，将会默认保存模型到`.checkpoint/`目录下
-- 模型的结构和参数参考了tensorflow的[官方示例](https://www.tensorflow.org/tutorials/generative/pix2pix)，可以通过-c参数来跟tensorflow的实现进行对齐测试
+- 模型的结构和参数参考了tensorflow的[官方示例](https://www.tensorflow.org/tutorials/generative/pix2pix)
 - 模型会在训练中定期将生成的图片存储到`.gout/`目录
 
 ![image-20200701153752019](https://raw.githubusercontent.com/JamiePlur/picgo/master/20200701153829.png)
