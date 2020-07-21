@@ -1,11 +1,3 @@
-'''
-@Descripttion: 
-@version: 
-@Author: Andy
-@Date: 2020-07-20 20:16:54
-@LastEditors: Andy
-@LastEditTime: 2020-07-20 20:16:54
-'''
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
