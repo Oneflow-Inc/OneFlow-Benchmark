@@ -40,7 +40,6 @@ def conv2d_layer(
     bn=True,
 ):   
     weight_shape = (filters, input.shape[1], kernel_size, kernel_size)
-    print("weight_shape:{}".format(weight_shape))
     weight = flow.get_variable(
         name + "_weight",
         shape=weight_shape,
@@ -65,7 +64,7 @@ def conv2d_layer(
                 output = _batch_norm(output, name + "_bn")
                 output = flow.nn.relu(output)
             else:
-                output = flow.nn.relu(output)     
+                output = flow.nn.relu(output)
         else:
             raise NotImplementedError
 
