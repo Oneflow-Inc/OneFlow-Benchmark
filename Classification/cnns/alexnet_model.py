@@ -65,10 +65,12 @@ def conv2d_layer(
 
     return output
 
-def alexnet(images, need_transpose=False):
+def alexnet(images, need_transpose=False, channel_last=False):
     if need_transpose:
         images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
-
+    if channel_last:
+    # if channel_last=True, then change mode from 'nchw' to 'nhwc'
+        images = flow.transpose(images, name="transpose", perm=[0, 2, 3, 1])
     conv1 = conv2d_layer(
         "conv1", images, filters=64, kernel_size=11, strides=4, padding="VALID"
     )
