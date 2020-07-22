@@ -27,7 +27,7 @@ OneFlow-Benchmark下的cnn仓库目前已支持resnet50、vgg、alexnet等经典
 
 - 准备数据集（可选）
 
-  - 下载[示例数据集](https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenet_ofrecord_example/part-00000`)
+  - 下载[示例数据集](https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenet_ofrecord_example/part-00000)
 
   - 或者：制作完整OFRecord格式的ImageNet数据集（见下文进阶部分）
 
