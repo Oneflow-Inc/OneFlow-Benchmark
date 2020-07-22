@@ -11,6 +11,7 @@ import oneflow as flow
 
 from pretrain import PreTrain
 from optimizer_util import gen_model_update_conf
+from util import InitNodes
 import benchmark_util
 
 parser = configs.get_parser()
@@ -40,7 +41,7 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
 
 @flow.global_function(gen_model_update_conf(args))
 def PretrainJob():
-    total_device_num = args.node_num * args.gpu_num_per_node
+    total_device_num = args.num_nodes * args.gpu_num_per_node
     batch_size = total_device_num * args.batch_size_per_device
 
     hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
@@ -79,14 +80,7 @@ def main():
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.log_dir(args.log_dir)
 
-    if args.node_num > 1:
-        nodes = []
-        for n in args.node_list.strip().split(","):
-            addr_dict = {}
-            addr_dict["addr"] = n
-            nodes.append(addr_dict)
-
-        flow.env.machine(nodes)
+    InitNodes(args)
 
     check_point = flow.train.CheckPoint()
     if args.model_load_dir:
@@ -98,7 +92,7 @@ def main():
         print("Init model on demand")
 
     total_batch_size = (
-        args.node_num * args.gpu_num_per_node * args.batch_size_per_device
+        args.num_nodes * args.gpu_num_per_node * args.batch_size_per_device
     )
     speedometer = benchmark_util.BERTSpeedometer()
 

@@ -28,8 +28,10 @@ def get_parser(parser=None):
     # resouce
     parser.add_argument("--model", type=str, default='BERT Pretrain')
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
-    parser.add_argument("--node_num", type=int, default=1)
-    parser.add_argument("--node_list", type=str, default=None)
+    parser.add_argument('--num_nodes', type=int, default=1,
+                        help='node/machine number for training')
+    parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
+                        help='nodes ip list for training, devided by ",", length >= num_nodes')
     
     # train
     parser.add_argument("--learning_rate", type=float, default=1e-4, help="Learning rate")
@@ -72,7 +74,7 @@ def get_parser(parser=None):
 def print_args(args):
     print("=".ljust(66, "="))
     print("Running {}: num_gpu_per_node = {}, num_nodes = {}.".format(
-        args.model, args.gpu_num_per_node, args.node_num))
+        args.model, args.gpu_num_per_node, args.num_nodes))
     print("=".ljust(66, "="))
     for arg in vars(args):
         print("{} = {}".format(arg, getattr(args, arg)))
