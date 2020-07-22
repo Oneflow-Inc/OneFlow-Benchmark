@@ -28,7 +28,6 @@ OneFlow-Benchmark下的cnn仓库目前已支持resnet50、vgg、alexnet等经典
 - 准备数据集（可选）
 
   - 下载[示例数据集](https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenet_ofrecord_example/part-00000`)
-
   - 或者：制作完整OFRecord格式的ImageNet数据集（见下文进阶部分）
 
   - 再或者：直接使用虚拟“合成数据”。
@@ -632,5 +631,5 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --model="vgg" \
 ```
 
-The top1 accuracy and the top5 acuuracy are 69.7326% and 89.3806%, respectively for our oneflow model after 90 epochs of training.
-For reference, the top1 accuracy and the top5 accuracy are 71.5% and 89.9%, respectively for the model from the tensorflow benchmarks after 90 epochs of training.
+The top1 accuracy and the top5 acuuracy are 71.1% and 89.6%, respectively for our oneflow model after 100 epochs of training.
+For reference, the top1 accuracy and the top5 accuracy are 71.5% and 89.9%, respectively for the model from the tensorflow benchmarks after 100 epochs of training.
