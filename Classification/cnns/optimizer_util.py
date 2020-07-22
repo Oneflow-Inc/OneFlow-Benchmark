@@ -76,7 +76,6 @@ def gen_model_update_conf(args):
         model_update_conf['learning_rate_decay'] = {"exponential_conf": {
             "decay_batches": exponential_decay_batches,
             "decay_rate": lr_decay_rate,
-
         }}
     
     # gradient_clipping

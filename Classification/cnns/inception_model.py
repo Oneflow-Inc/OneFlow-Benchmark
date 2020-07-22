@@ -4,6 +4,15 @@ from __future__ import print_function
 
 import oneflow as flow
 
+def _get_kernel_initializer():
+    return flow.variance_scaling_initializer(distribution="random_normal", data_format="NCHW")
+
+def _get_regularizer():
+    return flow.regularizers.l2(0.00005)
+
+def _get_bias_initializer():
+    return flow.zeros_initializer()
+
 def conv2d_layer(
     name,
     input,
@@ -15,8 +24,10 @@ def conv2d_layer(
     dilation_rate=1,
     activation="Relu",
     use_bias=True,
-    weight_initializer=flow.random_uniform_initializer(),
-    bias_initializer=flow.constant_initializer(),
+    weight_initializer=_get_kernel_initializer(),
+    bias_initializer=_get_bias_initializer(),
+    weight_regularizer=_get_regularizer(),
+    bias_regularizer=_get_regularizer(),
 ):
     if isinstance(kernel_size, int):
         kernel_size_1 = kernel_size
@@ -31,6 +42,7 @@ def conv2d_layer(
         shape=weight_shape,
         dtype=input.dtype,
         initializer=weight_initializer,
+        regularizer=weight_regularizer,
     )
     output = flow.nn.conv2d(
         input, weight, strides, padding, data_format, dilation_rate, name=name
@@ -41,6 +53,7 @@ def conv2d_layer(
             shape=(filters,),
             dtype=input.dtype,
             initializer=bias_initializer,
+            regularizer=bias_regularizer,
         )
         output = flow.nn.bias_add(output, bias, data_format)
 
@@ -63,9 +76,11 @@ def conv2d_layer_with_bn(
     data_format="NCHW",
     dilation_rate=1,
     activation="Relu",
-    use_bias=True,
-    weight_initializer=flow.random_uniform_initializer(),
-    bias_initializer=flow.constant_initializer(),
+    use_bias=True,    
+    weight_initializer=_get_kernel_initializer(),
+    bias_initializer=_get_bias_initializer(),
+    weight_regularizer=_get_regularizer(),
+    bias_regularizer=_get_regularizer(),
     use_bn=True,
 ):
     output = conv2d_layer(name=name,
@@ -79,7 +94,9 @@ def conv2d_layer_with_bn(
                           activation=activation,
                           use_bias=use_bias,
                           weight_initializer=weight_initializer,
-                          bias_initializer=bias_initializer)
+                          bias_initializer=bias_initializer,
+                          weight_regularizer=weight_regularizer,
+                          bias_regularizer=bias_regularizer)
 
     if use_bn:
         output = flow.layers.batch_normalization(inputs=output,
