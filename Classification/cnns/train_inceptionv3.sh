@@ -24,6 +24,6 @@ python3 of_cnn_train_val.py \
     --use_fp16=false \
     --model="inceptionv3" \
     --image_size=299 \
-    --resize_shorter=256 \
+    --resize_shorter=299 \
     --gradient_clipping=2 \
     --warmup_epochs=0 \
