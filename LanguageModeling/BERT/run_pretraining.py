@@ -10,6 +10,7 @@ import config as configs
 import oneflow as flow
 
 from pretrain import PreTrain
+from optimizer_util import gen_model_update_conf
 import benchmark_util
 
 parser = configs.get_parser()
@@ -37,101 +38,38 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
     return blob_confs
 
 
-def BuildPreTrainNet(
-    batch_size,
-    data_part_num,
-    seq_length=128,
-    max_position_embeddings=512,
-    num_hidden_layers=12,
-    num_attention_heads=12,
-    hidden_dropout_prob=0.1,
-    attention_probs_dropout_prob=0.1,
-    vocab_size=30522,
-    type_vocab_size=2,
-    max_predictions_per_seq=20,
-):
-    hidden_size = 64 * num_attention_heads  # , H = 64, size per head
-    intermediate_size = hidden_size * 4
-
-    decoders = BertDecoder(args.data_dir, batch_size, data_part_num, seq_length,
-                           max_predictions_per_seq)
-
-    input_ids = decoders["input_ids"]
-    next_sentence_labels = decoders["next_sentence_labels"]
-    input_mask = decoders["input_mask"]
-    token_type_ids = decoders["segment_ids"]
-    masked_lm_ids = decoders["masked_lm_ids"]
-    masked_lm_positions = decoders["masked_lm_positions"]
-    masked_lm_weights = decoders["masked_lm_weights"]
-    return PreTrain(
-        input_ids,
-        input_mask,
-        token_type_ids,
-        masked_lm_positions,
-        masked_lm_ids,
-        masked_lm_weights,
-        next_sentence_labels,
-        vocab_size,
-        seq_length=seq_length,
-        hidden_size=hidden_size,
-        num_hidden_layers=num_hidden_layers,
-        num_attention_heads=num_attention_heads,
-        intermediate_size=intermediate_size,
-        hidden_act="gelu",
-        hidden_dropout_prob=hidden_dropout_prob,
-        attention_probs_dropout_prob=attention_probs_dropout_prob,
-        max_position_embeddings=max_position_embeddings,
-        type_vocab_size=type_vocab_size,
-        max_predictions_per_seq=max_predictions_per_seq,
-        initializer_range=0.02,
-    )
-
-
-_BERT_MODEL_UPDATE_CONF = dict(
-    learning_rate_decay=dict(
-        polynomial_conf=dict(
-            decay_batches=args.iter_num,
-            end_learning_rate=0.0,
-        )
-    ),
-    warmup_conf=dict(
-        linear_conf=dict(warmup_batches=args.warmup_batches, start_multiplier=0,)
-    ),
-    clip_conf=dict(clip_by_global_norm=dict(clip_norm=1.0,)),
-    adam_conf=dict(epsilon=1e-6),
-    weight_decay_conf=dict(
-        weight_decay_rate=args.weight_decay_rate,
-        excludes=dict(pattern=["bias", "LayerNorm", "layer_norm"]),
-    ),
-)
-
-config = flow.function_config()
-config.default_data_type(flow.float)
-config.default_distribute_strategy(flow.scope.consistent_view())
-config.train.primary_lr(args.learning_rate)
-config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
-
-if args.use_fp16:
-    config.enable_auto_mixed_precision(True)
-
-
-@flow.global_function(config)
+@flow.global_function(gen_model_update_conf(args))
 def PretrainJob():
     total_device_num = args.node_num * args.gpu_num_per_node
     batch_size = total_device_num * args.batch_size_per_device
 
-    total_loss, mlm_loss, nsp_loss = BuildPreTrainNet(
-        batch_size,
-        args.data_part_num,
+    hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
+    intermediate_size = hidden_size * 4
+
+    decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
+                           args.max_predictions_per_seq)
+
+    total_loss, mlm_loss, nsp_loss = PreTrain(
+        decoders["input_ids"],
+        decoders["input_mask"],
+        decoders["segment_ids"],
+        decoders["masked_lm_positions"],
+        decoders["masked_lm_ids"],
+        decoders["masked_lm_weights"],
+        decoders["next_sentence_labels"],
+        args.vocab_size,
         seq_length=args.seq_length,
-        max_position_embeddings=args.max_position_embeddings,
+        hidden_size=hidden_size,
         num_hidden_layers=args.num_hidden_layers,
         num_attention_heads=args.num_attention_heads,
+        intermediate_size=intermediate_size,
+        hidden_act="gelu",
         hidden_dropout_prob=args.hidden_dropout_prob,
         attention_probs_dropout_prob=args.attention_probs_dropout_prob,
-        vocab_size=args.vocab_size,
+        max_position_embeddings=args.max_position_embeddings,
         type_vocab_size=args.type_vocab_size,
         max_predictions_per_seq=args.max_predictions_per_seq,
+        initializer_range=0.02,
     )
     flow.losses.add_loss(total_loss)
     return total_loss, mlm_loss, nsp_loss
