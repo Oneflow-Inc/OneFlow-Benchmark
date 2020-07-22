@@ -5,6 +5,7 @@ from __future__ import print_function
 import os
 import time
 import numpy as np
+from collections import OrderedDict
 import pandas as pd
 from datetime import datetime
 import oneflow as flow
@@ -92,77 +93,71 @@ def match_top_k(predictions, labels, top_k=1):
 
 
 class Metric(object):
-    def __init__(self, summary=None, save_summary_steps=-1, desc='train', calculate_batches=-1,
-                 batch_size=256, top_k=5, prediction_key='predictions', label_key='labels',
-                 loss_key=None):
+    def __init__(self, summary=None, desc='train', print_steps=-1, batch_size=256, keys=[], show_epoch=False):
+        r"""accumulate and calculate metric
+
+        Args:
+            summary: A `Summary` object to write in.
+            desc: `str` general description of the metric to show
+            print_steps: `Int` print metrics every nth steps
+            batch_size: `Int` batch size per step
+            keys: keys in callback outputs
+            show_epoch: `bool` show epoch number or not
+        Returns:
+            A `Blob`
+        """
         self.summary = summary
         self.save_summary = isinstance(self.summary, Summary)
-        self.save_summary_steps = save_summary_steps
         self.desc = desc
-        self.calculate_batches = calculate_batches
-        self.top_k = top_k
-        self.prediction_key = prediction_key
-        self.label_key = label_key
-        self.loss_key = loss_key
-        if loss_key:
-            self.fmt = "{}: epoch {}, iter {}, loss: {:.6f}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
-        else:
-            self.fmt = "{}: epoch {}, iter {}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
+        self.print_steps = print_steps
+        assert batch_size > 0
+        self.batch_size = batch_size
+
+        assert isinstance(keys, (list, tuple))
+        self.keys = keys
+        self.show_epoch = show_epoch
+        self.metric_dict = OrderedDict()
+        if show_epoch:
+            self.metric_dict['epoch'] = 0
+        self.metric_dict['step'] = 0
 
         self.timer = StopWatch()
         self.timer.start()
         self._clear()
 
     def _clear(self):
-        self.top_1_num_matched = 0
-        self.top_k_num_matched = 0
+        for key in self.keys:
+            self.metric_dict[key] = 0.0
+        self.metric_dict['throughput'] = 0.0
         self.num_samples = 0.0
+    
+    def update_and_save(self, key, value, epoch, step):
+        self.metric_dict[key] = value
+        if self.save_summary:
+            self.summary.scalar(self.desc + "_" + key, value, epoch, step)
 
-    def metric_cb(self, epoch, step):
+
+    def metric_cb(self, epoch=None, step=0):
         def callback(outputs):
             if step == 0: self._clear()
-            if self.prediction_key:
-                num_matched, num_samples = match_top_k(outputs[self.prediction_key],
-                                                       outputs[self.label_key])
-                self.top_1_num_matched += num_matched
-                num_matched, _ = match_top_k(outputs[self.prediction_key],
-                                             outputs[self.label_key], self.top_k)
-                self.top_k_num_matched += num_matched
-            else:
-                num_samples = outputs[self.label_key].shape[0]
+            if self.show_epoch:
+                self.metric_dict['epoch'] = epoch
+            self.metric_dict['step'] = step
 
-            self.num_samples += num_samples
+            for key in self.keys:
+                self.metric_dict[key] += outputs[key].numpy().sum()
 
-            if (step + 1) % self.calculate_batches == 0:
+            self.num_samples += self.batch_size
+
+            if (step + 1) % self.print_steps == 0:
                 throughput = self.num_samples / self.timer.split()
-                if self.prediction_key:
-                    top_1_accuracy = self.top_1_num_matched / self.num_samples
-                    top_k_accuracy = self.top_k_num_matched / self.num_samples
-                else:
-                    top_1_accuracy = 0.0
-                    top_k_accuracy = 0.0
-
-                if self.loss_key:
-                    loss = outputs[self.loss_key].mean()
-                    print(self.fmt.format(self.desc, epoch, step + 1, loss, top_1_accuracy,
-                                          top_k_accuracy, throughput))
-                    if self.save_summary:
-                        self.summary.scalar(self.desc+"_" + self.loss_key, loss, epoch, step)
-                else:
-                    print(self.fmt.format(self.desc, epoch, step + 1, top_1_accuracy,
-                                          top_k_accuracy, throughput))
-
+                self.update_and_save('throughput', throughput, epoch, step)
+                for key in self.keys:
+                    value = self.metric_dict[key] / self.num_samples
+                    self.update_and_save(key, value, epoch, step)
+                print(self.metric_dict)
+                #print(*['{} : {}'.format(k,v) for k,v in self.metric_dict], sep = " ")
                 self._clear()
-                if self.save_summary:
-                    self.summary.scalar(self.desc + "_throughput", throughput, epoch, step)
-                    if self.prediction_key:
-                        self.summary.scalar(self.desc + "_top_1", top_1_accuracy, epoch, step)
-                        self.summary.scalar(self.desc + "_top_{}".format(self.top_k),
-                                            top_k_accuracy, epoch, step)
-
-            if self.save_summary:
-                if (step + 1) % self.save_summary_steps == 0:
-                    self.summary.save()
 
         return callback
 

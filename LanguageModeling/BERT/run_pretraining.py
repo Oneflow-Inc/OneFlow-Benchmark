@@ -73,7 +73,7 @@ def PretrainJob():
         initializer_range=0.02,
     )
     flow.losses.add_loss(total_loss)
-    return total_loss, mlm_loss, nsp_loss
+    return {'total_loss': total_loss, 'mlm_loss': mlm_loss, 'nsp_loss': nsp_loss}
 
 
 def main():
@@ -87,17 +87,12 @@ def main():
     total_batch_size = (
         args.num_nodes * args.gpu_num_per_node * args.batch_size_per_device
     )
-    speedometer = benchmark_util.BERTSpeedometer()
 
+    summary = Summary(args.log_dir, args)
+    metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, summary=summary, 
+                    batch_size=total_batch_size, keys=['total_loss', 'mlm_loss', 'nsp_loss'])
     for step in range(args.iter_num):
-        cb = speedometer.speedometer_cb(
-            step,
-            total_batch_size,
-            args.iter_num,
-            args.loss_print_every_n_iter,
-        )
-        PretrainJob().async_get(cb)
-
+        PretrainJob().async_get(metric.metric_cb(0, step))
         if (step + 1) % args.model_save_every_n_iter == 0:
             snapshot.save("snapshot_%d" % (step + 1))
 
