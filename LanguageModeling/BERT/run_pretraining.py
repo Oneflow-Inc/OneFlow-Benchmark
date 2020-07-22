@@ -11,7 +11,7 @@ import oneflow as flow
 
 from pretrain import PreTrain
 from optimizer_util import gen_model_update_conf
-from util import InitNodes
+from util import Snapshot, Summary, InitNodes, Metric
 import benchmark_util
 
 parser = configs.get_parser()
@@ -82,14 +82,7 @@ def main():
 
     InitNodes(args)
 
-    check_point = flow.train.CheckPoint()
-    if args.model_load_dir:
-        assert os.path.isdir(args.model_load_dir)
-        check_point.load(args.model_load_dir)
-        print("Restoring model from {}.".format(args.model_load_dir))
-    else:
-        check_point.init()
-        print("Init model on demand")
+    snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
     total_batch_size = (
         args.num_nodes * args.gpu_num_per_node * args.batch_size_per_device
@@ -106,20 +99,10 @@ def main():
         PretrainJob().async_get(cb)
 
         if (step + 1) % args.model_save_every_n_iter == 0:
-            if not os.path.exists(args.model_save_dir):
-                os.makedirs(args.model_save_dir)
-            snapshot_save_path = os.path.join(
-                args.model_save_dir, "snapshot_%d" % (step + 1)
-            )
-            print("Saving model to {}.".format(snapshot_save_path))
-            check_point.save(snapshot_save_path)
+            snapshot.save("snapshot_%d" % (step + 1))
 
     if args.save_last_snapshot:
-        snapshot_save_path = os.path.join(args.model_save_dir, "last_snapshot")
-        if not os.path.exists(snapshot_save_path):
-            os.makedirs(snapshot_save_path)
-        print("Saving model to {}.".format(snapshot_save_path))
-        check_point.save(snapshot_save_path)
+        snapshot.save("last_snapshot")
 
 
 if __name__ == "__main__":
