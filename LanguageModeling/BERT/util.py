@@ -148,5 +148,3 @@ class Metric(object):
                 self._clear()
 
         return callback
-
-
