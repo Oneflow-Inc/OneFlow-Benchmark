@@ -50,14 +50,15 @@ class Summary(object):
         self._filename = filename
         self._log_dir = log_dir
         if not os.path.exists(log_dir): os.makedirs(log_dir)
-        self._metrics = pd.DataFrame({"epoch":0, "iter": 0, "legend": "cfg", "note": str(config)}, index=[0])
+        self._metrics = pd.DataFrame({"legend": "cfg", "value": str(config)}, index=[0])
 
-    def scalar(self, legend, value, epoch, step=-1):
-        # TODO: support rank(which device/gpu)
-        df = pd.DataFrame(
-            {"epoch": epoch, "iter": step, "legend": legend, "value": value, "rank": 0},
-            index=[0])
+    def scalar(self, legend, iter, value, **kwargs):
+        kwargs['legend'] = legend
+        kwargs['iter'] = int(iter)
+        kwargs['value'] = value
+        df = pd.DataFrame(kwargs, index=[0])
         self._metrics = pd.concat([self._metrics, df], axis=0, sort=False)
+        self.save()
 
     def save(self):
         save_path = os.path.join(self._log_dir, self._filename)
@@ -91,9 +92,8 @@ def match_top_k(predictions, labels, top_k=1):
     num_matched = match_array.sum()
     return num_matched, match_array.shape[0]
 
-
 class Metric(object):
-    def __init__(self, summary=None, desc='train', print_steps=-1, batch_size=256, keys=[], show_epoch=False):
+    def __init__(self, summary=None, desc='train', print_steps=-1, batch_size=256, keys=[]):
         r"""accumulate and calculate metric
 
         Args:
@@ -102,7 +102,6 @@ class Metric(object):
             print_steps: `Int` print metrics every nth steps
             batch_size: `Int` batch size per step
             keys: keys in callback outputs
-            show_epoch: `bool` show epoch number or not
         Returns:
             A `Blob`
         """
@@ -115,10 +114,7 @@ class Metric(object):
 
         assert isinstance(keys, (list, tuple))
         self.keys = keys
-        self.show_epoch = show_epoch
         self.metric_dict = OrderedDict()
-        if show_epoch:
-            self.metric_dict['epoch'] = 0
         self.metric_dict['step'] = 0
 
         self.timer = StopWatch()
@@ -131,18 +127,15 @@ class Metric(object):
         self.metric_dict['throughput'] = 0.0
         self.num_samples = 0.0
     
-    def update_and_save(self, key, value, epoch, step):
+    def update_and_save(self, key, value, step, **kwargs):
         self.metric_dict[key] = value
         if self.save_summary:
-            self.summary.scalar(self.desc + "_" + key, value, epoch, step)
+            self.summary.scalar(self.desc + "_" + key, step, value, **kwargs)
 
 
-    def metric_cb(self, epoch=None, step=0):
+    def metric_cb(self, step=0, **kwargs):
         def callback(outputs):
             if step == 0: self._clear()
-            if self.show_epoch:
-                self.metric_dict['epoch'] = epoch
-            self.metric_dict['step'] = step
 
             for key in self.keys:
                 self.metric_dict[key] += outputs[key].numpy().sum()
@@ -150,13 +143,18 @@ class Metric(object):
             self.num_samples += self.batch_size
 
             if (step + 1) % self.print_steps == 0:
+                self.metric_dict['step'] = step
+                for k, v in kwargs.items():
+                    print(k, v)
+                    self.metric_dict[k] = v
                 throughput = self.num_samples / self.timer.split()
-                self.update_and_save('throughput', throughput, epoch, step)
+                self.update_and_save('throughput', throughput, step)
                 for key in self.keys:
                     value = self.metric_dict[key] / self.num_samples
-                    self.update_and_save(key, value, epoch, step)
-                print(self.metric_dict)
-                #print(*['{} : {}'.format(k,v) for k,v in self.metric_dict], sep = " ")
+                    self.update_and_save(key, value, step, **kwargs)
+                #print(self.metric_dict)
+                print(', '.join(('{}: {}' if type(v) is int else '{}: {:.3f}').format(k, v) \
+                                for k, v in self.metric_dict.items()))
                 self._clear()
 
         return callback

@@ -92,7 +92,8 @@ def main():
     metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, summary=summary, 
                     batch_size=total_batch_size, keys=['total_loss', 'mlm_loss', 'nsp_loss'])
     for step in range(args.iter_num):
-        PretrainJob().async_get(metric.metric_cb(0, step))
+        PretrainJob().async_get(metric.metric_cb(step))
+        #PretrainJob().async_get(metric.metric_cb(step, epoch=3))
         if (step + 1) % args.model_save_every_n_iter == 0:
             snapshot.save("snapshot_%d" % (step + 1))
 
