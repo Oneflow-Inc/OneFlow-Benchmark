@@ -12,7 +12,7 @@ import oneflow as flow
 
 from squad import SQuAD
 from util import Snapshot, Summary, InitNodes, Metric
-from optimizer_util import gen_model_update_conf
+from optimizer_util import gen_model_update_conf, get_dev_config
 
 parser = configs.get_parser()
 parser.add_argument('--num_epochs', type=int, default=3, help='number of epochs')
@@ -28,14 +28,14 @@ parser.add_argument("--dev_example_num", type=int, default=10833,
 parser.add_argument("--dev_batch_size_per_device", type=int, default=64)
 parser.add_argument("--dev_data_part_num", type=int, default=1, 
                     help="data part number in dataset")
-parser.add_argument("--db_version", type=str, default='v1.1')
+parser.add_argument("--dev_output", type=str, default='squad_dev_result.npy')
 args = parser.parse_args()
 
 batch_size = args.num_nodes * args.gpu_num_per_node * args.batch_size_per_device
 dev_batch_size = args.num_nodes * args.gpu_num_per_node * args.dev_batch_size_per_device
 
 epoch_size = math.ceil(args.train_example_num / batch_size)
-num_val_steps = math.ceil(args.dev_example_num / dev_batch_size)
+num_dev_steps = math.ceil(args.dev_example_num / dev_batch_size)
 args.iter_num = epoch_size * args.num_epochs
 args.warmup_batches = args.iter_num // 100
 configs.print_args(args)
@@ -99,6 +99,35 @@ def SquadFinetuneJob():
     total_loss = 0.5*(start_loss + end_loss)
     flow.losses.add_loss(total_loss)
     return {'total_loss': total_loss}
+    
+
+@flow.global_function(get_dev_config(args))
+def SquadDevJob():
+    hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
+    intermediate_size = hidden_size * 4
+
+    decoders = SquadDecoder(args.dev_data_dir, batch_size, args.dev_data_part_num, args.seq_length,
+                            is_train=False)
+
+    start_logits, end_logits = SQuAD(
+        decoders['input_ids'],
+        decoders['input_mask'],
+        decoders['segment_ids'],
+        args.vocab_size,
+        seq_length=args.seq_length,
+        hidden_size=hidden_size,
+        num_hidden_layers=args.num_hidden_layers,
+        num_attention_heads=args.num_attention_heads,
+        intermediate_size=intermediate_size,
+        hidden_act="gelu",
+        hidden_dropout_prob=args.hidden_dropout_prob,
+        attention_probs_dropout_prob=args.attention_probs_dropout_prob,
+        max_position_embeddings=args.max_position_embeddings,
+        type_vocab_size=args.type_vocab_size,
+        initializer_range=0.02,
+    )
+
+    return decoders['unique_ids'], start_logits, end_logits
 
 
 def main():
@@ -118,9 +147,27 @@ def main():
         for step in range(epoch_size):
             SquadFinetuneJob().async_get(metric.metric_cb(step, epoch=epoch))
 
-
     if args.save_last_snapshot:
         snapshot.save("last_snapshot")
+    
+    if args.dev_data_dir:
+        all_results = []
+        for step in range(num_dev_steps):
+            unique_ids, start_position, end_position = SquadDevJob().get()
+            unique_ids = unique_ids.numpy()
+            start_position = start_position.numpy()
+            end_position = end_position.numpy()
+        
+            for result in zip(unique_ids, start_position, end_position):
+                all_results.append(result)
+    
+            if step % args.loss_print_every_n_iter == 0:
+                print("{}/{}, num of results:{}".format(step, num_dev_steps, len(all_results)))
+                print("last uid:", result[0])
+
+        import numpy as np
+        np.save(args.dev_output, all_results)
+        print(len(all_results), "all_resutls saved")
 
 
 if __name__ == "__main__":
