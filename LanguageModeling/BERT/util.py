@@ -86,12 +86,6 @@ class StopWatch(object):
         return self.stop_time - self.start_time
 
 
-def match_top_k(predictions, labels, top_k=1):
-    max_k_preds = np.argpartition(predictions.numpy(), -top_k)[:, -top_k:]
-    match_array = np.logical_or.reduce(max_k_preds == labels.reshape((-1, 1)), axis=1)
-    num_matched = match_array.sum()
-    return num_matched, match_array.shape[0]
-
 class Metric(object):
     def __init__(self, summary=None, desc='train', print_steps=-1, batch_size=256, keys=[]):
         r"""accumulate and calculate metric
@@ -103,7 +97,6 @@ class Metric(object):
             batch_size: `Int` batch size per step
             keys: keys in callback outputs
         Returns:
-            A `Blob`
         """
         self.summary = summary
         self.save_summary = isinstance(self.summary, Summary)
@@ -132,7 +125,6 @@ class Metric(object):
         if self.save_summary:
             self.summary.scalar(self.desc + "_" + key, step, value, **kwargs)
 
-
     def metric_cb(self, step=0, **kwargs):
         def callback(outputs):
             if step == 0: self._clear()
@@ -145,14 +137,12 @@ class Metric(object):
             if (step + 1) % self.print_steps == 0:
                 self.metric_dict['step'] = step
                 for k, v in kwargs.items():
-                    print(k, v)
                     self.metric_dict[k] = v
                 throughput = self.num_samples / self.timer.split()
                 self.update_and_save('throughput', throughput, step)
                 for key in self.keys:
                     value = self.metric_dict[key] / self.num_samples
                     self.update_and_save(key, value, step, **kwargs)
-                #print(self.metric_dict)
                 print(', '.join(('{}: {}' if type(v) is int else '{}: {:.3f}').format(k, v) \
                                 for k, v in self.metric_dict.items()))
                 self._clear()
