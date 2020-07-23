@@ -631,5 +631,5 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --model="vgg" \
 ```
 
-The top1 accuracy and the top5 acuuracy are 71.1% and 89.6%, respectively for our oneflow model after 100 epochs of training.
+The top1 accuracy and the top5 acuuracy are 72.1% and 90.7%, respectively for our oneflow model after 100 epochs of training.
 For reference, the top1 accuracy and the top5 accuracy are 71.5% and 89.9%, respectively for the model from the tensorflow benchmarks after 100 epochs of training.

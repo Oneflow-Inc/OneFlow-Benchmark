@@ -90,7 +90,7 @@ def _conv_block(in_blob, index, filters, conv_times):
     return conv_block
 
 
-def vgg16bn(images, trainable=True, need_transpose=False,channel_last=False,training=True, wd=1.0/32768):
+ def vgg16bn(images, trainable=True, need_transpose=False, channel_last=False, training=True, wd=1.0/32768):
     if need_transpose:
         images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
     if channel_last:
