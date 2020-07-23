@@ -12,7 +12,6 @@ import oneflow as flow
 from pretrain import PreTrain
 from optimizer_util import gen_model_update_conf
 from util import Snapshot, Summary, InitNodes, Metric
-import benchmark_util
 
 parser = configs.get_parser()
 args = parser.parse_args()
