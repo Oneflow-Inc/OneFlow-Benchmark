@@ -108,7 +108,6 @@ def BuildSQuADPredictNet(
     input_mask = decoders["input_mask"]
     token_type_ids = decoders["segment_ids"]
 
-
     return SQuADEval(
         unique_ids,
         input_ids,
