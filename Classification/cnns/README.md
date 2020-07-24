@@ -64,7 +64,7 @@ OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **
 
 #### Alexnet
 
-[alexnet_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/alexnet_of_best_model_val_top1_54.762.tar.gz) (validation accuracy: 54.762% top1，78.1914% top5 )
+[alexnet_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/alexnet_of_best_model_val_top1_54762.zip) (validation accuracy: 54.762% top1，78.1914% top5 )
 
 
 
@@ -118,13 +118,13 @@ Saving model to ./output/snapshots/model_save-20200723124215/snapshot_epoch_1.
 
 >  为了方便运行演示，我们默认使用synthetic虚拟合成数据集，使您可以快速看到模型运行的效果
 
-同样，你也可以使用[迷你示例数据集](https://oneflow-public.oss-cn-beijing.aliyuncs.com/online_document/dataset/imagenet/data.zip)，下载解压后放入cnn项目的root目录即可，然后修改训练脚本如下：
+同样，你也可以使用[迷你示例数据集](https://oneflow-public.oss-cn-beijing.aliyuncs.com/online_document/dataset/imagenet/mini-imagenet.zip)，下载解压后放入cnn项目的root目录即可，然后修改训练脚本如下：
 
 ```shell
 rm -rf core.* 
 rm -rf ./output/snapshots/*
 
-DATA_ROOT=data/imagenet/ofrecord
+DATA_ROOT=data/mini-imagenet/ofrecord
 
 python3 of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
