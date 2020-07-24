@@ -1,24 +1,20 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 import os
 import math
-
 import oneflow as flow
-
 import ofrecord_util
 import config as configs
 from util import Snapshot, Summary, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
 import resnet_model
 import vgg_model
-
+import alexnet_model
 
 parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
-
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
 train_batch_size = total_device_num * args.batch_size_per_device
@@ -31,15 +27,12 @@ num_val_steps = int(args.num_val_examples / val_batch_size)
 model_dict = {
     "resnet50": resnet_model.resnet50,
     "vgg": vgg_model.vgg16bn,
+    "alexnet": alexnet_model.alexnet,
 }
 
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
-
-if args.use_boxing_v2:
-    flow.config.collective_boxing.nccl_fusion_threshold_mb(8)
-    flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
 
 
 def label_smoothing(labels, classes, eta, dtype):
@@ -62,7 +55,7 @@ def TrainNet():
         (labels, images) = ofrecord_util.load_synthetic(args)
     logits = model_dict[args.model](images,
                                     need_transpose=False if args.train_data_dir else True,
-                                    channel_last=args.channel_last)
+                                    )
     if args.label_smoothing > 0:
         one_hot_labels = label_smoothing(labels, args.num_classes, args.label_smoothing, logits.dtype)
         loss = flow.nn.softmax_cross_entropy_with_logits(one_hot_labels, logits, name="softmax_loss")
@@ -87,7 +80,7 @@ def InferenceNet():
         (labels, images) = ofrecord_util.load_synthetic(args)
 
     logits = model_dict[args.model](
-        images, need_transpose=False if args.train_data_dir else True, channel_last=args.channel_last)
+        images, need_transpose=False if args.val_data_dir else True)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs
@@ -95,10 +88,6 @@ def InferenceNet():
 
 def main():
     InitNodes(args)
-    if args.channel_last:
-        print("Use 'NHWC' mode >> Channel last")
-    else:
-        print("Use 'NCHW' mode >> Channel first")
     flow.env.grpc_use_no_signal()
     flow.env.log_dir(args.log_dir)
 

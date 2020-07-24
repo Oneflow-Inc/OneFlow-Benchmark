@@ -141,7 +141,7 @@ def resnet50(images, trainable=True, need_transpose=False, training=True, wd=1.0
     if channel_last:
         # if channel_last=True, then change mode from 'nchw' to 'nhwc'
         images = flow.transpose(images, name="transpose", perm=[0, 2, 3, 1])
-    with flow.deprecated.variable_scope("Resnet"):
+    with flow.scope.namespace("Resnet"):
         stem = builder.resnet_stem(images)
         body = builder.resnet_conv_x_body(stem)
         pool5 = flow.nn.avg_pool2d(

@@ -111,15 +111,14 @@ def _get_train_conf():
         'lazy_adam_conf': {
         }
     })
-    train_conf.use_boxing_v2(True)
-    train_conf.default_distribute_strategy(flow.distribute.consistent_strategy())
+    train_conf.default_distribute_strategy(flow.scope.consistent_view())
     train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
 
 def _get_eval_conf():
     eval_conf = flow.FunctionConfig()
     eval_conf.default_data_type(flow.float)
-    eval_conf.default_distribute_strategy(flow.distribute.consistent_strategy())
+    eval_conf.default_distribute_strategy(flow.scope.consistent_view())
     return eval_conf
 
 
@@ -183,9 +182,9 @@ def main():
             eval_loss = 0.0
             for j in range(FLAGS.eval_batchs):
                 loss, pred, ref = eval_job().get()
-                label_ = ref.ndarray().astype(np.float32)
+                label_ = ref.numpy().astype(np.float32)
                 labels = np.concatenate((labels, label_), axis=0)
-                preds = np.concatenate((preds, pred.ndarray()), axis=0)
+                preds = np.concatenate((preds, pred.numpy()), axis=0)
                 eval_loss += loss.mean()
             auc = roc_auc_score(labels[1:], preds[1:])
             print(i+1, "eval_loss", eval_loss/FLAGS.eval_batchs, "eval_auc", auc)

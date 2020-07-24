@@ -12,8 +12,17 @@ args = parser.parse_args()
 configs.print_args(args)
 
 import oneflow as flow
-from resnet_model import resnet50
 from imagenet1000_clsidx_to_labels import clsidx_2_labels
+
+import resnet_model
+import vgg_model
+import alexnet_model
+
+model_dict = {
+    "resnet50": resnet_model.resnet50,
+    "vgg": vgg_model.vgg16bn,
+    "alexnet": alexnet_model.alexnet,
+}
 
 
 def load_image(image_path='test_img/ILSVRC2012_val_00020287.JPEG'):
@@ -30,7 +39,7 @@ def load_image(image_path='test_img/ILSVRC2012_val_00020287.JPEG'):
 
 @flow.global_function(flow.function_config())
 def InferenceNet(images=flow.FixedTensorDef((1, 3, 224, 224), dtype=flow.float)):
-    logits = resnet50(images, training=False, channel_last=args.channel_last)
+    logits = model_dict[args.model](images,training=False)
     predictions = flow.nn.softmax(logits)
     return predictions
 
@@ -43,8 +52,8 @@ def main():
 
     image = load_image(args.image_path)
     predictions = InferenceNet(image).get()
-    clsidx = predictions.ndarray().argmax()
-    print(predictions.ndarray().max(), clsidx_2_labels[clsidx])
+    clsidx = predictions.numpy().argmax()
+    print(predictions.numpy().max(), clsidx_2_labels[clsidx])
 
 
 if __name__ == "__main__":
