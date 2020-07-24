@@ -60,7 +60,7 @@ OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **
 
 #### VGG16
 
-[vgg16_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/alexnet_of_best_model_val_top1_54.762.tar.gz) (validation accuracy: 72.1% top1，92.7% top5 )
+[vgg16_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/vgg16_of_best_model_val_top1_721.zip) (validation accuracy: 72.1% top1，92.7% top5 )
 
 #### Alexnet
 
