@@ -36,11 +36,7 @@ def get_parser(parser=None):
     # train
     parser.add_argument("--learning_rate", type=float, default=1e-4, help="Learning rate")
     parser.add_argument("--weight_decay_rate", type=float, default=0.01, help="weight decay rate")
-    parser.add_argument("--batch_size_per_device", type=int, default=64)
-    parser.add_argument("--iter_num", type=int, default=1144000, help="total iterations to run")
     parser.add_argument("--warmup_batches", type=int, default=10000)
-    parser.add_argument("--data_dir", type=str, default=None)
-    parser.add_argument("--data_part_num", type=int, default=32, help="data part number in dataset")
     parser.add_argument('--use_fp16', type=str2bool, nargs='?', const=True, help='use use fp16 or not')
     
     # log and resore/save
