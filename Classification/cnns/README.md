@@ -8,7 +8,7 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 
 在2012年的ImageNet竞赛中，深度卷积网络AlexNet横空出世。以超出第二名10%以上的top-5准确率，勇夺ImageNet2012比赛的冠军。从此，以 CNN（卷积神经网络） 为代表的深度学习方法开始在计算机视觉领域的应用开始大放异彩，更多的更深的CNN网络被提出，比如ImageNet2014比赛的冠军VGGNet, ImageNet2015比赛的冠军ResNet。
 
-OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG** 、 **Resnet50** 等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
+OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **Resnet50** 等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
 
 
 
@@ -54,17 +54,17 @@ OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG** 、 **Re
 
 ### 预训练模型
 
-#### resnet50
+#### Resnet50
 
 [resnet50_v1.5_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_v15_of_best_model_val_top1_77318.tgz ) (validation accuracy: 77.318% top1，93.622% top5 )
 
-#### vgg
+#### VGG16
 
-（TODO）
+[vgg16_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/alexnet_of_best_model_val_top1_54.762.tar.gz) (validation accuracy: 72.1% top1，92.7% top5 )
 
-#### alexnet
+#### Alexnet
 
-（TODO）
+[alexnet_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/alexnet_of_best_model_val_top1_54.762.tar.gz) (validation accuracy: 54.762% top1，78.1914% top5 )
 
 
 
