@@ -8,7 +8,7 @@ import numpy as np
 
 import oneflow as flow
 
-from binclassiflication import GlueBERT
+from classifier import GlueBERT
 from util import Snapshot, Summary, InitNodes, Metric
 from optimizer_util import gen_model_update_conf, get_dev_config
 
