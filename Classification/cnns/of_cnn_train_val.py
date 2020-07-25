@@ -55,7 +55,7 @@ def TrainNet():
         (labels, images) = ofrecord_util.load_synthetic(args)
     logits = model_dict[args.model](images,
                                     need_transpose=False if args.train_data_dir else True,
-                                    channel_last=args.channel_last)
+                                    )
     if args.label_smoothing > 0:
         one_hot_labels = label_smoothing(labels, args.num_classes, args.label_smoothing, logits.dtype)
         loss = flow.nn.softmax_cross_entropy_with_logits(one_hot_labels, logits, name="softmax_loss")
@@ -80,7 +80,7 @@ def InferenceNet():
         (labels, images) = ofrecord_util.load_synthetic(args)
 
     logits = model_dict[args.model](
-        images, need_transpose=False if args.train_data_dir else True, channel_last=args.channel_last)
+        images, need_transpose=False if args.val_data_dir else True)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs
@@ -88,10 +88,6 @@ def InferenceNet():
 
 def main():
     InitNodes(args)
-    if args.channel_last:
-        print("Use 'NHWC' mode >> Channel last")
-    else:
-        print("Use 'NCHW' mode >> Channel first")
     flow.env.grpc_use_no_signal()
     flow.env.log_dir(args.log_dir)
 

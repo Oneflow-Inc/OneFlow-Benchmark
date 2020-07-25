@@ -62,12 +62,12 @@ def gen_model_update_conf(args):
         }}
     
     # weight decay
-    # if args.wd > 0:
-    #     assert args.wd < 1.0
-    #     model_update_conf['weight_decay_conf'] = {
-    #         "weight_decay_rate": args.wd, 
-    #         "excludes": {"pattern": ['_bn-']}
-    #     }
+    if args.wd > 0:
+        assert args.wd < 1.0
+        model_update_conf['weight_decay_conf'] = {
+            "weight_decay_rate": args.wd, 
+            "excludes": {"pattern": ['_bn-']}
+        }
 
     pprint.pprint(model_update_conf)
     return model_update_conf
