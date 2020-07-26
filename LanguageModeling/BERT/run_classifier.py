@@ -10,13 +10,13 @@ import oneflow as flow
 
 from classifier import GlueBERT
 from util import Snapshot, Summary, InitNodes, Metric
-from optimizer_util import gen_model_update_conf, get_dev_config
+from optimizer_util import gen_model_update_conf, get_eval_config
 
 import config as configs
-from sklearn.metrics import matthews_corrcoef
+from sklearn.metrics import accuracy_score, matthews_corrcoef, precision_score, recall_score, f1_score
 
 parser = configs.get_parser()
-parser.add_argument("--task", type=str, default='CoLA')
+parser.add_argument("--task_name", type=str, default='CoLA')
 parser.add_argument('--num_epochs', type=int, default=3, help='number of epochs')
 parser.add_argument("--train_data_dir", type=str, default=None)
 parser.add_argument("--train_data_prefix", type=str, default='train.of_record-')
@@ -114,7 +114,7 @@ def BertGlueFinetuneJob():
     return {'loss': loss}
 
 
-@flow.global_function(get_dev_config(args))
+@flow.global_function(get_eval_config(args))
 def BertGlueEvalTrainJob():
     _, logits, label_ids = BuildBert(
         batch_size,
@@ -126,7 +126,7 @@ def BertGlueEvalTrainJob():
     return logits, label_ids
 
 
-@flow.global_function(get_dev_config(args))
+@flow.global_function(get_eval_config(args))
 def BertGlueEvalValJob():
     #8551 or 1042
     _, logits, label_ids = BuildBert(
@@ -139,7 +139,7 @@ def BertGlueEvalValJob():
     return logits, label_ids
 
 
-def run_eval_job(eval_job_func, num_steps, desc='train acc'):
+def run_eval_job(eval_job_func, num_steps, desc='train'):
     labels = []
     predictions = []
     for index in range(num_steps):
@@ -147,17 +147,17 @@ def run_eval_job(eval_job_func, num_steps, desc='train acc'):
         predictions.extend(list(logits.numpy().argmax(axis=1)))
         labels.extend(list(label))
 
-    def calculate_acc(predictions, labels):
-        if args.task == 'CoLA':
-            #return np.mean(np.array(predictions) == np.array(labels))
-            return matthews_corrcoef(labels, predictions)
-        elif args.task == 'MRPC':
-            return matthews_corrcoef(labels, predictions)
-            #return np.mean(np.array(predictions) == np.array(labels))
+    def metric_fn(predictions, labels):
+        return {
+            "accuarcy": accuracy_score(labels, predictions), 
+            "matthews_corrcoef": matthews_corrcoef(labels, predictions), 
+            "precision": precision_score(labels, predictions), 
+            "recall": recall_score(labels, predictions),
+            "f1": f1_score(labels, predictions),
+        }
 
-    #print(predictions[0:12])
-    #print(np.array(labels).flatten()[0:12])
-    print('{}: {}'.format(desc, calculate_acc(predictions, labels)))
+    metric_dict = metric_fn(predictions, labels)
+    print(desc, ', '.join('{}: {:.3f}'.format(k, v) for k, v in metric_dict.items()))
     #pd.DataFrame({'predictions': predictions, 'labels': labels}).to_csv('predictions_{0}.csv'.format(step), index=False)
 
 
@@ -174,7 +174,6 @@ def main():
     #    import sys
     #    sys.exit()
 
-    mcc_or_acc = 'mcc' if args.task=='CoLA' else 'acc'
     summary = Summary(args.log_dir, args)
     for epoch in range(args.num_epochs):
         metric = Metric(desc='finetune', print_steps=args.loss_print_every_n_iter, summary=summary, 
@@ -184,8 +183,8 @@ def main():
             BertGlueFinetuneJob().async_get(metric.metric_cb(step, epoch=epoch))
             #if 1: #step % args.loss_print_every_n_iter == 0: 
 
-        run_eval_job(BertGlueEvalTrainJob, epoch_size, desc='train {}'.format(mcc_or_acc))
-        run_eval_job(BertGlueEvalValJob, num_eval_steps, desc='eval {}'.format(mcc_or_acc))
+        run_eval_job(BertGlueEvalTrainJob, epoch_size, desc='train')
+        run_eval_job(BertGlueEvalValJob, num_eval_steps, desc='eval')
 
     if args.save_last_snapshot:
         snapshot.save("last_snapshot")
