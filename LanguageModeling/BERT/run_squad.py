@@ -138,19 +138,20 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    summary = Summary(args.log_dir, args)
+    if args.do_train:
+        summary = Summary(args.log_dir, args)
+        for epoch in range(args.num_epochs):
+            metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, summary=summary, 
+                            batch_size=batch_size, keys=['total_loss'])
 
-    for epoch in range(args.num_epochs):
-        metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, summary=summary, 
-                        batch_size=batch_size, keys=['total_loss'])
+            for step in range(epoch_size):
+                SquadFinetuneJob().async_get(metric.metric_cb(step, epoch=epoch))
 
-        for step in range(epoch_size):
-            SquadFinetuneJob().async_get(metric.metric_cb(step, epoch=epoch))
-
-    if args.save_last_snapshot:
-        snapshot.save("last_snapshot")
+        if args.save_last_snapshot:
+            snapshot.save("last_snapshot")
     
-    if args.eval_data_dir:
+    if args.do_eval:
+        assert os.path.isdir(args.eval_data_dir)
         all_results = []
         for step in range(num_eval_steps):
             unique_ids, start_position, end_position = SquadDevJob().get()
