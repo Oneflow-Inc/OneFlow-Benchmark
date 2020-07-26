@@ -37,15 +37,15 @@ eval_batch_size = args.num_nodes * args.gpu_num_per_node * args.eval_batch_size_
 epoch_size = math.ceil(args.train_example_num / batch_size)
 num_eval_steps = math.ceil(args.eval_example_num / eval_batch_size)
 args.iter_num = epoch_size * args.num_epochs
-args.warmup_batches = args.iter_num // 100
+args.warmup_batches = args.iter_num // 10
 configs.print_args(args)
 
 def SquadDecoder(data_dir, batch_size, data_part_num, seq_length, is_train=True):
     ofrecord = flow.data.ofrecord_reader(data_dir,
                                          batch_size=batch_size,
                                          data_part_num=data_part_num,
-                                         random_shuffle = True,
-                                         shuffle_after_epoch=True)
+                                         random_shuffle = is_train,
+                                         shuffle_after_epoch=is_train)
     blob_confs = {}
     def _blob_conf(name, shape, dtype=flow.int32):
         blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
