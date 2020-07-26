@@ -10,7 +10,7 @@ import oneflow as flow
 
 from classifier import GlueBERT
 from util import Snapshot, Summary, InitNodes, Metric
-from optimizer_util import gen_model_update_conf, get_dev_config
+from optimizer_util import gen_model_update_conf, get_eval_config
 
 import config as configs
 from sklearn.metrics import matthews_corrcoef
@@ -114,7 +114,7 @@ def BertGlueFinetuneJob():
     return {'loss': loss}
 
 
-@flow.global_function(get_dev_config(args))
+@flow.global_function(get_eval_config(args))
 def BertGlueEvalTrainJob():
     _, logits, label_ids = BuildBert(
         batch_size,
@@ -126,7 +126,7 @@ def BertGlueEvalTrainJob():
     return logits, label_ids
 
 
-@flow.global_function(get_dev_config(args))
+@flow.global_function(get_eval_config(args))
 def BertGlueEvalValJob():
     #8551 or 1042
     _, logits, label_ids = BuildBert(

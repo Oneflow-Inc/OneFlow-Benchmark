@@ -12,7 +12,7 @@ import oneflow as flow
 
 from squad import SQuAD
 from util import Snapshot, Summary, InitNodes, Metric
-from optimizer_util import gen_model_update_conf, get_dev_config
+from optimizer_util import gen_model_update_conf, get_eval_config
 
 parser = configs.get_parser()
 parser.add_argument('--num_epochs', type=int, default=3, help='number of epochs')
@@ -22,20 +22,20 @@ parser.add_argument("--train_example_num", type=int, default=88614,
 parser.add_argument("--batch_size_per_device", type=int, default=32)
 parser.add_argument("--train_data_part_num", type=int, default=1, 
                     help="data part number in dataset")
-parser.add_argument("--dev_data_dir", type=str, default=None)
-parser.add_argument("--dev_example_num", type=int, default=10833, 
+parser.add_argument("--eval_data_dir", type=str, default=None)
+parser.add_argument("--eval_example_num", type=int, default=10833, 
                     help="example number in dataset")
-parser.add_argument("--dev_batch_size_per_device", type=int, default=64)
-parser.add_argument("--dev_data_part_num", type=int, default=1, 
+parser.add_argument("--eval_batch_size_per_device", type=int, default=64)
+parser.add_argument("--eval_data_part_num", type=int, default=1, 
                     help="data part number in dataset")
-parser.add_argument("--dev_output", type=str, default='squad_dev_result.npy')
+parser.add_argument("--eval_output", type=str, default='squad_eval_result.npy')
 args = parser.parse_args()
 
 batch_size = args.num_nodes * args.gpu_num_per_node * args.batch_size_per_device
-dev_batch_size = args.num_nodes * args.gpu_num_per_node * args.dev_batch_size_per_device
+eval_batch_size = args.num_nodes * args.gpu_num_per_node * args.eval_batch_size_per_device
 
 epoch_size = math.ceil(args.train_example_num / batch_size)
-num_dev_steps = math.ceil(args.dev_example_num / dev_batch_size)
+num_eval_steps = math.ceil(args.eval_example_num / eval_batch_size)
 args.iter_num = epoch_size * args.num_epochs
 args.warmup_batches = args.iter_num // 100
 configs.print_args(args)
@@ -101,12 +101,12 @@ def SquadFinetuneJob():
     return {'total_loss': total_loss}
     
 
-@flow.global_function(get_dev_config(args))
+@flow.global_function(get_eval_config(args))
 def SquadDevJob():
     hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
     intermediate_size = hidden_size * 4
 
-    decoders = SquadDecoder(args.dev_data_dir, batch_size, args.dev_data_part_num, args.seq_length,
+    decoders = SquadDecoder(args.eval_data_dir, batch_size, args.eval_data_part_num, args.seq_length,
                             is_train=False)
 
     start_logits, end_logits = SQuAD(
@@ -150,9 +150,9 @@ def main():
     if args.save_last_snapshot:
         snapshot.save("last_snapshot")
     
-    if args.dev_data_dir:
+    if args.eval_data_dir:
         all_results = []
-        for step in range(num_dev_steps):
+        for step in range(num_eval_steps):
             unique_ids, start_position, end_position = SquadDevJob().get()
             unique_ids = unique_ids.numpy()
             start_position = start_position.numpy()
@@ -162,11 +162,11 @@ def main():
                 all_results.append(result)
     
             if step % args.loss_print_every_n_iter == 0:
-                print("{}/{}, num of results:{}".format(step, num_dev_steps, len(all_results)))
+                print("{}/{}, num of results:{}".format(step, num_eval_steps, len(all_results)))
                 print("last uid:", result[0])
 
         import numpy as np
-        np.save(args.dev_output, all_results)
+        np.save(args.eval_output, all_results)
         print(len(all_results), "all_resutls saved")
 
 

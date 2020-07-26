@@ -35,7 +35,7 @@ def gen_model_update_conf(args):
     return config
 
 
-def get_dev_config(args):
+def get_eval_config(args):
     config = flow.function_config()
     config.default_distribute_strategy(flow.scope.consistent_view())
     config.default_data_type(flow.float)
