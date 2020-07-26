@@ -147,7 +147,7 @@ def run_eval_job(eval_job_func, num_steps, desc='train acc'):
         predictions.extend(list(logits.numpy().argmax(axis=1)))
         labels.extend(list(label))
 
-    def calculate_acc(predictions, labels):
+    def metric_fn(predictions, labels):
         if args.task_name == 'CoLA':
             #return np.mean(np.array(predictions) == np.array(labels))
             return matthews_corrcoef(labels, predictions)
@@ -157,7 +157,7 @@ def run_eval_job(eval_job_func, num_steps, desc='train acc'):
 
     #print(predictions[0:12])
     #print(np.array(labels).flatten()[0:12])
-    print('{}: {}'.format(desc, calculate_acc(predictions, labels)))
+    print('{}: {}'.format(desc, metric_fn(predictions, labels)))
     #pd.DataFrame({'predictions': predictions, 'labels': labels}).to_csv('predictions_{0}.csv'.format(step), index=False)
 
 
