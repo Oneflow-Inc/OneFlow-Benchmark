@@ -16,7 +16,7 @@ import config as configs
 from sklearn.metrics import matthews_corrcoef
 
 parser = configs.get_parser()
-parser.add_argument("--task", type=str, default='CoLA')
+parser.add_argument("--task_name", type=str, default='CoLA')
 parser.add_argument('--num_epochs', type=int, default=3, help='number of epochs')
 parser.add_argument("--train_data_dir", type=str, default=None)
 parser.add_argument("--train_data_prefix", type=str, default='train.of_record-')
@@ -148,10 +148,10 @@ def run_eval_job(eval_job_func, num_steps, desc='train acc'):
         labels.extend(list(label))
 
     def calculate_acc(predictions, labels):
-        if args.task == 'CoLA':
+        if args.task_name == 'CoLA':
             #return np.mean(np.array(predictions) == np.array(labels))
             return matthews_corrcoef(labels, predictions)
-        elif args.task == 'MRPC':
+        elif args.task_name == 'MRPC':
             return matthews_corrcoef(labels, predictions)
             #return np.mean(np.array(predictions) == np.array(labels))
 
@@ -174,7 +174,7 @@ def main():
     #    import sys
     #    sys.exit()
 
-    mcc_or_acc = 'mcc' if args.task=='CoLA' else 'acc'
+    mcc_or_acc = 'mcc' if args.task_name=='CoLA' else 'acc'
     summary = Summary(args.log_dir, args)
     for epoch in range(args.num_epochs):
         metric = Metric(desc='finetune', print_steps=args.loss_print_every_n_iter, summary=summary, 
