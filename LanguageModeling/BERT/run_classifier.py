@@ -13,7 +13,7 @@ from util import Snapshot, Summary, InitNodes, Metric
 from optimizer_util import gen_model_update_conf, get_eval_config
 
 import config as configs
-from sklearn.metrics import matthews_corrcoef
+from sklearn.metrics import accuracy_score, matthews_corrcoef, precision_score, recall_score, f1_score
 
 parser = configs.get_parser()
 parser.add_argument("--task_name", type=str, default='CoLA')
@@ -139,7 +139,7 @@ def BertGlueEvalValJob():
     return logits, label_ids
 
 
-def run_eval_job(eval_job_func, num_steps, desc='train acc'):
+def run_eval_job(eval_job_func, num_steps, desc='train'):
     labels = []
     predictions = []
     for index in range(num_steps):
@@ -148,16 +148,18 @@ def run_eval_job(eval_job_func, num_steps, desc='train acc'):
         labels.extend(list(label))
 
     def metric_fn(predictions, labels):
-        if args.task_name == 'CoLA':
-            #return np.mean(np.array(predictions) == np.array(labels))
-            return matthews_corrcoef(labels, predictions)
-        elif args.task_name == 'MRPC':
-            return matthews_corrcoef(labels, predictions)
-            #return np.mean(np.array(predictions) == np.array(labels))
+        return {
+            "accuarcy": np.mean(np.array(predictions) == np.array(labels)), 
+            "accuarcy1": accuracy_score(labels, predictions), 
+            "matthews_corrcoef": matthews_corrcoef(labels, predictions), 
+            "precision": precision_score(labels, predictions), 
+            "recall": recall_score(labels, predictions),
+            "f1": f1_score(labels, predictions),
+        }
 
-    #print(predictions[0:12])
-    #print(np.array(labels).flatten()[0:12])
-    print('{}: {}'.format(desc, metric_fn(predictions, labels)))
+    #print('{}: {}'.format(desc, metric_fn(predictions, labels)))
+    metric_dict = metric_fn(predictions, labels)
+    print(desc, ', '.join('{}: {:.3f}'.format(k, v) for k, v in metric_dict.items()))
     #pd.DataFrame({'predictions': predictions, 'labels': labels}).to_csv('predictions_{0}.csv'.format(step), index=False)
 
 
@@ -174,7 +176,6 @@ def main():
     #    import sys
     #    sys.exit()
 
-    mcc_or_acc = 'mcc' if args.task_name=='CoLA' else 'acc'
     summary = Summary(args.log_dir, args)
     for epoch in range(args.num_epochs):
         metric = Metric(desc='finetune', print_steps=args.loss_print_every_n_iter, summary=summary, 
@@ -184,8 +185,8 @@ def main():
             BertGlueFinetuneJob().async_get(metric.metric_cb(step, epoch=epoch))
             #if 1: #step % args.loss_print_every_n_iter == 0: 
 
-        run_eval_job(BertGlueEvalTrainJob, epoch_size, desc='train {}'.format(mcc_or_acc))
-        run_eval_job(BertGlueEvalValJob, num_eval_steps, desc='eval {}'.format(mcc_or_acc))
+        run_eval_job(BertGlueEvalTrainJob, epoch_size, desc='train')
+        run_eval_job(BertGlueEvalValJob, num_eval_steps, desc='eval')
 
     if args.save_last_snapshot:
         snapshot.save("last_snapshot")
