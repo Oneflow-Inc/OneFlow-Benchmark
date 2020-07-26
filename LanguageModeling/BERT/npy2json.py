@@ -23,8 +23,8 @@ import json
 import math
 import os
 import random
-import modeling
-import optimization
+#import modeling
+#import optimization
 import tokenization
 import six
 import tensorflow as tf
@@ -229,7 +229,8 @@ class InputFeatures(object):
 
 def read_squad_examples(input_file, is_training):
   """Read a SQuAD json file into a list of SquadExample."""
-  with tf.gfile.Open(input_file, "r") as reader:
+  #with tf.gfile.Open(input_file, "r") as reader:
+  with open(input_file, "r") as reader:
     input_data = json.load(reader)["data"]
 
   def is_whitespace(c):
@@ -288,7 +289,7 @@ def read_squad_examples(input_file, is_training):
             cleaned_answer_text = " ".join(
                 tokenization.whitespace_tokenize(orig_answer_text))
             if actual_text.find(cleaned_answer_text) == -1:
-              tf.logging.warning("Could not find answer: '%s' vs. '%s'",
+              print("Warning Could not find answer: '%s' vs. '%s'",
                                  actual_text, cleaned_answer_text)
               continue
           else:
@@ -430,30 +431,30 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length,
         start_position = 0
         end_position = 0
 
-      if example_index < 20:
-        tf.logging.info("*** Example ***")
-        tf.logging.info("unique_id: %s" % (unique_id))
-        tf.logging.info("example_index: %s" % (example_index))
-        tf.logging.info("doc_span_index: %s" % (doc_span_index))
-        tf.logging.info("tokens: %s" % " ".join(
+      if 0:#example_index < 20:
+        print("*** Example ***")
+        print("unique_id: %s" % (unique_id))
+        print("example_index: %s" % (example_index))
+        print("doc_span_index: %s" % (doc_span_index))
+        print("tokens: %s" % " ".join(
             [tokenization.printable_text(x) for x in tokens]))
-        tf.logging.info("token_to_orig_map: %s" % " ".join(
+        print("token_to_orig_map: %s" % " ".join(
             ["%d:%d" % (x, y) for (x, y) in six.iteritems(token_to_orig_map)]))
-        tf.logging.info("token_is_max_context: %s" % " ".join([
+        print("token_is_max_context: %s" % " ".join([
             "%d:%s" % (x, y) for (x, y) in six.iteritems(token_is_max_context)
         ]))
-        tf.logging.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
-        tf.logging.info(
+        print("input_ids: %s" % " ".join([str(x) for x in input_ids]))
+        print(
             "input_mask: %s" % " ".join([str(x) for x in input_mask]))
-        tf.logging.info(
+        print(
             "segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
         if is_training and example.is_impossible:
-          tf.logging.info("impossible example")
+          print("impossible example")
         if is_training and not example.is_impossible:
           answer_text = " ".join(tokens[start_position:(end_position + 1)])
-          tf.logging.info("start_position: %d" % (start_position))
-          tf.logging.info("end_position: %d" % (end_position))
-          tf.logging.info(
+          print("start_position: %d" % (start_position))
+          print("end_position: %d" % (end_position))
+          print(
               "answer: %s" % (tokenization.printable_text(answer_text)))
 
       feature = InputFeatures(
@@ -550,7 +551,7 @@ def _check_is_max_context(doc_spans, cur_span_index, position):
   return cur_span_index == best_span_index
 
 
-def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
+def create_model_old(bert_config, is_training, input_ids, input_mask, segment_ids,
                  use_one_hot_embeddings):
   """Creates a classification model."""
   model = modeling.BertModel(
@@ -590,7 +591,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
   return (start_logits, end_logits)
 
 
-def model_fn_builder(bert_config, init_checkpoint, learning_rate,
+def model_fn_builder_old(bert_config, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, use_tpu,
                      use_one_hot_embeddings):
   """Returns `model_fn` closure for TPUEstimator."""
@@ -598,9 +599,9 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
     """The `model_fn` for TPUEstimator."""
 
-    tf.logging.info("*** Features ***")
+    print("*** Features ***")
     for name in sorted(features.keys()):
-      tf.logging.info("  name = %s, shape = %s" % (name, features[name].shape))
+      print("  name = %s, shape = %s" % (name, features[name].shape))
 
     unique_ids = features["unique_ids"]
     input_ids = features["input_ids"]
@@ -634,12 +635,12 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
       else:
         tf.train.init_from_checkpoint(init_checkpoint, assignment_map)
 
-    tf.logging.info("**** Trainable Variables ****")
+    print("**** Trainable Variables ****")
     for var in tvars:
       init_string = ""
       if var.name in initialized_variable_names:
         init_string = ", *INIT_FROM_CKPT*"
-      tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape,
+      print("  name = %s, shape = %s%s", var.name, var.shape,
                       init_string)
 
     output_spec = None
@@ -687,7 +688,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
   return model_fn
 
 
-def input_fn_builder(input_file, seq_length, is_training, drop_remainder):
+def input_fn_builder_old(input_file, seq_length, is_training, drop_remainder):
   """Creates an `input_fn` closure to be passed to TPUEstimator."""
 
   name_to_features = {
@@ -745,8 +746,8 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                       max_answer_length, do_lower_case, output_prediction_file,
                       output_nbest_file, output_null_log_odds_file):
   """Write final predictions to the json file and log-odds of null if needed."""
-  tf.logging.info("Writing predictions to: %s" % (output_prediction_file))
-  tf.logging.info("Writing nbest to: %s" % (output_nbest_file))
+  print("Writing predictions to: %s" % (output_prediction_file))
+  print("Writing nbest to: %s" % (output_nbest_file))
 
   example_index_to_features = collections.defaultdict(list)
   for feature in all_features:
@@ -921,7 +922,8 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
 
     all_nbest_json[example.qas_id] = nbest_json
 
-  with tf.gfile.GFile(output_prediction_file, "w") as writer:
+  #with tf.gfile.GFile(output_prediction_file, "w") as writer:
+  with open(output_prediction_file, "w") as writer:
     writer.write(json.dumps(all_predictions, indent=4) + "\n")
     
 
@@ -976,7 +978,7 @@ def get_final_text(pred_text, orig_text, do_lower_case):
   start_position = tok_text.find(pred_text)
   if start_position == -1:
     if FLAGS.verbose_logging:
-      tf.logging.info(
+      print(
           "Unable to find text: '%s' in '%s'" % (pred_text, orig_text))
     return orig_text
   end_position = start_position + len(pred_text) - 1
@@ -986,7 +988,7 @@ def get_final_text(pred_text, orig_text, do_lower_case):
 
   if len(orig_ns_text) != len(tok_ns_text):
     if FLAGS.verbose_logging:
-      tf.logging.info("Length not equal after stripping spaces: '%s' vs '%s'",
+      print("Length not equal after stripping spaces: '%s' vs '%s'",
                       orig_ns_text, tok_ns_text)
     return orig_text
 
@@ -1004,7 +1006,7 @@ def get_final_text(pred_text, orig_text, do_lower_case):
 
   if orig_start_position is None:
     if FLAGS.verbose_logging:
-      tf.logging.info("Couldn't map start position")
+      print("Couldn't map start position")
     return orig_text
 
   orig_end_position = None
@@ -1015,7 +1017,7 @@ def get_final_text(pred_text, orig_text, do_lower_case):
 
   if orig_end_position is None:
     if FLAGS.verbose_logging:
-      tf.logging.info("Couldn't map end position")
+      print("Couldn't map end position")
     return orig_text
 
   output_text = orig_text[orig_start_position:(orig_end_position + 1)]
@@ -1057,7 +1059,7 @@ def _compute_softmax(scores):
   return probs
 
 
-class FeatureWriter(object):
+class FeatureWriter_old(object):
   """Writes InputFeature to TF example file."""
 
   def __init__(self, filename, is_training):
@@ -1126,36 +1128,37 @@ def validate_flags_or_throw(bert_config):
 
 
 def main(_):
-  tf.logging.set_verbosity(tf.logging.INFO)
+  # tf.logging.set_verbosity(tf.logging.INFO)
 
-  bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
+  #bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
 
-  validate_flags_or_throw(bert_config)
+  #validate_flags_or_throw(bert_config)
 
-  tf.gfile.MakeDirs(FLAGS.output_dir)
+  #tf.gfile.MakeDirs(FLAGS.output_dir)
+  os.mkdir(FLAGS.output_dir)
 
   tokenizer = tokenization.FullTokenizer(
       vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
-  tpu_cluster_resolver = None
-  if FLAGS.use_tpu and FLAGS.tpu_name:
-    tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(
-        FLAGS.tpu_name, zone=FLAGS.tpu_zone, project=FLAGS.gcp_project)
+  # tpu_cluster_resolver = None
+  # if FLAGS.use_tpu and FLAGS.tpu_name:
+  #   tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(
+  #       FLAGS.tpu_name, zone=FLAGS.tpu_zone, project=FLAGS.gcp_project)
 
-  is_per_host = tf.contrib.tpu.InputPipelineConfig.PER_HOST_V2
+  # is_per_host = tf.contrib.tpu.InputPipelineConfig.PER_HOST_V2
   
   if FLAGS.do_predict:
     eval_examples = read_squad_examples(
         input_file=FLAGS.predict_file, is_training=False)
 
-    eval_writer = FeatureWriter(
-        filename=os.path.join(FLAGS.output_dir, "eval.tf_record"),
-        is_training=False)
+    # eval_writer = FeatureWriter(
+    #     filename=os.path.join(FLAGS.output_dir, "eval.tf_record"),
+    #     is_training=False)
     eval_features = []
 
     def append_feature(feature):
       eval_features.append(feature)
-      eval_writer.process_feature(feature)
+      # eval_writer.process_feature(feature)
 
     convert_examples_to_features(
         examples=eval_examples,
@@ -1165,12 +1168,12 @@ def main(_):
         max_query_length=FLAGS.max_query_length,
         is_training=False,
         output_fn=append_feature)
-    eval_writer.close()
+    #eval_writer.close()
 
-    tf.logging.info("***** Running predictions *****")
-    tf.logging.info("  Num orig examples = %d", len(eval_examples))
-    tf.logging.info("  Num split examples = %d", len(eval_features))
-    tf.logging.info("  Batch size = %d", FLAGS.predict_batch_size)
+    print("***** Running predictions *****")
+    print("  Num orig examples = %d", len(eval_examples))
+    print("  Num split examples = %d", len(eval_features))
+    print("  Batch size = %d", FLAGS.predict_batch_size)
 
     all_results = []
     allresults = np.load(FLAGS.all_results_file,
