@@ -149,8 +149,7 @@ def run_eval_job(eval_job_func, num_steps, desc='train'):
 
     def metric_fn(predictions, labels):
         return {
-            "accuarcy": np.mean(np.array(predictions) == np.array(labels)), 
-            "accuarcy1": accuracy_score(labels, predictions), 
+            "accuarcy": accuracy_score(labels, predictions), 
             "matthews_corrcoef": matthews_corrcoef(labels, predictions), 
             "precision": precision_score(labels, predictions), 
             "recall": recall_score(labels, predictions),
