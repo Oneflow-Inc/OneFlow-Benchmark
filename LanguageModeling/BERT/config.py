@@ -25,6 +25,8 @@ def get_parser(parser=None):
 
     parser = argparse.ArgumentParser(description="flags for bert")
 
+    parser.add_argument('--do_train', type=str2bool, nargs='?', const=True, help='train or not')
+    parser.add_argument('--do_eval', type=str2bool, nargs='?', const=True, help='eval or not')
     # resouce
     parser.add_argument("--model", type=str, default='BERT Pretrain')
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
