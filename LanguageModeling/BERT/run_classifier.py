@@ -157,7 +157,6 @@ def run_eval_job(eval_job_func, num_steps, desc='train'):
             "f1": f1_score(labels, predictions),
         }
 
-    #print('{}: {}'.format(desc, metric_fn(predictions, labels)))
     metric_dict = metric_fn(predictions, labels)
     print(desc, ', '.join('{}: {:.3f}'.format(k, v) for k, v in metric_dict.items()))
     #pd.DataFrame({'predictions': predictions, 'labels': labels}).to_csv('predictions_{0}.csv'.format(step), index=False)
