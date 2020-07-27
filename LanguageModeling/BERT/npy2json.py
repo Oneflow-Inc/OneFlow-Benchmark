@@ -1135,7 +1135,7 @@ def main(_):
   #validate_flags_or_throw(bert_config)
 
   #tf.gfile.MakeDirs(FLAGS.output_dir)
-  os.mkdir(FLAGS.output_dir)
+  os.makedirs(FLAGS.output_dir, exist_ok=True)
 
   tokenizer = tokenization.FullTokenizer(
       vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
