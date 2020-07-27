@@ -745,61 +745,45 @@ def _compute_softmax(scores):
   return probs
 
 
-def npy2json(FLAGS):
-  #validate_flags_or_throw(bert_config)
-
+def gen_eval_predict_json(FLAGS, all_results):
   os.makedirs(FLAGS.output_dir, exist_ok=True)
 
   tokenizer = tokenization.FullTokenizer(
       vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
-  if FLAGS.do_npy2json:
-    eval_examples = read_squad_examples(
-        input_file=FLAGS.predict_file, is_training=False)
+  eval_examples = read_squad_examples(
+      input_file=FLAGS.predict_file, is_training=False)
 
-    # eval_writer = FeatureWriter(
-    #     filename=os.path.join(FLAGS.output_dir, "eval.tf_record"),
-    #     is_training=False)
-    eval_features = []
+  # eval_writer = FeatureWriter(
+  #     filename=os.path.join(FLAGS.output_dir, "eval.tf_record"),
+  #     is_training=False)
+  eval_features = []
 
-    def append_feature(feature):
-      eval_features.append(feature)
-      # eval_writer.process_feature(feature)
+  def append_feature(feature):
+    eval_features.append(feature)
+    # eval_writer.process_feature(feature)
 
-    convert_examples_to_features(
-        examples=eval_examples,
-        tokenizer=tokenizer,
-        max_seq_length=FLAGS.max_seq_length,
-        doc_stride=FLAGS.doc_stride,
-        max_query_length=FLAGS.max_query_length,
-        is_training=False,
-        output_fn=append_feature)
-    #eval_writer.close()
+  convert_examples_to_features(
+      examples=eval_examples,
+      tokenizer=tokenizer,
+      max_seq_length=FLAGS.max_seq_length,
+      doc_stride=FLAGS.doc_stride,
+      max_query_length=FLAGS.max_query_length,
+      is_training=False,
+      output_fn=append_feature)
+  #eval_writer.close()
 
-    print("***** Running predictions *****")
-    print("  Num orig examples = %d", len(eval_examples))
-    print("  Num split examples = %d", len(eval_features))
-    print("  Batch size = %d", FLAGS.predict_batch_size)
+  print("***** Running predictions *****")
+  print("  Num orig examples = %d", len(eval_examples))
+  print("  Num split examples = %d", len(eval_features))
+  print("  Batch size = %d", FLAGS.predict_batch_size)
 
-    all_results = []
-    allresults = np.load(os.path.join(FLAGS.output_dir, FLAGS.all_results_file),
-          allow_pickle=True)
-    for item in allresults:
-      unique_id = int(item[0][0])
-      start_logits = item[1].flatten().tolist()
-      end_logits = item[2].flatten().tolist()
-      all_results.append(
-          RawResult(
-              unique_id=unique_id,
-              start_logits=start_logits,
-              end_logits=end_logits))
+  output_prediction_file = os.path.join(FLAGS.output_dir, "predictions.json")
+  output_nbest_file = os.path.join(FLAGS.output_dir, "nbest_predictions.json")
+  output_null_log_odds_file = os.path.join(FLAGS.output_dir, "null_odds.json")
 
-    output_prediction_file = os.path.join(FLAGS.output_dir, "predictions.json")
-    output_nbest_file = os.path.join(FLAGS.output_dir, "nbest_predictions.json")
-    output_null_log_odds_file = os.path.join(FLAGS.output_dir, "null_odds.json")
-
-    write_predictions(eval_examples, eval_features, all_results,
-                      FLAGS.n_best_size, FLAGS.max_answer_length,
-                      FLAGS.do_lower_case, output_prediction_file,
-                      output_nbest_file, output_null_log_odds_file, FLAGS)
+  write_predictions(eval_examples, eval_features, all_results,
+                    FLAGS.n_best_size, FLAGS.max_answer_length,
+                    FLAGS.do_lower_case, output_prediction_file,
+                    output_nbest_file, output_null_log_odds_file, FLAGS)
 

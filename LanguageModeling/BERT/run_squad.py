@@ -14,6 +14,7 @@ import oneflow as flow
 from squad import SQuAD
 from util import Snapshot, Summary, InitNodes, Metric
 from optimizer_util import gen_model_update_conf, get_eval_config
+from squad_util import RawResult, gen_eval_predict_json
 
 parser = configs.get_parser()
 parser.add_argument('--num_epochs', type=int, default=3, help='number of epochs')
@@ -33,7 +34,6 @@ parser.add_argument("--warmup_proportion", type=float, default=0.1)
 
 # post eval
 parser.add_argument("--output_dir", type=str, default='squad_output', help='folder for all_results.npy')
-parser.add_argument("--all_results_file", type=str, default="all_results.py", help='filename of all_results')
 parser.add_argument("--doc_stride", type=int, default=128)
 parser.add_argument("--max_seq_length", type=int, default=384)
 parser.add_argument("--max_query_length", type=int, default=64)
@@ -53,7 +53,6 @@ parser.add_argument("--version_2_with_negative", type=str2bool, default='False',
     help="If true, the SQuAD examples contain some that do not have an answer.")
 parser.add_argument("--null_score_diff_threshold", type=float, default=0.0,
     help="If null_score - best_non_null is greater than the threshold predict null.")
-parser.add_argument("--do_npy2json", type=str2bool, default='False')
 
 args = parser.parse_args()
 
@@ -183,26 +182,23 @@ def main():
         assert os.path.isdir(args.eval_data_dir)
         all_results = []
         for step in range(num_eval_steps):
-            unique_ids, start_position, end_position = SquadDevJob().get()
+            unique_ids, start_positions, end_positions = SquadDevJob().get()
             unique_ids = unique_ids.numpy()
-            start_position = start_position.numpy()
-            end_position = end_position.numpy()
+            start_positions = start_positions.numpy()
+            end_positions = end_positions.numpy()
         
-            for result in zip(unique_ids, start_position, end_position):
-                all_results.append(result)
+            for unique_id, start_position, end_position in zip(unique_ids, start_positions, end_positions):
+                all_results.append(RawResult(
+                    unique_id = int(unique_id[0]),
+                    start_logits = start_position.flatten().tolist(),
+                    end_logits = end_position.flatten().tolist(),
+                ))
     
             if step % args.loss_print_every_n_iter == 0:
                 print("{}/{}, num of results:{}".format(step, num_eval_steps, len(all_results)))
-                print("last uid:", result[0])
-
-        import numpy as np
-        np.save(os.path.join(args.output_dir, args.all_results_file), all_results)
-        print(len(all_results), "all_resutls saved")
-
-    if args.do_npy2json:
-        from squad_util import npy2json
-        print("start do numpy2json")
-        npy2json(args)
+                print("last uid:", unique_id[0])
+        
+        gen_eval_predict_json(args, all_results)
 
 
 if __name__ == "__main__":
