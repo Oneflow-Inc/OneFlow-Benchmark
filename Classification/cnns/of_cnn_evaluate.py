@@ -62,8 +62,10 @@ def main():
     checkpoint.load(args.model_load_dir)
     metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
                     save_summary_steps=num_val_steps, batch_size=val_batch_size)
-    for i in range(num_val_steps):
-        InferenceNet().async_get(metric.metric_cb(0, i))
+    
+    for i in range(args.num_epochs):
+        for j in range(num_val_steps):
+            InferenceNet().async_get(metric.metric_cb(0, j))
 
 
 if __name__ == "__main__":

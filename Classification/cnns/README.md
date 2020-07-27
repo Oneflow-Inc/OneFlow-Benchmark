@@ -272,22 +272,25 @@ validation: epoch 0, iter 100, top_1: 0.074620, top_k: 0.194120, samples/s: 2014
 
 恭喜，到这里，您已经知道如何用OneFlow训练模型，接下来，试试用训练好的模型对新图片进行分类预测吧！
 
-在预测之前，需要准备你自己训练的模型
-
-**关于模型，您可以选择：**
+在预测之前， **关于模型，您可以选择：**
 
 - 自己训练的模型(如：./output/snapshots/model_save-20200723124724/snapshot_epoch_89)
 
-- 或者，下载我们已训练好的模型：[resnet_v1.5_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_v15_of_best_model_val_top1_77318.tgz ) 
-
-  (validation accuracy: 77.318% top1，93.622% top5 )
+- 下载我们训练好的模型：[resnet_v1.5_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_v15_of_best_model_val_top1_77318.tgz ) (validation accuracy: 77.318% top1，93.622% top5 )
 
   
 
 准备好模型后，将模型目录填入`inference.sh` 脚本的`MODEL_LOAD_DIR`变量中，然后执行inference.sh脚本，开始对图片`data/tiger.jpg`的类别的进行预测：
 
-```
+```shell
 sh inference.sh
+```
+
+若输出下面的内容，则表示预测成功：
+
+```shell
+data/tiger.jpg
+0.81120294 tiger, Panthera tigris
 ```
 
 **参数说明**(部分)
@@ -296,13 +299,28 @@ sh inference.sh
 - --image_path 待检测图片路径
 - --model_load_dir 模型文件路径
 
-若输出下面的内容，则表示预测成功：
+### 评估（Evaluate）
 
+在测试了单张图片之后，想试试模型精度有没有达到 **SOTA** (State Of The Art)? 只需运行：
+```shell
+sh evaluate.sh
 ```
-data/tiger.jpg
-0.81120294 tiger, Panthera tigris
+即可获得训练好的模型在50000张验证集上的准确率：
+```shell
+Time stamp: 2020-07-27-09:28:28
+Restoring model from resnet_v15_of_best_model_val_top1_77318.
+I0727 09:28:28.773988162    8411 ev_epoll_linux.c:82]        Use of signals is disabled. Epoll engine will not be used
+Loading data from /dataset/ImageNet/ofrecord/validation
+validation: epoch 0, iter 195, top_1: 0.773277, top_k: 0.936058, samples/s: 1578.325
+validation: epoch 0, iter 195, top_1: 0.773237, top_k: 0.936078, samples/s: 1692.303
+validation: epoch 0, iter 195, top_1: 0.773297, top_k: 0.936018, samples/s: 1686.896
 ```
 
+从3轮的评估结果来看，我们的模型在Imagenet(2012)上已经达到了77.32+%的top_1精度。
+
+
+
+最后，恭喜你！完成了Resnet模型在ImageNet上完整的训练/验证、推理和评估，为自己鼓个掌吧！
 
 
 
@@ -552,4 +570,4 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --model="vgg" \
 ```
 
-经过90轮epochs的训练后，oneflow模型的top1准确率和top5准确率分别为72.1％和90.7％。 作为对比，经过90轮epochs的训练后的tensorflow基准模型的top1准确率和top5准确率分别为71.5％和89.9％。
+经过90个epochs的训练后，oneflow模型的top1准确率和top5准确率分别为72.1％和90.7％。 作为对比，经过90轮epochs的训练后的tensorflow基准模型的top1准确率和top5准确率分别为71.5％和89.9％。
