@@ -5,23 +5,25 @@ from __future__ import print_function
 import argparse
 from datetime import datetime
 
+
+def str_list(x):
+    return x.split(',')
+
+def int_list(x):
+    return list(map(int, x.split(',')))
+
+def float_list(x):
+    return list(map(float, x.split(',')))
+
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Unsupported value encountered.')
+
 def get_parser(parser=None):
-    def str_list(x):
-        return x.split(',')
-
-    def int_list(x):
-        return list(map(int, x.split(',')))
-
-    def float_list(x):
-        return list(map(float, x.split(',')))
-
-    def str2bool(v):
-        if v.lower() in ('yes', 'true', 't', 'y', '1'):
-            return True
-        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-            return False
-        else:
-            raise argparse.ArgumentTypeError('Unsupported value encountered.')
 
     parser = argparse.ArgumentParser(description="flags for bert")
 
@@ -55,6 +57,7 @@ def get_parser(parser=None):
     parser.add_argument("--log_dir", type=str, default="./output", help="log info save directory")
     
     # bert backbone
+    parser.add_argument('--do_lower_case', type=str2bool, nargs='?', const=True, default='True')
     parser.add_argument("--seq_length", type=int, default=512)
     parser.add_argument("--max_predictions_per_seq", type=int, default=80)
     parser.add_argument("--num_hidden_layers", type=int, default=24)
