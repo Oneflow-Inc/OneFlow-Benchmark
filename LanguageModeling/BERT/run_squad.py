@@ -67,25 +67,26 @@ args.predict_batch_size = eval_batch_size
 configs.print_args(args)
 
 def SquadDecoder(data_dir, batch_size, data_part_num, seq_length, is_train=True):
-    ofrecord = flow.data.ofrecord_reader(data_dir,
-                                         batch_size=batch_size,
-                                         data_part_num=data_part_num,
-                                         random_shuffle = is_train,
-                                         shuffle_after_epoch=is_train)
-    blob_confs = {}
-    def _blob_conf(name, shape, dtype=flow.int32):
-        blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
+    with flow.scope.placement("cpu", "0:0"):
+        ofrecord = flow.data.ofrecord_reader(data_dir,
+                                             batch_size=batch_size,
+                                             data_part_num=data_part_num,
+                                             random_shuffle = is_train,
+                                             shuffle_after_epoch=is_train)
+        blob_confs = {}
+        def _blob_conf(name, shape, dtype=flow.int32):
+            blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
 
-    _blob_conf("input_ids", [seq_length])
-    _blob_conf("input_mask", [seq_length])
-    _blob_conf("segment_ids", [seq_length])
-    if is_train:
-        _blob_conf("start_positions", [1])
-        _blob_conf("end_positions", [1])
-    else:
-        _blob_conf("unique_ids", [1])
+        _blob_conf("input_ids", [seq_length])
+        _blob_conf("input_mask", [seq_length])
+        _blob_conf("segment_ids", [seq_length])
+        if is_train:
+            _blob_conf("start_positions", [1])
+            _blob_conf("end_positions", [1])
+        else:
+            _blob_conf("unique_ids", [1])
 
-    return blob_confs
+        return blob_confs
 
 
 if args.do_train:

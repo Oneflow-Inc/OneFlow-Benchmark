@@ -47,23 +47,24 @@ configs.print_args(args)
 def BertDecoder(
     data_dir, batch_size, data_part_num, seq_length, part_name_prefix, shuffle=True
 ):
-    ofrecord = flow.data.ofrecord_reader(data_dir,
-                                         batch_size=batch_size,
-                                         data_part_num=data_part_num,
-                                         part_name_prefix=part_name_prefix,
-                                         random_shuffle=shuffle,
-                                         shuffle_after_epoch=shuffle)
-    blob_confs = {}
-    def _blob_conf(name, shape, dtype=flow.int32):
-        blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
+    with flow.scope.placement("cpu", "0:0"):
+        ofrecord = flow.data.ofrecord_reader(data_dir,
+                                             batch_size=batch_size,
+                                             data_part_num=data_part_num,
+                                             part_name_prefix=part_name_prefix,
+                                             random_shuffle=shuffle,
+                                             shuffle_after_epoch=shuffle)
+        blob_confs = {}
+        def _blob_conf(name, shape, dtype=flow.int32):
+            blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
 
-    _blob_conf("input_ids", [seq_length])
-    _blob_conf("input_mask", [seq_length])
-    _blob_conf("segment_ids", [seq_length])
-    _blob_conf("label_ids", [1])
-    _blob_conf("is_real_example", [1])
+        _blob_conf("input_ids", [seq_length])
+        _blob_conf("input_mask", [seq_length])
+        _blob_conf("segment_ids", [seq_length])
+        _blob_conf("label_ids", [1])
+        _blob_conf("is_real_example", [1])
 
-    return blob_confs
+        return blob_confs
 
 
 def BuildBert(
