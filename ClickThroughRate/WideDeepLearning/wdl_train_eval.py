@@ -111,14 +111,14 @@ def _get_train_conf():
         'lazy_adam_conf': {
         }
     })
-    train_conf.default_distribute_strategy(flow.scope.consistent_view())
+    train_conf.default_logical_view(flow.scope.consistent_view())
     train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
 
 def _get_eval_conf():
     eval_conf = flow.FunctionConfig()
     eval_conf.default_data_type(flow.float)
-    eval_conf.default_distribute_strategy(flow.scope.consistent_view())
+    eval_conf.default_logical_view(flow.scope.consistent_view())
     return eval_conf
 
 
