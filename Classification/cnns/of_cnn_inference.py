@@ -12,6 +12,7 @@ args = parser.parse_args()
 configs.print_args(args)
 
 import oneflow as flow
+import oneflow.typing as tp
 from imagenet1000_clsidx_to_labels import clsidx_2_labels
 
 import resnet_model
@@ -38,7 +39,7 @@ def load_image(image_path='test_img/ILSVRC2012_val_00020287.JPEG'):
 
 
 @flow.global_function(flow.function_config())
-def InferenceNet(images=flow.FixedTensorDef((1, 3, 224, 224), dtype=flow.float)):
+def InferenceNet(images:tp.Numpy.Placeholder((1, 3, 224, 224), dtype=flow.float)):
     logits = model_dict[args.model](images,training=False)
     predictions = flow.nn.softmax(logits)
     return predictions
