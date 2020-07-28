@@ -25,7 +25,7 @@ def gen_model_update_conf(args):
     
     config = flow.function_config()
     config.default_data_type(flow.float)
-    config.default_distribute_strategy(flow.scope.consistent_view())
+    config.default_logical_view(flow.scope.consistent_view())
     config.train.primary_lr(args.learning_rate)
     config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
     
@@ -37,7 +37,7 @@ def gen_model_update_conf(args):
 
 def get_eval_config(args):
     config = flow.function_config()
-    config.default_distribute_strategy(flow.scope.consistent_view())
+    config.default_logical_view(flow.scope.consistent_view())
     config.default_data_type(flow.float)
     if args.use_fp16:
         config.enable_auto_mixed_precision(True)
