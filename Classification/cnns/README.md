@@ -78,8 +78,10 @@ sh inference.sh
 
 脚本执行后，将对下面的图片进行分类：
 
-![fish](data/fish.jpg)
 
+<div align="center">
+    <img src="data/fish.jpg" align='center'/>
+</div>
  **输出：** 
 
 ```shell
@@ -155,6 +157,7 @@ python3 of_cnn_train_val.py \
 [ResNet](https://arxiv.org/abs/1512.03385) 是2015年ImageNet竞赛的冠军。目前，ResNet相对对于传统的机器学习分类算法而言，效果已经相当的出色，之后大量的检测，分割，识别等任务也都在ResNet基础上完成。
 
 [OneFlow-Benchmark](https://github.com/Oneflow-Inc/OneFlow-Benchmark)仓库中，我们提供了ResNet50 v1.5的OneFlow实现。该实现对标了[英伟达的Mxnet版实现](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5)。我们在ImageNet-2012数据集上训练90轮后，验证集上的准确率能够达到：77.318%(top1)，93.622%(top5)  更详细的网络参数对齐工作，见下面【进阶 Advanced】部分。
+
 
 ![resnet50_validation_acuracy](docs/resnet50_validation_acuracy.png)
 
@@ -438,7 +441,10 @@ Oneflow保持了和Mxnet一致的初始学习率以及衰减方式。具体来�
 - warmup + cosine decay
 - warmup + step decay
 
-[![image](docs/resnet50_lr_schedule.png)
+<div align="center">
+    <img src="docs/resnet50_lr_schedule.png" align='center'/>
+</div>
+
 
 | item        | oneflow | nvidia  |
 | ----------- | ------- | ------ |
