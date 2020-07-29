@@ -4,16 +4,16 @@
 # down pretrain tensorflow bert model and convert to oneflow bert model
     ./build_checkpoint.sh
 
-# fitune the model on CoLA dataset (max validation dataset mcc = 0.401)
+# fitune the model on CoLA dataset (max validation dataset mcc = 0.580)
 # CoLA:The Corpus of Linguistic Acceptability consists of English acceptability judgments drawn from books and journal articles on linguistic theory. 
 #      Each example is a sequence of words annotated with whether it is a grammatical English sentence
 python run_glue.py --task 'CoLA' --data_dir glue_data_bin/CoLA/train --val_data_dir glue_data_bin/CoLA/eval \
---model_load_dir="./log/of_uncased_L-12_H-768_A-12"  --iter_num 1100 --learning_rate 1e-5 --batch_size_per_device=128 \
+--model_load_dir="./log/of_uncased_L-12_H-768_A-12"  --iter_num 1100 --learning_rate 1e-5 --batch_size_per_device=32 \
 --loss_print_every_n_iter 80 --weight_decay_rate 0.01
 
-# fitune the model on MRPC dataset (max validation dataset acc = 0.685)
+# fitune the model on MRPC dataset (max validation dataset acc = 0.865)
 # MRPC:  The Microsoft Research Paraphrase Corpus (Dolan & Brockett, 2005) is a corpus of sentence pairs automatically extracted from online news sources,
 #        with human annotations for whether the sentences in the pair are semantically equivalent.
 python run_glue.py --task 'MRPC' --data_dir glue_data_bin/MRPC/train --val_data_dir glue_data_bin/MRPC/eval \
---model_load_dir="./log/of_uncased_L-12_H-768_A-12"  --iter_num 200 --learning_rate 2e-6 --batch_size_per_device=16 \
---loss_print_every_n_iter 10 --weight_decay_rate 0.001
+--model_load_dir="./log/of_uncased_L-12_H-768_A-12"  --iter_num 500 --learning_rate 2e-5 --batch_size_per_device=32 \
+--loss_print_every_n_iter 50 --weight_decay_rate 0 --data_part_num 1 --lr_decay_num_same_as_iter_num True --warmup_batches 0

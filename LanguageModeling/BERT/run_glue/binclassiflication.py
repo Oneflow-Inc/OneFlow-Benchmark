@@ -39,6 +39,7 @@ def TrainBert(
         max_position_embeddings=max_position_embeddings,
         type_vocab_size=type_vocab_size,
         initializer_range=initializer_range,
+        compress_ratio=1,
     )
     pooled_output = PooledOutput(
         sequence_output=backbone.sequence_output(),
@@ -58,7 +59,7 @@ def TrainBert(
 
 
 def PooledOutput(sequence_output, hidden_size, initializer_range):
-    with flow.deprecated.variable_scope("bert-pooler"):
+    with flow.scope.namespace("bert-pooler"):
         first_token_tensor = flow.slice(
             sequence_output, [None, 0, 0], [None, 1, -1])
         first_token_tensor = flow.reshape(
@@ -70,14 +71,14 @@ def PooledOutput(sequence_output, hidden_size, initializer_range):
             weight_initializer=bert_util.CreateInitializer(initializer_range),
             name="dense",
         )
-        pooled_output = flow.keras.activations.tanh(pooled_output)
+        pooled_output = flow.math.tanh(pooled_output)
     return pooled_output
 
 
 def _AddClassficationLoss(input_blob, label_blob, hidden_size, label_num, initializer_range,
                           scope_name='classification'):
-    print(label_num, hidden_size)
-    with flow.deprecated.variable_scope(scope_name):
+
+    with flow.scope.namespace(scope_name):
         output_weight_blob = flow.get_variable(
             name="output_weights",
             shape=[label_num, hidden_size],

@@ -21,10 +21,10 @@ class BertBackbone(object):
                  max_position_embeddings=512,
                  type_vocab_size=16,
                  initializer_range=0.02,
-                 compress_ratio=2):
+                 compress_ratio=1):
 
-        with flow.deprecated.variable_scope("bert"):
-            with flow.deprecated.variable_scope("embeddings"):
+        with flow.scope.namespace("bert"):
+            with flow.scope.namespace("embeddings"):
                 (self.embedding_output_, self.embedding_table_) = _EmbeddingLookup(
                     input_ids_blob=input_ids_blob,
                     vocab_size=vocab_size,
@@ -44,7 +44,7 @@ class BertBackbone(object):
                     initializer_range=initializer_range,
                     max_position_embeddings=max_position_embeddings,
                     dropout_prob=hidden_dropout_prob)
-            with flow.deprecated.variable_scope("encoder"):
+            with flow.scope.namespace("encoder"):
                 attention_mask_blob = _CreateAttentionMaskFromInputMask(
                     input_mask_blob, from_seq_length=seq_length, to_seq_length=seq_length)
                 self.all_encoder_layers_ = _TransformerModel(
@@ -89,7 +89,7 @@ def _TransformerModel(input_blob,
                       attention_probs_dropout_prob=0.1,
                       initializer_range=0.02,
                       do_return_all_layers=False,
-                      compress_ratio=2):
+                      compress_ratio=1):
 
     assert hidden_size % num_attention_heads == 0
     attention_head_size = int(hidden_size / num_attention_heads)
@@ -114,10 +114,10 @@ def _TransformerModel(input_blob,
 
 
 def addOnelayer(layer_idx, trainable, prev_output_blob, attention_mask_blob, num_attention_heads, attention_head_size, attention_probs_dropout_prob, initializer_range, seq_length, hidden_size, hidden_dropout_prob, intermediate_act_fn, intermediate_size, all_layer_output_blobs):
-    with flow.deprecated.variable_scope("layer_%d" % layer_idx):
+    with flow.scope.namespace("layer_%d" % layer_idx):
         layer_input_blob = prev_output_blob
-        with flow.deprecated.variable_scope("attention"):
-            with flow.deprecated.variable_scope("self"):
+        with flow.scope.namespace("attention"):
+            with flow.scope.namespace("self"):
                 attention_output_blob = _AttentionLayer(
                     from_blob=layer_input_blob,
                     to_blob=layer_input_blob,
@@ -130,7 +130,7 @@ def addOnelayer(layer_idx, trainable, prev_output_blob, attention_mask_blob, num
                     trainable=trainable,
                     from_seq_length=seq_length,
                     to_seq_length=seq_length)
-            with flow.deprecated.variable_scope("output"):
+            with flow.scope.namespace("output"):
                 attention_output_blob = _FullyConnected(
                     attention_output_blob,
                     input_size=num_attention_heads * attention_head_size,
@@ -143,7 +143,7 @@ def addOnelayer(layer_idx, trainable, prev_output_blob, attention_mask_blob, num
                 attention_output_blob = attention_output_blob + layer_input_blob
                 attention_output_blob = _LayerNorm(
                     attention_output_blob, hidden_size, trainable=trainable)
-        with flow.deprecated.variable_scope("intermediate"):
+        with flow.scope.namespace("intermediate"):
             if callable(intermediate_act_fn):
                 act_fn = op_conf_util.kNone
             else:
@@ -159,7 +159,7 @@ def addOnelayer(layer_idx, trainable, prev_output_blob, attention_mask_blob, num
             if callable(intermediate_act_fn):
                 intermediate_output_blob = intermediate_act_fn(
                     intermediate_output_blob)
-        with flow.deprecated.variable_scope("output"):
+        with flow.scope.namespace("output"):
             layer_output_blob = _FullyConnected(
                 intermediate_output_blob,
                 input_size=intermediate_size,
@@ -363,10 +363,10 @@ def GetActivation(name):
     if name == 'linear':
         return None
     elif name == 'relu':
-        return flow.keras.activations.relu
+        return flow.math.relu
     elif name == 'tanh':
-        return flow.keras.activations.tanh
+        return flow.math.tanh
     elif name == 'gelu':
-        return flow.keras.activations.gelu
+        return flow.math.gelu
     else:
         raise Exception("unsupported activation")
