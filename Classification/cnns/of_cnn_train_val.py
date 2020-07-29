@@ -43,7 +43,7 @@ def label_smoothing(labels, classes, eta, dtype):
                         on_value=1 - eta + eta / classes, off_value=eta/classes)
 
 
-@flow.global_function(get_train_config(args))
+@flow.global_function("train", get_train_config(args))
 def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
@@ -68,7 +68,7 @@ def TrainNet():
     return outputs
 
 
-@flow.global_function(get_val_config(args))
+@flow.global_function("predict", get_val_config(args))
 def InferenceNet():
     if args.val_data_dir:
         assert os.path.exists(args.val_data_dir)
