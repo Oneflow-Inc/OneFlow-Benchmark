@@ -1,8 +1,10 @@
 import oneflow as flow
 import oneflow.python.framework.distribute as distribute_util
 
+
 def get_const_initializer():
-    return flow.constant_initializer(0.002)
+    return flow.constant_initializer(0.00002)
+
 
 def deconv2d(
     input,
@@ -108,108 +110,12 @@ def conv2d(
     return output
 
 
-# def batchnorm(input, name, axis=1, reuse=False):
+# def batchnorm(input, name, axis=1, reuse=False, trainable=True):
 #     name_ = name if reuse == False else name + "_reuse"
-#     return flow.layers.batch_normalization(input, axis=axis, name=name_)
+#     return flow.layers.batch_normalization(input, axis=axis, name=name_, trainable=trainable)
 
-def batchnorm(
-        inputs,
-        axis=1,
-        momentum: float = 0.99,
-        epsilon: float = 0.001,
-        center: bool = True,
-        scale: bool = True,
-        beta_initializer=None,
-        gamma_initializer=None,
-        beta_regularizer=None,
-        gamma_regularizer=None,
-        moving_mean_initializer=None,
-        moving_variance_initializer=None,
-        trainable=True,
-        training=True,
-        name: str = "BatchNorm",
-        reuse=False,
-    ):
-        name_ = name if reuse == False else name + "_reuse"
-        if axis < 0:
-            axis += len(inputs.shape)
-        assert axis >= 0 and axis < len(inputs.shape)
-
-        params_shape = [inputs.shape[axis]]
-        # Float32 required to avoid precision-loss when using fp16 input/output
-        params_dtype = flow.float32 if inputs.dtype == flow.float16 else inputs.dtype
-
-        if not flow.current_global_function_desc().IsTrainable() or not trainable:
-            training = False
-
-        if center:
-            beta = flow.get_variable(
-                name=name + "beta",
-                shape=params_shape,
-                dtype=params_dtype,
-                initializer=beta_initializer or flow.zeros_initializer(),
-                regularizer=beta_regularizer,
-                trainable=trainable,
-                distribute=distribute_util.broadcast(),
-                reuse=reuse,
-            )
-        else:
-            beta = flow.constant(0, dtype=params_dtype, shape=params_shape, name="beta")
-
-        if scale:
-            gamma = flow.get_variable(
-                name=name + "gamma",
-                shape=params_shape,
-                dtype=params_dtype,
-                initializer=gamma_initializer or flow.ones_initializer(),
-                regularizer=gamma_regularizer,
-                trainable=trainable,
-                distribute=distribute_util.broadcast(),
-                reuse=reuse,
-            )
-        else:
-            gamma = flow.constant(
-                1, dtype=params_dtype, shape=params_shape, name="gamma"
-            )
-
-        moving_mean = flow.get_variable(
-            name=name + "moving_mean",
-            shape=params_shape,
-            dtype=params_dtype,
-            initializer=moving_mean_initializer or flow.zeros_initializer(),
-            trainable=False,
-            distribute=distribute_util.broadcast(),
-            reuse=reuse,
-        )
-
-        moving_variance = flow.get_variable(
-            name=name + "moving_variance",
-            shape=params_shape,
-            dtype=params_dtype,
-            initializer=moving_variance_initializer or flow.ones_initializer(),
-            trainable=False,
-            distribute=distribute_util.broadcast(),
-            reuse=reuse,
-        )
-
-        builder = (
-            flow.user_op_builder(name_)
-            .Op("normalization")
-            .Input("x", [inputs])
-            .Input("moving_mean", [moving_mean])
-            .Input("moving_variance", [moving_variance])
-            .Input("gamma", [gamma])
-            .Input("beta", [beta])
-            .Output("y")
-            .Attr("axis", axis)
-            .Attr("epsilon", epsilon)
-            .Attr("training", training)
-            .Attr("momentum", momentum)
-        )
-        if trainable and training:
-            builder = builder.Output("mean").Output("inv_variance")
-
-        return builder.Build().InferAndTryRun().RemoteBlobList()[0]
+def batchnorm(input, name, axis=1, reuse=False, trainable=True):
+    return input
 
 def dense(
     input, units, name, use_bias=False, trainable=True, reuse=False, const_init=False
@@ -220,7 +126,8 @@ def dense(
     in_num_axes = len(in_shape)
     assert in_num_axes >= 2
 
-    inputs = flow.reshape(input, (-1, in_shape[-1])) if in_num_axes > 2 else input
+    inputs = flow.reshape(
+        input, (-1, in_shape[-1])) if in_num_axes > 2 else input
 
     weight = flow.get_variable(
         name="{}-weight".format(name),
@@ -234,7 +141,8 @@ def dense(
         model_name="weight",
     )
 
-    out = flow.matmul(a=inputs, b=weight, transpose_b=True, name=name_ + "matmul",)
+    out = flow.matmul(a=inputs, b=weight, transpose_b=True,
+                      name=name_ + "matmul",)
 
     if use_bias:
         bias = flow.get_variable(
@@ -250,5 +158,6 @@ def dense(
         )
         out = flow.nn.bias_add(out, bias, name=name_ + "_bias_add")
 
-    out = flow.reshape(out, in_shape[:-1] + (units,)) if in_num_axes > 2 else out
+    out = flow.reshape(out, in_shape[:-1] +
+                       (units,)) if in_num_axes > 2 else out
     return out

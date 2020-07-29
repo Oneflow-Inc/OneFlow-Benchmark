@@ -10,16 +10,16 @@ BATCH_SIZE = 1
 
 # download dataset
 
-def get_constant_initializer(constant_value=0.002):
+def get_constant_initializer(constant_value=0.2):
     return tf.constant_initializer(constant_value)
 
-def download():
-    # the default download path is "~/.keras/datasets"
-    _URL = "https://people.eecs.berkeley.edu/~tinghuiz/projects/pix2pix/datasets/facades.tar.gz"
-    path_to_zip = tf.keras.utils.get_file(
-        "facades.tar.gz", origin=_URL, extract=True)
-    return path_to_zip
-
+def get_batchnorm(do_nothing=True):
+    if do_nothing:
+        def fake_bn(x, training=True):
+            return x
+        return fake_bn
+    else:
+        return tf.keras.layers.BatchNormalization()
 
 # build the model
 def downsample(inp, filters, size, apply_batchnorm=True, const_init=True):
@@ -32,8 +32,8 @@ def downsample(inp, filters, size, apply_batchnorm=True, const_init=True):
         use_bias=False,
     )(inp)
 
-    if apply_batchnorm: #and not const_init:
-        conv = tf.keras.layers.BatchNormalization()(conv)
+    if apply_batchnorm:
+        conv = get_batchnorm()(conv)
 
     result = tf.keras.layers.LeakyReLU()(conv)
 
@@ -50,8 +50,7 @@ def upsample(inp, filters, size, apply_dropout=False, const_init=True):
         use_bias=False,
     )(inp)
 
-    # if not const_init:
-    deconv = tf.keras.layers.BatchNormalization()(deconv)
+    deconv = get_batchnorm()(deconv)
 
     if apply_dropout:
         deconv = tf.keras.layers.Dropout(0.5)(deconv)
@@ -108,7 +107,7 @@ def Generator(const_init=True):
     )  # (bs, 256, 256, 3)
     u0 = last(u1)
 
-    return tf.keras.Model(inputs=inputs, outputs=d8)
+    return tf.keras.Model(inputs=inputs, outputs=u0)
 
 
 def Discriminator(const_init=True):
@@ -132,7 +131,7 @@ def Discriminator(const_init=True):
         zero_pad1
     )  # (bs, 31, 31, 512)
 
-    bn = tf.keras.layers.BatchNormalization()(conv, training=True)
+    bn = get_batchnorm()(conv, training=True)
 
     leaky_relu = tf.keras.layers.LeakyReLU()(bn)
 
@@ -193,10 +192,10 @@ def train_step(input_image, target):
     #                                             discriminator.trainable_variables))
     with tf.GradientTape() as gen_tape: 
         gen_output = generator(input_image, training=True)
-        # disc_generated_output = discriminator(
-        #     [input_image, gen_output], training=True)
-        # gen_total_loss, gen_gan_loss, gen_l1_loss = generator_loss(
-        #     disc_generated_output, gen_output, target)
+        disc_generated_output = discriminator(
+            [input_image, gen_output], training=True)
+        gen_total_loss, gen_gan_loss, gen_l1_loss = generator_loss(
+            disc_generated_output, gen_output, target)
 
     generator_gradients = gen_tape.gradient(gen_output,
                                             generator.trainable_variables)

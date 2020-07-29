@@ -38,7 +38,7 @@ class Pix2Pix:
             g_loss = gan_loss + self.LAMBDA * l1_loss
 
             flow.losses.add_loss(g_out)
-            return g_loss
+            return g_out
 
         @flow.global_function(func_config)
         def test_discriminator(
@@ -66,7 +66,7 @@ class Pix2Pix:
         inp = np.load("input.npy").transpose(0, 3, 1, 2).astype(np.float32, order="C")
         tar = np.load("target.npy").transpose(0, 3, 1, 2).astype(np.float32, order="C")
         for i in range(3):
-            d_loss = test_discriminator(inp, tar).get()
+            # d_loss = test_discriminator(inp, tar).get()
             g_loss = test_generator(inp, tar).get()
             # print("tf produce d_loss:{}, g_loss:{}".format(d_loss.numpy().mean(), g_loss.numpy().mean()))
             print("of produce g_loss:{}".format(g_loss.numpy().mean()))
@@ -101,7 +101,7 @@ class Pix2Pix:
         )
 
         if apply_batchnorm: #and not const_init:
-            out = layers.batchnorm(out, name=name + "_bn", reuse=reuse)
+            out = layers.batchnorm(out, name=name + "_bn", reuse=reuse, trainable=trainable)
 
         out = flow.nn.leaky_relu(out, alpha=0.3)
         return out
@@ -128,8 +128,7 @@ class Pix2Pix:
             name=name + "_deconv",
         )
 
-        # if not const_init:
-        out = layers.batchnorm(out, name=name + "_bn")
+        out = layers.batchnorm(out, name=name + "_bn", trainable=trainable,)
 
         if apply_dropout and not const_init:
             out = flow.nn.dropout(out, rate=0.5)
@@ -257,14 +256,15 @@ class Pix2Pix:
             apply_batchnorm=False,
             reuse=reuse,
             const_init=const_init,
+            trainable=trainable,
         )
         # (n, 64, 64, 64)
         d2 = self._downsample(
-            d1, 128, 4, name="d_d2", reuse=reuse, const_init=const_init
+            d1, 128, 4, name="d_d2", reuse=reuse, trainable=trainable, const_init=const_init
         )
         # (n, 256, 32, 32)
         d3 = self._downsample(
-            d2, 256, 4, name="d_d3", reuse=reuse, const_init=const_init
+            d2, 256, 4, name="d_d3", reuse=reuse, trainable=trainable, const_init=const_init
         )
         # (n, 256, 34, 34)
         pad1 = flow.pad(d3, [[0, 0], [0, 0], [1, 1], [1, 1]])
@@ -281,7 +281,7 @@ class Pix2Pix:
             const_init=const_init,
             use_bias=False,
         )
-        bn = layers.batchnorm(conv1, name="d_bn", reuse=reuse)
+        bn = layers.batchnorm(conv1, name="d_bn", reuse=reuse, trainable=trainable)
         leaky_relu = flow.nn.leaky_relu(bn, alpha=0.3)
         # (n, 512, 33, 33)
         pad2 = flow.pad(leaky_relu, [[0, 0], [0, 0], [1, 1], [1, 1]])
@@ -372,8 +372,8 @@ class Pix2Pix:
         func_config.default_data_type(flow.float)
         func_config.default_distribute_strategy(flow.scope.consistent_view())
         func_config.train.primary_lr(self.lr)
-        # func_config.train.model_update_conf(dict(adam_conf={"beta1": 0.5}))
-        func_config.train.model_update_conf(dict(naive_conf={}))
+        func_config.train.model_update_conf(dict(adam_conf={"beta1": 0.5}))
+        # func_config.train.model_update_conf(dict(naive_conf={}))
         flow.config.gpu_device_num(self.gpus_per_node)
 
         @flow.global_function(func_config)
@@ -413,11 +413,11 @@ class Pix2Pix:
             flow.losses.add_loss(d_loss)
             return d_loss
 
-        func_config = flow.FunctionConfig()
-        func_config.default_data_type(flow.float)
-        func_config.default_distribute_strategy(flow.scope.consistent_view())
+        eval_func_config = flow.FunctionConfig()
+        eval_func_config.default_data_type(flow.float)
+        eval_func_config.default_distribute_strategy(flow.scope.consistent_view())
 
-        @flow.global_function(func_config)
+        @flow.global_function(eval_func_config)
         def eval_generator(input=flow.FixedTensorDef((self.batch_size, 3, 256, 256))):
             g_out = self.generator(input, trainable=False)
             return g_out
@@ -462,7 +462,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="flags for multi-node and resource")
     parser.add_argument("-g", "--gpu_num_per_node", type=int, default=1, required=False)
     parser.add_argument("-e", "--epoch_num", type=int, default=10, required=False)
-    parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4, required=False)
+    parser.add_argument("-lr", "--learning_rate", type=float, default=2e-5, required=False)
     parser.add_argument(
         "-c", "--compare", default=False, action="store_true", required=False
     )
@@ -475,5 +475,5 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--batch_size", type=int, default=1, required=False)
     args = parser.parse_args()
     pix2pix = Pix2Pix(args)
-    pix2pix.compare_with_tf()
-    # pix2pix.train(epochs=args.epoch_num)
+    # pix2pix.compare_with_tf()
+    pix2pix.train(epochs=args.epoch_num)
