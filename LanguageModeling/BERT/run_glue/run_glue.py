@@ -259,11 +259,13 @@ def EvalModel(step):
     for index in range(len_train_data//(args.node_num * args.gpu_num_per_node * args.batch_size_per_device)):
         train_logits, train_label = BertGlueEvalTrainJob().get()
         train_predictions.extend(list(train_logits.numpy().argmax(axis=1)))
-        train_labels.extend(list(train_label))
+
+        train_labels.extend(list(train_label.numpy().flatten()))
 
     if args.task == 'CoLA':
         print('train mcc', matthews_corrcoef(train_labels, train_predictions))
     elif args.task == 'MRPC':
+        print(np.array(train_labels).shape)
         train_acc = np.mean(np.array(train_predictions)
                             == np.array(train_labels))
         print('train acc', train_acc)
@@ -273,12 +275,12 @@ def EvalModel(step):
     elif args.task == 'MRPC':
         len_val_data = 408
 
-    val_labels = []
-    val_predictions = []
+    val_labels = np.array([])
+    val_predictions = np.array([])
     for index in range(len_val_data//(args.node_num * args.gpu_num_per_node * args.batch_size_per_device)):
         val_logits, val_label = BertGlueEvalValJob().get()
-        val_predictions.extend(list(val_logits.numpy().argmax(axis=1)))
-        val_labels.extend(list(val_label))
+        val_predictions= np.concatenate((val_predictions,val_logits.numpy().argmax(axis=1)))
+        val_labels=np.concatenate((val_labels,val_label.numpy().flatten()))
 
     if args.task == 'CoLA':
         print('val mcc', matthews_corrcoef(val_labels, val_predictions))
