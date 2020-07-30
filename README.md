@@ -88,4 +88,4 @@ see: https://github.com/Oneflow-Inc/OneFlow-Benchmark/tree/of_develop_py3/Classi
 
 ## Generative
 
-项目由一流科技, 之江实验室研发.
+## 项目由一流科技, 之江实验室研发.
