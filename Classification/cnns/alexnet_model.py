@@ -65,6 +65,7 @@ def conv2d_layer(
 
     return output
 
+
 def alexnet(images, need_transpose=False, channel_last=False, training=True):
     if need_transpose:
         images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
