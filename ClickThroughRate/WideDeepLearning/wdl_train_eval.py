@@ -115,12 +115,6 @@ def _get_train_conf():
     train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
 
-def _get_eval_conf():
-    eval_conf = flow.FunctionConfig()
-    eval_conf.default_data_type(flow.float)
-    eval_conf.default_logical_view(flow.scope.consistent_view())
-    return eval_conf
-
 
 global_loss = 0.0
 def _create_train_callback(step):
@@ -140,7 +134,7 @@ def _create_train_callback(step):
     else:
         return nop
 
-@flow.global_function(_get_train_conf())
+@flow.global_function(type='train', function_config=_get_train_conf())
 def train_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
         _data_loader_ofrecord(data_dir=FLAGS.train_data_dir,
@@ -154,7 +148,7 @@ def train_job():
     return loss
 
 
-@flow.global_function(_get_eval_conf())
+@flow.global_function(type='predict')
 def eval_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
         _data_loader_ofrecord(data_dir=FLAGS.eval_data_dir,
