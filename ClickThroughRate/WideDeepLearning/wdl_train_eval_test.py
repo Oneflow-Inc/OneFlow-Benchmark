@@ -170,7 +170,7 @@ def eval_job():
     predict = flow.math.sigmoid(logits)
     return loss, predict, labels
 
-@flow.global_function(type='predict')
+@flow.global_function()
 def test_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
         _data_loader_ofrecord(data_dir=FLAGS.test_data_dir,
