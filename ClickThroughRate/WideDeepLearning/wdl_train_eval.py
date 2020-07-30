@@ -133,6 +133,7 @@ def _get_train_conf():
     train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
 
+
 @flow.global_function('train', _get_train_conf())
 def train_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
