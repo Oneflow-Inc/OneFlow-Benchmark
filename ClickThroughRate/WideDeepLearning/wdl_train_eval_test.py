@@ -110,19 +110,6 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
     return scores
 
 
-def _get_train_conf():
-    train_conf = flow.FunctionConfig()
-    train_conf.default_data_type(flow.float)
-    train_conf.train.primary_lr(FLAGS.learning_rate)
-    train_conf.train.model_update_conf({
-        'lazy_adam_conf': {
-        }
-    })
-    train_conf.default_logical_view(flow.scope.consistent_view())
-    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
-    return train_conf
-
-
 global_loss = 0.0
 def _create_train_callback(epoch, step):
     def nop(loss):
@@ -142,7 +129,20 @@ def _create_train_callback(epoch, step):
     else:
         return nop
 
-@flow.global_function(_get_train_conf())
+
+def CreateOptimizer(args):
+    lr_scheduler = flow.optimizer.PiecewiseConstantScheduler([], [args.learning_rate])
+    return flow.optimizer.LARS(lr_scheduler)
+
+
+def _get_train_conf():
+    train_conf = flow.FunctionConfig()
+    train_conf.default_data_type(flow.float)
+    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
+    return train_conf
+
+
+@flow.global_function('train', _get_train_conf())
 def train_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
         _data_loader_ofrecord(data_dir=FLAGS.train_data_dir,
@@ -152,7 +152,8 @@ def train_job():
                               shuffle=True)
     logits = _model(dense_fields, wide_sparse_fields, deep_sparse_fields)
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
-    flow.losses.add_loss(loss)
+    opt = CreateOptimizer(FLAGS)
+    opt.minimize(loss)
     return loss
 
 
