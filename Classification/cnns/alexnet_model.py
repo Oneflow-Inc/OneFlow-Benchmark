@@ -59,13 +59,14 @@ def conv2d_layer(
 
     if activation is not None:
         if activation == "Relu":
-            output = flow.keras.activations.relu(output)
+            output = flow.nn.relu(output)
         else:
             raise NotImplementedError
 
     return output
 
-def alexnet(images, need_transpose=False, channel_last=False):
+
+def alexnet(images, need_transpose=False, channel_last=False, training=True):
     if need_transpose:
         images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
     if channel_last:
@@ -95,7 +96,7 @@ def alexnet(images, need_transpose=False, channel_last=False):
     fc1 = flow.layers.dense(
         inputs=pool5,
         units=4096,
-        activation=flow.keras.activations.relu,
+        activation=flow.nn.relu,
         use_bias=True,
         #kernel_initializer=flow.random_uniform_initializer(),
         kernel_initializer=_get_kernel_initializer(),
@@ -110,7 +111,7 @@ def alexnet(images, need_transpose=False, channel_last=False):
     fc2 = flow.layers.dense(
         inputs=dropout1,
         units=4096,
-        activation=flow.keras.activations.relu,
+        activation=flow.nn.relu,
         use_bias=True,        
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
