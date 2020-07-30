@@ -156,7 +156,7 @@ def train_job():
     return loss
 
 
-@flow.global_function(type='predict')
+@flow.global_function()
 def eval_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
         _data_loader_ofrecord(data_dir=FLAGS.eval_data_dir,
