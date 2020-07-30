@@ -88,8 +88,6 @@ step: 79, total_loss: 10.347, mlm_loss: 9.655, nsp_loss: 0.692, throughput: 118.
 
 其中1、4、5我们提供了下载链接，4和5在SQuAD官网也能够下载。
 下面介绍如何准备OneFlow需要的预训练好的模型，词表文件也包含在其中的下载文件里。
-#### 下载OneFlow预训练好的模型
-* [ ] TODO
 #### 将Tensorflow的BERT模型转为OneFlow模型格式
 如果想直接使用已经训练好的pretrained模型做fine-tune任务（如以下将展示的SQuAD），可以考虑直接从[google-research BERT](https://github.com/google-research/bert)页面下载已经训练好的BERT模型。
 
