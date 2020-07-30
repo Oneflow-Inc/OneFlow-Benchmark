@@ -3,7 +3,7 @@ import bert as bert_util
 import oneflow.core.operator.op_conf_pb2 as op_conf_util
 
 
-def TrainBert(
+def GlueBERT(
     input_ids_blob,
     input_mask_blob,
     token_type_ids_blob,
@@ -39,7 +39,6 @@ def TrainBert(
         max_position_embeddings=max_position_embeddings,
         type_vocab_size=type_vocab_size,
         initializer_range=initializer_range,
-        compress_ratio=1,
     )
     pooled_output = PooledOutput(
         sequence_output=backbone.sequence_output(),
@@ -77,7 +76,6 @@ def PooledOutput(sequence_output, hidden_size, initializer_range):
 
 def _AddClassficationLoss(input_blob, label_blob, hidden_size, label_num, initializer_range,
                           scope_name='classification'):
-
     with flow.scope.namespace(scope_name):
         output_weight_blob = flow.get_variable(
             name="output_weights",

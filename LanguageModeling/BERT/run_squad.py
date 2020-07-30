@@ -3,252 +3,202 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import math
 import argparse
 from datetime import datetime
 
+import config as configs
+from config import str2bool
 import oneflow as flow
 
-from squad import SQuADTrain
-import benchmark_util
+from squad import SQuAD
+from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer
+from squad_util import RawResult, gen_eval_predict_json
 
-parser = argparse.ArgumentParser(description="flags for bert")
+parser = configs.get_parser()
+parser.add_argument('--num_epochs', type=int, default=3, help='number of epochs')
+parser.add_argument("--train_data_dir", type=str, default=None)
+parser.add_argument("--train_example_num", type=int, default=88614, 
+                    help="example number in dataset")
+parser.add_argument("--batch_size_per_device", type=int, default=32)
+parser.add_argument("--train_data_part_num", type=int, default=1, 
+                    help="data part number in dataset")
+parser.add_argument("--eval_data_dir", type=str, default=None)
+parser.add_argument("--eval_example_num", type=int, default=10833, 
+                    help="example number in dataset")
+parser.add_argument("--eval_batch_size_per_device", type=int, default=64)
+parser.add_argument("--eval_data_part_num", type=int, default=1, 
+                    help="data part number in dataset")
 
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Unsupported value encountered.')
-
-
-# resouce
-parser.add_argument("--gpu_num_per_node", type=int, default=1)
-parser.add_argument("--node_num", type=int, default=1)
-parser.add_argument("--node_list", type=str, default=None)
-
-# train
-parser.add_argument("--learning_rate", type=float, default=1e-4, help="Learning rate")
-parser.add_argument("--weight_decay_rate", type=float, default=0.01, help="weight decay rate")
-parser.add_argument("--batch_size_per_device", type=int, default=64)
-parser.add_argument("--iter_num", type=int, default=1144000, help="total iterations to run")
-parser.add_argument("--warmup_batches", type=int, default=10000)
-parser.add_argument("--log_every_n_iter", type=int, default=1, help="print loss every n iteration")
-parser.add_argument("--data_dir", type=str, default=None)
-parser.add_argument("--data_part_num", type=int, default=32, help="data part number in dataset")
-parser.add_argument('--use_fp16', type=str2bool, nargs='?', const=True, help='use use fp16 or not')
-
-# log and resore/save
-parser.add_argument("--loss_print_every_n_iter", type=int, default=10, required=False,
-    help="print loss every n iteration")
-parser.add_argument("--model_save_every_n_iter", type=int, default=10000, required=False,
-    help="save model every n iteration",)
-parser.add_argument("--model_save_dir", type=str,
-    default="./output/model_save-{}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
-    required=False, help="model save directory")
-parser.add_argument("--save_last_snapshot", type=bool, default=False, required=False,
-    help="save model snapshot for last iteration")
-parser.add_argument("--model_load_dir", type=str, default=None, help="model load directory")
-parser.add_argument("--log_dir", type=str, default="./output", help="log info save directory")
-
-# bert
-parser.add_argument("--seq_length", type=int, default=512)
-parser.add_argument("--max_predictions_per_seq", type=int, default=80)
-parser.add_argument("--num_hidden_layers", type=int, default=24)
-parser.add_argument("--num_attention_heads", type=int, default=16)
-parser.add_argument("--max_position_embeddings", type=int, default=512)
-parser.add_argument("--type_vocab_size", type=int, default=2)
-parser.add_argument("--vocab_size", type=int, default=30522)
-parser.add_argument("--attention_probs_dropout_prob", type=float, default=0.1)
-parser.add_argument("--hidden_dropout_prob", type=float, default=0.1)
-parser.add_argument("--hidden_size_per_head", type=int, default=64)
+# post eval
+parser.add_argument("--output_dir", type=str, default='squad_output', help='folder for all_results.npy')
+parser.add_argument("--doc_stride", type=int, default=128)
+parser.add_argument("--max_seq_length", type=int, default=384)
+parser.add_argument("--max_query_length", type=int, default=64)
+parser.add_argument("--vocab_file", type=str,
+                    help="The vocabulary file that the BERT model was trained on.")
+parser.add_argument("--predict_file", type=str, 
+                    help="SQuAD json for predictions. E.g., dev-v1.1.json or test-v1.1.json")
+parser.add_argument("--n_best_size", type=int, default=20,
+    help="The total number of n-best predictions to generate in the nbest_predictions.json output file.")
+parser.add_argument("--max_answer_length", type=int, default=30,
+    help="The maximum length of an answer that can be generated. This is needed \
+    because the start and end predictions are not conditioned on one another.")
+parser.add_argument("--verbose_logging", type=str2bool, default='False',
+    help="If true, all of the warnings related to data processing will be printed. \
+    A number of warnings are expected for a normal SQuAD evaluation.")
+parser.add_argument("--version_2_with_negative", type=str2bool, default='False',
+    help="If true, the SQuAD examples contain some that do not have an answer.")
+parser.add_argument("--null_score_diff_threshold", type=float, default=0.0,
+    help="If null_score - best_non_null is greater than the threshold predict null.")
 
 args = parser.parse_args()
 
+batch_size = args.num_nodes * args.gpu_num_per_node * args.batch_size_per_device
+eval_batch_size = args.num_nodes * args.gpu_num_per_node * args.eval_batch_size_per_device
 
-def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions_per_seq):
-    ofrecord = flow.data.ofrecord_reader(data_dir,
-                                         batch_size=batch_size,
-                                         data_part_num=data_part_num,
-                                         random_shuffle = True,
-                                         shuffle_after_epoch=True)
-    blob_confs = {}
-    def _blob_conf(name, shape, dtype=flow.int32):
-        blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
+epoch_size = math.ceil(args.train_example_num / batch_size)
+num_eval_steps = math.ceil(args.eval_example_num / eval_batch_size)
+args.iter_num = epoch_size * args.num_epochs
+args.predict_batch_size = eval_batch_size
+configs.print_args(args)
 
-    _blob_conf("input_ids", [seq_length])
-    _blob_conf("input_mask", [seq_length])
-    _blob_conf("segment_ids", [seq_length])
-    _blob_conf("start_positions", [1])
-    _blob_conf("end_positions", [1])
+def SquadDecoder(data_dir, batch_size, data_part_num, seq_length, is_train=True):
+    with flow.scope.placement("cpu", "0:0"):
+        ofrecord = flow.data.ofrecord_reader(data_dir,
+                                             batch_size=batch_size,
+                                             data_part_num=data_part_num,
+                                             random_shuffle = is_train,
+                                             shuffle_after_epoch=is_train)
+        blob_confs = {}
+        def _blob_conf(name, shape, dtype=flow.int32):
+            blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
 
-    return blob_confs
+        _blob_conf("input_ids", [seq_length])
+        _blob_conf("input_mask", [seq_length])
+        _blob_conf("segment_ids", [seq_length])
+        if is_train:
+            _blob_conf("start_positions", [1])
+            _blob_conf("end_positions", [1])
+        else:
+            _blob_conf("unique_ids", [1])
 
-
-def BuildSQuADNet(
-    batch_size,
-    data_part_num,
-    seq_length=128,
-    max_position_embeddings=512,
-    num_hidden_layers=12,
-    num_attention_heads=12,
-    hidden_dropout_prob=0.1,
-    attention_probs_dropout_prob=0.1,
-    vocab_size=30522,
-    type_vocab_size=2,
-    max_predictions_per_seq=20,
-):
-    hidden_size = 64 * num_attention_heads  # , H = 64, size per head
-    intermediate_size = hidden_size * 4
-
-    decoders = BertDecoder(args.data_dir, batch_size, data_part_num, seq_length,
-                           max_predictions_per_seq)
-
-    input_ids = decoders["input_ids"]
-    input_mask = decoders["input_mask"]
-    token_type_ids = decoders["segment_ids"]
-    start_positions = decoders["start_positions"]
-    end_positions = decoders["end_positions"]
-
-    return SQuADTrain(
-        input_ids,
-        input_mask,
-        token_type_ids,
-        start_positions,
-        end_positions,
-        vocab_size,
-        seq_length=seq_length,
-        hidden_size=hidden_size,
-        num_hidden_layers=num_hidden_layers,
-        num_attention_heads=num_attention_heads,
-        intermediate_size=intermediate_size,
-        hidden_act="gelu",
-        hidden_dropout_prob=hidden_dropout_prob,
-        attention_probs_dropout_prob=attention_probs_dropout_prob,
-        max_position_embeddings=max_position_embeddings,
-        type_vocab_size=type_vocab_size,
-        max_predictions_per_seq=max_predictions_per_seq,
-        initializer_range=0.02,
-    )
+        return blob_confs
 
 
-_BERT_MODEL_UPDATE_CONF = dict(
-    learning_rate_decay=dict(
-        polynomial_conf=dict(
-            decay_batches=args.iter_num,
-            end_learning_rate=0.0,
+if args.do_train:
+    @flow.global_function(type="train")
+    def SquadFinetuneJob():
+        hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
+        intermediate_size = hidden_size * 4
+    
+        decoders = SquadDecoder(args.train_data_dir, batch_size, args.train_data_part_num, args.seq_length)
+    
+        start_logits, end_logits = SQuAD(
+            decoders['input_ids'],
+            decoders['input_mask'],
+            decoders['segment_ids'],
+            args.vocab_size,
+            seq_length=args.seq_length,
+            hidden_size=hidden_size,
+            num_hidden_layers=args.num_hidden_layers,
+            num_attention_heads=args.num_attention_heads,
+            intermediate_size=intermediate_size,
+            hidden_act="gelu",
+            hidden_dropout_prob=args.hidden_dropout_prob,
+            attention_probs_dropout_prob=args.attention_probs_dropout_prob,
+            max_position_embeddings=args.max_position_embeddings,
+            type_vocab_size=args.type_vocab_size,
+            initializer_range=0.02,
         )
-    ),
-    warmup_conf=dict(
-        linear_conf=dict(warmup_batches=args.warmup_batches, start_multiplier=0,)
-    ),
-    clip_conf=dict(clip_by_global_norm=dict(clip_norm=1.0,)),
-    adam_conf=dict(epsilon=1e-6),
-    weight_decay_conf=dict(
-        weight_decay_rate=args.weight_decay_rate,
-        excludes=dict(pattern=["bias", "LayerNorm", "layer_norm"]),
-    ),
-)
-
-config = flow.function_config()
-config.default_data_type(flow.float)
-config.default_distribute_strategy(flow.scope.consistent_view())
-config.train.primary_lr(args.learning_rate)
-config.train.model_update_conf(_BERT_MODEL_UPDATE_CONF)
-
-if args.use_fp16:
-    config.enable_auto_mixed_precision(True)
-
-
-@flow.global_function(config)
-def SquadFinetuneJob():
-    total_device_num = args.node_num * args.gpu_num_per_node
-    batch_size = total_device_num * args.batch_size_per_device
-
-    total_loss = BuildSQuADNet(
-        batch_size,
-        args.data_part_num,
-        seq_length=args.seq_length,
-        max_position_embeddings=args.max_position_embeddings,
-        num_hidden_layers=args.num_hidden_layers,
-        num_attention_heads=args.num_attention_heads,
-        hidden_dropout_prob=args.hidden_dropout_prob,
-        attention_probs_dropout_prob=args.attention_probs_dropout_prob,
-        vocab_size=args.vocab_size,
-        type_vocab_size=args.type_vocab_size,
-        max_predictions_per_seq=args.max_predictions_per_seq,
-    )
-    flow.losses.add_loss(total_loss)
-    return total_loss
+    
+        def _ComputeLoss(logits, positions):
+            logits = flow.reshape(logits, [-1, args.seq_length])
+            probs = flow.nn.softmax(logits)
+            pre_example_loss = flow.nn.sparse_cross_entropy(labels=positions, prediction=probs)
+            return pre_example_loss
+    
+        start_loss = _ComputeLoss(start_logits, decoders['start_positions'])
+        end_loss = _ComputeLoss(end_logits, decoders['end_positions'])
+    
+        total_loss = 0.5*(start_loss + end_loss)
+        flow.losses.add_loss(total_loss)
+        opt = CreateOptimizer(args)
+        opt.minimize(total_loss)
+        return {'total_loss': total_loss}
+    
+if args.do_eval:
+    @flow.global_function(type='predict')
+    def SquadDevJob():
+        hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
+        intermediate_size = hidden_size * 4
+    
+        decoders = SquadDecoder(args.eval_data_dir, eval_batch_size, args.eval_data_part_num, args.seq_length,
+                                is_train=False)
+    
+        start_logits, end_logits = SQuAD(
+            decoders['input_ids'],
+            decoders['input_mask'],
+            decoders['segment_ids'],
+            args.vocab_size,
+            seq_length=args.seq_length,
+            hidden_size=hidden_size,
+            num_hidden_layers=args.num_hidden_layers,
+            num_attention_heads=args.num_attention_heads,
+            intermediate_size=intermediate_size,
+            hidden_act="gelu",
+            hidden_dropout_prob=args.hidden_dropout_prob,
+            attention_probs_dropout_prob=args.attention_probs_dropout_prob,
+            max_position_embeddings=args.max_position_embeddings,
+            type_vocab_size=args.type_vocab_size,
+            initializer_range=0.02,
+        )
+    
+        return decoders['unique_ids'], start_logits, end_logits
 
 
 def main():
-    print("=".ljust(66, "="))
-    print(
-        "Running bert: num_gpu_per_node = {}, num_nodes = {}.".format(
-            args.gpu_num_per_node, args.node_num
-        )
-    )
-    print("=".ljust(66, "="))
-    for arg in vars(args):
-        print("{} = {}".format(arg, getattr(args, arg)))
-    print("-".ljust(66, "-"))
-    print("Time stamp: {}".format(
-        str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
-
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.log_dir(args.log_dir)
 
+    InitNodes(args)
 
-    if args.node_num > 1:
-        nodes = []
-        for n in args.node_list.strip().split(","):
-            addr_dict = {}
-            addr_dict["addr"] = n
-            nodes.append(addr_dict)
+    if args.do_train or args.do_eval:
+        snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-        flow.env.machine(nodes)
+    if args.do_train:
+        summary = Summary(args.log_dir, args)
+        for epoch in range(args.num_epochs):
+            metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, summary=summary, 
+                            batch_size=batch_size, keys=['total_loss'])
 
-    check_point = flow.train.CheckPoint()
-    if args.model_load_dir:
-        assert os.path.isdir(args.model_load_dir)
-        check_point.load(args.model_load_dir)
-        print("Restoring model from {}.".format(args.model_load_dir))
-    else:
-        check_point.init()
-        print("Init model on demand")
+            for step in range(epoch_size):
+                SquadFinetuneJob().async_get(metric.metric_cb(step, epoch=epoch))
 
-    total_batch_size = (
-        args.node_num * args.gpu_num_per_node * args.batch_size_per_device
-    )
+        if args.save_last_snapshot:
+            snapshot.save("last_snapshot")
     
-    iter_step = 0
-    def cb(result):
-        nonlocal iter_step
-        iter_step += 1
-        if iter_step % args.loss_print_every_n_iter == 0:
-            print("{}/{} loss:{}".format(iter_step, 
-            args.iter_num,
-            result.mean()))
-
-    for step in range(args.iter_num):
-        SquadFinetuneJob().async_get(cb)
-
-        if (step + 1) % args.model_save_every_n_iter == 0:
-            if not os.path.exists(args.model_save_dir):
-                os.makedirs(args.model_save_dir)
-            snapshot_save_path = os.path.join(
-                args.model_save_dir, "snapshot_%d" % (step + 1)
-            )
-            print("Saving model to {}.".format(snapshot_save_path))
-            check_point.save(snapshot_save_path)
-
-    if args.save_last_snapshot:
-        snapshot_save_path = os.path.join(args.model_save_dir, "last_snapshot")
-        if not os.path.exists(snapshot_save_path):
-            os.makedirs(snapshot_save_path)
-        print("Saving model to {}.".format(snapshot_save_path))
-        check_point.save(snapshot_save_path)
+    if args.do_eval:
+        assert os.path.isdir(args.eval_data_dir)
+        all_results = []
+        for step in range(num_eval_steps):
+            unique_ids, start_positions, end_positions = SquadDevJob().get()
+            unique_ids = unique_ids.numpy()
+            start_positions = start_positions.numpy()
+            end_positions = end_positions.numpy()
+        
+            for unique_id, start_position, end_position in zip(unique_ids, start_positions, end_positions):
+                all_results.append(RawResult(
+                    unique_id = int(unique_id[0]),
+                    start_logits = start_position.flatten().tolist(),
+                    end_logits = end_position.flatten().tolist(),
+                ))
+    
+            if step % args.loss_print_every_n_iter == 0:
+                print("{}/{}, num of results:{}".format(step, num_eval_steps, len(all_results)))
+                print("last uid:", unique_id[0])
+        
+        gen_eval_predict_json(args, all_results)
 
 
 if __name__ == "__main__":
