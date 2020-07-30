@@ -10,8 +10,7 @@ import config as configs
 import oneflow as flow
 
 from pretrain import PreTrain
-from optimizer_util import gen_model_update_conf
-from util import Snapshot, Summary, InitNodes, Metric
+from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer
 
 parser = configs.get_parser()
 parser.add_argument("--data_dir", type=str, default=None)
@@ -44,7 +43,7 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
     return blob_confs
 
 
-@flow.global_function(gen_model_update_conf(args))
+@flow.global_function(type='train')
 def PretrainJob():
     hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
     intermediate_size = hidden_size * 4
@@ -74,7 +73,8 @@ def PretrainJob():
         max_predictions_per_seq=args.max_predictions_per_seq,
         initializer_range=0.02,
     )
-    flow.losses.add_loss(total_loss)
+    opt = CreateOptimizer(args)
+    opt.minimize(total_loss)
     return {'total_loss': total_loss, 'mlm_loss': mlm_loss, 'nsp_loss': nsp_loss}
 
 
