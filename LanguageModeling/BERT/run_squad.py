@@ -62,7 +62,6 @@ eval_batch_size = args.num_nodes * args.gpu_num_per_node * args.eval_batch_size_
 epoch_size = math.ceil(args.train_example_num / batch_size)
 num_eval_steps = math.ceil(args.eval_example_num / eval_batch_size)
 args.iter_num = epoch_size * args.num_epochs
-args.warmup_batches = math.ceil(args.iter_num * args.warmup_proportion)
 args.predict_batch_size = eval_batch_size
 configs.print_args(args)
 
