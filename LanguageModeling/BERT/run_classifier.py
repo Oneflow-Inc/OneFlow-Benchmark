@@ -9,8 +9,7 @@ import numpy as np
 import oneflow as flow
 
 from classifier import GlueBERT
-from util import Snapshot, Summary, InitNodes, Metric
-from optimizer_util import gen_model_update_conf, get_eval_config
+from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer
 
 import config as configs
 from sklearn.metrics import accuracy_score, matthews_corrcoef, precision_score, recall_score, f1_score
@@ -40,7 +39,6 @@ eval_batch_size = args.num_nodes * args.gpu_num_per_node * args.eval_batch_size_
 epoch_size = math.ceil(args.train_example_num / batch_size)
 num_eval_steps = math.ceil(args.eval_example_num / eval_batch_size)
 args.iter_num = epoch_size * args.num_epochs
-args.warmup_batches = args.iter_num // 100
 configs.print_args(args)
 
 
@@ -103,7 +101,7 @@ def BuildBert(
     return loss, logits, decoders['label_ids']
 
 
-@flow.global_function(gen_model_update_conf(args))
+@flow.global_function(type='train')
 def BertGlueFinetuneJob():
     loss, logits, _ = BuildBert(
         batch_size,
@@ -112,10 +110,12 @@ def BertGlueFinetuneJob():
         args.train_data_prefix,
     )
     flow.losses.add_loss(loss)
+    opt = CreateOptimizer(args)
+    opt.minimize(loss)
     return {'loss': loss}
 
 
-@flow.global_function(get_eval_config(args))
+@flow.global_function(type='predict')
 def BertGlueEvalTrainJob():
     _, logits, label_ids = BuildBert(
         batch_size,
@@ -127,7 +127,7 @@ def BertGlueEvalTrainJob():
     return logits, label_ids
 
 
-@flow.global_function(get_eval_config(args))
+@flow.global_function(type='predict')
 def BertGlueEvalValJob():
     #8551 or 1042
     _, logits, label_ids = BuildBert(

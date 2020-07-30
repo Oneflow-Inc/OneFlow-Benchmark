@@ -12,8 +12,7 @@ from config import str2bool
 import oneflow as flow
 
 from squad import SQuAD
-from util import Snapshot, Summary, InitNodes, Metric
-from optimizer_util import gen_model_update_conf, get_eval_config
+from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer
 from squad_util import RawResult, gen_eval_predict_json
 
 parser = configs.get_parser()
@@ -30,7 +29,6 @@ parser.add_argument("--eval_example_num", type=int, default=10833,
 parser.add_argument("--eval_batch_size_per_device", type=int, default=64)
 parser.add_argument("--eval_data_part_num", type=int, default=1, 
                     help="data part number in dataset")
-parser.add_argument("--warmup_proportion", type=float, default=0.1)
 
 # post eval
 parser.add_argument("--output_dir", type=str, default='squad_output', help='folder for all_results.npy')
@@ -62,7 +60,6 @@ eval_batch_size = args.num_nodes * args.gpu_num_per_node * args.eval_batch_size_
 epoch_size = math.ceil(args.train_example_num / batch_size)
 num_eval_steps = math.ceil(args.eval_example_num / eval_batch_size)
 args.iter_num = epoch_size * args.num_epochs
-args.warmup_batches = math.ceil(args.iter_num * args.warmup_proportion)
 args.predict_batch_size = eval_batch_size
 configs.print_args(args)
 
@@ -90,7 +87,7 @@ def SquadDecoder(data_dir, batch_size, data_part_num, seq_length, is_train=True)
 
 
 if args.do_train:
-    @flow.global_function(gen_model_update_conf(args))
+    @flow.global_function(type="train")
     def SquadFinetuneJob():
         hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
         intermediate_size = hidden_size * 4
@@ -126,10 +123,12 @@ if args.do_train:
     
         total_loss = 0.5*(start_loss + end_loss)
         flow.losses.add_loss(total_loss)
+        opt = CreateOptimizer(args)
+        opt.minimize(total_loss)
         return {'total_loss': total_loss}
     
 if args.do_eval:
-    @flow.global_function(get_eval_config(args))
+    @flow.global_function(type='predict')
     def SquadDevJob():
         hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
         intermediate_size = hidden_size * 4
