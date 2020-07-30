@@ -78,8 +78,10 @@ sh inference.sh
 
 脚本执行后，将对下面的图片进行分类：
 
-![fish](data/fish.jpg)
 
+<div align="center">
+    <img src="data/fish.jpg" align='center'/>
+</div>
  **输出：** 
 
 ```shell
@@ -155,6 +157,7 @@ python3 of_cnn_train_val.py \
 [ResNet](https://arxiv.org/abs/1512.03385) 是2015年ImageNet竞赛的冠军。目前，ResNet相对对于传统的机器学习分类算法而言，效果已经相当的出色，之后大量的检测，分割，识别等任务也都在ResNet基础上完成。
 
 [OneFlow-Benchmark](https://github.com/Oneflow-Inc/OneFlow-Benchmark)仓库中，我们提供了ResNet50 v1.5的OneFlow实现。该实现对标了[英伟达的Mxnet版实现](https://github.com/NVIDIA/DeepLearningExamples/tree/master/MxNet/Classification/RN50v1.5)。我们在ImageNet-2012数据集上训练90轮后，验证集上的准确率能够达到：77.318%(top1)，93.622%(top5)  更详细的网络参数对齐工作，见下面【进阶 Advanced】部分。
+
 
 ![resnet50_validation_acuracy](docs/resnet50_validation_acuracy.png)
 
@@ -272,22 +275,25 @@ validation: epoch 0, iter 100, top_1: 0.074620, top_k: 0.194120, samples/s: 2014
 
 恭喜，到这里，您已经知道如何用OneFlow训练模型，接下来，试试用训练好的模型对新图片进行分类预测吧！
 
-在预测之前，需要准备你自己训练的模型
-
-**关于模型，您可以选择：**
+在预测之前， **关于模型，您可以选择：**
 
 - 自己训练的模型(如：./output/snapshots/model_save-20200723124724/snapshot_epoch_89)
 
-- 或者，下载我们已训练好的模型：[resnet_v1.5_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_v15_of_best_model_val_top1_77318.tgz ) 
-
-  (validation accuracy: 77.318% top1，93.622% top5 )
+- 下载我们训练好的模型：[resnet_v1.5_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_v15_of_best_model_val_top1_77318.tgz ) (validation accuracy: 77.318% top1，93.622% top5 )
 
   
 
 准备好模型后，将模型目录填入`inference.sh` 脚本的`MODEL_LOAD_DIR`变量中，然后执行inference.sh脚本，开始对图片`data/tiger.jpg`的类别的进行预测：
 
-```
+```shell
 sh inference.sh
+```
+
+若输出下面的内容，则表示预测成功：
+
+```shell
+data/tiger.jpg
+0.81120294 tiger, Panthera tigris
 ```
 
 **参数说明**(部分)
@@ -296,13 +302,28 @@ sh inference.sh
 - --image_path 待检测图片路径
 - --model_load_dir 模型文件路径
 
-若输出下面的内容，则表示预测成功：
+### 评估（Evaluate）
 
+在测试了单张图片之后，想试试模型精度有没有达到 **SOTA** (State Of The Art)? 只需运行：
+```shell
+sh evaluate.sh
 ```
-data/tiger.jpg
-0.81120294 tiger, Panthera tigris
+即可获得训练好的模型在50000张验证集上的准确率：
+```shell
+Time stamp: 2020-07-27-09:28:28
+Restoring model from resnet_v15_of_best_model_val_top1_77318.
+I0727 09:28:28.773988162    8411 ev_epoll_linux.c:82]        Use of signals is disabled. Epoll engine will not be used
+Loading data from /dataset/ImageNet/ofrecord/validation
+validation: epoch 0, iter 195, top_1: 0.773277, top_k: 0.936058, samples/s: 1578.325
+validation: epoch 0, iter 195, top_1: 0.773237, top_k: 0.936078, samples/s: 1692.303
+validation: epoch 0, iter 195, top_1: 0.773297, top_k: 0.936018, samples/s: 1686.896
 ```
 
+从3轮的评估结果来看，我们的模型在Imagenet(2012)上已经达到了77.32+%的top_1精度。
+
+
+
+最后，恭喜你！完成了Resnet模型在ImageNet上完整的训练/验证、推理和评估，为自己鼓个掌吧！
 
 
 
@@ -356,6 +377,28 @@ python3 of_cnn_train_val.py \
 
 
 
+### 训练过程可视化
+
+Oneflow支持将训练生成的中间结果以日志文件的形式保存到本地，可视化后端通过实时读取日志文件，将训练过程产生的数据实时展示到可视化前端。
+
+目前，Oneflow支持的可视化类型分为以下几种：
+
+| 可视化类型 | 描述                     |
+| ---------- | ------------------------ |
+| 模型结构   | 结构图、计算图(后续支持) |
+| 标量数据   | 标量数据                 |
+| 媒体数据   | 文本、图像               |
+| 统计分析   | 数据直方图、数据分布图   |
+| 降维分析   | 数据降维                 |
+| 超参分析   | 超参数                   |
+| 异常检测   | 异常数据检测             |
+
+具体使用方式可参考test_summary.py 文件
+
+具体可视化效果参考之江天枢人工智能开源平台http://tianshu.org.cn/?/course 用户手册可视化部分
+
+
+
 ## 进阶 Advanced
 
 ### 参数对齐
@@ -398,7 +441,10 @@ Oneflow保持了和Mxnet一致的初始学习率以及衰减方式。具体来�
 - warmup + cosine decay
 - warmup + step decay
 
-[![image](docs/resnet50_lr_schedule.png)
+<div align="center">
+    <img src="docs/resnet50_lr_schedule.png" align='center'/>
+</div>
+
 
 | item        | oneflow | nvidia  |
 | ----------- | ------- | ------ |
@@ -465,32 +511,61 @@ OneFlow和英伟达保持了相同的初始化方式，只是在两个框架中�
 
 
 
-
 ### OneFlow 模型转 ONNX 模型
 
-ONNX (Open Neural Network Exchange) 是一种较为广泛使用的神经网络中间格式，通过 ONNX 格式，OneFlow 模型可以被许多部署框架（如 OpenVINO、ONNX Runtime 和移动端的 ncnn、tnn、TEngine 等）所使用。这一节介绍如何将训练好的 resnet50 v1.5 模型转换为 ONNX 模型并验证正确性，可以在 resnet\_to\_onnx.py 中找到参考代码。
+#### 简介
+
+ **ONNX (Open Neural Network Exchange)**  是一种较为广泛使用的神经网络中间格式，通过 ONNX 格式，OneFlow 模型可以被许多部署框架（如 OpenVINO、ONNX Runtime 和移动端的 ncnn、tnn、TEngine 等）所使用。这一节介绍如何将训练好的 resnet50 v1.5 模型转换为 ONNX 模型并验证正确性。
+
+#### 快速上手
+
+我们提供了完整代码：[resnet\_to\_onnx.py](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/master/Classification/cnns/resnet_to_onnx.py)  帮你轻松完成模型的转换和测试的工作
+
+ **步骤一：** 下载预训练模型：[resnet50_v1.5_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/resnet_v15_of_best_model_val_top1_77318.tgz ) ，解压后放入当前目录
+
+ **步骤二：** 执行：`python3 resnet_to_onnx.py `
+
+此代码将完成OneFlow模型->ONNX模型的转化，然后使用ONNX Runtime加载转换后的模型对单张图片进行测试。测试图片如下：
+
+<div align="center">
+    <img src="data/tiger.jpg" align='center'/>
+</div>
+
+输出：
+
+```python
+Convert to onnx success! >>  onnx/model/resnet_v15_of_best_model_val_top1_77318.onnx
+data/tiger.jpg
+Are the results equal? Yes
+Class: tiger, Panthera tigris; score: 0.8112028241157532
+```
+
+
 
 #### 如何生成 ONNX 模型
 
-**步骤一：将网络权重保存到磁盘**
+**步骤一：指定模型路径 ** 
 
-首先将训练得到的网络权重保存到磁盘，例如我们保存到 /tmp/resnet50_weights 这个文件夹下
+首先指定待转换的OneFlow模型路径，然后指定转换后的ONNX模型存放路径，例如示例中：
 
 ```python
-check_point = flow.train.CheckPoint()
-check_point.save("/tmp/resnet50_weights")
+# set up your model path
+flow_weights_path = 'resnet_v15_of_best_model_val_top1_77318'
+onnx_model_dir = 'onnx/model'
 ```
 
 **步骤二：新建一个用于推理的 job function**
 
-然后新建一个用于推理的 job function，它只包含网络结构本身，不包含读取 OFRecord 的算子，并且直接接受 numpy 数组形式的输入。可参考 resnet\_to\_onnx.py 中的 `InferenceNet`。
+然后新建一个用于推理的 job function，它只包含网络结构本身，不包含读取 OFRecord 的算子，并且直接接受 numpy 数组形式的输入。可参考 resnet\_to\_onnx.py 中的 `InferenceNet`
 
 **步骤三：调用 flow.onnx.export 方法**
 
-接下来调用 `flow.onnx.export` 方法，从 OneFlow 网络得到 ONNX 模型，它的第一个参数是上文所说的专用于推理的 job function，第二个参数是 /tmp/resnet50_weights 这个保存了网络权重的文件夹，第三个参数是 ONNX 模型文件的路径。
+接下来代码中会调用`oneflow_to_onnx()`方法，此方法包含了核心的模型转换方法： `flow.onnx.export()` 
+
+ **flow.onnx.export** 将从 OneFlow 网络得到 ONNX 模型，它的第一个参数是上文所说的专用于推理的 job function，第二个参数是OneFlow模型路径，第三个参数是（转换后）ONNX模型的存放路径
 
 ```python
-flow.onnx.export(InferenceNet, '/tmp/resnet50_weights', 'resnet50_v1.5.onnx')
+onnx_model = oneflow_to_onnx(InferenceNet, flow_weights_path, onnx_model_dir, external_data=False)
 ```
 
 #### 验证 ONNX 模型的正确性
@@ -500,10 +575,6 @@ flow.onnx.export(InferenceNet, '/tmp/resnet50_weights', 'resnet50_v1.5.onnx')
 #### 训练AlexNet
 
 ```
-export ENABLE_USER_OP=True
-rm -rf core.* 
-rm -rf ./output/snapshots/*
-DATA_ROOT=/dataset/ImageNet/ofrecord
 #Please change this to your data root.
 python3 of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
@@ -529,10 +600,6 @@ python3 of_cnn_train_val.py \
 
 #### 训练 VGG-16
 ```
-export ENABLE_USER_OP=True
-rm -rf core.* 
-rm -rf ./output/snapshots/*
-DATA_ROOT=/dataset/ImageNet/ofrecord
 #Please change this to your data root.
 python3 cnn_benchmark/of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
@@ -552,4 +619,38 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --model="vgg" \
 ```
 
-经过90轮epochs的训练后，oneflow模型的top1准确率和top5准确率分别为72.1％和90.7％。 作为对比，经过90轮epochs的训练后的tensorflow基准模型的top1准确率和top5准确率分别为71.5％和89.9％。
+经过90个epochs的训练后，oneflow模型的top1准确率和top5准确率分别为72.1％和90.7％。 作为对比，经过90轮epochs的训练后的tensorflow基准模型的top1准确率和top5准确率分别为71.5％和89.9％。
+
+
+## 训练 Inception_v3
+```
+#Please change this to your data root.
+python3 of_cnn_train_val.py \
+    --train_data_dir=$DATA_ROOT/train \
+    --val_data_dir=$DATA_ROOT/validation \
+    --train_data_part_num=256 \
+    --val_data_part_num=256 \
+    --num_nodes=1 \
+    --gpu_num_per_node=1 \
+    --model_update="rmsprop" \
+    --epsilon=1 \
+    --decay_rate=0.9 \
+    --learning_rate=0.045 \
+    --lr_decay="exponential" \
+    --lr_decay_rate=0.94 \
+    --lr_decay_epochs=2 \
+    --loss_print_every_n_iter=10 \
+    --batch_size_per_device=256 \
+    --val_batch_size_per_device=256 \
+    --num_epoch=100 \
+    --use_fp16=false \
+    --model="inceptionv3" \
+    --image_size=299 \
+    --resize_shorter=299 \
+    --gradient_clipping=2 \
+    --warmup_epochs=0 \
+```
+
+The top1 accuracy and the top5 acuuracy are 72.53% and 90.04%, respectively for the validation set after 100 epochs of training.
+The top1 accuracy and the top5 accuracy are 81.19% and 93.15%, respectively for the training set after 100 epochs of training.
+

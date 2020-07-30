@@ -39,6 +39,7 @@ def GlueBERT(
         max_position_embeddings=max_position_embeddings,
         type_vocab_size=type_vocab_size,
         initializer_range=initializer_range,
+        compress_ratio=1,
     )
     pooled_output = PooledOutput(
         sequence_output=backbone.sequence_output(),

@@ -10,6 +10,7 @@ from typing import Callable, Text
 
 import numpy as np
 import oneflow as flow
+import oneflow.typing as tp
 import onnx
 import onnxruntime as ort
 
@@ -31,14 +32,8 @@ def load_image(image_path: Text) -> np.ndarray:
     return np.ascontiguousarray(im, 'float32')
 
 
-def func_config():
-    func_config = flow.FunctionConfig()
-    func_config.default_data_type(flow.float)
-    return func_config
-
-
-@flow.global_function(func_config())
-def InferenceNet(images=flow.FixedTensorDef((1, 3, 224, 224))):
+@flow.global_function("predict")
+def InferenceNet(images: tp.Numpy.Placeholder((1, 3, 224, 224), dtype=flow.float)) -> tp.Numpy:
     logits = resnet50(images, training=False)
     predictions = flow.nn.softmax(logits)
     return predictions
@@ -81,15 +76,15 @@ def oneflow_to_onnx(job_func: Callable, flow_weights_path: Text, onnx_model_dir:
 def check_equality(job_func: Callable, onnx_model: onnx.ModelProto, image_path: Text) -> (bool, np.ndarray):
     image = load_image(image_path)
     onnx_res = onnx_inference(image, onnx_model)
-    oneflow_res = job_func(image).get().ndarray()
+    oneflow_res = job_func(image)
     is_equal = np.allclose(onnx_res, oneflow_res, rtol=1e-4, atol=1e-5)
     return is_equal, onnx_res
 
 
 if __name__ == "__main__":
-    # image_path = 'tiger.jpg'
-    image_path = 'test_img/ILSVRC2012_val_00020287.JPEG'
-    flow_weights_path = '/your/oneflow/weights/path'
+    image_path = 'data/tiger.jpg'
+    # set up your model path
+    flow_weights_path = 'resnet_v15_of_best_model_val_top1_77318'
     onnx_model_dir = 'onnx/model'
 
     check_point = flow.train.CheckPoint()
