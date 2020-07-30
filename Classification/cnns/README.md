@@ -581,10 +581,6 @@ flow.onnx.export(InferenceNet, '/tmp/resnet50_weights', 'resnet50_v1.5.onnx')
 #### 训练AlexNet
 
 ```
-export ENABLE_USER_OP=True
-rm -rf core.* 
-rm -rf ./output/snapshots/*
-DATA_ROOT=/dataset/ImageNet/ofrecord
 #Please change this to your data root.
 python3 cnn_benchmark/of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
@@ -609,10 +605,6 @@ For reference, the top1 accuracy and the top5 accuracy are 54.6% and 78.33%, res
 
 #### 训练 VGG-16
 ```
-export ENABLE_USER_OP=True
-rm -rf core.* 
-rm -rf ./output/snapshots/*
-DATA_ROOT=/dataset/ImageNet/ofrecord
 #Please change this to your data root.
 python3 cnn_benchmark/of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
@@ -637,10 +629,6 @@ For reference, the top1 accuracy and the top5 accuracy are 71.5% and 89.9%, resp
 
 ## 训练 Inception_v3
 ```
-export ENABLE_USER_OP=True
-rm -rf core.* 
-rm -rf ./output/snapshots/*
-DATA_ROOT=/dataset/ImageNet/ofrecord
 #Please change this to your data root.
 python3 of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
