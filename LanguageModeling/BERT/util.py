@@ -130,7 +130,6 @@ class Metric(object):
             if step == 0: self._clear()
 
             for key in self.keys:
-                #self.metric_dict[key] += outputs[key].numpy().sum()
                 self.metric_dict[key] += outputs[key].sum()
 
             self.num_samples += self.batch_size
