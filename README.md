@@ -2,7 +2,7 @@
 ## Introduction
 This repository provides OneFlow deep learning benchmark examples for CV, CTR and NLP, and more models are on the way and will be provided here when ready.
 
-## [Convolutional Networks](https://github.com/Oneflow-Inc/OneFlow-Benchmark/tree/of_develop_py3/Classification/cnns) for Computer Vision Classification
+## [Convolutional Networks](./Classification/cnns) for Computer Vision Classification
 - [ResNet-50](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/Classification/cnns/resnet_model.py)
 - [ResNeXt-50-32*4d](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/Classification/cnns/resnext_model.py)
 - [VGG-16](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/Classification/cnns/vgg_model.py)
