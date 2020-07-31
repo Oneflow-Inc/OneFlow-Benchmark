@@ -28,9 +28,6 @@ class DCGAN:
         self.z_dim = 100
         self.eval_interval = 100
         self.eval_size = 16
-        self.seed = np.random.normal(0, 1, size=(self.eval_size, self.z_dim)).astype(
-            np.float32
-        )
 
         self.gpus_per_node = args.gpu_num_per_node
         self.batch_size = args.batch_size * self.gpus_per_node
@@ -38,9 +35,8 @@ class DCGAN:
     def train(self, epochs=1, model_dir=None, save=True):
         func_config = flow.FunctionConfig()
         func_config.default_data_type(flow.float)
-        func_config.default_distribute_strategy(flow.distribute.consistent_strategy())
+        func_config.default_logical_view(flow.scope.consistent_view())
         func_config.train.primary_lr(self.lr)
-        # func_config.train.model_update_conf(dict(naive_conf={}))
         func_config.train.model_update_conf(dict(adam_conf={}))
         flow.config.gpu_device_num(self.gpus_per_node)
 
@@ -76,15 +72,6 @@ class DCGAN:
 
             return d_loss, d_loss_fake, d_loss_real
 
-        func_config = flow.FunctionConfig()
-        func_config.default_data_type(flow.float)
-        func_config.default_distribute_strategy(flow.distribute.consistent_strategy())
-
-        @flow.global_function(func_config)
-        def eval_generator(z=flow.FixedTensorDef((self.eval_size, self.z_dim)),):
-            g_out = self.generator(z, trainable=False)
-            return g_out
-
         check_point = flow.train.CheckPoint()
         check_point.init()
 
@@ -110,9 +97,6 @@ class DCGAN:
                         )
                     )
                     self._save_images(gout, batch_idx + 1, epoch_idx + 1)
-                    # self._eval_model_and_save_images(
-                    #     eval_generator, batch_idx + 1, epoch_idx + 1
-                    # )
         if save:
             from datetime import datetime
             if not os.path.exists("checkpoint"):
@@ -150,17 +134,6 @@ class DCGAN:
                 writer.append_data(image)
             image = imageio.imread(filename)
             writer.append_data(image)
-
-    def _eval_model_and_save_images(self, model, batch_idx, epoch_idx):
-        results = model(self.seed).get()
-        fig = plt.figure(figsize=(4, 4))
-        for i in range(self.eval_size):
-            plt.subplot(4, 4, i + 1)
-            plt.imshow(results[i, 0, :, :] * 127.5 + 127.5, cmap="gray")
-            plt.axis("off")
-        if not os.path.exists("gout"):
-            os.mkdir("gout")
-        plt.savefig("gout/image_{:02d}_{:04d}.png".format(epoch_idx, batch_idx))
 
     def generator(self, z, const_init=False, trainable=True):
         # (n, 256, 7, 7)
@@ -204,7 +177,7 @@ class DCGAN:
             const_init=const_init,
             trainable=trainable,
         )
-        out = flow.keras.activations.tanh(out)
+        out = flow.math.tanh(out)
         return out
 
     def discriminator(self, img, const_init=False, trainable=True, reuse=False):
