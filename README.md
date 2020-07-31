@@ -7,6 +7,7 @@ This repository provides OneFlow deep learning benchmark examples for CV, CTR an
 - [VGG-16](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/Classification/cnns/vgg_model.py)
 - [Inception-V3](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/Classification/cnns/inception_model.py)
 - [AlexNet](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/Classification/cnns/alexnet_model.py)
+- [MobileNet-V2](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/Classification/cnns/mobilenet_v2_model.py)
 
 ## [Wide Deep Learning](https://github.com/Oneflow-Inc/OneFlow-Benchmark/tree/of_develop_py3/ClickThroughRate/WideDeepLearning) for Click-Through-Rate (CTR) Recommender Systems
 - [OneFlow-WDL](https://github.com/Oneflow-Inc/OneFlow-Benchmark/tree/of_develop_py3/ClickThroughRate/WideDeepLearning)
@@ -15,4 +16,5 @@ This repository provides OneFlow deep learning benchmark examples for CV, CTR an
 - [BERT Pretrain for Language Modeling](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/LanguageModeling/BERT/run_pretraining.py)
 - [SQuAD for Question Answering](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/LanguageModeling/BERT/run_squad.py)
 - [CoLA and MRPC of GLUE](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/of_develop_py3/LanguageModeling/BERT/run_classifier.py)
+
 
