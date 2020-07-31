@@ -651,6 +651,6 @@ python3 of_cnn_train_val.py \
     --warmup_epochs=0 \
 ```
 
-The top1 accuracy and the top5 acuuracy are 72.53% and 90.04%, respectively for the validation set after 100 epochs of training.
-The top1 accuracy and the top5 accuracy are 81.19% and 93.15%, respectively for the training set after 100 epochs of training.
+经过100个epoch的训练后，oneflow模型在验证集上的top1准确率和top5准确率分别为72.53％和90.04％；在训练集上的top1准确率和top5准确率分别为81.19％和93.15％。
+目前训练结果和主流benchmark的准确率还有差距，我们会在后续调整数据预处理方式，并进一步调整训练参数，已达到预期效果，并提供预训练模型。
 
