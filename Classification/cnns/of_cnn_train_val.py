@@ -24,6 +24,7 @@ import config as configs
 from util import Snapshot, Summary, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
 import resnet_model
+import resnext_model
 import vgg_model
 import alexnet_model
 import inception_model
@@ -47,6 +48,7 @@ model_dict = {
     "alexnet": alexnet_model.alexnet,
     "inceptionv3": inception_model.inceptionv3,
     "mobilenetv2": mobilenet_v2_model.Mobilenet,
+    "resnext50": resnext_model.resnext50,
 }
 
 
