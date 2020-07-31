@@ -531,6 +531,8 @@ OneFlow和英伟达保持了相同的初始化方式，只是在两个框架中�
     <img src="data/tiger.jpg" align='center'/>
 </div>
 
+> ​                                             图片来源：https://en.wikipedia.org/wiki/Tiger
+
 输出：
 
 ```python
