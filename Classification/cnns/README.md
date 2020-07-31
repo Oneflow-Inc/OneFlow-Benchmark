@@ -53,7 +53,7 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 
 在2012年的ImageNet竞赛中，深度卷积网络AlexNet横空出世。以超出第二名10%以上的top-5准确率，勇夺ImageNet2012比赛的冠军。从此，以 CNN（卷积神经网络） 为代表的深度学习方法开始在计算机视觉领域的应用开始大放异彩，更多的更深的CNN网络被提出，比如ImageNet2014比赛的冠军VGGNet, ImageNet2015比赛的冠军ResNet。
 
-OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **Resnet50** 等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
+OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **Resnet50** **InceptionV3** 等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
 
 
 
@@ -277,7 +277,7 @@ python3 of_cnn_train_val.py \
 
 - --num_epoch                              迭代总轮数
 
-- --model                                        使用的模型，可选：resnet50、vgg、alexnet
+- --model                                        使用的模型，可选：resnet50、vgg、alexnet、inceptionv3
 
 然后在命令行执行：
 
@@ -620,7 +620,7 @@ onnx_model = oneflow_to_onnx(InferenceNet, flow_weights_path, onnx_model_dir, ex
 #### 训练AlexNet
 
 ```
-#Please change this to your data root.
+#Please change $DATA_ROOT this to your own data root.
 python3 of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
     --val_data_dir=$DATA_ROOT/validation \
@@ -645,7 +645,7 @@ python3 of_cnn_train_val.py \
 
 #### 训练 VGG-16
 ```
-#Please change this to your data root.
+#Please change $DATA_ROOT this to your own data root.
 python3 cnn_benchmark/of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
     --val_data_dir=$DATA_ROOT/validation \
@@ -667,9 +667,9 @@ python3 cnn_benchmark/of_cnn_train_val.py \
 经过90个epochs的训练后，oneflow模型的top1准确率和top5准确率分别为72.1％和90.7％。 作为对比，经过90轮epochs的训练后的tensorflow基准模型的top1准确率和top5准确率分别为71.5％和89.9％。
 
 
-## 训练 Inception_v3
+## 训练 InceptionV3
 ```
-#Please change this to your data root.
+#Please change $DATA_ROOT this to your own data root.
 python3 of_cnn_train_val.py \
     --train_data_dir=$DATA_ROOT/train \
     --val_data_dir=$DATA_ROOT/validation \
@@ -696,6 +696,6 @@ python3 of_cnn_train_val.py \
     --warmup_epochs=0 \
 ```
 
-The top1 accuracy and the top5 acuuracy are 72.53% and 90.04%, respectively for the validation set after 100 epochs of training.
-The top1 accuracy and the top5 accuracy are 81.19% and 93.15%, respectively for the training set after 100 epochs of training.
+经过100个epochs的训练后，oneflow模型在验证集上的top1准确率和top5准确率分别为72.53％和90.04％；在训练集上的top1准确率和top5准确率分别为81.19％和93.15％。
+目前训练结果和主流benchmark的准确率还有差距，我们会在后续调整数据预处理方式，并进一步调整训练参数，已达到预期效果，并提供预训练模型。
 
