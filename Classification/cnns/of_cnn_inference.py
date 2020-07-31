@@ -17,6 +17,7 @@ import oneflow.typing as tp
 from imagenet1000_clsidx_to_labels import clsidx_2_labels
 
 import resnet_model
+import resnext_model
 import vgg_model
 import alexnet_model
 import mobilenet_v2_model
@@ -26,6 +27,7 @@ model_dict = {
     "vgg": vgg_model.vgg16bn,
     "alexnet": alexnet_model.alexnet,
     "mobilenetv2": mobilenet_v2_model.Mobilenet,
+    "resnext50": resnext_model.resnext50,
 }
 
 
