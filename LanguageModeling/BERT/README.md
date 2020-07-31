@@ -1,3 +1,10 @@
+
+BERT - Bidirectional Encoder Representations from Transformers
+
+OneFlow实现了BERT的预训练模型（Pre-training）和两个NLP下游任务（SQuAD，Classifier）。主要参考了[谷歌](https://github.com/google-research/bert)和[英伟达](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow/LanguageModeling/BERT)的实现。
+
+本文的主要目的是介绍如何快速的使用OneFlow BERT相关脚本。
+
 Table of Contents
 =================
 
@@ -9,12 +16,6 @@ Table of Contents
   * [Step 1: 精调并验证](#step-1-%E7%B2%BE%E8%B0%83%E5%B9%B6%E9%AA%8C%E8%AF%81)
 * [BERT Classification with CoLA and MRPC](#bert-classification-with-cola-and-mrpc)
 
-
-BERT - Bidirectional Encoder Representations from Transformers
-
-OneFlow实现了BERT的预训练模型（Pre-training）和两个NLP下游任务（SQuAD，Classifier）。主要参考了[谷歌](https://github.com/google-research/bert)和[英伟达](https://github.com/NVIDIA/DeepLearningExamples/tree/master/TensorFlow/LanguageModeling/BERT)的实现。
-
-本文的主要目的是介绍如何快速的使用OneFlow BERT相关脚本。
 
 ## 数据集下载
 在使用这些脚本进行训练、精调或预测之前，请参考下面链接下载相应的数据集，数据集的格式是OFRecord。
