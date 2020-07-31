@@ -19,6 +19,7 @@ import oneflow as flow
 import vgg_model
 import resnet_model
 import alexnet_model
+import mobilenet_v2_model
 
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
@@ -31,6 +32,7 @@ model_dict = {
     "resnet50": resnet_model.resnet50,
     "vgg": vgg_model.vgg16bn,
     "alexnet": alexnet_model.alexnet,
+    "mobilenetv2": mobilenet_v2_model.Mobilenet,
 }
 
 
