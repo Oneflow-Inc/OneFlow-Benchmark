@@ -389,7 +389,7 @@ OneFlow框架从底层设计上，就原生支持高效的分布式训练。尤�
 # train.sh 
 python3 of_cnn_train_val.py \
     --num_nodes=2 \
-    --node_ips="192.168.1.1, 192.168.1.2"
+    --node_ips="192.168.1.1, 192.168.1.2" \
     --gpu_num_per_node=4 \
     ...
     --model="resnet50"
@@ -440,7 +440,7 @@ Oneflow支持将训练生成的中间结果以日志文件的形式保存到本�
 
 具体使用方式可参考test_summary.py 文件
 
-具体可视化效果参考之江天枢人工智能开源平台http://tianshu.org.cn/?/course 用户手册可视化部分
+具体可视化效果参考[之江天枢人工智能开源平台](http://tianshu.org.cn/?/course)用户手册可视化部分
 
 
 
