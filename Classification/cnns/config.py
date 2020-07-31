@@ -1,3 +1,18 @@
+"""
+Copyright 2020 The OneFlow Authors. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -51,11 +66,11 @@ def get_parser(parser=None):
         help='Whether to use use fp16'
     )
     parser.add_argument(
-        '--use_boxing_v2',
+        '--channel_last',
         type=str2bool,
         nargs='?',
-        const=True,
-        help='Whether to use boxing v2'
+        const=False,
+        help='Whether to use use channel last mode(nhwc)'
     )
 
     # train and validaion
@@ -67,7 +82,7 @@ def get_parser(parser=None):
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
     # inference
-    parser.add_argument("--image_path", type=str, default='tiger.jpg', help="image path")
+    parser.add_argument("--image_path", type=str, default='test_img/tiger.jpg', help="image path")
 
     # for data process
     parser.add_argument("--num_classes", type=int, default=1000, help="num of pic classes")
