@@ -63,8 +63,14 @@ def PretrainJob():
     hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
     intermediate_size = hidden_size * 4
 
-    decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
-                           args.max_predictions_per_seq)
+    if args.data_part_num == 1:
+        with flow.scope.placement("cpu", "0:0"):
+            decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
+                                   args.max_predictions_per_seq)
+    else:
+        assert args.data_part_num > 1
+        decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
+                               args.max_predictions_per_seq)
 
     total_loss, mlm_loss, nsp_loss = PreTrain(
         decoders["input_ids"],
