@@ -30,7 +30,7 @@ def InitNodes(args):
         assert args.num_nodes <= len(args.node_ips)
         flow.env.ctrl_port(12138)
         nodes = []
-        for ip in args.node_ips:
+        for ip in args.node_ips[:args.num_nodes]:
             addr_dict = {}
             addr_dict["addr"] = ip
             nodes.append(addr_dict)
