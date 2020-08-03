@@ -1,3 +1,18 @@
+"""
+Copyright 2020 The OneFlow Authors. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -18,7 +33,9 @@ from job_function_util import get_train_config, get_val_config
 import oneflow as flow
 import vgg_model
 import resnet_model
+import resnext_model
 import alexnet_model
+import mobilenet_v2_model
 
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
@@ -31,6 +48,8 @@ model_dict = {
     "resnet50": resnet_model.resnet50,
     "vgg": vgg_model.vgg16bn,
     "alexnet": alexnet_model.alexnet,
+    "mobilenetv2": mobilenet_v2_model.Mobilenet,
+    "resnext50": resnext_model.resnext50,
 }
 
 

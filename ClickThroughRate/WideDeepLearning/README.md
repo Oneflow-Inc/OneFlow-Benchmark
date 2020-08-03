@@ -43,4 +43,4 @@ python3 wdl_train_eval_test.py \
   --gpu_num 1
 ```
 
-OneFlow-WDL网络实现了模型并行与稀疏更新，在8卡12G TitanV的服务器上实现支持超过4亿的词表大小，而且性能没有损失与小词表性能相当，详细请参考[这篇文档](https://github.com/Oneflow-Inc/oneflow-documentation/blob/master/docs/adv_examples/wide_deep.md)评测部分的内容。
+OneFlow-WDL网络实现了模型并行与稀疏更新，在8卡12G TitanV的服务器上实现支持超过4亿的词表大小，而且性能没有损失与小词表性能相当，详细请参考[这篇文档](https://github.com/Oneflow-Inc/oneflow-documentation/blob/master/cn/docs/adv_examples/wide_deep.md)评测部分的内容。
