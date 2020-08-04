@@ -24,7 +24,7 @@ import numpy as np
 import oneflow as flow
 
 from classifier import GlueBERT
-from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer
+from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
 
 import config as configs
 from sklearn.metrics import accuracy_score, matthews_corrcoef, precision_score, recall_score, f1_score
@@ -116,7 +116,7 @@ def BuildBert(
     return loss, logits, decoders['label_ids']
 
 
-@flow.global_function(type='train')
+@flow.global_function(type='train', function_config=GetFunctionConfig(args))
 def BertGlueFinetuneJob():
     loss, logits, _ = BuildBert(
         batch_size,
@@ -130,7 +130,7 @@ def BertGlueFinetuneJob():
     return {'loss': loss}
 
 
-@flow.global_function(type='predict')
+@flow.global_function(type='predict', function_config=GetFunctionConfig(args))
 def BertGlueEvalTrainJob():
     _, logits, label_ids = BuildBert(
         batch_size,
@@ -142,7 +142,7 @@ def BertGlueEvalTrainJob():
     return logits, label_ids
 
 
-@flow.global_function(type='predict')
+@flow.global_function(type='predict', function_config=GetFunctionConfig(args))
 def BertGlueEvalValJob():
     #8551 or 1042
     _, logits, label_ids = BuildBert(

@@ -27,7 +27,7 @@ from config import str2bool
 import oneflow as flow
 
 from squad import SQuAD
-from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer
+from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
 from squad_util import RawResult, gen_eval_predict_json
 
 parser = configs.get_parser()
@@ -102,7 +102,7 @@ def SquadDecoder(data_dir, batch_size, data_part_num, seq_length, is_train=True)
 
 
 if args.do_train:
-    @flow.global_function(type="train")
+    @flow.global_function(type='train', function_config=GetFunctionConfig(args))
     def SquadFinetuneJob():
         hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
         intermediate_size = hidden_size * 4

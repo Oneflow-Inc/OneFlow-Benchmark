@@ -172,3 +172,10 @@ def CreateOptimizer(args):
     return flow.optimizer.AdamW(lr_scheduler, epsilon=1e-6, weight_decay=args.weight_decay_rate, 
                                 weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
                                 grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0))
+
+def GetFunctionConfig(args):
+    print('args.use_fp16', args.use_fp16)
+    config = flow.function_config()
+    config.enable_auto_mixed_precision(args.use_fp16)
+    return config
+    
