@@ -174,7 +174,6 @@ def CreateOptimizer(args):
                                 grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0))
 
 def GetFunctionConfig(args):
-    print('args.use_fp16', args.use_fp16)
     config = flow.function_config()
     config.enable_auto_mixed_precision(args.use_fp16)
     return config
