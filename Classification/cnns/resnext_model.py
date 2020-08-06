@@ -25,40 +25,49 @@ basic_block_expansion = 1
 bottle_neck_expansion = 4
 
 
+def _get_regularizer(model_name):
+    #all decay
+    return flow.regularizers.l2(0.0001)
+
+
+def _get_initializer(model_name):
+    if model_name == "weight":
+        return flow.variance_scaling_initializer(2.0, mode="fan_out", distribution="random_normal", data_format="NCHW")
+    elif model_name == "bias":
+        return flow.zeros_initializer()
+    elif model_name == "gamma":
+        return flow.ones_initializer()
+    elif model_name == "beta":
+        return flow.zeros_initializer()
+    elif model_name == "dense_weight":
+        return flow.variance_scaling_initializer(1/3, mode="fan_in", distribution="random_uniform")
+    elif model_name == "dense_bias":
+        return flow.random_uniform_initializer(0, 0.01)
+
 def _conv2d(
     inputs,
     filters,
     kernel_size,
     strides=1,
-    padding="VALID",
+    padding=[[0, 0], [0, 0], [0, 0], [0, 0]],
     groups=1,
     use_bias=False,
     trainable=True,
     name=None
 ):
-    if padding != "SAME" and padding != "VALID":
-        if isinstance(padding, list):
-            inputs = flow.pad(inputs, (padding))
-            padding = "VALID"
-        elif isinstance(padding, tuple):
-            inputs = flow.pad(inputs, padding)
-            padding = "VALID"
-        else:
-            raise ValueError("padding must be SAME， VALID or a list/tuple.")
-
     return flow.layers.conv2d(
         inputs, filters, kernel_size, strides, padding,
         data_format="NCHW", dilation_rate=1, groups=groups,
         activation=None, use_bias=use_bias,
-        kernel_initializer=flow.random_normal_initializer(),
-        bias_initializer=flow.zeros_initializer(),
-        kernel_regularizer=None, bias_regularizer=None,
-        trainable=trainable, name=name, weight_name=name+"-weight",
+        kernel_initializer=_get_initializer("weight"),
+        bias_initializer=_get_initializer("bias"),
+        kernel_regularizer=_get_regularizer("weight"), bias_regularizer=_get_regularizer("bias"),
+        trainable=True, name=name, weight_name=name+"-weight",
         bias_name=name+"-bias")
 
 def conv3x3(in_tensor, filters, strides=1, groups=1, trainable=True, name=""):
     return _conv2d(in_tensor, filters=filters, kernel_size=3,
-            strides=strides, padding=([0, 0], [0, 0], [1, 1], [1, 1]), groups=groups, use_bias=False,
+            strides=strides, padding=[[0, 0], [0, 0], [strides, strides], [strides, strides]], groups=groups, use_bias=False,
             trainable=trainable, name=name)
 
 
@@ -66,15 +75,20 @@ def _batch_norm(inputs, trainable=True, training=True, name=None):
     return flow.layers.batch_normalization(
         inputs=inputs,
         axis=1,
-        momentum=0.1,
+        momentum=0.9,
         epsilon=1e-5,
         center=True,
         scale=True,
+        beta_initializer=_get_initializer("beta"),
+        gamma_initializer=_get_initializer("gamma"),
+        beta_regularizer=_get_regularizer("beta"),
+        gamma_regularizer=_get_regularizer("gamma"),
+        moving_mean_initializer=None,
+        moving_variance_initializer=None,
         trainable=trainable,
         training=training,
         name=name
     )
-
 
 def basic_block(inputs, filters, strides=1, downsample=None, num_group=32,
         trainable=True, training=True, layer_block=""):
@@ -102,7 +116,7 @@ def bottle_neck(inputs, filters, strides,
     bn1 = _batch_norm(conv1, trainable=trainable, training=training, name=layer_block+"bn1")
     relu1 = flow.nn.relu(bn1, name=layer_block+"relu1")
     conv2 = _conv2d(relu1, filters*2, kernel_size=3, strides=strides,
-            padding=([0, 0], [0, 0], [1, 1], [1, 1]), use_bias=False,
+            padding=[[0, 0], [0, 0], [1, 1], [1, 1]], use_bias=False,
             groups=num_group, trainable=trainable,
             name=layer_block+"conv2")
     bn2 = _batch_norm(conv2, trainable=trainable, training=training, name=layer_block+"bn2")
@@ -175,9 +189,8 @@ class ResNeXt():
         bn1  = _batch_norm(conv1, trainable=self.trainable, training=self.training, name="bn1")
 
         relu = flow.nn.relu(bn1, name="relu1")
-        pad_before_max_pool = flow.pad(relu, ([0, 0], [0, 0], [1, 1], [1, 1]))
         max_pool = flow.nn.max_pool2d(relu, ksize=3, strides=2,
-                padding="VALID", data_format="NCHW", name="max_pool")  
+                padding=[[0, 0], [0, 0], [1, 1], [1, 1]], data_format="NCHW", name="max_pool")
         layer1 = self._make_layer(max_pool, 64, self.layers[0],
                 self.num_group, layer_num="layer1")
         layer2 = self._make_layer(layer1[-1], 128, self.layers[1],
@@ -198,9 +211,11 @@ class ResNeXt():
         reshape = flow.reshape(avg_pool, (avg_pool.shape[0], -1))
 
         fc = flow.layers.dense(reshape, units=self.num_classes, use_bias=True,
-                kernel_initializer=flow.xavier_uniform_initializer(),
-                bias_initializer=flow.zeros_initializer(),
+                kernel_initializer=_get_initializer("dense_weight"),
+                bias_initializer=_get_initializer("dense_bias"),
                 trainable=self.trainable,
+                kernel_regularizer=_get_regularizer("dense_weight"),
+                bias_regularizer=_get_regularizer("dense_bias"),
                 name="fc")
         return fc
 
