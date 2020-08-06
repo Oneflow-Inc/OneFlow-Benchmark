@@ -91,9 +91,6 @@ serialized Example proto. The Example proto contains the following fields:
 Note that the length of xmin is identical to the length of xmax, ymin and ymax
 for each example.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from datetime import datetime
 import os

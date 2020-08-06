@@ -13,9 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 import math
@@ -46,7 +43,7 @@ parser.add_argument("--eval_data_part_num", type=int, default=1,
                     help="data part number in dataset")
 
 # post eval
-parser.add_argument("--output_dir", type=str, default='squad_output', help='folder for all_results.npy')
+parser.add_argument("--output_dir", type=str, default='squad_output', help='folder for output file')
 parser.add_argument("--doc_stride", type=int, default=128)
 parser.add_argument("--max_seq_length", type=int, default=384)
 parser.add_argument("--max_query_length", type=int, default=64)
