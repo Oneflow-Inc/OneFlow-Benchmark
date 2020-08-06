@@ -2,7 +2,7 @@
 
 OneFlow build up Wide & Deep Learning (WDL) network based on HugeCTR. 
 
-OneFlow-WDL network supports model parallelism and sparse gradient update. It can support over 400 million vocabularies size of lookup table in a TitanV 12G * 8 server, at the same time has the same performace with small vocabularies size table.
+OneFlow-WDL network supports model parallelism and sparse gradient update. It can support over 400 million vocab size of lookup table in a TitanV 12G * 8 server, at the same time has the same performace with small vocab size table.
 
 The purpose of this document is to introduce how to use OneFlow-WDL to train network and present the testing results of OneFlow-WDL.  
 
@@ -103,12 +103,12 @@ Results：
 
 Summary: OneFlow-WDL ran faster than HugeCTR over batch size from 512 to 16384.
 
-### Big vocabularies size performance  
+### Big vocab size performance  
 There are two Embedding Tables config in OneFlow-WDL：
 - The size of `wide_embedding` is vocab_size x 1
 - The size of`deep_embedding` is vocab_size x 16
 
-In HugeCTR the vocabularies size is 1,603,616(1.6 million). We kept increasing vocabularies size from 3.2 million to 409.6 million during test, result is below：
+In HugeCTR the vocab size is 1,603,616(1.6 million). We kept increasing vocab size from 3.2 million to 409.6 million during test, result is below：
 
 ![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/big_vocab_table_2x1024.png) 
 
@@ -116,9 +116,9 @@ In HugeCTR the vocabularies size is 1,603,616(1.6 million). We kept increasing v
 
 In above figures，the blue column is average latency and orange curve is for the memory usage over different vocab size.
 
-Conclusion: with the increaseing of vocabularies size, memory usage increase, but the average latency kept still.
+Conclusion: with the increaseing of vocab size, memory usage increase, but the average latency kept still.
 
-Our test GPU has 12G memory only, we can image how big vocabularies size will OneFlow-WDL support with 16G, 32G or even larger memory devices. **409.6 Million vocab size is not the limitation but a begining**. 
+Our test GPU has 12G memory only, we can image how big vocab size will OneFlow-WDL support with 16G, 32G or even larger memory devices. **409.6 Million vocab size is not the limitation but a begining**. 
 
 ### Convergence test 1
 We choose batch size=512 to run the convergence performance test. 
