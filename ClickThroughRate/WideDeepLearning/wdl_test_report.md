@@ -2,9 +2,9 @@
 
 OneFlow build up Wide & Deep Learning (WDL) network based on HugeCTR. 
 
-OneFlow-WDL network supports model parallelism and sparse gradient update. It can support over 400 million vocabulary size of lookup table in a TitanV 12G * 8 server, at the same time has the same performace with small vocab size table.
+OneFlow-WDL network supports model parallelism and sparse gradient update. It can support over 400 million vocabularies size of lookup table in a TitanV 12G * 8 server, at the same time has the same performace with small vocabularies size table.
 
-The purpose of this document is to present the testing results of OneFlow-WDL.  
+The purpose of this document is to introduce how to use OneFlow-WDL to train network and present the testing results of OneFlow-WDL.  
 
 ## Environment and Preparation 
 Please make sure to install OneFlow in your computer/server before running OneFlow-WDL, and [scikit-learn](https://scikit-learn.org/stable/install.html) is required to calculate metrics.
@@ -28,7 +28,7 @@ criteo_wdl_3000w_ofrecord_example
 Making a full-size dataset is exhausting. Hopefully [*Use Spark to create WDL dataset*](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/master/ClickThroughRate/WideDeepLearning/how_to_make_ofrecord_for_wdl.md) can help you to generate the full-size ofrecord for testing. You can download original dataset from [CriteoLabs](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) and follow the steps in [Spark 2.4.* shell](https://www.apache.org/dyn/closer.lua/spark/spark-2.4.6/spark-2.4.6-bin-hadoop2.7.tgz).
 
 ### OneFlow-WDL code
-The main script we tested is the file: `wdl_train_eval.py`. Please download from [here](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/master/ClickThroughRate/WideDeepLearning/wdl_train_eval.py).
+The main code we test is the file: `wdl_train_eval.py`. Please download from [here](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/master/ClickThroughRate/WideDeepLearning/wdl_train_eval.py).
 
 ## Run OneFlow-WDL code
 ```
@@ -49,7 +49,7 @@ python3 wdl_train_eval.py \
   --gpu_num 1
 ```
 
-The running shell script is shown above, the only thing we need to config is `DATA_ROOT` of ofrecord dataset for OneFlow-WDL. Then the shell is able to run. If the following output show up which mean the code is running correctly.
+The running shell code is shown above, the only thing we need to config is `DATA_ROOT` of ofrecord dataset for OneFlow-WDL. Then the shell is able to run. If the following output show up which means the code is running correctly.
 
 Note: the `criteo_wdl_3000w_ofrecord_example` dataset has one part file only, the `train_data_part_num` and `eval_data_part_num` are both set to `1`.
 ```
@@ -63,10 +63,10 @@ Note: the `criteo_wdl_3000w_ofrecord_example` dataset has one part file only, th
 4000 eval_loss 0.47925308644771575 eval_auc 0.7781267916810946
 ```
 ## Testing results and explanation
-All tests are performed on a sever with 8 TitanV 12G GPUs installed. As a reference, we perform some Nvidia HugeCTR test in docker container.
+All tests are performed on a sever with 8 TitanV 12G GPUs installed. As a reference, we perform some Nvidia HugeCTR tests in docker container.
 
-### Multi-devices Performance
-The main purpose of this test is to test the average latency over different GPU device number with fixed tatal batch size = 16384. 7 hidden layers with 1024 neural units are applied in this test.
+### Multi-devices performance
+The main purpose of this test is to test the average latency over different GPU device number with fixed total batch size = 16384. 7 hidden layers with 1024 neural units are applied in this test.
 
 Results：
 
@@ -76,10 +76,10 @@ the maximum memory usage over devices is shown below:
 
 ![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/fixed_batch_size_memory.png)
 
-Summary, from one device to 8 devices, OneFlow-WDL ran faster than HugeCTR with less less memory consumption.
+To summarise, from one device to 8 devices, OneFlow-WDL ran faster than HugeCTR with less memory usage.
 
-### Batch size per device = 16384 , multi-devices Performance
-The main purpose of test is to test the average latency over different GPU devices with batch size per device= 16384, the total batch size is scaled with device number. 7 hidden layers with 1024 neural units are applied in this test.
+### Batch size per device = 16384 , multi-devices performance
+The main purpose of test is to test the average latency over different GPU devices with batch size=16384 per device, the total batch size is scaled with device number. 7 hidden layers with 1024 neural units are applied in this test.
 
 Results：
 
@@ -90,8 +90,8 @@ the maximum memory usage over devices is shown below:
 ![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/scaled_batch_size_memory.png)
 
 Summary:
-- The latency kept increase alone with number of devices;
-- OneFlow-WDL ran faster than HugeCTR with less less memory consumption;
+- The latency kept increase alone with number of devices.
+- OneFlow-WDL ran faster than HugeCTR with less less memory consumption.
 - There is no obvious change in memory usage.
 
 ### Performance in different batch size with one GPU device
@@ -103,12 +103,12 @@ Results：
 
 Summary: OneFlow-WDL ran faster than HugeCTR over batch size from 512 to 16384.
 
-### Big Vocab Size Performance  
-There are two Embedding Table config in OneFlow-WDL：
+### Big vocabularies size performance  
+There are two Embedding Tables config in OneFlow-WDL：
 - The size of `wide_embedding` is vocab_size x 1
 - The size of`deep_embedding` is vocab_size x 16
 
-In HugeCTR the vocab size is 1,603,616(1.6 million). We kept increasing vocab size from 3.2 million to 409.6 million during test, result is below：
+In HugeCTR the vocabularies size is 1,603,616(1.6 million). We kept increasing vocabularies size from 3.2 million to 409.6 million during test, result is below：
 
 ![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/big_vocab_table_2x1024.png) 
 
@@ -116,9 +116,9 @@ In HugeCTR the vocab size is 1,603,616(1.6 million). We kept increasing vocab si
 
 In above figures，the blue column is average latency and orange curve is for the memory usage over different vocab size.
 
-Conclusion: with the increaseing of vocab size, memory usage increase, but the average latency kept still.
+Conclusion: with the increaseing of vocabularies size, memory usage increase, but the average latency kept still.
 
-Our test GPU has 12G memory only, we can image how big vocab size will OneFlow-WDL support with 16G, 32G or even larger Memory devices. **409.6 Million vocab size is not the limitation but a begining**. 
+Our test GPU has 12G memory only, we can image how big vocabularies size will OneFlow-WDL support with 16G, 32G or even larger memory devices. **409.6 Million vocab size is not the limitation but a begining**. 
 
 ### Convergence test 1
 We choose batch size=512 to run the convergence performance test. 
