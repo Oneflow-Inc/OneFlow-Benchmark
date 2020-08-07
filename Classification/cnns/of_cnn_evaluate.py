@@ -51,7 +51,7 @@ model_dict = {
 
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
-flow.config.enable_debug_mode(True)
+#flow.config.enable_debug_mode(True)
 @flow.global_function("predict", get_val_config(args))
 def InferenceNet():
     assert os.path.exists(args.val_data_dir)

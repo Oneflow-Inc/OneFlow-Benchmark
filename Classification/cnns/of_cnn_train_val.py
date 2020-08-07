@@ -50,7 +50,7 @@ model_dict = {
 
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
-flow.config.enable_debug_mode(True)
+#flow.config.enable_debug_mode(True)
 
 
 def label_smoothing(labels, classes, eta, dtype):
