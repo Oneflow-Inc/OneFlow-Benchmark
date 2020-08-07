@@ -134,7 +134,7 @@ if __name__ == "__main__":
     configs.print_args(args)
 
     flow.config.gpu_device_num(args.gpu_num_per_node)
-    flow.config.enable_debug_mode(True)
+    #flow.config.enable_debug_mode(True)
     @flow.global_function(get_val_config(args))
     def IOTest():
         if args.train_data_dir:
