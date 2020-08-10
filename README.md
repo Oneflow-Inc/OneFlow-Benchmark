@@ -20,7 +20,7 @@ This repository provides OneFlow deep learning benchmark examples for CV, CTR an
 
 ## OneFlow Benchmark Test Reports
 
-| Model | DType | XLA | Throughput | Speedup |
+| Model | DType | XLA | Throughput | Speedup on 32 devices |
 | ----- | ----- | --- | ---------- | ------- |
-| [BERT Pretrain](./reports/bert_fp32_report.md) | Float32 | No | 530k tokens/sec | 28.54 |
 | [ResNet50-V1.5](./reports/resnet50_v15_fp32_report.md) | Float32 | No | 11.6k imges/sec | 30.4 |
+| [BERT base Pretrain](./reports/bert_fp32_report.md) | Float32 | No | 530k tokens/sec | 28.54 |
