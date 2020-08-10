@@ -97,7 +97,7 @@ LOCAL_RUN=local_run.sh
 #comment unused hosts with `#`
 #or use first arg to limit the hosts number
 
-declare -a host_list=("10.11.0.2" "10.11.0.3" "10.11.0.4" "10.11.0.4")
+declare -a host_list=("10.11.0.2" "10.11.0.3" "10.11.0.4" "10.11.0.5")
 
 if [ -n "$1" ]
 then
