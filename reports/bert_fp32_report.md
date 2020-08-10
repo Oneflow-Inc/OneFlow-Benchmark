@@ -171,6 +171,7 @@ step: 199, total_loss: 9.640, mlm_loss: 8.960, nsp_loss: 0.680, throughput: 142.
 ```
 Normally, the first `throughput` value e.g. `52.257` is discarded because the start time of first batch is not correct. we average the other `throughput` as the throughput of this test.
 ## BERT base Pretrain Test Results
+All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_bert_benchmark_logs.tgz)
 ### Group: batch size per device = 32
 ![image](imgs/bert_base_bsz32_fp32.png)
 ### Group: batch size per device = 64 

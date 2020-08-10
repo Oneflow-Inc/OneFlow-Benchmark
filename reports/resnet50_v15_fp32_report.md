@@ -163,6 +163,7 @@ train: epoch 0, iter 200, loss: 1.047857, top_1: 1.000000, top_k: 1.000000, samp
 ```
 Normally, the first `samples/s` value e.g. `288.088` is discarded because the start time of first batch is not correct. we average the other `samples/s` as the throughput of this test.
 ## Test Results
+All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_resnet50_logs.tgz)
 ### Group: batch size per device = 128
 ![image](imgs/resnet50_v15_bsz128_fp32.png)
 ### Group: batch size per device = 160
