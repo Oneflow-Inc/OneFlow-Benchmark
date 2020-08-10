@@ -1,4 +1,4 @@
-# OneFlow ResNet50-V1.5 Benchmark
+# OneFlow BERT Pretrain Benchmark Test Report
 This document reports OneFlow ResNet50-V1.5 benchmark test results on Aug 8 2020. 
 
 ## Test Environment
