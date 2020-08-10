@@ -54,6 +54,7 @@ We create two bash scripts alone side with `cnns` folder for this test:
 # local_run.sh
 NUM_NODES=$1
 GPU_NUM_PER_NODE=$2
+BENCH_ROOT_DIR=cnn3
 
 DATA_ROOT=/path/to/ofrecord
 rm -rf ./log
@@ -65,7 +66,7 @@ BSZ_PER_DEVICE=128
 NUM_ITERS=200
 NUM_EXAMPLES=$(($NUM_NODES * $GPU_NUM_PER_NODE * $BSZ_PER_DEVICE * $NUM_ITERS))
 
-python3 cnns/of_cnn_train_val.py \
+python3 ./$BENCH_ROOT_DIR/of_cnn_train_val.py \
     --num_examples=$NUM_EXAMPLES \
     --train_data_dir=$DATA_ROOT/train \
     --train_data_part_num=44 \
@@ -88,6 +89,7 @@ python3 cnns/of_cnn_train_val.py \
 
 NUM_NODES=$1
 GPU_NUM_PER_NODE=$2
+BENCH_ROOT_DIR=cnn3
 LOCAL_RUN=local_run.sh
 
 ##############################################
@@ -125,7 +127,7 @@ for host in "${hosts[@]}"
 do
   echo "start training on ${host}"
   ssh $USER@$host 'rm -rf ~/oneflow_temp/*'
-  scp -r $PWD/cnns ./$LOCAL_RUN $USER@$host:~/oneflow_temp
+  scp -r ./$BENCH_ROOT_DIR ./$LOCAL_RUN $USER@$host:~/oneflow_temp
   ssh $USER@$host "cd ~/oneflow_temp; nohup ./$LOCAL_RUN $NUM_NODES $GPU_NUM_PER_NODE 1>oneflow.log 2>&1 </dev/null &"
 done
 ```
