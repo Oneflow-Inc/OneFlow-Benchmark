@@ -1,5 +1,5 @@
 # OneFlow BERT Pretrain Benchmark Test Report
-This document reports OneFlow ResNet50-V1.5 benchmark test results on Aug 8 2020. 
+This document reports OneFlow BERT Pretrain benchmark test results on Aug 9 2020. 
 
 ## Test Environment
 All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and following is the main hardware and software configurations for each:  
@@ -37,7 +37,7 @@ Legend:
 ```
 
 ## Test Descriptions
-Two groups of tests were performed with different batch size per device: 128 and 160.
+4 groups of tests were performed with different batch size per device: 32, 64 and 96 for BERT base, 4 for BERT large.
 
 Each group includes 6 tests with different number of devices: 1, 2, 4, 8, 16, 32.
 
@@ -46,40 +46,49 @@ Each group includes 6 tests with different number of devices: 1, 2, 4, 8, 16, 32
 Data type of all tests is `Float32`, XLA is not applied.
 
 ## Test Scripts
-Please clone or download `cnns` folder from [OneFlow-Benchmark repository](https://github.com/Oneflow-Inc/OneFlow-Benchmark/tree/master/Classification/cnns). 
+Please clone or download `BERT` folder from [OneFlow-Benchmark repository](https://github.com/Oneflow-Inc/OneFlow-Benchmark/tree/master/LanguageModeling/BERT). 
 
-We create two bash scripts alone side with `cnns` folder for this test:
+We create two bash scripts alone side with `BERT` folder for this test:
 1. `local_run.sh` - launch a local oneflow with specific number of nodes and gpu number per node
 ```bash
 # local_run.sh
 NUM_NODES=$1
 GPU_NUM_PER_NODE=$2
+BENCH_ROOT_DIR=BERT
 
 DATA_ROOT=/path/to/ofrecord
 rm -rf ./log
 mkdir ./log
 
-BSZ_PER_DEVICE=128 
-#BSZ_PER_DEVICE=160
+#BSZ_PER_DEVICE=32
+#BSZ_PER_DEVICE=64
+BSZ_PER_DEVICE=96
 
-NUM_ITERS=200
-NUM_EXAMPLES=$(($NUM_NODES * $GPU_NUM_PER_NODE * $BSZ_PER_DEVICE * $NUM_ITERS))
+python3 ./$BENCH_ROOT_DIR/run_pretraining.py \
+  --gpu_num_per_node=$GPU_NUM_PER_NODE \
+  --num_nodes=$NUM_NODES \
+  --node_ips='10.11.0.2','10.11.0.3','10.11.0.4','10.11.0.5' \
+  --learning_rate=1e-4 \
+  --batch_size_per_device=$BSZ_PER_DEVICE \
+  --iter_num=200 \
+  --loss_print_every_n_iter=20 \
+  --seq_length=128 \
+  --max_predictions_per_seq=20 \
+  --num_hidden_layers=12 \
+  --num_attention_heads=12 \
+  --max_position_embeddings=512 \
+  --type_vocab_size=2 \
+  --vocab_size=30522 \
+  --attention_probs_dropout_prob=0.1 \
+  --hidden_dropout_prob=0.1 \
+  --hidden_size_per_head=64 \
+  --data_dir=$DATA_ROOT \
+  --data_part_num=32 \
+  --log_dir=./log \
+  --model_save_every_n_iter=10000 \
+  --save_last_snapshot=False \
+  --model_save_dir=./snapshots
 
-python3 cnns/of_cnn_train_val.py \
-    --num_examples=$NUM_EXAMPLES \
-    --train_data_dir=$DATA_ROOT/train \
-    --train_data_part_num=44 \
-    --num_nodes=$NUM_NODES \
-    --gpu_num_per_node=$GPU_NUM_PER_NODE \
-    --model_update="momentum" \
-    --learning_rate=0.001 \
-    --loss_print_every_n_iter=20 \
-    --batch_size_per_device=$BSZ_PER_DEVICE \
-    --val_batch_size_per_device=125 \
-    --num_epoch=1 \
-    --log_dir=./log \
-    --node_ips='10.11.0.2','10.11.0.3','10.11.0.4','10.11.0.5' \
-    --model="resnet50"
 ```
 2. `launch_all.sh` - launch oneflow on all remote nodes with specific number of nodes and gpu number per node.
 ```bash
@@ -89,6 +98,7 @@ python3 cnns/of_cnn_train_val.py \
 NUM_NODES=$1
 GPU_NUM_PER_NODE=$2
 LOCAL_RUN=local_run.sh
+BENCH_ROOT_DIR=BERT
 
 ##############################################
 #0 prepare the host list for training
@@ -125,7 +135,7 @@ for host in "${hosts[@]}"
 do
   echo "start training on ${host}"
   ssh $USER@$host 'rm -rf ~/oneflow_temp/*'
-  scp -r $PWD/cnns ./$LOCAL_RUN $USER@$host:~/oneflow_temp
+  scp -r ./$BENCH_ROOT_DIR ./$LOCAL_RUN $USER@$host:~/oneflow_temp
   ssh $USER@$host "cd ~/oneflow_temp; nohup ./$LOCAL_RUN $NUM_NODES $GPU_NUM_PER_NODE 1>oneflow.log 2>&1 </dev/null &"
 done
 ```
@@ -142,26 +152,70 @@ Note: Please to make sure all servers can login each other automaticly with ssh-
 ```
 
 ### Calculate `Throughput` from Test Results
-`Throughput(samples/s)` information as well as `loss` and `top-k` can be found in `oneflow_temp` folder in the first node's home directory, there are two files:
+`Throughput(samples/s)` information as well as `loss` can be found in `oneflow_temp` folder in the first node's home directory, there are two files:
 1. `oneflow.log` - redirected stdout 
 2. `log/summary.csv` - same information in csv format 
 
 We use `oneflow.log` for instance, here is an example:
 ```
-train: epoch 0, iter 20, loss: 6.505637, top_1: 0.000000, top_k: 0.000000, samples/s: 288.088
-train: epoch 0, iter 40, loss: 5.736447, top_1: 0.020313, top_k: 0.117578, samples/s: 385.628
-train: epoch 0, iter 60, loss: 4.274485, top_1: 0.817969, top_k: 0.991797, samples/s: 386.264
-train: epoch 0, iter 80, loss: 2.331075, top_1: 1.000000, top_k: 1.000000, samples/s: 385.723
-train: epoch 0, iter 100, loss: 1.236110, top_1: 1.000000, top_k: 1.000000, samples/s: 384.622
-train: epoch 0, iter 120, loss: 1.078446, top_1: 1.000000, top_k: 1.000000, samples/s: 385.367
-train: epoch 0, iter 140, loss: 1.054016, top_1: 1.000000, top_k: 1.000000, samples/s: 384.704
-train: epoch 0, iter 160, loss: 1.048110, top_1: 1.000000, top_k: 1.000000, samples/s: 384.927
-train: epoch 0, iter 180, loss: 1.050786, top_1: 1.000000, top_k: 1.000000, samples/s: 384.109
-train: epoch 0, iter 200, loss: 1.047857, top_1: 1.000000, top_k: 1.000000, samples/s: 384.517
+step: 19, total_loss: 11.078, mlm_loss: 10.407, nsp_loss: 0.671, throughput: 52.257
+step: 39, total_loss: 10.884, mlm_loss: 10.190, nsp_loss: 0.694, throughput: 142.735
+step: 59, total_loss: 10.592, mlm_loss: 9.915, nsp_loss: 0.677, throughput: 142.636
+step: 79, total_loss: 10.335, mlm_loss: 9.659, nsp_loss: 0.676, throughput: 142.391
+step: 99, total_loss: 10.157, mlm_loss: 9.479, nsp_loss: 0.678, throughput: 142.565
+step: 119, total_loss: 10.046, mlm_loss: 9.361, nsp_loss: 0.686, throughput: 142.397
+step: 139, total_loss: 9.915, mlm_loss: 9.237, nsp_loss: 0.678, throughput: 142.298
+step: 159, total_loss: 9.851, mlm_loss: 9.168, nsp_loss: 0.683, throughput: 142.383
+step: 179, total_loss: 9.784, mlm_loss: 9.104, nsp_loss: 0.680, throughput: 142.270
+step: 199, total_loss: 9.640, mlm_loss: 8.960, nsp_loss: 0.680, throughput: 142.579
 ```
-Normally, the first `samples/s` value e.g. `288.088` is discarded because the start time of first batch is not correct. we average the other `samples/s` as the throughput of this test.
-## Test Results
-### Group: batch size per device = 128
-![image](imgs/resnet50_v15_bsz128_fp32.png)
-### Group: batch size per device = 160
-![image](imgs/resnet50_v15_bsz160_fp32.png)
+Normally, the first `throughput` value e.g. `52.257` is discarded because the start time of first batch is not correct. we average the other `throughput` as the throughput of this test.
+## BERT base Pretrain Test Results
+### Group: batch size per device = 32
+![image](imgs/bert_base_bsz32_fp32.png)
+### Group: batch size per device = 64 
+![image](imgs/bert_base_bsz64_fp32.png)
+### Group: batch size per device = 96 
+![image](imgs/bert_base_bsz96_fp32.png)
+## BERT Large Pretrain Test Results
+BERT large was tested on the same situtation. Some arguments in `local_run.sh` need to be modified to meet to BERT large pretrain configuration. 
+```bash
+# local_run.sh for bert large
+NUM_NODES=$1
+GPU_NUM_PER_NODE=$2
+BENCH_ROOT_DIR=BERT
+
+DATA_ROOT=/path/to/ofrecord
+rm -rf ./log
+mkdir ./log
+
+BSZ_PER_DEVICE=4
+
+python3 ./$BENCH_ROOT_DIR/run_pretraining.py \
+  --gpu_num_per_node=$GPU_NUM_PER_NODE \
+  --num_nodes=$NUM_NODES \
+  --node_ips='10.11.0.2','10.11.0.3','10.11.0.4','10.11.0.5' \
+  --learning_rate=1e-4 \
+  --batch_size_per_device=$BSZ_PER_DEVICE \
+  --iter_num=200 \
+  --loss_print_every_n_iter=20 \
+  --seq_length=512 \
+  --max_predictions_per_seq=80 \
+  --num_hidden_layers=24 \
+  --num_attention_heads=16 \
+  --max_position_embeddings=512 \
+  --type_vocab_size=2 \
+  --vocab_size=30522 \
+  --attention_probs_dropout_prob=0.1 \
+  --hidden_dropout_prob=0.1 \
+  --hidden_size_per_head=64 \
+  --data_dir=$DATA_ROOT \
+  --data_part_num=32 \
+  --log_dir=./log \
+  --model_save_every_n_iter=10000 \
+  --save_last_snapshot=False \
+  --model_save_dir=./snapshots
+
+```
+Here is the result:
+![image](imgs/bert_large_bsz4_fp32.png)
