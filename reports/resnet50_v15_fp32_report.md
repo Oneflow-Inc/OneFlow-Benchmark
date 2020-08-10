@@ -1,5 +1,5 @@
 # OneFlow ResNet50-V1.5 Benchmark
-This document reports OneFlow ResNet50-V1.5 benchmark results on Aug 8 2020. 
+This document reports OneFlow ResNet50-V1.5 benchmark test results on Aug 8 2020. 
 
 ## Test Environment
 All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and following is the main hardware and software configurations for each:  
