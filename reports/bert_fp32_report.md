@@ -175,9 +175,27 @@ All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs
 ### Group: batch size per device = 32
 ![image](imgs/bert_base_bsz32_fp32.png)
 ### Group: batch size per device = 64 
-![image](imgs/bert_base_bsz64_fp32.png)
+| node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 64 | 9989 | 145.148  | 1 | 
+| 1 | 2 | 2 | 64 | 10947 | 277.880  | 1.91  | 
+| 1 | 4 | 4 | 64 | 10955 | 552.843  | 3.81  | 
+| 1 | 8 | 8 | 64 | 11029 | 1103.102  | 7.60  | 
+| 2 | 8 | 16 | 64 | 10957 | 2023.743  | 13.94  | 
+| 4 | 8 | 32 | 64 | 10981 | 3947.739  | 27.20  | 
+BERT Base Pretrain, batch size per device=64, dtype=float32, without XLA						
+
 ### Group: batch size per device = 96 
-![image](imgs/bert_base_bsz96_fp32.png)
+| node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 96 | 13771 | 145.095  | 1 | 
+| 1 | 2 | 2 | 96 | 14757 | 282.984  | 1.95  | 
+| 1 | 4 | 4 | 96 | 14851 | 559.011  | 3.85  | 
+| 1 | 8 | 8 | 96 | 14815 | 1121.632  | 7.73  | 
+| 2 | 8 | 16 | 96 | 14815 | 2132.490  | 14.70  | 
+| 4 | 8 | 32 | 96 | 14687 | 4140.439  | 28.54  | 
+BERT Base Pretrain, batch size per device=96, dtype=float32, without XLA						
+
 ## BERT Large Pretrain Test Results
 BERT large was tested on the same situtation. Some arguments in `local_run.sh` need to be modified to meet to BERT large pretrain configuration. 
 ```bash
@@ -219,4 +237,15 @@ python3 ./$BENCH_ROOT_DIR/run_pretraining.py \
 
 ```
 Here is the result:
-![image](imgs/bert_large_bsz4_fp32.png)
+				
+| node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 4 | 12087 | 8.839  | 1 | 
+| 1 | 2 | 2 | 4 | 14593 | 16.405  | 1.86  | 
+| 1 | 4 | 4 | 4 | 14713 | 33.158  | 3.75  | 
+| 1 | 8 | 8 | 4 | 14765 | 64.519  | 7.30  | 
+| 2 | 8 | 16 | 4 | 14661 | 74.224  | 8.40  | 
+| 4 | 8 | 32 | 4 | 14673 | 143.232  | 16.21  | 
+| 1 | 1 | 1 | 6 | 15779 | 9.180  | 1.04  | 
+BERT Large Pretrain, batch size per device=4, dtype=float32, without XLA
+
