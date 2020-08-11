@@ -173,6 +173,7 @@ Normally, the first `throughput` value e.g. `52.257` is discarded because the st
 ## BERT base Pretrain Test Results
 All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_bert_benchmark_logs.tgz)
 ### Group: batch size per device = 32
+BERT Base Pretrain, batch size per device=32, dtype=float32, without XLA						
 | node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
 | -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
 | 1 | 1 | 1 | 32 | 6207 | 140.034  | 1 | 
@@ -181,9 +182,9 @@ All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs
 | 1 | 8 | 8 | 32 | 7323 | 1010.446  | 7.22  | 
 | 2 | 8 | 16 | 32 | 7145 | 1571.088  | 11.22  | 
 | 4 | 8 | 32 | 32 | 7185 | 3136.797  | 22.40  | 
-BERT Base Pretrain, batch size per device=32, dtype=float32, without XLA						
 
 ### Group: batch size per device = 64 
+BERT Base Pretrain, batch size per device=64, dtype=float32, without XLA						
 | node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
 | -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
 | 1 | 1 | 1 | 64 | 9989 | 145.148  | 1 | 
@@ -192,9 +193,9 @@ BERT Base Pretrain, batch size per device=32, dtype=float32, without XLA
 | 1 | 8 | 8 | 64 | 11029 | 1103.102  | 7.60  | 
 | 2 | 8 | 16 | 64 | 10957 | 2023.743  | 13.94  | 
 | 4 | 8 | 32 | 64 | 10981 | 3947.739  | 27.20  | 
-BERT Base Pretrain, batch size per device=64, dtype=float32, without XLA						
 
 ### Group: batch size per device = 96 
+BERT Base Pretrain, batch size per device=96, dtype=float32, without XLA						
 | node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
 | -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
 | 1 | 1 | 1 | 96 | 13771 | 145.095  | 1 | 
@@ -203,7 +204,6 @@ BERT Base Pretrain, batch size per device=64, dtype=float32, without XLA
 | 1 | 8 | 8 | 96 | 14815 | 1121.632  | 7.73  | 
 | 2 | 8 | 16 | 96 | 14815 | 2132.490  | 14.70  | 
 | 4 | 8 | 32 | 96 | 14687 | 4140.439  | 28.54  | 
-BERT Base Pretrain, batch size per device=96, dtype=float32, without XLA						
 
 ## BERT Large Pretrain Test Results
 BERT large was tested on the same situtation. Some arguments in `local_run.sh` need to be modified to meet to BERT large pretrain configuration. 
@@ -246,7 +246,7 @@ python3 ./$BENCH_ROOT_DIR/run_pretraining.py \
 
 ```
 Here is the result:
-				
+BERT Large Pretrain, batch size per device=4, dtype=float32, without XLA
 | node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
 | -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
 | 1 | 1 | 1 | 4 | 12087 | 8.839  | 1 | 
@@ -256,5 +256,4 @@ Here is the result:
 | 2 | 8 | 16 | 4 | 14661 | 74.224  | 8.40  | 
 | 4 | 8 | 32 | 4 | 14673 | 143.232  | 16.21  | 
 | 1 | 1 | 1 | 6 | 15779 | 9.180  | 1.04  | 
-BERT Large Pretrain, batch size per device=4, dtype=float32, without XLA
 

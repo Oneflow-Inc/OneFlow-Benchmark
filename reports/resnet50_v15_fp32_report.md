@@ -165,6 +165,7 @@ Normally, the first `samples/s` value e.g. `288.088` is discarded because the st
 ## Test Results
 All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_resnet50_logs.tgz)
 ### Group: batch size per device = 128
+ResNet50 V1.5, batch size per device=128, dtype=float32, without XLA						
 | node num | gpus/nodes | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
 | -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
 | 1 | 1 | 1 | 128 | 12565 | 383.760  | 1 | 
@@ -173,9 +174,9 @@ All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs
 | 1 | 8 | 8 | 128 | 13051 | 2942.321  | 7.67  | 
 | 2 | 8 | 16 | 128 | 12871 | 5839.054  | 15.22  | 
 | 4 | 8 | 32 | 128 | 12871 | 11548.451  | 30.09  | 
-ResNet50 V1.5, batch size per device=128, dtype=float32, without XLA						
 
 ### Group: batch size per device = 160
+ResNet50 V1.5, batch size per device=160, dtype=float32, without XLA						
 | node num | gpus/nodes | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
 | -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
 | 1 | 1 | 1 | 160 | 15509 | 382.324  | 1 | 
@@ -184,5 +185,4 @@ ResNet50 V1.5, batch size per device=128, dtype=float32, without XLA
 | 1 | 8 | 8 | 160 | 15701 | 3016.431  | 7.89  | 
 | 2 | 8 | 16 | 160 | 15817 | 5877.289  | 15.37  | 
 | 4 | 8 | 32 | 160 | 15879 | 11623.889  | 30.40  | 
-ResNet50 V1.5, batch size per device=160, dtype=float32, without XLA						
 
