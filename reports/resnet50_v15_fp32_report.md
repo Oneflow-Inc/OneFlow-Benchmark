@@ -54,7 +54,7 @@ We create two bash scripts alone side with `cnns` folder for this test:
 # local_run.sh
 NUM_NODES=$1
 GPU_NUM_PER_NODE=$2
-BENCH_ROOT_DIR=cnn3
+BENCH_ROOT_DIR=cnns
 
 DATA_ROOT=/path/to/ofrecord
 rm -rf ./log
