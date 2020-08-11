@@ -173,7 +173,16 @@ Normally, the first `throughput` value e.g. `52.257` is discarded because the st
 ## BERT base Pretrain Test Results
 All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_bert_benchmark_logs.tgz)
 ### Group: batch size per device = 32
-![image](imgs/bert_base_bsz32_fp32.png)
+| node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 32 | 6207 | 140.034  | 1 | 
+| 1 | 2 | 2 | 32 | 7081 | 254.304  | 1.82  | 
+| 1 | 4 | 4 | 32 | 7255 | 506.989  | 3.62  | 
+| 1 | 8 | 8 | 32 | 7323 | 1010.446  | 7.22  | 
+| 2 | 8 | 16 | 32 | 7145 | 1571.088  | 11.22  | 
+| 4 | 8 | 32 | 32 | 7185 | 3136.797  | 22.40  | 
+BERT Base Pretrain, batch size per device=32, dtype=float32, without XLA						
+
 ### Group: batch size per device = 64 
 | node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
 | -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
