@@ -48,7 +48,7 @@ OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **
 >
 > 2）同时，我们提供了一个小的迷你示例数据集。直接下载解压至cnn项目的root目录，即可快速开始训练。读者可以在熟悉了流程后，参考数据集制作部分，制作完整的Imagenet2012数据集。
 >
-> 3）使用OFRcord格式的数据集可以提高数据加载效率（但这非必须，参考[数据输入](https://github.com/Oneflow-Inc/oneflow-documentation/docs/basics_topics/data_input.md)，oneflow支持直接加载numpy数据）。
+> 3）使用OFRcord格式的数据集可以提高数据加载效率（但这非必须，参考[数据输入](https://github.com/Oneflow-Inc/oneflow-documentation/blob/master/cn/docs/basics_topics/data_input.md)，oneflow支持直接加载numpy数据）。
 
 
 
@@ -395,7 +395,7 @@ Oneflow支持将训练生成的中间结果以日志文件的形式保存到本�
 
 具体使用方式可参考test_summary.py 文件
 
-具体可视化效果参考之江天枢人工智能开源平台http://tianshu.org.cn/?/course 用户手册可视化部分
+具体可视化效果参考[之江天枢人工智能开源平台](http://tianshu.org.cn/?/course)用户手册可视化部分
 
 
 
@@ -507,7 +507,7 @@ OneFlow和英伟达保持了相同的初始化方式，只是在两个框架中�
 - [ImageNet](http://image-net.org/index) 
 	ImageNet数据集，一般是指2010-2017年间大规模视觉识别竞赛(ILSVRC)的所使用的数据集的统称。ImageNet数据从2010年来稍有变化，常用ImageNet-2012数据集包含1000个类别，其中训练集包含1,281,167张图片，每个类别数据732至1300张不等，验证集包含50,000张图片，平均每个类别50张图片。
 
-完整的ImageNet(2012)制作过程，请参考tools目录下的[README说明](https://github.com/Oneflow-Inc/OneFlow-Benchmark/Classification/cnns/tools/README.md)
+完整的ImageNet(2012)制作过程，请参考tools目录下的[README说明](./tools/README.md)
 
 
 
@@ -530,6 +530,8 @@ OneFlow和英伟达保持了相同的初始化方式，只是在两个框架中�
 <div align="center">
     <img src="data/tiger.jpg" align='center'/>
 </div>
+
+> ​                                             图片来源：https://en.wikipedia.org/wiki/Tiger
 
 输出：
 
