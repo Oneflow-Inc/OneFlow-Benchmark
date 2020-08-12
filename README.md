@@ -1,8 +1,8 @@
 # OneFlow Deep Learning Benchmarks
 
-[![](https://img.shields.io/badge/Docs in-EN-blue.svg)](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_sx_benchmark/README.md)
+[![](https://img.shields.io/badge/Docs_in-EN-blue.svg)](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_sx_benchmark/README.md)
 
-[![](https://img.shields.io/badge/Docs in-CH-purple.svg)](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_sx_benchmark/README_CH.md)
+[![](https://img.shields.io/badge/Docs_in-CH-purple.svg)](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_sx_benchmark/README_CH.md)
 
 This repository provides a collection of example implementations and modeling solutions using the latest OneFlow's high-level APIs, for CV, CTR and NLP models as a benchmark.
 
