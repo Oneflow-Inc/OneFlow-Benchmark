@@ -71,9 +71,10 @@ def TrainNet():
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
-    logits = model_dict[args.model](images,
-                                    need_transpose=False if args.train_data_dir else True,
-                                    )
+
+    logits = model_dict[args.model](images, channel_last=args.channel_last)
+
+
     if args.label_smoothing > 0:
         one_hot_labels = label_smoothing(labels, args.num_classes, args.label_smoothing, logits.dtype)
         loss = flow.nn.softmax_cross_entropy_with_logits(one_hot_labels, logits, name="softmax_loss")
@@ -97,8 +98,7 @@ def InferenceNet():
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](
-        images, need_transpose=False if args.val_data_dir else True)
+    logits = model_dict[args.model](images, channel_last=args.channel_last)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs

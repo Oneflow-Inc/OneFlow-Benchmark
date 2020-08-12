@@ -156,11 +156,8 @@ class MobileNetV2(object):
         else:
             self.config_map=MNETV2_CONFIGS_MAP[(224, 224)]
     
-    def build_network(self, input_data, need_transpose, data_format, class_num=1000, prefix="", **configs):
+    def build_network(self, input_data, data_format, class_num=1000, prefix="", **configs):
         self.config_map.update(configs)
-
-        if need_transpose:
-            input_data = flow.transpose(input_data, name="transpose", perm=[0, 3, 1, 2])
         first_c = int(round(self.config_map['firstconv_filter_num']*self.multiplier))
         first_layer = mobilenet_unit(
             data=input_data,
@@ -233,11 +230,14 @@ class MobileNetV2(object):
         )
         return fc
 
-    def __call__(self, input_data, need_transpose, class_num=1000, prefix = "", **configs):
-        sym = self.build_network(input_data, need_transpose, class_num=class_num, prefix=prefix, **configs)
+    def __call__(self, input_data, class_num=1000, prefix = "", **configs):
+        sym = self.build_network(input_data, class_num=class_num, prefix=prefix, **configs)
         return sym
 
-def Mobilenet(input_data, trainable=True, need_transpose=False, training=True, data_format="NCHW", num_classes=1000, multiplier=1.0, prefix = ""):
+def Mobilenet(input_data, trainable=True, training=True, channel_last=False, num_classes=1000, multiplier=1.0, prefix = ""):
+    data_format = "NCHW"
+    if channel_last:
+        data_format = "NHWC"
     mobilenetgen = MobileNetV2((224,224), multiplier=multiplier)
-    out = mobilenetgen(input_data, need_transpose, data_format=data_format, class_num=num_classes, prefix = "MobilenetV2")
+    out = mobilenetgen(input_data, data_format=data_format, class_num=num_classes, prefix = "MobilenetV2")
     return out

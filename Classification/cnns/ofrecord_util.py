@@ -69,9 +69,11 @@ def load_synthetic(args):
         batch_size=batch_size,
         initializer=flow.zeros_initializer(flow.int32),
     )
-
+    img_shape = (3, args.image_size, args.image_size)
+    if args.channel_last:
+        img_shape = (args.image_size, args.image_size, 3)
     image = flow.data.decode_random(
-        shape=(args.image_size, args.image_size, 3), dtype=flow.float, batch_size=batch_size
+        shape=img_shape, dtype=flow.float, batch_size=batch_size
     )
 
     return label, image
@@ -82,21 +84,25 @@ def load_imagenet_for_training(args):
     train_batch_size = total_device_num * args.batch_size_per_device
 
     color_space = 'RGB'
-    ofrecord = flow.data.ofrecord_reader(args.train_data_dir,
+    
+    (image, label) = flow.data.ofrecord_image_classification_reader(args.train_data_dir,
                                         batch_size=train_batch_size,
                                         data_part_num=args.train_data_part_num,
                                         part_name_suffix_length=5,
+                                        image_feature_name="encoded",
+                                        label_feature_name="class/label",
+                                        color_space = color_space,
                                         random_shuffle=True,
                                         shuffle_after_epoch=True)
-    image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded",  # seed=seed,
-                                                    color_space=color_space)
-    label = flow.data.OFRecordRawDecoder(
-        ofrecord, "class/label", shape=(), dtype=flow.int32)
+
     rsz = flow.image.Resize(image, resize_x=args.image_size, resize_y=args.image_size,
                             color_space=color_space)
 
     rng = flow.random.CoinFlip(batch_size=train_batch_size)  # , seed=seed)
-    normal = flow.image.CropMirrorNormalize(rsz, mirror_blob=rng, color_space=color_space,
+    output_layout = "NCHW"
+    if args.channel_last:
+        output_layout = "NHWC"
+    normal = flow.image.CropMirrorNormalize(rsz, mirror_blob=rng, color_space=color_space, output_layout=output_layout,
                                             mean=args.rgb_mean, std=args.rgb_std, output_dtype=flow.float)
     return label, normal
 
@@ -106,19 +112,22 @@ def load_imagenet_for_validation(args):
     val_batch_size = total_device_num * args.val_batch_size_per_device
 
     color_space = 'RGB'
-    ofrecord = flow.data.ofrecord_reader(args.val_data_dir,
-                                            batch_size=val_batch_size,
-                                            data_part_num=args.val_data_part_num,
-                                            part_name_suffix_length=5,
-                                            shuffle_after_epoch=False)
-    image = flow.data.OFRecordImageDecoder(
-        ofrecord, "encoded", color_space=color_space)
-    label = flow.data.OFRecordRawDecoder(
-        ofrecord, "class/label", shape=(), dtype=flow.int32)
+    (image, label) = flow.data.ofrecord_image_classification_reader(args.val_data_dir,
+                                        batch_size=val_batch_size,
+                                        data_part_num=args.val_data_part_num,
+                                        part_name_suffix_length=5,
+                                        image_feature_name="encoded",
+                                        label_feature_name="class/label",
+                                        color_space = color_space,
+                                        shuffle_after_epoch=False)
+
     rsz = flow.image.Resize(
         image, resize_shorter=args.resize_shorter, color_space=color_space)
-
-    normal = flow.image.CropMirrorNormalize(rsz, color_space=color_space,
+        
+    output_layout = "NCHW"
+    if args.channel_last:
+        output_layout = "NHWC"
+    normal = flow.image.CropMirrorNormalize(rsz, color_space=color_space, output_layout=output_layout,
                                             crop_h=args.image_size, crop_w=args.image_size, crop_pos_y=0.5, crop_pos_x=0.5,
                                             mean=args.rgb_mean, std=args.rgb_std, output_dtype=flow.float)
     return label, normal

@@ -100,12 +100,8 @@ def _conv_block(in_blob, index, filters, conv_times):
 
     return conv_block
 
-def vgg16bn(images, trainable=True, need_transpose=False, channel_last=False, training=True, wd=1.0/32768):
-    if need_transpose:
-        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
-    if channel_last:
-        # if channel_last=True, then change mode from 'nchw'to 'nhwc'
-        images = flow.transpose(images, name="transpose", perm=[0,2,3,1])
+def vgg16bn(images, trainable=True, channel_last=False, training=True, wd=1.0/32768):
+
     conv1 = _conv_block(images, 0, 64, 2)
     pool1 = flow.nn.max_pool2d(conv1[-1], 2, 2, "VALID", "NCHW", name="pool1")
     

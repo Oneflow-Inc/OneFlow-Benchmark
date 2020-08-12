@@ -491,12 +491,7 @@ def InceptionE(in_blob, index):
     return concat_total
 
 
-def inceptionv3(images, trainable=True, need_transpose=False, channel_last=False):
-    if need_transpose:
-        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
-    if channel_last:
-    # if channel_last=True, then change mode from 'nchw' to 'nhwc'
-        images = flow.transpose(images, name="transpose", perm=[0, 2, 3, 1])
+def inceptionv3(images, trainable=True, channel_last=False):
     with flow.scope.namespace("InceptionV3"):
         # conv0: 299 x 299 x 3
         conv0 = conv2d_layer_with_bn(
