@@ -1,6 +1,6 @@
 # OneFlow Deep Learning Benchmarks
 
-[![](https://img.shields.io/badge/Docs in-EN-blue.svg)](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_sx_benchmark/README_EN.md)
+[![](https://img.shields.io/badge/Docs in-EN-blue.svg)](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_sx_benchmark/README.md)
 
 [![](https://img.shields.io/badge/Docs in-CH-purple.svg)](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/dev_sx_benchmark/README_CH.md)
 
