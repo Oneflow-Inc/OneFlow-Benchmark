@@ -4,7 +4,7 @@
 
 This repository provides a collection of example implementations and modeling solutions using the latest OneFlow's high-level APIs, for CV, CTR and NLP models as a benchmark.
 
-It aims to demonstrate the best practices for modeling so that OneFLow users can take full advantage of OneFlow for their research and product development.
+It aims to demonstrate the best practices for modeling so that OneFlow users can take full advantage of OneFlow for their research and product development.
 
  More models are coming!
 
