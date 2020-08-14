@@ -1,5 +1,5 @@
 # OneFlow ResNet50-V1.5 Benchmark Test Report
-This document reports OneFlow ResNet50-V1.5 benchmark test results on Aug 8 2020. 
+This document reports OneFlow ResNet50-V1.5 benchmark test results on Aug 13 2020. 
 
 ## Test Environment
 All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and following is the main hardware and software configurations for each:  
@@ -9,7 +9,7 @@ All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and follo
 - Memory 384G
 - Ubuntu 16.04.4 LTS (GNU/Linux 4.4.0-116-generic x86_64)
 - CUDA Version: 10.2, Driver Version: 440.33.01
-- OneFlow: v0.1.8, fix_infer_out_logical_blob_desc@17a2bdc9b
+- OneFlow: v0.1.8, master@4d44113e2 with NCCL 2.4.8
 - OneFlow-Benchmark: master@892f87e6
 - `nvidia-smi topo -m`
 ```
@@ -163,7 +163,7 @@ train: epoch 0, iter 200, loss: 1.047857, top_1: 1.000000, top_k: 1.000000, samp
 ```
 Normally, the first `samples/s` value e.g. `288.088` is discarded because the start time of first batch is not correct. we average the other `samples/s` as the throughput of this test.
 ## Test Results
-All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_resnet50_logs.tgz)
+All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/of_leinao_benchmark_log_0813.tar.gz)
 ### Group: batch size per device = 128
 ResNet50 V1.5, batch size per device=128, dtype=float32, without XLA						
 | node num | device num | bsz per device | throughput | speedup | memory(MiB) | 

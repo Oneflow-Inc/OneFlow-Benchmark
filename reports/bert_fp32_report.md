@@ -9,7 +9,7 @@ All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and follo
 - Memory 384G
 - Ubuntu 16.04.4 LTS (GNU/Linux 4.4.0-116-generic x86_64)
 - CUDA Version: 10.2, Driver Version: 440.33.01
-- OneFlow: v0.1.8, fix_infer_out_logical_blob_desc@17a2bdc9b
+- OneFlow: v0.1.8, master@4d44113e2 with NCCL 2.4.8
 - OneFlow-Benchmark: master@892f87e6
 - `nvidia-smi topo -m`
 ```
@@ -171,7 +171,7 @@ step: 199, total_loss: 9.640, mlm_loss: 8.960, nsp_loss: 0.680, throughput: 142.
 ```
 Normally, the first `throughput` value e.g. `52.257` is discarded because the start time of first batch is not correct. we average the other `throughput` as the throughput of this test.
 ## BERT base Pretrain Test Results
-All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_bert_benchmark_logs.tgz)
+All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/of_leinao_benchmark_log_0813.tar.gz)
 ### Group: batch size per device = 32
 BERT Base Pretrain, batch size per device=32, dtype=float32, without XLA						
 | node num | device num | bsz per device | throughput | speedup | memory(MiB) | 
