@@ -30,6 +30,7 @@ def _default_config(args):
 def get_train_config(args):
     train_config = _default_config(args)
     train_config.train.primary_lr(args.learning_rate)
+    train_config.cudnn_conv_heuristic_search_algo(False)
 
 
     train_config.prune_parallel_cast_ops(True)
