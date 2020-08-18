@@ -13,9 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 import time
@@ -30,7 +27,7 @@ def InitNodes(args):
         assert args.num_nodes <= len(args.node_ips)
         flow.env.ctrl_port(12138)
         nodes = []
-        for ip in args.node_ips:
+        for ip in args.node_ips[:args.num_nodes]:
             addr_dict = {}
             addr_dict["addr"] = ip
             nodes.append(addr_dict)

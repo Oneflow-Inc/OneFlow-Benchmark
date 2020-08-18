@@ -13,9 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 import argparse
@@ -25,7 +22,7 @@ import config as configs
 import oneflow as flow
 
 from pretrain import PreTrain
-from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer
+from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
 
 parser = configs.get_parser()
 parser.add_argument("--data_dir", type=str, default=None)
@@ -57,14 +54,19 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
     _blob_conf("masked_lm_weights", [max_predictions_per_seq], flow.float)
     return blob_confs
 
-
-@flow.global_function(type='train')
+@flow.global_function(type='train', function_config=GetFunctionConfig(args))
 def PretrainJob():
     hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
     intermediate_size = hidden_size * 4
 
-    decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
-                           args.max_predictions_per_seq)
+    if args.data_part_num == 1:
+        with flow.scope.placement("cpu", "0:0"):
+            decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
+                                   args.max_predictions_per_seq)
+    else:
+        assert args.data_part_num > 1
+        decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
+                               args.max_predictions_per_seq)
 
     total_loss, mlm_loss, nsp_loss = PreTrain(
         decoders["input_ids"],

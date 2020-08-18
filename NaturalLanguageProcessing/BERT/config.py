@@ -13,9 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import argparse
 from datetime import datetime
@@ -56,7 +53,8 @@ def get_parser(parser=None):
     parser.add_argument("--learning_rate", type=float, default=1e-4, help="Learning rate")
     parser.add_argument("--weight_decay_rate", type=float, default=0.01, help="weight decay rate")
     parser.add_argument("--warmup_proportion", type=float, default=0.1)
-    parser.add_argument('--use_fp16', type=str2bool, nargs='?', const=True, help='use use fp16 or not')
+    parser.add_argument('--use_fp16', type=str2bool, nargs='?', default='False', const=True, 
+                        help='use use fp16 or not')
     
     # log and resore/save
     parser.add_argument("--loss_print_every_n_iter", type=int, default=10, required=False,
