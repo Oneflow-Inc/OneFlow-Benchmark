@@ -1,5 +1,5 @@
 # OneFlow ResNet50-V1.5 Benchmark Test Report
-This document reports OneFlow ResNet50-V1.5 benchmark test results on Aug 13 2020. 
+This document reports OneFlow ResNet50-V1.5 benchmark test results on Aug 8 2020. 
 
 ## Test Environment
 All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and following is the main hardware and software configurations for each:  
@@ -9,7 +9,7 @@ All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and follo
 - Memory 384G
 - Ubuntu 16.04.4 LTS (GNU/Linux 4.4.0-116-generic x86_64)
 - CUDA Version: 10.2, Driver Version: 440.33.01
-- OneFlow: v0.1.8, master@4d44113e2 with NCCL 2.4.8
+- OneFlow: v0.1.8, fix_infer_out_logical_blob_desc@17a2bdc9b
 - OneFlow-Benchmark: master@892f87e6
 - `nvidia-smi topo -m`
 ```
@@ -163,26 +163,26 @@ train: epoch 0, iter 200, loss: 1.047857, top_1: 1.000000, top_k: 1.000000, samp
 ```
 Normally, the first `samples/s` value e.g. `288.088` is discarded because the start time of first batch is not correct. we average the other `samples/s` as the throughput of this test.
 ## Test Results
-All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/of_leinao_benchmark_log_0813.tar.gz)
+All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_resnet50_logs.tgz)
 ### Group: batch size per device = 128
 ResNet50 V1.5, batch size per device=128, dtype=float32, without XLA						
-| node num | device num | bsz per device | throughput | speedup | memory(MiB) | 
-| -------- | -------- | -------- | -------- | -------- | -------- | 
-| 1 | 1 | 128 | 405.53  | 1.00  | 12553 | 
-| 1 | 2 | 128 | 795.19  | 1.96  | 12993 | 
-| 1 | 4 | 128 | 1589.44  | 3.92  | 12941 | 
-| 1 | 8 | 128 | 3160.44  | 7.79  | 12943 | 
-| 2 | 16 | 128 | 6273.50  | 15.47  | 13617 | 
-| 4 | 32 | 128 | 12230.47  | 30.16  | 13643 | 
+| node num | gpus/nodes | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 128 | 12565 | 383.760  | 1 | 
+| 1 | 2 | 2 | 128 | 12839 | 747.295  | 1.95  | 
+| 1 | 4 | 4 | 128 | 12987 | 1497.618  | 3.90  | 
+| 1 | 8 | 8 | 128 | 13051 | 2942.321  | 7.67  | 
+| 2 | 8 | 16 | 128 | 12871 | 5839.054  | 15.22  | 
+| 4 | 8 | 32 | 128 | 12871 | 11548.451  | 30.09  | 
 
 ### Group: batch size per device = 160
 ResNet50 V1.5, batch size per device=160, dtype=float32, without XLA						
-| node num | device num | bsz per device | throughput | speedup | memory(MiB) | 
-| -------- | -------- | -------- | -------- | -------- | -------- | 
-| 1 | 1 | 160 | 405.46  | 1.00  | 15583 | 
-| 1 | 2 | 160 | 797.04  | 1.97  | 15765 | 
-| 1 | 4 | 160 | 1593.81  | 3.93  | 15837 | 
-| 1 | 8 | 160 | 3177.84  | 7.84  | 15889 | 
-| 2 | 16 | 160 | 6282.58  | 15.49  | 15963 | 
-| 4 | 32 | 160 | 12370.62  | 30.51  | 15965 | 
+| node num | gpus/nodes | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 160 | 15509 | 382.324  | 1 | 
+| 1 | 2 | 2 | 160 | 15785 | 755.956  | 1.98  | 
+| 1 | 4 | 4 | 160 | 15881 | 1494.733  | 3.91  | 
+| 1 | 8 | 8 | 160 | 15701 | 3016.431  | 7.89  | 
+| 2 | 8 | 16 | 160 | 15817 | 5877.289  | 15.37  | 
+| 4 | 8 | 32 | 160 | 15879 | 11623.889  | 30.40  | 
 

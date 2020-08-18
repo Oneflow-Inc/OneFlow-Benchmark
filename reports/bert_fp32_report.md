@@ -1,5 +1,5 @@
 # OneFlow BERT Pretrain Benchmark Test Report
-This document reports OneFlow BERT Pretrain benchmark test results on Aug 13 2020. 
+This document reports OneFlow BERT Pretrain benchmark test results on Aug 9 2020. 
 
 ## Test Environment
 All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and following is the main hardware and software configurations for each:  
@@ -9,7 +9,7 @@ All tests were performed on 4 GPU Servers with 8x Tesla V100-SXM2-16GB and follo
 - Memory 384G
 - Ubuntu 16.04.4 LTS (GNU/Linux 4.4.0-116-generic x86_64)
 - CUDA Version: 10.2, Driver Version: 440.33.01
-- OneFlow: v0.1.8, master@4d44113e2 with NCCL 2.4.8
+- OneFlow: v0.1.8, fix_infer_out_logical_blob_desc@17a2bdc9b
 - OneFlow-Benchmark: master@892f87e6
 - `nvidia-smi topo -m`
 ```
@@ -171,40 +171,39 @@ step: 199, total_loss: 9.640, mlm_loss: 8.960, nsp_loss: 0.680, throughput: 142.
 ```
 Normally, the first `throughput` value e.g. `52.257` is discarded because the start time of first batch is not correct. we average the other `throughput` as the throughput of this test.
 ## BERT base Pretrain Test Results
-All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/of_leinao_benchmark_log_0813.tar.gz)
+All test logs can be found [here](https://oneflow-public.oss-cn-beijing.aliyuncs.com/OF_benchmark_logs/oneflow_bert_benchmark_logs.tgz)
 ### Group: batch size per device = 32
 BERT Base Pretrain, batch size per device=32, dtype=float32, without XLA						
-| node num | device num | bsz per device | throughput | speedup | memory(MiB) | 
-| -------- | -------- | -------- | -------- | -------- | -------- | 
-| 1 | 1 | 32 | 137.17  | 1.00  | 6205 | 
-| 1 | 2 | 32 | 250.41  | 1.83  | 7071 | 
-| 1 | 4 | 32 | 502.70  | 3.66  | 7139 | 
-| 1 | 8 | 32 | 990.87  | 7.22  | 7215 | 
-| 2 | 16 | 32 | 1573.31  | 11.47  | 7135 | 
-| 4 | 32 | 32 | 3081.96  | 22.47  | 7149 | 
+| node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 32 | 6207 | 140.034  | 1 | 
+| 1 | 2 | 2 | 32 | 7081 | 254.304  | 1.82  | 
+| 1 | 4 | 4 | 32 | 7255 | 506.989  | 3.62  | 
+| 1 | 8 | 8 | 32 | 7323 | 1010.446  | 7.22  | 
+| 2 | 8 | 16 | 32 | 7145 | 1571.088  | 11.22  | 
+| 4 | 8 | 32 | 32 | 7185 | 3136.797  | 22.40  | 
 
 ### Group: batch size per device = 64 
 BERT Base Pretrain, batch size per device=64, dtype=float32, without XLA						
-| node num | device num | bsz per device | throughput | speedup | memory(MiB) | 
-| -------- | -------- | -------- | -------- | -------- | -------- | 
-| 1 | 1 | 64 | 145.55  | 1.00  | 9987 | 
-| 1 | 2 | 64 | 277.03  | 1.90  | 10847 | 
-| 1 | 4 | 64 | 551.78  | 3.79  | 10923 | 
-| 1 | 8 | 64 | 1105.13  | 7.59  | 11057 | 
-| 2 | 16 | 64 | 2016.09  | 13.85  | 10937 | 
-| 4 | 32 | 64 | 3911.90  | 26.88  | 10963 | 
-
+| node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 64 | 9989 | 145.148  | 1 | 
+| 1 | 2 | 2 | 64 | 10947 | 277.880  | 1.91  | 
+| 1 | 4 | 4 | 64 | 10955 | 552.843  | 3.81  | 
+| 1 | 8 | 8 | 64 | 11029 | 1103.102  | 7.60  | 
+| 2 | 8 | 16 | 64 | 10957 | 2023.743  | 13.94  | 
+| 4 | 8 | 32 | 64 | 10981 | 3947.739  | 27.20  | 
 
 ### Group: batch size per device = 96 
 BERT Base Pretrain, batch size per device=96, dtype=float32, without XLA						
-| node num | device num | bsz per device | throughput | speedup | memory(MiB) | 
-| -------- | -------- | -------- | -------- | -------- | -------- | 
-| 1 | 1 | 96 | 148.34  | 1.00  | 13769 | 
-| 1 | 2 | 96 | 286.24  | 1.93  | 14735 | 
-| 1 | 4 | 96 | 573.85  | 3.87  | 14809 | 
-| 1 | 8 | 96 | 1147.47  | 7.74  | 14893 | 
-| 2 | 16 | 96 | 2169.65  | 14.63  | 14763 | 
-| 4 | 32 | 96 | 4238.85  | 28.58  | 14795 | 
+| node num | gpu num/node | gpu num | bsz/gpu | GPU Memory Usage | Throughput | Speedup | 
+| -------- | -------- | -------- | -------- | -------- | -------- | -------- | 
+| 1 | 1 | 1 | 96 | 13771 | 145.095  | 1 | 
+| 1 | 2 | 2 | 96 | 14757 | 282.984  | 1.95  | 
+| 1 | 4 | 4 | 96 | 14851 | 559.011  | 3.85  | 
+| 1 | 8 | 8 | 96 | 14815 | 1121.632  | 7.73  | 
+| 2 | 8 | 16 | 96 | 14815 | 2132.490  | 14.70  | 
+| 4 | 8 | 32 | 96 | 14687 | 4140.439  | 28.54  | 
 
 ## BERT Large Pretrain Test Results
 BERT large was tested on the same situtation. Some arguments in `local_run.sh` need to be modified to meet to BERT large pretrain configuration. 
