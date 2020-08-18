@@ -53,7 +53,7 @@ def get_parser(parser=None):
     parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
                         help='nodes ip list for training, devided by ",", length >= num_nodes')
 
-    parser.add_argument("--model", type=str, default="resnet50",
+    parser.add_argument("--model", type=str, default="resnext50",
                         help="resnet50")
     parser.add_argument(
         '--use_fp16',
