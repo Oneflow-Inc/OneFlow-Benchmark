@@ -18,7 +18,6 @@ python3 of_cnn_train_val.py \
 
 
 
-
 # # training with imagenet
 # DATA_ROOT=/datasets/ImageNet/ofrecord
 # LOG_FOLDER=../logs
@@ -40,4 +39,5 @@ python3 of_cnn_train_val.py \
 #     --num_epoch=90 \
 #     --model="resnet50" 2>&1 | tee ${LOGFILE}
 
-# echo "Writting log to ${LOGFILE}"
+# echo "Writting log to ${LOGFILE}" 
+
