@@ -15,7 +15,7 @@ python3 of_cnn_train_val.py \
     --val_batch_size_per_device=16 \
     --num_epoch=10 \
     --model="resnet50" 
-
+    
 
 
 # # training with imagenet
