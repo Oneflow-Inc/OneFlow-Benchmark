@@ -156,7 +156,7 @@ class Metric(object):
                     value = self.metric_dict[key] / self.num_samples
                     self.update_and_save(key, value, step, **kwargs)
                 print(', '.join(('{}: {}' if type(v) is int else '{}: {:.3f}').format(k, v) \
-                                for k, v in self.metric_dict.items()))
+                                for k, v in self.metric_dict.items()), time.time())
                 self._clear()
 
         return callback
