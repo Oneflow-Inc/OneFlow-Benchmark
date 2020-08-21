@@ -125,7 +125,7 @@ def main():
                             save_summary_steps=num_val_steps, batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
-        # snapshot.save('epoch_{}'.format(epoch))
+        snapshot.save('epoch_{}'.format(epoch))
 
 
 if __name__ == "__main__":
