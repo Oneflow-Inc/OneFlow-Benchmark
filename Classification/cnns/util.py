@@ -157,12 +157,12 @@ class Metric(object):
                 if self.loss_key:
                     loss = outputs[self.loss_key].mean()
                     print(self.fmt.format(self.desc, epoch, step + 1, loss, top_1_accuracy,
-                                          top_k_accuracy, throughput))
+                                          top_k_accuracy, throughput), time.time())
                     if self.save_summary:
                         self.summary.scalar(self.desc+"_" + self.loss_key, loss, epoch, step)
                 else:
                     print(self.fmt.format(self.desc, epoch, step + 1, top_1_accuracy,
-                                          top_k_accuracy, throughput))
+                                          top_k_accuracy, throughput), time.time())
 
                 self._clear()
                 if self.save_summary:
