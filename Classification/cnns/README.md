@@ -82,7 +82,8 @@ sh inference.sh
 <div align="center">
     <img src="data/fish.jpg" align='center'/>
 </div>
- **输出：**  
+
+ **输出**  
 
 ```shell
 data/fish.jpg
