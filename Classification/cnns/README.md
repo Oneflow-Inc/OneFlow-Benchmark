@@ -82,7 +82,7 @@ sh inference.sh
 <div align="center">
     <img src="data/fish.jpg" align='center'/>
 </div>
- **输出：** 
+ **输出：**  
 
 ```shell
 data/fish.jpg
@@ -546,7 +546,7 @@ Class: tiger, Panthera tigris; score: 0.8112028241157532
 
 #### 如何生成 ONNX 模型
 
-**步骤一：指定模型路径 ** 
+**步骤一：指定模型路径**  
 
 首先指定待转换的OneFlow模型路径，然后指定转换后的ONNX模型存放路径，例如示例中：
 
