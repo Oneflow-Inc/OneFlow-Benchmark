@@ -92,11 +92,10 @@ def load_imagenet_for_training(args):
                                                     color_space=color_space)
     label = flow.data.OFRecordRawDecoder(
         ofrecord, "class/label", shape=(), dtype=flow.int32)
-    rsz = flow.image.Resize(image, resize_x=args.image_size, resize_y=args.image_size,
-                            color_space=color_space)
 
+    rsz = flow.image.Resize(image, target_size=[args.image_size, args.image_size]) 
     rng = flow.random.CoinFlip(batch_size=train_batch_size)  # , seed=seed)
-    normal = flow.image.CropMirrorNormalize(rsz, mirror_blob=rng, color_space=color_space,
+    normal = flow.image.CropMirrorNormalize(rsz[0], mirror_blob=rng, color_space=color_space,
                                             mean=args.rgb_mean, std=args.rgb_std, output_dtype=flow.float)
     return label, normal
 
@@ -115,10 +114,13 @@ def load_imagenet_for_validation(args):
         ofrecord, "encoded", color_space=color_space)
     label = flow.data.OFRecordRawDecoder(
         ofrecord, "class/label", shape=(), dtype=flow.int32)
-    rsz = flow.image.Resize(
-        image, resize_shorter=args.resize_shorter, color_space=color_space)
 
-    normal = flow.image.CropMirrorNormalize(rsz, color_space=color_space,
+    rsz = flow.image.Resize(
+        image, resize_side="shorter",
+        keep_aspect_ratio=True,
+        target_size=args.resize_shorter)
+
+    normal = flow.image.CropMirrorNormalize(rsz[0], color_space=color_space,
                                             crop_h=args.image_size, crop_w=args.image_size, crop_pos_y=0.5, crop_pos_x=0.5,
                                             mean=args.rgb_mean, std=args.rgb_std, output_dtype=flow.float)
     return label, normal
