@@ -103,15 +103,23 @@ def TrainNet():
     else:
         loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
 
-    loss = flow.math.reduce_mean(loss)
+    loss = flow.math.reduce_mean(loss)    
     flow.losses.add_loss(loss)
     predictions = flow.nn.softmax(logits)
     outputs = {"loss": loss, "predictions": predictions, "labels": labels}
 
     # set up warmup,learning rate and optimizer
+    set_up_optimizer(loss, args)
+    return outputs
+
+
+def set_up_optimizer(loss, args):
+    # set up warmup,learning rate and optimizer
+    print("set_up_optimizer >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n args.gradient_clipping, args.warmup_epochs, args.learning_rate", 
+        args.gradient_clipping,  args.warmup_epochs, args.learning_rate)
+        
     batches_per_epoch = math.ceil(args.num_examples / train_batch_size)
     warmup_batches = batches_per_epoch * args.warmup_epochs
-    gradient_clip = flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping)
     lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
         base_lr=args.learning_rate, 
         boundaries=[30, 60, 80], 
@@ -120,9 +128,9 @@ def TrainNet():
         )
     flow.optimizer.SGD(lr_scheduler,
       momentum=args.mom,
-      grad_clipping=gradient_clip
-    ).minimize(loss),
-    return outputs
+      grad_clipping= flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) 
+          if args.gradient_clipping>0.0  else None
+    ).minimize(loss)
 
 
 @flow.global_function("predict", get_val_config(args))
