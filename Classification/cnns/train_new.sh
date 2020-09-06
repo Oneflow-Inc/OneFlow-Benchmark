@@ -53,13 +53,15 @@ python3 of_cnn_train_val_new.py \
      --val_data_part_num=256 \
      --num_nodes=1 \
      --gpu_num_per_node=8 \
-     --model_update="momentum" \
+     --optimizer="sgd" \
+     --momentum=0.875 \
      --learning_rate=0.768 \
+     --wd=1.0/32768 \
      --loss_print_every_n_iter=100 \
      --batch_size_per_device=96 \
      --val_batch_size_per_device=50 \
      --num_epoch=90 \
      --model="resnet50" 2>&1 | tee ${LOGFILE}
 
-# echo "Writting log to ${LOGFILE}" 
+echo "Writting log to ${LOGFILE}" 
 

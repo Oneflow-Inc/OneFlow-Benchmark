@@ -20,7 +20,7 @@ import pprint
 def add_optimizer_args(parser):
     group = parser.add_argument_group('optimizer parameters',
                                       'entire group applies only to optimizer parameters') 
-    group.add_argument("--model_update", type=str, default="sgd", help="sgd, adam, rmsprop")
+    group.add_argument("--optimizer", type=str, default="sgd", help="sgd, adam, rmsprop")
     group.add_argument("--learning_rate", type=float, default=0.256)
     group.add_argument("--wd", type=float, default=1.0/32768, help="weight decay")
     group.add_argument("--momentum", type=float, default=0.875, help="momentum")
@@ -35,15 +35,11 @@ def add_optimizer_args(parser):
     return parser
 
 def set_up_optimizer(loss, args):
-    print("set_up_optimizer >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n args.gradient_clipping, args.warmup_epochs, args.learning_rate", 
-        args.gradient_clipping,  args.warmup_epochs, args.learning_rate)
-        
     batches_per_epoch = math.ceil(args.num_examples / train_batch_size)
     warmup_batches = batches_per_epoch * args.warmup_epochs
     num_train_batches = batches_per_epoch * args.num_epochs
     decay_batches = num_train_batches - warmup_batches
     exponential_decay_batches = batches_per_epoch * args.lr_decay_epochs
-    print("warmup_batches, decay_batches >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>. ", warmup_batches, decay_batches)
 
     # set up warmup strategy
     warmup = flow.optimizer.warmup.linear(warmup_batches, 0) 
