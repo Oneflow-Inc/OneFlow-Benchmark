@@ -17,9 +17,10 @@ import os
 import math
 import oneflow as flow
 import ofrecord_util
+import optimizer_util_new
 import config as configs
 from util import Snapshot, Summary, InitNodes, Metric
-
+from job_function_util_new import get_train_config, get_val_config
 import resnet_model
 import resnext_model
 import vgg_model
@@ -53,33 +54,9 @@ flow.config.gpu_device_num(args.gpu_num_per_node)
 #flow.config.enable_debug_mode(True)
 
 
-def _default_config(args):
-    config = flow.function_config()
-    config.default_logical_view(flow.scope.consistent_view())
-    config.default_data_type(flow.float)
-    if args.use_fp16:
-        config.enable_auto_mixed_precision(True)
-    return config
-
-
-def get_train_config(args):
-    train_config = _default_config(args)
-    train_config.cudnn_conv_heuristic_search_algo(False)
-
-
-    train_config.prune_parallel_cast_ops(True)
-    train_config.enable_inplace(True)
-    return train_config
-
-
-def get_val_config(args):
-    return _default_config(args)
-
-
 def label_smoothing(labels, classes, eta, dtype):
     assert classes > 0
     assert eta >= 0.0 and eta < 1.0
-
     return flow.one_hot(labels, depth=classes, dtype=dtype,
                         on_value=1 - eta + eta / classes, off_value=eta/classes)
 
@@ -109,28 +86,8 @@ def TrainNet():
     outputs = {"loss": loss, "predictions": predictions, "labels": labels}
 
     # set up warmup,learning rate and optimizer
-    set_up_optimizer(loss, args)
+    optimizer_util_new.set_up_optimizer(loss, args)
     return outputs
-
-
-def set_up_optimizer(loss, args):
-    # set up warmup,learning rate and optimizer
-    print("set_up_optimizer >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n args.gradient_clipping, args.warmup_epochs, args.learning_rate", 
-        args.gradient_clipping,  args.warmup_epochs, args.learning_rate)
-        
-    batches_per_epoch = math.ceil(args.num_examples / train_batch_size)
-    warmup_batches = batches_per_epoch * args.warmup_epochs
-    lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
-        base_lr=args.learning_rate, 
-        boundaries=[30, 60, 80], 
-        scale=[0.1, 0.01, 0.001], 
-        warmup=flow.optimizer.warmup.linear(warmup_batches, 0)
-        )
-    flow.optimizer.SGD(lr_scheduler,
-      momentum=args.mom,
-      grad_clipping= flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) 
-          if args.gradient_clipping>0.0  else None
-    ).minimize(loss)
 
 
 @flow.global_function("predict", get_val_config(args))
