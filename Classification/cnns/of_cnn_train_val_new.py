@@ -18,7 +18,7 @@ import math
 import oneflow as flow
 import ofrecord_util
 import optimizer_util_new
-import config as configs
+import config_new as configs
 from util import Snapshot, Summary, InitNodes, Metric
 from job_function_util_new import get_train_config, get_val_config
 import resnet_model

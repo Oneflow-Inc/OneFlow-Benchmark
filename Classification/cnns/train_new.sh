@@ -41,7 +41,8 @@ rm -rf ./output/snapshots/*
 
 
 # training with imagenet
- DATA_ROOT=/DATA/disk1/ImageNet/ofrecord
+ #DATA_ROOT=/DATA/disk1/ImageNet/ofrecord
+ DATA_ROOT=/datasets/ImageNet/ofrecord
  LOG_FOLDER=../logs
  mkdir -p $LOG_FOLDER
  LOGFILE=$LOG_FOLDER/resnet_training.log
@@ -55,11 +56,10 @@ python3 of_cnn_train_val_new.py \
      --gpu_num_per_node=8 \
      --optimizer="sgd" \
      --momentum=0.875 \
-     --learning_rate=0.768 \
-     --wd=1.0/32768 \
+     --learning_rate=1.024 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=96 \
-     --val_batch_size_per_device=50 \
+     --batch_size_per_device=128 \
+     --val_batch_size_per_device=100 \
      --num_epoch=90 \
      --model="resnet50" 2>&1 | tee ${LOGFILE}
 

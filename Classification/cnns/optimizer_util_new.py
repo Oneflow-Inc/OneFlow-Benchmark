@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+import oneflow as flow
 import math
 import pprint
 
@@ -35,6 +35,8 @@ def add_optimizer_args(parser):
     return parser
 
 def set_up_optimizer(loss, args):
+    total_device_num = args.num_nodes * args.gpu_num_per_node
+    train_batch_size = total_device_num * args.batch_size_per_device
     batches_per_epoch = math.ceil(args.num_examples / train_batch_size)
     warmup_batches = batches_per_epoch * args.warmup_epochs
     num_train_batches = batches_per_epoch * args.num_epochs
@@ -44,8 +46,8 @@ def set_up_optimizer(loss, args):
     # set up warmup strategy
     warmup = flow.optimizer.warmup.linear(warmup_batches, 0) if warmup_batches > 0 else None
    
-   # set up grad_clipping
-   grad_clipping = flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) if args.gradient_clipping>0.0  else None
+    # set up grad_clipping
+    grad_clipping = flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) if  args.gradient_clipping > 0.0  else None
 
    # set up learning rate scheduler
     if args.lr_decay == 'cosine':
@@ -101,7 +103,7 @@ def set_up_optimizer(loss, args):
                 grad_clipping=grad_clipping,
                 epsilon=args.epsilon
             ).minimize(loss)
-    elif args.optimizer='rmsprop':
+    elif args.optimizer=='rmsprop':
         flow.optimizer.RMSProp(lr_scheduler=lr_scheduler,
             decay_rate=args.decay_rate,
             epsilon=args.epsilon
