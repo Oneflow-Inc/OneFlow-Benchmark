@@ -42,12 +42,10 @@ def set_up_optimizer(loss, args):
     exponential_decay_batches = batches_per_epoch * args.lr_decay_epochs
 
     # set up warmup strategy
-    warmup = flow.optimizer.warmup.linear(warmup_batches, 0) 
-        if warmup_batches > 0 else None
+    warmup = flow.optimizer.warmup.linear(warmup_batches, 0) if warmup_batches > 0 else None
    
    # set up grad_clipping
-   grad_clipping = flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) 
-       if args.gradient_clipping>0.0  else None
+   grad_clipping = flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) if args.gradient_clipping>0.0  else None
 
    # set up learning rate scheduler
     if args.lr_decay == 'cosine':
