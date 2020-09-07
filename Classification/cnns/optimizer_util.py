@@ -114,4 +114,6 @@ if __name__ == '__main__':
     import config as configs
     parser = configs.get_parser()
     args = parser.parse_args()
-    configs.print_args(args)
+    configs.print_args(args) 
+
+    
