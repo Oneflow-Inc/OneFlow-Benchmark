@@ -17,7 +17,7 @@ import os
 import math
 import oneflow as flow
 import ofrecord_util
-import optimizer_util_new
+import optimizer_util
 import config as configs
 from util import Snapshot, Summary, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
@@ -86,7 +86,7 @@ def TrainNet():
     outputs = {"loss": loss, "predictions": predictions, "labels": labels}
 
     # set up warmup,learning rate and optimizer
-    optimizer_util_new.set_up_optimizer(loss, args)
+    optimizer_util.set_up_optimizer(loss, args)
     return outputs
 
 
