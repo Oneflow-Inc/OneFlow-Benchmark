@@ -13,99 +13,101 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+import oneflow as flow
 import math
 import pprint
 
 def add_optimizer_args(parser):
     group = parser.add_argument_group('optimizer parameters',
                                       'entire group applies only to optimizer parameters') 
-    group.add_argument("--model_update", type=str, default="sgd", help="sgd, adam, momentum, rmsprop")
+    group.add_argument("--optimizer", type=str, default="sgd", help="sgd, adam, rmsprop")
     group.add_argument("--learning_rate", type=float, default=0.256)
     group.add_argument("--wd", type=float, default=1.0/32768, help="weight decay")
-    group.add_argument("--mom", type=float, default=0.875, help="momentum")
+    group.add_argument("--momentum", type=float, default=0.875, help="momentum")
     group.add_argument('--lr_decay', type=str, default='cosine', help='cosine, step, polynomial, exponential, None')
     group.add_argument('--lr_decay_rate', type=float, default='0.94', help='exponential learning decay rate')
     group.add_argument('--lr_decay_epochs', type=int, default=2, help='exponential learning rate decay every n epochs')
     group.add_argument('--warmup_epochs', type=int, default=5,
-                       help='the epochs to ramp-up lr to scaled large-batch value')
+                       help='the epochs to warmp-up lr to scaled large-batch value')
     group.add_argument('--decay_rate', type=float, default='0.9', help='decay rate of RMSProp')
     group.add_argument('--epsilon', type=float, default='1', help='epsilon')
     group.add_argument('--gradient_clipping', type=float, default=0.0, help='gradient clipping')
     return parser
 
-def gen_model_update_conf(args):
+def set_up_optimizer(loss, args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     train_batch_size = total_device_num * args.batch_size_per_device
-    epoch_size = math.ceil(args.num_examples / train_batch_size)
-    num_train_batches = epoch_size * args.num_epochs
-    num_warmup_batches = epoch_size * args.warmup_epochs
-    decay_batches = num_train_batches - num_warmup_batches
-    lr_decay_rate = args.lr_decay_rate
-    decay_rate = args.decay_rate
-    epsilon = args.epsilon
-    clipping_threshold = args.gradient_clipping
-    exponential_decay_batches = epoch_size * args.lr_decay_epochs
+    batches_per_epoch = math.ceil(args.num_examples / train_batch_size)
+    warmup_batches = batches_per_epoch * args.warmup_epochs
+    num_train_batches = batches_per_epoch * args.num_epochs
+    decay_batches = num_train_batches - warmup_batches
+    exponential_decay_batches = batches_per_epoch * args.lr_decay_epochs
 
-    model_update_conf = {}
-    # basic model update
-    if args.model_update == 'sgd':
-        model_update_conf["naive_conf"] = {}
-    elif args.model_update == 'adam':
-        model_update_conf["adam_conf"] = {"beta1": 0.9}
-    elif args.model_update == 'momentum':
-        assert args.mom < 1.0 
-        assert args.mom > 0.0
-        model_update_conf["momentum_conf"] = {"beta": args.mom}
-    elif args.model_update == 'rmsprop':
-        model_update_conf["rmsprop_conf"] = {"decay_rate": decay_rate, "epsilon": epsilon}
-    else:
-        assert False
+    # set up warmup strategy
+    warmup = flow.optimizer.warmup.linear(warmup_batches, 0) if warmup_batches > 0 else None
+   
+    # set up grad_clipping
+    grad_clipping = flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) if  args.gradient_clipping > 0.0  else None
 
-    # learning rate warmup
-    if args.warmup_epochs > 0: #linear warmup only
-        model_update_conf['warmup_conf'] = {"linear_conf": {
-            "warmup_batches": num_warmup_batches, 
-            "start_multiplier": 0,
-        }}
-
-    # learning rate decay
+   # set up learning rate scheduler
     if args.lr_decay == 'cosine':
-        model_update_conf['learning_rate_decay'] = {"cosine_conf": {"decay_batches": decay_batches}}
+        # CosineScheduler
+        lr_scheduler = flow.optimizer.CosineScheduler(
+            base_lr=args.learning_rate, 
+            steps = decay_batches, 
+            warmup=warmup
+        )
     elif args.lr_decay == 'step':
-        boundaries = [x * epoch_size for x in [30, 60, 80]] 
-        scales = [1, 0.1, 0.01, 0.001]
-        model_update_conf['learning_rate_decay'] = {"piecewise_scaling_conf": {
-            "boundaries": boundaries, 
-            "scales":scales,
-        }}
+        # PiecewiseScalingScheduler
+        lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
+            base_lr=args.learning_rate, 
+            boundaries=[30, 60, 80], 
+            scale=[0.1, 0.01, 0.001], 
+            warmup=warmup
+        )
     elif args.lr_decay == 'polynomial':
-        model_update_conf['learning_rate_decay'] = {"polynomial_conf": {
-            "decay_batches": decay_batches, 
-            "end_learning_rate": 0.00001,
-        }}
+        # PolynomialSchduler
+        lr_scheduler = flow.optimizer.PolynomialSchduler(
+            steps=decay_batches, 
+            end_learning_rate=0.00001,
+            warmup=warmup        
+        )
     elif args.lr_decay == 'exponential':
-        model_update_conf['learning_rate_decay'] = {"exponential_conf": {
-            "decay_batches": exponential_decay_batches,
-            "decay_rate": lr_decay_rate,
-        }}
+        # ExponentialScheduler
+        lr_scheduler = flow.optimizer.ExponentialScheduler(
+            base_lr=args.learning_rate,
+            steps=exponential_decay_batches, 
+            alpha=0.1,
+            decay_rate=args.lr_decay_rate,
+            warmup=warmup
+        )
+
     
-    # gradient_clipping
-    if args.gradient_clipping > 0:
-        model_update_conf['clip_conf'] = {"clip_by_global_norm": {
-            "clip_norm": clipping_threshold
-        }}
-
-    # weight decay
-    if args.wd > 0:
-        assert args.wd < 1.0
-        model_update_conf['weight_decay_conf'] = {
-            "weight_decay_rate": args.wd, 
-            "excludes": {"pattern": ['_bn-']}
-        }
-
-    pprint.pprint(model_update_conf)
-    return model_update_conf
+    # set up optimizer
+    if args.optimizer=='sgd':
+        flow.optimizer.SGD(lr_scheduler,
+            momentum=args.momentum if args.momentum>0 else None,
+            grad_clipping = grad_clipping
+        ).minimize(loss)
+    elif args.optimizer=='adam':
+        if args.wd > 0 and args.wd < 1.0 :
+            flow.optimizer.AdamW(
+                lr_scheduler = lr_scheduler,
+                weight_decay = args.wd,
+                weight_decay_excludes='_bn-',
+                grad_clipping = grad_clipping,
+                epsilon=args.epsilon
+            ).minimize(loss)
+        else:
+            flow.optimizer.Adam(lr_scheduler=lr_scheduler,
+                grad_clipping=grad_clipping,
+                epsilon=args.epsilon
+            ).minimize(loss)
+    elif args.optimizer=='rmsprop':
+        flow.optimizer.RMSProp(lr_scheduler=lr_scheduler,
+            decay_rate=args.decay_rate,
+            epsilon=args.epsilon
+        ).minimize(loss)
 
 
 if __name__ == '__main__':
@@ -113,4 +115,3 @@ if __name__ == '__main__':
     parser = configs.get_parser()
     args = parser.parse_args()
     configs.print_args(args)
-    gen_model_update_conf(args)

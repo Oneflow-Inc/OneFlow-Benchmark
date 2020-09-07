@@ -17,7 +17,8 @@ import os
 import math
 import oneflow as flow
 import ofrecord_util
-import config as configs
+import optimizer_util_new
+import config_new as configs
 from util import Snapshot, Summary, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
 import resnet_model
@@ -56,7 +57,6 @@ flow.config.gpu_device_num(args.gpu_num_per_node)
 def label_smoothing(labels, classes, eta, dtype):
     assert classes > 0
     assert eta >= 0.0 and eta < 1.0
-
     return flow.one_hot(labels, depth=classes, dtype=dtype,
                         on_value=1 - eta + eta / classes, off_value=eta/classes)
 
@@ -80,10 +80,13 @@ def TrainNet():
     else:
         loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
 
-    loss = flow.math.reduce_mean(loss)
+    loss = flow.math.reduce_mean(loss)    
     flow.losses.add_loss(loss)
     predictions = flow.nn.softmax(logits)
     outputs = {"loss": loss, "predictions": predictions, "labels": labels}
+
+    # set up warmup,learning rate and optimizer
+    optimizer_util_new.set_up_optimizer(loss, args)
     return outputs
 
 
