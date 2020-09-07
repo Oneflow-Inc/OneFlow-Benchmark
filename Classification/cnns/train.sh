@@ -2,20 +2,21 @@
 rm -rf core.* 
 rm -rf ./output/snapshots/*
 
+
 # training with synthetic data
 python3 of_cnn_train_val.py \
     --num_examples=50 \
     --num_val_examples=50 \
     --num_nodes=1 \
     --gpu_num_per_node=1 \
-    --optimizer="sgd" \
-    --momentum=0.875 \
+    --optimizer="adam" \
     --learning_rate=0.001 \
     --loss_print_every_n_iter=1 \
     --batch_size_per_device=16 \
     --val_batch_size_per_device=16 \
     --num_epoch=10 \
     --model="resnet50"
+
 
 
 
@@ -48,7 +49,7 @@ python3 of_cnn_train_val.py \
 #  mkdir -p $LOG_FOLDER
 #  LOGFILE=$LOG_FOLDER/resnet_training.log
 
-# python3 of_cnn_train_val_new.py \
+# python3 of_cnn_train_val.py \
 #      --train_data_dir=$DATA_ROOT/train \
 #      --train_data_part_num=256 \
 #      --val_data_dir=$DATA_ROOT/validation \
