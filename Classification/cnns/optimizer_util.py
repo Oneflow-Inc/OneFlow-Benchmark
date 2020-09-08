@@ -68,8 +68,11 @@ def set_up_optimizer(loss, args):
     elif args.lr_decay == 'polynomial':
         # PolynomialSchduler
         lr_scheduler = flow.optimizer.PolynomialSchduler(
+            base_lr=args.learning_rate,
             steps=decay_batches, 
             end_learning_rate=0.00001,
+            power=1.0,
+            cycle=False,
             warmup=warmup        
         )
     elif args.lr_decay == 'exponential':
@@ -77,20 +80,29 @@ def set_up_optimizer(loss, args):
         lr_scheduler = flow.optimizer.ExponentialScheduler(
             base_lr=args.learning_rate,
             steps=exponential_decay_batches, 
-            alpha=0.1,
             decay_rate=args.lr_decay_rate,
+            staircase=False,
+            warmup=warmup
+        )
+    else:
+        lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
+            base_lr=args.learning_rate, 
+            boundaries=[args.num_epochs], 
+            scale=[1.0], 
             warmup=warmup
         )
 
     
     # set up optimizer
     if args.optimizer=='sgd':
+        print("Optimizer:  SGD")
         flow.optimizer.SGD(lr_scheduler,
             momentum=args.momentum if args.momentum>0 else None,
             grad_clipping = grad_clipping
         ).minimize(loss)
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
+            print("Optimizer:  AdamW")
             flow.optimizer.AdamW(
                 lr_scheduler = lr_scheduler,
                 weight_decay = args.wd,
@@ -99,11 +111,13 @@ def set_up_optimizer(loss, args):
                 epsilon=args.epsilon
             ).minimize(loss)
         else:
+            print("Optimizer:  Adam")
             flow.optimizer.Adam(lr_scheduler=lr_scheduler,
                 grad_clipping=grad_clipping,
                 epsilon=args.epsilon
             ).minimize(loss)
     elif args.optimizer=='rmsprop':
+        print("Optimizer:  RMSProp")
         flow.optimizer.RMSProp(lr_scheduler=lr_scheduler,
             decay_rate=args.decay_rate,
             epsilon=args.epsilon
