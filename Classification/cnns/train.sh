@@ -9,7 +9,8 @@ python3 of_cnn_train_val.py \
     --num_val_examples=50 \
     --num_nodes=1 \
     --gpu_num_per_node=1 \
-    --optimizer="adam" \
+    --optimizer="sgd" \
+    --momentum=0.875 \
     --learning_rate=0.001 \
     --loss_print_every_n_iter=1 \
     --batch_size_per_device=16 \
