@@ -242,29 +242,18 @@ echo "Writting log to ${LOGFILE}"
 **参数说明**(部分)
 
 - --train_data_dir                Imagenet2012训练集文件夹路径(ofrecord格式)
-
 - --train_data_part_num   训练所用的ofrecord分片数量
-
 - --val_data_dir                    Imagenet2012验证集文件夹路径(ofrecord格式)
-
 - --val_data_part_num       验证所用的ofrecord分片数量
-
-- --num_nodes=1                训练使用的机器节点数
-
+- --num_nodes                    训练使用的机器节点数
 - --gpu_num_per_node      每个机器节点使用的gpu数量
-
-- --model_update="momentum"    学习率更新方式
-
-- --learning_rate=0.256               初始学习率
-
+- --optimizer                                 优化器，默认sgd
+- --label_smoothing                     是否使用标签平滑处理
+- --learning_rate                           初始学习率
 - --loss_print_every_n_iter          打印loss间隔 
-
 - --batch_size_per_device            训练时每个gpu的batch大小
-
 - --val_batch_size_per_device     验证时每个gpu的batch大小
-
 - --num_epoch                              迭代总轮数
-
 - --model                                        使用的模型，可选：resnet50、vgg、alexnet、inceptionv3
 
 然后在命令行执行：
@@ -618,8 +607,8 @@ python3 of_cnn_train_val.py \
     --val_data_part_num=256 \
     --num_nodes=1 \
     --gpu_num_per_node=1 \
-    --model_update="momentum" \
-    --mom=0.9 \
+    --optimizer="sgd" \
+    --momentum=0.9 \
     --learning_rate=0.01 \
     --loss_print_every_n_iter=100 \
     --batch_size_per_device=512 \
@@ -643,8 +632,8 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --val_data_part_num=256 \
     --num_nodes=1 \
     --gpu_num_per_node=4 \
-    --model_update="momentum" \
-    --mom=0.9 \
+    --optimizer="sgd" \
+    --momentum=0.9 \
     --learning_rate=0.01 \
     --loss_print_every_n_iter=10 \
     --batch_size_per_device=128 \
@@ -667,7 +656,7 @@ python3 of_cnn_train_val.py \
     --val_data_part_num=256 \
     --num_nodes=1 \
     --gpu_num_per_node=1 \
-    --model_update="rmsprop" \
+    --optimizer="rmsprop"  \
     --epsilon=1 \
     --decay_rate=0.9 \
     --learning_rate=0.045 \
