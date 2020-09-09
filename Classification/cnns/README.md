@@ -129,25 +129,49 @@ rm -rf ./output/snapshots/*
 
 DATA_ROOT=data/mini-imagenet/ofrecord
 
+# training with mini-imagenet
+DATA_ROOT=data/mini-imagenet/ofrecord
 python3 of_cnn_train_val.py \
-    --train_data_dir=$DATA_ROOT/train \
-    --num_examples=50 \
-    --train_data_part_num=1 \
-    --val_data_dir=$DATA_ROOT/validation \
-    --num_val_examples=50 \
-    --val_data_part_num=1 \
-    --num_nodes=1 \
-    --gpu_num_per_node=1 \
-    --model_update="momentum" \
-    --learning_rate=0.001 \
-    --loss_print_every_n_iter=1 \
-    --batch_size_per_device=16 \
-    --val_batch_size_per_device=10 \
-    --num_epoch=10 \
-    --model="resnet50"
+   --train_data_dir=$DATA_ROOT/train \
+   --num_examples=50 \
+   --train_data_part_num=1 \
+   --val_data_dir=$DATA_ROOT/validation \
+   --num_val_examples=50 \
+   --val_data_part_num=1 \
+   --num_nodes=1 \
+   --gpu_num_per_node=1 \
+   --optimizer="sgd" \
+   --momentum=0.875 \
+   --learning_rate=0.001 \
+   --loss_print_every_n_iter=1 \
+   --batch_size_per_device=16 \
+   --val_batch_size_per_device=10 \
+   --num_epoch=10 \
+   --model="resnet50"
 ```
 
 运行此脚本，将在仅有50张金鱼图片的迷你imagenet数据集上，训练出一个分类模型，利用它，你可以对金鱼图片进行分类。
+
+训练完成后，你也可以修改evaluate.sh脚本以对模型进行评估：
+
+```shell
+#!/bin/bash
+# Evaluate with mini-imagenet
+DATA_ROOT=data/mini-imagenet/ofrecord
+MODEL_LOAD_DIR="output/snapshots/model_save-20200907130848/snapshot_epoch_9"
+python3  of_cnn_evaluate.py \
+    --num_epochs=3 \
+    --num_val_examples=50 \
+    --model_load_dir=$MODEL_LOAD_DIR  \
+    --val_data_dir=$DATA_ROOT/validation \
+    --val_data_part_num=1 \
+    --num_nodes=1 \
+    --gpu_num_per_node=1 \
+    --val_batch_size_per_device=10 \
+    --model="resnet50"
+```
+
+恭喜你，得到了这个还不错的金鱼分类模型，想尝试在完整imagenet上训练自己的分类模型吗？
 
 不要着急，如果您需要在完整的ImageNet2012数据集上进行训练，请看下文【ResNet】部分的介绍。其中，我们将重点介绍其中的经典网络：Resnet50，以及如何利用OneFlow在完整的Imagenet2012数据集上训练Resnet50，并提供 **对标Nvidia的Mxnet版** 实现。
 
@@ -189,50 +213,47 @@ cd OneFlow-Benchmark/Classification/cnns
 rm -rf core.* 
 rm -rf ./output/snapshots/*
 
-DATA_ROOT=/dataset/ImageNet/ofrecord
+# training with imagenet
+ DATA_ROOT=/datasets/ImageNet/ofrecord
+ LOG_FOLDER=../logs
+ mkdir -p $LOG_FOLDER
+ LOGFILE=$LOG_FOLDER/resnet_training.log
 
 python3 of_cnn_train_val.py \
-    --train_data_dir=$DATA_ROOT/train \
-    --train_data_part_num=256 \
-    --val_data_dir=$DATA_ROOT/validation \
-    --val_data_part_num=256 \
-    --num_nodes=1 \
-    --gpu_num_per_node=4 \
-    --model_update="momentum" \
-    --learning_rate=0.256 \
-    --loss_print_every_n_iter=10 \
-    --batch_size_per_device=64 \
-    --val_batch_size_per_device=50 \
-    --num_epoch=90 \
-    --model="resnet50"
+     --train_data_dir=$DATA_ROOT/train \
+     --train_data_part_num=256 \
+     --val_data_dir=$DATA_ROOT/validation \
+     --val_data_part_num=256 \
+     --num_nodes=1 \
+     --gpu_num_per_node=4 \
+     --optimizer="sgd" \
+     --momentum=0.875 \
+     --label_smoothing=0.1 \
+     --learning_rate=0.256 \
+     --loss_print_every_n_iter=100 \
+     --batch_size_per_device=64 \
+     --val_batch_size_per_device=50 \
+     --num_epoch=90 \
+     --model="resnet50" 2>&1 | tee ${LOGFILE}
+
+echo "Writting log to ${LOGFILE}" 
 ```
 
 **参数说明**(部分)
 
 - --train_data_dir                Imagenet2012训练集文件夹路径(ofrecord格式)
-
 - --train_data_part_num   训练所用的ofrecord分片数量
-
 - --val_data_dir                    Imagenet2012验证集文件夹路径(ofrecord格式)
-
 - --val_data_part_num       验证所用的ofrecord分片数量
-
-- --num_nodes=1                训练使用的机器节点数
-
+- --num_nodes                    训练使用的机器节点数
 - --gpu_num_per_node      每个机器节点使用的gpu数量
-
-- --model_update="momentum"    学习率更新方式
-
-- --learning_rate=0.256               初始学习率
-
+- --optimizer                                 优化器，默认sgd
+- --label_smoothing                     是否使用标签平滑处理
+- --learning_rate                           初始学习率
 - --loss_print_every_n_iter          打印loss间隔 
-
 - --batch_size_per_device            训练时每个gpu的batch大小
-
 - --val_batch_size_per_device     验证时每个gpu的batch大小
-
 - --num_epoch                              迭代总轮数
-
 - --model                                        使用的模型，可选：resnet50、vgg、alexnet、inceptionv3
 
 然后在命令行执行：
@@ -586,8 +607,8 @@ python3 of_cnn_train_val.py \
     --val_data_part_num=256 \
     --num_nodes=1 \
     --gpu_num_per_node=1 \
-    --model_update="momentum" \
-    --mom=0.9 \
+    --optimizer="sgd" \
+    --momentum=0.9 \
     --learning_rate=0.01 \
     --loss_print_every_n_iter=100 \
     --batch_size_per_device=512 \
@@ -611,8 +632,8 @@ python3 cnn_benchmark/of_cnn_train_val.py \
     --val_data_part_num=256 \
     --num_nodes=1 \
     --gpu_num_per_node=4 \
-    --model_update="momentum" \
-    --mom=0.9 \
+    --optimizer="sgd" \
+    --momentum=0.9 \
     --learning_rate=0.01 \
     --loss_print_every_n_iter=10 \
     --batch_size_per_device=128 \
@@ -635,7 +656,7 @@ python3 of_cnn_train_val.py \
     --val_data_part_num=256 \
     --num_nodes=1 \
     --gpu_num_per_node=1 \
-    --model_update="rmsprop" \
+    --optimizer="rmsprop"  \
     --epsilon=1 \
     --decay_rate=0.9 \
     --learning_rate=0.045 \
