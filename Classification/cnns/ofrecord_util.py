@@ -82,7 +82,6 @@ def load_imagenet_for_training(args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     train_batch_size = total_device_num * args.batch_size_per_device
     output_layout="NHWC" if args.channel_last else "NCHW"
-    print("load_imagenet_for_training.output_layout>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", output_layout)
 
     color_space = 'RGB'
     ofrecord = flow.data.ofrecord_reader(args.train_data_dir,
@@ -108,7 +107,6 @@ def load_imagenet_for_validation(args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     val_batch_size = total_device_num * args.val_batch_size_per_device
     output_layout="NHWC" if args.channel_last else "NCHW"
-    print("load_imagenet_for_validation.output_layout>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", output_layout)
 
     color_space = 'RGB'
     ofrecord = flow.data.ofrecord_reader(args.val_data_dir,

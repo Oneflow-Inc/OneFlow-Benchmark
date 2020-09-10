@@ -147,7 +147,6 @@ class ResnetBuilder(object):
 def resnet50(images, trainable=True, training=True, wd=1.0 / 32768, channel_last=False):
     weight_regularizer = flow.regularizers.l2(wd) if wd > 0.0 and wd < 1.0 else None
     builder = ResnetBuilder(weight_regularizer, trainable, training, channel_last)
-    print("resnet50.channel_last ; images.shape>>>>>>>>>>>>>>>>>", channel_last, images.shape)
 
 
     with flow.scope.namespace("Resnet"):
