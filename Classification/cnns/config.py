@@ -63,6 +63,13 @@ def get_parser(parser=None):
         help='Whether to use use fp16'
     )
     parser.add_argument(
+        '--use_xla',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        help='Whether to use use xla'
+    )
+    parser.add_argument(
         '--channel_last',
         type=str2bool,
         nargs='?',

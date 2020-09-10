@@ -131,7 +131,7 @@ class Metric(object):
             self.metric_dict[key] = 0.0
         self.metric_dict['throughput'] = 0.0
         self.num_samples = 0.0
-    
+
     def update_and_save(self, key, value, step, **kwargs):
         self.metric_dict[key] = value
         if self.save_summary:
@@ -164,14 +164,16 @@ class Metric(object):
 def CreateOptimizer(args):
     warmup_batches = int(args.iter_num * args.warmup_proportion)
     lr_warmup = flow.optimizer.warmup.linear(warmup_batches, 0)
-    lr_scheduler = flow.optimizer.PolynomialSchduler(args.learning_rate, args.iter_num, 0.0, 
+    lr_scheduler = flow.optimizer.PolynomialSchduler(args.learning_rate, args.iter_num, 0.0,
                                                      warmup=lr_warmup)
-    return flow.optimizer.AdamW(lr_scheduler, epsilon=1e-6, weight_decay=args.weight_decay_rate, 
+    return flow.optimizer.AdamW(lr_scheduler, epsilon=1e-6, weight_decay=args.weight_decay_rate,
                                 weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
                                 grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0))
 
 def GetFunctionConfig(args):
     config = flow.function_config()
     config.enable_auto_mixed_precision(args.use_fp16)
+    if args.use_xla:
+        config.use_xla_jit(True)
     return config
-    
+

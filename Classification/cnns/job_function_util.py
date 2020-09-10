@@ -23,6 +23,8 @@ def _default_config(args):
     config.default_data_type(flow.float)
     if args.use_fp16:
         config.enable_auto_mixed_precision(True)
+    if args.use_xla:
+        config.use_xla_jit(True)
     return config
 
 
