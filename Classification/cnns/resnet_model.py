@@ -144,15 +144,12 @@ class ResnetBuilder(object):
         return pool1
 
 
-def resnet50(images, trainable=True, need_transpose=False, training=True, wd=1.0 / 32768, channel_last=False):
+def resnet50(images, trainable=True, training=True, wd=1.0 / 32768, channel_last=False):
     weight_regularizer = flow.regularizers.l2(wd) if wd > 0.0 and wd < 1.0 else None
     builder = ResnetBuilder(weight_regularizer, trainable, training, channel_last)
-    # note: images.shape = (N C H W) in cc's new dataloader, transpose is not needed anymore
-    if need_transpose:
-        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
-    if channel_last:
-        # if channel_last=True, then change mode from 'nchw' to 'nhwc'
-        images = flow.transpose(images, name="transpose", perm=[0, 2, 3, 1])
+    print("resnet50.channel_last ; images.shape>>>>>>>>>>>>>>>>>", channel_last, images.shape)
+
+
     with flow.scope.namespace("Resnet"):
         stem = builder.resnet_stem(images)
         body = builder.resnet_conv_x_body(stem)

@@ -70,8 +70,9 @@ def load_synthetic(args):
         initializer=flow.zeros_initializer(flow.int32),
     )
 
+    shape=(args.image_size, args.image_size, 3) if args.channel_last else (3, args.image_size, args.image_size)
     image = flow.data.decode_random(
-        shape=(args.image_size, args.image_size, 3), dtype=flow.float, batch_size=batch_size
+        shape=shape, dtype=flow.float, batch_size=batch_size
     )
 
     return label, image
@@ -80,6 +81,8 @@ def load_synthetic(args):
 def load_imagenet_for_training(args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     train_batch_size = total_device_num * args.batch_size_per_device
+    output_layout="NHWC" if args.channel_last else "NCHW"
+    print("load_imagenet_for_training.output_layout>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", output_layout)
 
     color_space = 'RGB'
     ofrecord = flow.data.ofrecord_reader(args.train_data_dir,
@@ -95,7 +98,8 @@ def load_imagenet_for_training(args):
 
     rsz = flow.image.Resize(image, target_size=[args.image_size, args.image_size]) 
     rng = flow.random.CoinFlip(batch_size=train_batch_size)  # , seed=seed)
-    normal = flow.image.CropMirrorNormalize(rsz[0], mirror_blob=rng, color_space=color_space,
+    normal = flow.image.CropMirrorNormalize(rsz[0], mirror_blob=rng,
+                                            color_space=color_space, output_layout=output_layout,
                                             mean=args.rgb_mean, std=args.rgb_std, output_dtype=flow.float)
     return label, normal
 
@@ -103,6 +107,8 @@ def load_imagenet_for_training(args):
 def load_imagenet_for_validation(args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     val_batch_size = total_device_num * args.val_batch_size_per_device
+    output_layout="NHWC" if args.channel_last else "NCHW"
+    print("load_imagenet_for_validation.output_layout>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", output_layout)
 
     color_space = 'RGB'
     ofrecord = flow.data.ofrecord_reader(args.val_data_dir,
@@ -120,7 +126,7 @@ def load_imagenet_for_validation(args):
         keep_aspect_ratio=True,
         target_size=args.resize_shorter)
 
-    normal = flow.image.CropMirrorNormalize(rsz[0], color_space=color_space,
+    normal = flow.image.CropMirrorNormalize(rsz[0], color_space=color_space, output_layout=output_layout,
                                             crop_h=args.image_size, crop_w=args.image_size, crop_pos_y=0.5, crop_pos_x=0.5,
                                             mean=args.rgb_mean, std=args.rgb_std, output_dtype=flow.float)
     return label, normal
