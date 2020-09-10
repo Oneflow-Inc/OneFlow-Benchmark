@@ -63,6 +63,13 @@ def get_parser(parser=None):
         help='Whether to use use fp16'
     )
     parser.add_argument(
+        '--use_xla',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        help='Whether to use use xla'
+    )
+    parser.add_argument(
         '--channel_last',
         type=str2bool,
         nargs='?',
@@ -95,7 +102,7 @@ def get_parser(parser=None):
                         default='NHWC', help="NCHW or NHWC")
     parser.add_argument('--image-shape', type=int_list, default=[3, 224, 224],
                         help='the image shape feed into the network')
-    parser.add_argument('--label-smoothing', type=float, default=0.1, help='label smoothing factor')
+    parser.add_argument('--label_smoothing', type=float, default=0.1, help='label smoothing factor')
 
     # snapshot
     parser.add_argument("--model_save_dir", type=str,
