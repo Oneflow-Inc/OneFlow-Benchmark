@@ -59,7 +59,7 @@ def InferenceNet():
     (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
 
     logits = model_dict[args.model](images,
-                                    channel_last=True if args.channel_last else False)
+                                    channel_last=args.channel_last)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs
