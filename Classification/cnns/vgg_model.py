@@ -16,10 +16,11 @@ limitations under the License.
 
 import oneflow as flow
 
-def _batch_norm(inputs, name=None, trainable=True):
+def _batch_norm(inputs, name=None, trainable=True, data_format="NCHW"):
+    axis = 1 if  data_format=="NCHW" else 3
     return flow.layers.batch_normalization(
         inputs=inputs,
-        axis=1,
+        axis=axis,
         momentum=0.997,
         epsilon=1.001e-5,
         center=True,
@@ -35,6 +36,7 @@ def conv2d_layer(
     name,
     input,
     filters,
+    weight_initializer,
     kernel_size=3,
     strides=1,
     padding="SAME",
@@ -42,15 +44,14 @@ def conv2d_layer(
     dilation_rate=1,
     activation="Relu",
     use_bias=True,
-    weight_initializer=flow.variance_scaling_initializer(2, 'fan_out', 'random_normal', data_format="NCHW"),
     bias_initializer=flow.zeros_initializer(),
 
     weight_regularizer=_get_regularizer(), # weight_decay
     bias_regularizer=_get_regularizer(),
 
     bn=True,
-):   
-    weight_shape = (filters, input.shape[1], kernel_size, kernel_size)
+): 
+    weight_shape =  (filters, input.shape[1], kernel_size, kernel_size) if data_format=="NCHW"  else  (filters, kernel_size, kernel_size, input.shape[3])
     weight = flow.get_variable(
         name + "_weight",
         shape=weight_shape,
@@ -72,7 +73,7 @@ def conv2d_layer(
     if activation is not None:
         if activation == "Relu":
             if bn:
-                output = _batch_norm(output, name + "_bn")
+                output = _batch_norm(output, name + "_bn", True, data_format)
                 output = flow.nn.relu(output)
             else:
                 output = flow.nn.relu(output)
@@ -82,9 +83,10 @@ def conv2d_layer(
     return output
 
 
-def _conv_block(in_blob, index, filters, conv_times):
+def _conv_block(in_blob, index, filters, conv_times, data_format="NCHW"):
     conv_block = []
     conv_block.insert(0, in_blob)
+    weight_initializer = flow.variance_scaling_initializer(2, 'fan_out', 'random_normal', data_format=data_format)
     for i in range(conv_times):
         conv_i = conv2d_layer(
             name="conv{}".format(index),
@@ -92,6 +94,8 @@ def _conv_block(in_blob, index, filters, conv_times):
             filters=filters,
             kernel_size=3,
             strides=1,
+            data_format=data_format,
+            weight_initializer=weight_initializer,
             bn=True,
         )
 
@@ -100,26 +104,23 @@ def _conv_block(in_blob, index, filters, conv_times):
 
     return conv_block
 
-def vgg16bn(images, trainable=True, need_transpose=False, channel_last=False, training=True, wd=1.0/32768):
-    if need_transpose:
-        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
-    if channel_last:
-        # if channel_last=True, then change mode from 'nchw'to 'nhwc'
-        images = flow.transpose(images, name="transpose", perm=[0,2,3,1])
-    conv1 = _conv_block(images, 0, 64, 2)
-    pool1 = flow.nn.max_pool2d(conv1[-1], 2, 2, "VALID", "NCHW", name="pool1")
+def vgg16bn(images, trainable=True, channel_last=False, training=True, wd=1.0/32768):
+    data_format="NHWC" if channel_last else "NCHW"
     
-    conv2 = _conv_block(pool1, 2, 128, 2)
-    pool2 = flow.nn.max_pool2d(conv2[-1], 2, 2, "VALID", "NCHW", name="pool2")
+    conv1 = _conv_block(images, 0, 64, 2, data_format)
+    pool1 = flow.nn.max_pool2d(conv1[-1], 2, 2, "VALID", data_format, name="pool1")
+    
+    conv2 = _conv_block(pool1, 2, 128, 2, data_format)
+    pool2 = flow.nn.max_pool2d(conv2[-1], 2, 2, "VALID", data_format, name="pool2")
 
-    conv3 = _conv_block(pool2, 4, 256, 3)
-    pool3 = flow.nn.max_pool2d(conv3[-1], 2, 2, "VALID", "NCHW", name="pool3")
+    conv3 = _conv_block(pool2, 4, 256, 3, data_format)
+    pool3 = flow.nn.max_pool2d(conv3[-1], 2, 2, "VALID", data_format, name="pool3")
 
-    conv4 = _conv_block(pool3, 7, 512, 3)
-    pool4 = flow.nn.max_pool2d(conv4[-1], 2, 2, "VALID", "NCHW", name="pool4")
+    conv4 = _conv_block(pool3, 7, 512, 3, data_format)
+    pool4 = flow.nn.max_pool2d(conv4[-1], 2, 2, "VALID", data_format, name="pool4")
 
-    conv5 = _conv_block(pool4, 10, 512, 3)
-    pool5 = flow.nn.max_pool2d(conv5[-1], 2, 2, "VALID", "NCHW", name="pool5")
+    conv5 = _conv_block(pool4, 10, 512, 3, data_format)
+    pool5 = flow.nn.max_pool2d(conv5[-1], 2, 2, "VALID", data_format, name="pool5")
 
     def _get_kernel_initializer():
         return flow.random_normal_initializer(stddev=0.01)

@@ -16,8 +16,8 @@ limitations under the License.
 
 import oneflow as flow
 
-def _get_kernel_initializer():
-    return flow.variance_scaling_initializer(distribution="random_normal", data_format="NCHW")
+def _get_kernel_initializer(data_format="NCHW"):
+    return flow.variance_scaling_initializer(distribution="random_normal", data_format=data_format)
 
 def _get_regularizer():
     return flow.regularizers.l2(0.00005)
@@ -36,7 +36,6 @@ def conv2d_layer(
     dilation_rate=1,
     activation="Relu",
     use_bias=True,
-    weight_initializer=_get_kernel_initializer(),
     bias_initializer=_get_bias_initializer(),
     weight_regularizer=_get_regularizer(),
     bias_regularizer=_get_regularizer(),
@@ -48,7 +47,8 @@ def conv2d_layer(
         kernel_size_1 = kernel_size[0]
         kernel_size_2 = kernel_size[1]
 
-    weight_shape = (filters, input.shape[1], kernel_size_1, kernel_size_2)
+    weight_initializer = _get_kernel_initializer(data_format)
+    weight_shape =  (filters, input.shape[1], kernel_size_1, kernel_size_2) if data_format=="NCHW"  else  (filters, kernel_size_1, kernel_size_2, input.shape[3])
     weight = flow.get_variable(
         name + "-weight",
         shape=weight_shape,
@@ -79,28 +79,26 @@ def conv2d_layer(
 
 
 def alexnet(images, need_transpose=False, channel_last=False, training=True):
-    if need_transpose:
-        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
-    if channel_last:
-    # if channel_last=True, then change mode from 'nchw' to 'nhwc'
-        images = flow.transpose(images, name="transpose", perm=[0, 2, 3, 1])
+    data_format = "NHWC" if channel_last else "NCHW"
+
     conv1 = conv2d_layer(
-        "conv1", images, filters=64, kernel_size=11, strides=4, padding="VALID"
+        "conv1", images, filters=64, kernel_size=11, strides=4, padding="VALID",
+         data_format=data_format
     )
 
-    pool1 = flow.nn.avg_pool2d(conv1, 3, 2, "VALID", "NCHW", name="pool1")
+    pool1 = flow.nn.avg_pool2d(conv1, 3, 2, "VALID", data_format, name="pool1")
 
-    conv2 = conv2d_layer("conv2", pool1, filters=192, kernel_size=5)
+    conv2 = conv2d_layer("conv2", pool1, filters=192, kernel_size=5, data_format=data_format)
 
-    pool2 = flow.nn.avg_pool2d(conv2, 3, 2, "VALID", "NCHW", name="pool2")
+    pool2 = flow.nn.avg_pool2d(conv2, 3, 2, "VALID", data_format, name="pool2")
 
-    conv3 = conv2d_layer("conv3", pool2, filters=384)
+    conv3 = conv2d_layer("conv3", pool2, filters=384, data_format=data_format)
 
-    conv4 = conv2d_layer("conv4", conv3, filters=384)
+    conv4 = conv2d_layer("conv4", conv3, filters=384, data_format=data_format)
 
-    conv5 = conv2d_layer("conv5", conv4, filters=256)
+    conv5 = conv2d_layer("conv5", conv4, filters=256, data_format=data_format)
 
-    pool5 = flow.nn.avg_pool2d(conv5, 3, 2, "VALID", "NCHW", name="pool5")
+    pool5 = flow.nn.avg_pool2d(conv5, 3, 2, "VALID", data_format, name="pool5")
 
     if len(pool5.shape) > 2:
         pool5 = flow.reshape(pool5, shape=(pool5.shape[0], -1))

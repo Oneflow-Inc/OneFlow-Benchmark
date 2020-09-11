@@ -22,13 +22,15 @@ BLOCK_FILTERS_INNER = [64, 128, 256, 512]
 
 
 class ResnetBuilder(object):
-    def __init__(self, weight_regularizer, trainable=True, training=True, channel_last=False):
+    def __init__(self, weight_regularizer, trainable=True, training=True, channel_last=False, fuse_bn_relu=True, fuse_bn_add_relu=True):
         self.data_format = "NHWC" if channel_last else "NCHW"
         self.weight_initializer = flow.variance_scaling_initializer(2, 'fan_in', 'random_normal',
                                                                     data_format=self.data_format)
         self.weight_regularizer = weight_regularizer
         self.trainable = trainable
         self.training = training
+        self.fuse_bn_relu = fuse_bn_relu
+        self.fuse_bn_add_relu = fuse_bn_add_relu
 
     def _conv2d(
             self,
@@ -78,26 +80,72 @@ class ResnetBuilder(object):
             name=name,
         )
 
-    def conv2d_affine(self, input, name, filters, kernel_size, strides, activation=None, last=False):
+    def _batch_norm_relu(self, inputs, name=None, last=False):
+        if self.fuse_bn_relu:
+            initializer = flow.zeros_initializer() if last else flow.ones_initializer()
+            axis = 1
+            if self.data_format =="NHWC":
+                axis = 3
+            return flow.layers.batch_normalization_relu(
+                inputs=inputs,
+                axis=axis,
+                momentum=0.9,
+                epsilon=1e-5,
+                center=True,
+                scale=True,
+                trainable=self.trainable,
+                training=self.training,
+                gamma_initializer=initializer,
+                moving_variance_initializer=initializer,
+                gamma_regularizer=self.weight_regularizer,
+                beta_regularizer=self.weight_regularizer,
+                name=name + "_bn_relu",
+            )
+        else:
+            output = self._batch_norm(output, name + "_bn", last=last)
+            return flow.nn.relu(output)
+
+    def _batch_norm_add_relu(self, inputs, addend, name=None, last=False):
+        if self.fuse_bn_add_relu:
+            initializer = flow.zeros_initializer() if last else flow.ones_initializer()
+            axis = 1
+            if self.data_format =="NHWC":
+                axis = 3
+            return flow.layers.batch_normalization_add_relu(
+                inputs=inputs,
+                addend=addend,
+                axis=axis,
+                momentum=0.9,
+                epsilon=1e-5,
+                center=True,
+                scale=True,
+                trainable=self.trainable,
+                training=self.training,
+                gamma_initializer=initializer,
+                moving_variance_initializer=initializer,
+                gamma_regularizer=self.weight_regularizer,
+                beta_regularizer=self.weight_regularizer,
+                name=name+"_bn_add_relu",
+            )
+        else:
+            return flow.nn.relu(self._batch_norm(inputs, name+"_bn", last=last) + addend)
+
+    def conv2d_affine(self, input, name, filters, kernel_size, strides):
         # input data_format must be NCHW, cannot check now
         padding = "SAME" if strides > 1 or kernel_size > 1 else "VALID"
         output = self._conv2d(name, input, filters, kernel_size, strides, padding)
-        output = self._batch_norm(output, name + "_bn", last=last)
-        if activation == "Relu":
-            output = flow.nn.relu(output)
-
         return output
 
     def bottleneck_transformation(self, input, block_name, filters, filters_inner, strides):
         a = self.conv2d_affine(
-            input, block_name + "_branch2a", filters_inner, 1, 1, activation="Relu"
-        )
+            input, block_name + "_branch2a", filters_inner, 1, 1)
+        a = self._batch_norm_relu(a, block_name + "_branch2a")
 
         b = self.conv2d_affine(
-            a, block_name + "_branch2b", filters_inner, 3, strides, activation="Relu"
-        )
+            a, block_name + "_branch2b", filters_inner, 3, strides)
+        b = self._batch_norm_relu(b, block_name + "_branch2b")
 
-        c = self.conv2d_affine(b, block_name + "_branch2c", filters, 1, 1, last=True)
+        c = self.conv2d_affine(b, block_name + "_branch2c", filters, 1, 1)
         return c
 
     def residual_block(self, input, block_name, filters, filters_inner, strides_init):
@@ -105,13 +153,14 @@ class ResnetBuilder(object):
             shortcut = self.conv2d_affine(
                 input, block_name + "_branch1", filters, 1, strides_init
             )
+            shortcut = self._batch_norm(shortcut, block_name + "_branch1_bn")
         else:
             shortcut = input
 
         bottleneck = self.bottleneck_transformation(
             input, block_name, filters, filters_inner, strides_init,
         )
-        return flow.nn.relu(bottleneck + shortcut)
+        return self._batch_norm_add_relu(bottleneck, shortcut, block_name + "_branch2c", last=True)
 
     def residual_stage(self, input, stage_name, counts, filters, filters_inner, stride_init=2):
         output = input
@@ -137,7 +186,7 @@ class ResnetBuilder(object):
 
     def resnet_stem(self, input):
         conv1 = self._conv2d("conv1", input, 64, 7, 2)
-        conv1_bn = flow.nn.relu(self._batch_norm(conv1, "conv1_bn"))
+        conv1_bn = self._batch_norm_relu(conv1, "conv1")
         pool1 = flow.nn.max_pool2d(
             conv1_bn, ksize=3, strides=2, padding="SAME", data_format=self.data_format, name="pool1",
         )
