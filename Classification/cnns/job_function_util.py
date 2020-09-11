@@ -25,13 +25,13 @@ def _default_config(args):
         config.enable_auto_mixed_precision(True)
     if args.use_xla:
         config.use_xla_jit(True)
+    config.enable_fuse_add_to_output(True)
     return config
 
 
 def get_train_config(args):
     train_config = _default_config(args)
     train_config.cudnn_conv_heuristic_search_algo(False)
-
 
     train_config.prune_parallel_cast_ops(True)
     train_config.enable_inplace(True)
