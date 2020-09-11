@@ -58,7 +58,6 @@ def _relu6(data, prefix):
 
 
 def mobilenet_unit(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, data_format="NCHW", if_act=True, use_bias=False, prefix=''):
-    print("num_group >>>>>>>>>>>>>>>> ", num_group)
     conv = flow.layers.conv2d(inputs=data, filters=num_filter, kernel_size=kernel, strides=stride, 
             padding=pad, data_format=data_format, dilation_rate=1, groups=num_group, activation=None, 
             use_bias=use_bias, kernel_initializer=_get_initializer("weight"), 
