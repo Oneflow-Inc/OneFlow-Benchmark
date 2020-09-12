@@ -76,7 +76,6 @@ def shortcut(data_in, data_residual, prefix):
 
 def inverted_residual_unit(data, num_in_filter, num_filter, ifshortcut, stride, kernel, pad, expansion_factor, prefix, data_format="NCHW", has_expand = 1):
     num_expfilter = int(round(num_in_filter*expansion_factor))
-    print("num_expfilter, num_in_filter, expansion_factor ", num_expfilter, num_in_filter, expansion_factor)
     if has_expand:
         channel_expand = mobilenet_unit(
             data=data,
