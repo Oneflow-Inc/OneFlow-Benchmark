@@ -21,7 +21,10 @@ import glob
 from sklearn.metrics import roc_auc_score
 import numpy as np
 import time
+from pynvml import *
 
+def str_list(x):
+    return x.split(',')
 parser = argparse.ArgumentParser()
 parser.add_argument('--train_data_dir', type=str, required=True)
 parser.add_argument('--train_data_part_num', type=int, required=True)
@@ -42,7 +45,11 @@ parser.add_argument('--num_wide_sparse_fields', type=int, default=2)
 parser.add_argument('--num_deep_sparse_fields', type=int, default=26)
 parser.add_argument('--max_iter', type=int, default=30000)
 parser.add_argument('--loss_print_every_n_iter', type=int, default=100)
-parser.add_argument('--gpu_num', type=int, default=8)
+parser.add_argument('--gpu_num_per_node', type=int, default=8)
+parser.add_argument('--num_nodes', type=int, default=1,
+                    help='node/machine number for training')
+parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
+                    help='nodes ip list for training, devided by ",", length >= num_nodes')
 parser.add_argument('--hidden_units_num', type=int, default=7)
 parser.add_argument('--hidden_size', type=int, default=1024)
 
@@ -50,7 +57,6 @@ FLAGS = parser.parse_args()
 
 #DEEP_HIDDEN_UNITS = [1024, 1024]#, 1024, 1024, 1024, 1024, 1024]
 DEEP_HIDDEN_UNITS = [FLAGS.hidden_size for i in range(FLAGS.hidden_units_num)]
-print(DEEP_HIDDEN_UNITS)
 
 
 def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_length=-1,
@@ -120,6 +126,7 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
 
 global_loss = 0.0
 def _create_train_callback(step):
+    handle = nvmlDeviceGetHandleByIndex(0)
     def nop(loss):
         global global_loss
         global_loss += loss.mean()
@@ -127,8 +134,9 @@ def _create_train_callback(step):
 
     def print_loss(loss):
         global global_loss
+        info = nvmlDeviceGetMemoryInfo(handle)
         global_loss += loss.mean()
-        print(step+1, 'time', datetime.datetime.now(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter)
+        print(step+1, 'time', datetime.datetime.now(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter, 'mem', info.used)
         global_loss = 0.0
 
     if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
@@ -139,7 +147,7 @@ def _create_train_callback(step):
 
 def CreateOptimizer(args):
     lr_scheduler = flow.optimizer.PiecewiseConstantScheduler([], [args.learning_rate])
-    return flow.optimizer.LARS(lr_scheduler)
+    return flow.optimizer.LazyAdam(lr_scheduler)
 
 
 def _get_train_conf():
@@ -177,8 +185,37 @@ def eval_job():
     predict = flow.math.sigmoid(logits)
     return loss, predict, labels
 
+
+def InitNodes(args):
+    if args.num_nodes > 1:
+        assert args.num_nodes <= len(args.node_ips)
+        flow.env.ctrl_port(12138)
+        nodes = []
+        for ip in args.node_ips[:args.num_nodes]:
+            addr_dict = {}
+            addr_dict["addr"] = ip
+            nodes.append(addr_dict)
+
+        flow.env.machine(nodes)
+
+def print_args(args):
+    print("=".ljust(66, "="))
+    print("Running {}: num_gpu_per_node = {}, num_nodes = {}.".format(
+        'OneFlow-WDL', args.gpu_num_per_node, args.num_nodes))
+    print("=".ljust(66, "="))
+    for arg in vars(args):
+        print("{} = {}".format(arg, getattr(args, arg)))
+    print("-".ljust(66, "-"))
+    #print("Time stamp: {}".format(
+    #    str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
+
+
 def main():
-    flow.config.gpu_device_num(FLAGS.gpu_num)
+    print_args(FLAGS)
+    InitNodes(FLAGS)
+    flow.config.gpu_device_num(FLAGS.gpu_num_per_node)
+    flow.config.enable_model_io_v2(True)
+    flow.config.enable_debug_mode(True)
     #flow.config.enable_numa_aware_cuda_malloc_host(True)
     #flow.config.collective_boxing.enable_fusion(False)
     check_point = flow.train.CheckPoint()
@@ -201,4 +238,6 @@ def main():
 
 
 if __name__ == '__main__':
+    nvmlInit()
     main()
+    nvmlShutdown()
