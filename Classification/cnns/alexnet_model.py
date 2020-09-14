@@ -19,8 +19,8 @@ import oneflow as flow
 def _get_kernel_initializer(data_format="NCHW"):
     return flow.variance_scaling_initializer(distribution="random_normal", data_format=data_format)
 
-def _get_regularizer():
-    return flow.regularizers.l2(0.00005)
+def _get_regularizer(wd=0.00005):
+    return flow.regularizers.l2(wd)
 
 def _get_bias_initializer():
     return flow.zeros_initializer()
@@ -78,25 +78,27 @@ def conv2d_layer(
     return output
 
 
-def alexnet(images, need_transpose=False, channel_last=False, training=True):
+def alexnet(images, wd=0.00005, channel_last=False, training=True):
     data_format = "NHWC" if channel_last else "NCHW"
 
+    weight_regularizer=_get_regularizer(wd)
+    bias_regularizer=_get_regularizer
     conv1 = conv2d_layer(
         "conv1", images, filters=64, kernel_size=11, strides=4, padding="VALID",
-         data_format=data_format
+         data_format=data_format, weight_regularizer=weight_regularizer
     )
 
     pool1 = flow.nn.avg_pool2d(conv1, 3, 2, "VALID", data_format, name="pool1")
 
-    conv2 = conv2d_layer("conv2", pool1, filters=192, kernel_size=5, data_format=data_format)
+    conv2 = conv2d_layer("conv2", pool1, filters=192, kernel_size=5, data_format=data_format, weight_regularizer=weight_regularizer)
 
     pool2 = flow.nn.avg_pool2d(conv2, 3, 2, "VALID", data_format, name="pool2")
 
-    conv3 = conv2d_layer("conv3", pool2, filters=384, data_format=data_format)
+    conv3 = conv2d_layer("conv3", pool2, filters=384, data_format=data_format, weight_regularizer=weight_regularizer)
 
-    conv4 = conv2d_layer("conv4", conv3, filters=384, data_format=data_format)
+    conv4 = conv2d_layer("conv4", conv3, filters=384, data_format=data_format, weight_regularizer=weight_regularizer)
 
-    conv5 = conv2d_layer("conv5", conv4, filters=256, data_format=data_format)
+    conv5 = conv2d_layer("conv5", conv4, filters=256, data_format=data_format, weight_regularizer=weight_regularizer)
 
     pool5 = flow.nn.avg_pool2d(conv5, 3, 2, "VALID", data_format, name="pool5")
 
@@ -111,8 +113,8 @@ def alexnet(images, need_transpose=False, channel_last=False, training=True):
         #kernel_initializer=flow.random_uniform_initializer(),
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
-        kernel_regularizer=_get_regularizer(),
-        bias_regularizer=_get_regularizer(),
+        kernel_regularizer=weight_regularizer,
+        bias_regularizer=weight_regularizer,
         name="fc1",
     )
 
@@ -125,8 +127,8 @@ def alexnet(images, need_transpose=False, channel_last=False, training=True):
         use_bias=True,        
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
-        kernel_regularizer=_get_regularizer(),
-        bias_regularizer=_get_regularizer(),
+        kernel_regularizer=weight_regularizer,
+        bias_regularizer=weight_regularizer,
         name="fc2",
     )
 
@@ -138,7 +140,7 @@ def alexnet(images, need_transpose=False, channel_last=False, training=True):
         activation=None,
         use_bias=False,
         kernel_initializer=_get_kernel_initializer(),
-        kernel_regularizer=_get_regularizer(),
+        kernel_regularizer=weight_regularizer,
         bias_initializer=False,
         name="fc3",
     )
