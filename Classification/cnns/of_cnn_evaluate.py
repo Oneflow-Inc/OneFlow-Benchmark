@@ -58,8 +58,7 @@ def InferenceNet():
     print("Loading data from {}".format(args.val_data_dir))
     (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
 
-    logits = model_dict[args.model](images,
-                                    channel_last=args.channel_last)
+    logits = model_dict[args.model](images, args)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs

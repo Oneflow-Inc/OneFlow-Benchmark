@@ -85,6 +85,20 @@ def get_parser(parser=None):
     parser.add_argument("--batch_size_per_device", type=int, default=64)
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
+    # fuse bn relu or bn add relu
+    parser.add_argument(
+        '--fuse_bn_relu',
+        type=str2bool,
+        default=True,
+        help='Whether to use use fuse batch normalization relu'
+    )
+    parser.add_argument(
+        '--fuse_bn_add_relu',
+        type=str2bool,
+        default=True,
+        help='Whether to use use fuse batch normalization add relu'
+    )
+
     # inference
     parser.add_argument("--image_path", type=str, default='test_img/tiger.jpg', help="image path")
 

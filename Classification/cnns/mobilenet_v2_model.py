@@ -239,9 +239,9 @@ class MobileNetV2(object):
         sym = self.build_network(input_data, class_num=class_num, prefix=prefix, **configs)
         return sym
 
-def Mobilenet(input_data, trainable=True, training=True, channel_last=False, num_classes=1000, multiplier=1.0, prefix = ""):
-    assert   channel_last==False, "Mobilenet does not support channel_last mode, set channel_last=False will be right!"
-    data_format="NHWC" if channel_last else "NCHW"
+def Mobilenet(input_data, args, trainable=True, training=True, num_classes=1000, multiplier=1.0, prefix = ""):
+    assert   args.channel_last==False, "Mobilenet does not support channel_last mode, set channel_last=False will be right!"
+    data_format="NHWC" if args.channel_last else "NCHW"
     mobilenetgen = MobileNetV2((224,224), multiplier=multiplier)
     out = mobilenetgen(input_data, data_format=data_format, class_num=num_classes, prefix = "MobilenetV2")
     return out

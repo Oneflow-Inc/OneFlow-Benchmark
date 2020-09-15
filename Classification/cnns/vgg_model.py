@@ -104,8 +104,8 @@ def _conv_block(in_blob, index, filters, conv_times, data_format="NCHW"):
 
     return conv_block
 
-def vgg16bn(images, trainable=True, channel_last=False, training=True, wd=1.0/32768):
-    data_format="NHWC" if channel_last else "NCHW"
+def vgg16bn(images, args, trainable=True, training=True):
+    data_format="NHWC" if args.channel_last else "NCHW"
     
     conv1 = _conv_block(images, 0, 64, 2, data_format)
     pool1 = flow.nn.max_pool2d(conv1[-1], 2, 2, "VALID", data_format, name="pool1")
