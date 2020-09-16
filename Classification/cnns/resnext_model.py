@@ -242,34 +242,34 @@ def resnext34(images, trainable=True, training=True, need_transpose=False,
     return model
 
 
-def resnext50(images, trainable=True, training=True, need_transpose=False,
-        channel_last=False, **kwargs):
+def resnext50(images, args, trainable=True, training=True, need_transpose=False,
+        **kwargs):
     """Constructs a ResNeXt-50 model.
     """
     resnext_50 = ResNeXt(images,  trainable=trainable, training=training,
-             need_transpose=need_transpose, channel_last=channel_last,
+             need_transpose=need_transpose, channel_last=args.channel_last,
              block=bottle_neck, layers=[3, 4, 6, 3], **kwargs)
     model = resnext_50.build_network()
     return model
 
 
-def resnext101(images, trainable=True, training=True, need_transpose=False,
-        channel_last=False, **kwargs):
+def resnext101(images, args, trainable=True, training=True, need_transpose=False,
+        **kwargs):
     """Constructs a ResNeXt-101 model.
     """
     resnext_101 = ResNeXt(images, trainable=trainable, training=training,
-            need_transpose=False, channel_last=False,
+            need_transpose=False, channel_last=args.channel_last,
             block=bottle_neck, layers=[3, 4, 23, 3], **kwargs)
     model = resnex_101.build_network()
     return model
 
 
-def resnext152(images, trainable=True, training=True, need_transpose=False,
-        channel_last=False, **kwargs):
+def resnext152(images, args, trainable=True, training=True, need_transpose=False,
+        **kwargs):
     """Constructs a ResNeXt-152 model.
     """
     resnext_152 = ResNeXt(images, trainable=trainable, training=training,
-            need_transpose=need_transpose, channel_last=channel_last,
+            need_transpose=need_transpose, channel_last=args.channel_last,
             block=bottle_neck, layers=[3, 8, 36, 3], **kwargs)
     model = resnext_152.build_network()
     return model
