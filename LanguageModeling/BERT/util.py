@@ -26,7 +26,7 @@ import oneflow as flow
 def InitNodes(args):
     if args.num_nodes > 1:
         assert args.num_nodes <= len(args.node_ips)
-        #flow.env.ctrl_port(12138)
+        flow.env.ctrl_port(args.ctrl_port)
         nodes = []
         for ip in args.node_ips[:args.num_nodes]:
             addr_dict = {}
