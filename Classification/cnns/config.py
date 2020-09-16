@@ -52,6 +52,7 @@ def get_parser(parser=None):
                         help='node/machine number for training')
     parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
                         help='nodes ip list for training, devided by ",", length >= num_nodes')
+    parser.add_argument("--ctrl_port", type=int, default=12315, 'ctrl_port for multinode job')
 
     parser.add_argument("--model", type=str, default="resnet50",
                         help="resnet50")
