@@ -50,7 +50,7 @@ parser.add_argument('--num_nodes', type=int, default=1,
                     help='node/machine number for training')
 parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
                     help='nodes ip list for training, devided by ",", length >= num_nodes')
-parser.add_argument("--ctrl_port", type=int, default=12315, help='ctrl_port for multinode job')
+parser.add_argument("--ctrl_port", type=int, default=50051, help='ctrl_port for multinode job')
 parser.add_argument('--hidden_units_num', type=int, default=7)
 parser.add_argument('--hidden_size', type=int, default=1024)
 
