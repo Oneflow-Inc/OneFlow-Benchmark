@@ -197,6 +197,14 @@ def resnet50(images, args, trainable=True, training=True):
     weight_regularizer = flow.regularizers.l2(args.wd) if args.wd > 0.0 and args.wd < 1.0 else None
     builder = ResnetBuilder(weight_regularizer, trainable, training, args.channel_last, args.fuse_bn_relu, args.fuse_bn_add_relu)
 
+    if args.use_fp16 and args.num_nodes * args.gpu_num_per_node > 1:
+        flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
+    
+    if args.nccl_fusion_threshold_mb:
+        flow.config.collective_boxing.nccl_fusion_threshold_mb(args.nccl_fusion_threshold_mb)
+    
+    if args.nccl_fusion_max_ops:
+        flow.config.collective_boxing.nccl_fusion_max_ops(args.nccl_fusion_max_ops)
 
     with flow.scope.namespace("Resnet"):
         stem = builder.resnet_stem(images)
