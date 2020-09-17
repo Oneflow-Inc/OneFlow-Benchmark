@@ -90,13 +90,13 @@ def get_parser(parser=None):
     parser.add_argument(
         '--fuse_bn_relu',
         type=str2bool,
-        default=True,
+        default=False,
         help='Whether to use use fuse batch normalization relu'
     )
     parser.add_argument(
         '--fuse_bn_add_relu',
         type=str2bool,
-        default=True,
+        default=False,
         help='Whether to use use fuse batch normalization add relu'
     )
 
