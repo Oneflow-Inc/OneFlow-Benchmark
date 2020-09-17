@@ -90,14 +90,14 @@ def get_parser(parser=None):
     parser.add_argument(
         '--fuse_bn_relu',
         type=str2bool,
-        default=True,
-        help='Whether to use use fuse batch normalization relu'
+        default=False,
+        help='Whether to use use fuse batch normalization relu. Currently supported in origin/master of OneFlow only.'
     )
     parser.add_argument(
         '--fuse_bn_add_relu',
         type=str2bool,
-        default=True,
-        help='Whether to use use fuse batch normalization add relu'
+        default=False,
+        help='Whether to use use fuse batch normalization add relu. Currently supported in origin/master of OneFlow only.'
     )
 
     # inference
