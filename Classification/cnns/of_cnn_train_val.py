@@ -53,6 +53,14 @@ model_dict = {
 flow.config.gpu_device_num(args.gpu_num_per_node)
 #flow.config.enable_debug_mode(True)
 
+if args.use_fp16 and args.num_nodes * args.gpu_num_per_node > 1:
+    flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
+
+if args.nccl_fusion_threshold_mb:
+    flow.config.collective_boxing.nccl_fusion_threshold_mb(args.nccl_fusion_threshold_mb)
+
+if args.nccl_fusion_max_ops:
+    flow.config.collective_boxing.nccl_fusion_max_ops(args.nccl_fusion_max_ops)
 
 def label_smoothing(labels, classes, eta, dtype):
     assert classes > 0
