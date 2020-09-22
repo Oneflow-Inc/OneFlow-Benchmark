@@ -52,6 +52,7 @@ def get_parser(parser=None):
                         help='node/machine number for training')
     parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
                         help='nodes ip list for training, devided by ",", length >= num_nodes')
+    parser.add_argument("--ctrl_port", type=int, default=50051, help='ctrl_port for multinode job')
 
     parser.add_argument("--model", type=str, default="resnet50",
                         help="resnet50")
@@ -91,6 +92,20 @@ def get_parser(parser=None):
                         default=None, help="model load directory if need")
     parser.add_argument("--batch_size_per_device", type=int, default=64)
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
+
+    # fuse bn relu or bn add relu
+    parser.add_argument(
+        '--fuse_bn_relu',
+        type=str2bool,
+        default=False,
+        help='Whether to use use fuse batch normalization relu. Currently supported in origin/master of OneFlow only.'
+    )
+    parser.add_argument(
+        '--fuse_bn_add_relu',
+        type=str2bool,
+        default=False,
+        help='Whether to use use fuse batch normalization add relu. Currently supported in origin/master of OneFlow only.'
+    )
 
     # inference
     parser.add_argument("--image_path", type=str, default='test_img/tiger.jpg', help="image path")

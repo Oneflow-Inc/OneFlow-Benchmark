@@ -193,9 +193,9 @@ class ResnetBuilder(object):
         return pool1
 
 
-def resnet50(images, trainable=True, training=True, wd=1.0 / 32768, channel_last=False):
-    weight_regularizer = flow.regularizers.l2(wd) if wd > 0.0 and wd < 1.0 else None
-    builder = ResnetBuilder(weight_regularizer, trainable, training, channel_last)
+def resnet50(images, args, trainable=True, training=True):
+    weight_regularizer = flow.regularizers.l2(args.wd) if args.wd > 0.0 and args.wd < 1.0 else None
+    builder = ResnetBuilder(weight_regularizer, trainable, training, args.channel_last, args.fuse_bn_relu, args.fuse_bn_add_relu)
 
 
     pad_output = 0 # TODO: use args.pad_output 
