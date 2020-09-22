@@ -197,7 +197,6 @@ def resnet50(images, args, trainable=True, training=True):
     weight_regularizer = flow.regularizers.l2(args.wd) if args.wd > 0.0 and args.wd < 1.0 else None
     builder = ResnetBuilder(weight_regularizer, trainable, training, args.channel_last, args.fuse_bn_relu, args.fuse_bn_add_relu)
 
-
     if args.pad_output:
         if args.channel_last: 
             paddings = ((0, 0), (0, 0), (0, 0), (0, 1))
