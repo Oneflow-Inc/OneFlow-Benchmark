@@ -77,6 +77,13 @@ def get_parser(parser=None):
         const=False,
         help='Whether to use use channel last mode(nhwc)'
     )
+    parser.add_argument(
+        '--pad_output',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        help='Whether to pad the output to number of image channels to 4.'
+    )
 
     # train and validaion
     parser.add_argument('--num_epochs', type=int,

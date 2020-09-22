@@ -198,6 +198,12 @@ def resnet50(images, args, trainable=True, training=True):
     builder = ResnetBuilder(weight_regularizer, trainable, training, args.channel_last, args.fuse_bn_relu, args.fuse_bn_add_relu)
 
 
+    if args.pad_output:
+        if args.channel_last: 
+            paddings = ((0, 0), (0, 0), (0, 0), (0, 1))
+        else:
+            paddings = ((0, 0), (0, 1), (0, 0), (0, 0))
+        images = flow.pad(images, paddings=paddings)
     with flow.scope.namespace("Resnet"):
         stem = builder.resnet_stem(images)
         body = builder.resnet_conv_x_body(stem)
@@ -216,3 +222,4 @@ def resnet50(images, args, trainable=True, training=True):
             name="fc1001",
         )
     return fc1001
+
