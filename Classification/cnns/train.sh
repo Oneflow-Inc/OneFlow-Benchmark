@@ -20,6 +20,9 @@ python3 $BENCH_ROOT/of_cnn_train_val.py \
     --train_data_part_num=$DATA_PART_NUM \
     --num_nodes=$NUM_NODES \
     --gpu_num_per_node=$GPU_NUM_PER_NODE \
+    --optimizer="sgd" \
+    --momentum=0.875 \
+    --label_smoothing=0.1 \
     --learning_rate=0.001 \
     --loss_print_every_n_iter=100 \
     --batch_size_per_device=$BSZ_PER_DEVICE \
@@ -34,3 +37,10 @@ python3 $BENCH_ROOT/of_cnn_train_val.py \
     --nccl_fusion_threshold_mb=16 \
     --nccl_fusion_max_ops=24 \
     --model="resnet50"
+
+
+
+    python3 -m pip list
+  136  python3 -m pip uninstall oneflow-cu102 oneflow-master-cu102
+  137  python3 -m pip list
+  138  python3 -m pip install /data/package/oneflow_master_cu102-0.2b1-cp37-cp37m-manylinux2014_x86_64.whl
