@@ -198,9 +198,8 @@ def resnet50(images, args, trainable=True, training=True):
     builder = ResnetBuilder(weight_regularizer, trainable, training, args.channel_last, args.fuse_bn_relu, args.fuse_bn_add_relu)
 
 
-    pad_output = 0 # TODO: use args.pad_output 
-    if pad_output:
-        if channel_last: 
+    if args.pad_output:
+        if args.channel_last: 
             paddings = ((0, 0), (0, 0), (0, 0), (0, 1))
         else:
             paddings = ((0, 0), (0, 1), (0, 0), (0, 0))
