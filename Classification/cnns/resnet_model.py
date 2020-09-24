@@ -102,8 +102,7 @@ class ResnetBuilder(object):
                 name=name + "_bn_relu",
             )
         else:
-            output = self._batch_norm(output, name + "_bn", last=last)
-            return flow.nn.relu(output)
+            return flow.nn.relu(self._batch_norm(inputs, name + "_bn", last=last))
 
     def _batch_norm_add_relu(self, inputs, addend, name=None, last=False):
         if self.fuse_bn_add_relu:
