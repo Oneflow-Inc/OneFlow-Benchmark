@@ -113,8 +113,6 @@ def get_parser(parser=None):
                         help='a tuple of size 3 for the mean rgb')
     parser.add_argument('--rgb-std', type=float_list, default=[58.393, 57.12, 57.375],
                         help='a tuple of size 3 for the std rgb')
-    parser.add_argument("--input_layout", type=str,
-                        default='NHWC', help="NCHW or NHWC")
     parser.add_argument('--image-shape', type=int_list, default=[3, 224, 224],
                         help='the image shape feed into the network')
     parser.add_argument('--label_smoothing', type=float, default=0.1, help='label smoothing factor')
