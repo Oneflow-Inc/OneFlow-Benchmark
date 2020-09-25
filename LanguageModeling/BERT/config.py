@@ -67,7 +67,7 @@ def get_parser(parser=None):
     parser.add_argument("--model_save_dir", type=str,
         default="./output/model_save-{}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))),
         required=False, help="model save directory")
-    parser.add_argument("--save_last_snapshot", type=bool, default=False, required=False,
+    parser.add_argument("--save_last_snapshot", type=str2bool, default=False, required=False,
         help="save model snapshot for last iteration")
     parser.add_argument("--model_load_dir", type=str, default=None, help="model load directory")
     parser.add_argument("--log_dir", type=str, default="./output", help="log info save directory")
