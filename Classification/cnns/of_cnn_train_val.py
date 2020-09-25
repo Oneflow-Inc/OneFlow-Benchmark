@@ -107,7 +107,6 @@ def InferenceNet():
 
 def main():
     InitNodes(args)
-    flow.env.grpc_use_no_signal()
     flow.env.log_dir(args.log_dir)
 
     summary = Summary(args.log_dir, args)

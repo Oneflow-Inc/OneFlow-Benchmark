@@ -68,7 +68,6 @@ def main():
     InitNodes(args)
     assert args.model_load_dir, 'Must have model load dir!'
 
-    flow.env.grpc_use_no_signal()
     flow.env.log_dir(args.log_dir)
     summary = Summary(args.log_dir, args)
     # snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
