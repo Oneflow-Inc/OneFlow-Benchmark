@@ -93,10 +93,10 @@ def get_parser(parser=None):
     parser.add_argument("--batch_size_per_device", type=int, default=64)
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
-    parser.add_argument("--nccl_fusion_threshold_mb", type=int,
-                        default=0, help="4/8/16/32")
-    parser.add_argument("--nccl_fusion_max_ops", type=int, 
-                        default=0, help="16/24/32")
+    parser.add_argument("--nccl_fusion_threshold_mb", type=int, default=0,
+                        help="NCCL fusion threshold megabytes, set to 0 to compatible with previous version of OneFlow.")
+    parser.add_argument("--nccl_fusion_max_ops", type=int, default=0,
+                        help="Maximum number of ops of NCCL fusion, set to 0 to compatible with previous version of OneFlow.")
 
     # fuse bn relu or bn add relu
     parser.add_argument(
