@@ -20,6 +20,11 @@ LOG_FOLDER=../logs
 mkdir -p $LOG_FOLDER
 LOGFILE=$LOG_FOLDER/resnet_training.log
 
+export PYTHONUNBUFFERED=1
+echo PYTHONUNBUFFERED=$PYTHONUNBUFFERED
+export NCCL_LAUNCH_MODE=PARALLEL
+echo NCCL_LAUNCH_MODE=$NCCL_LAUNCH_MODE
+
 python3 of_cnn_train_val.py \
      --train_data_dir=$DATA_ROOT/train \
      --train_data_part_num=256 \
