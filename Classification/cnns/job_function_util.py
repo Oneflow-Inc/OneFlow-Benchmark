@@ -35,6 +35,7 @@ def get_train_config(args):
 
     train_config.prune_parallel_cast_ops(True)
     train_config.enable_inplace(True)
+    train_config.enable_fuse_model_update_ops(True)
     return train_config
 
 

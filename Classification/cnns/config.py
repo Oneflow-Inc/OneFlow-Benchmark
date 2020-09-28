@@ -77,6 +77,13 @@ def get_parser(parser=None):
         const=False,
         help='Whether to use use channel last mode(nhwc)'
     )
+    parser.add_argument(
+        '--pad_output',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        help='Whether to pad the output to number of image channels to 4.'
+    )
 
     # train and validaion
     parser.add_argument('--num_epochs', type=int,
@@ -85,6 +92,11 @@ def get_parser(parser=None):
                         default=None, help="model load directory if need")
     parser.add_argument("--batch_size_per_device", type=int, default=64)
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
+
+    parser.add_argument("--nccl_fusion_threshold_mb", type=int, default=0,
+                        help="NCCL fusion threshold megabytes, set to 0 to compatible with previous version of OneFlow.")
+    parser.add_argument("--nccl_fusion_max_ops", type=int, default=0,
+                        help="Maximum number of ops of NCCL fusion, set to 0 to compatible with previous version of OneFlow.")
 
     # fuse bn relu or bn add relu
     parser.add_argument(
