@@ -39,8 +39,7 @@ python3 of_cnn_train_val.py \
      --loss_print_every_n_iter=100 \
      --batch_size_per_device=128 \
      --val_batch_size_per_device=50 \
-     --channel_last=True \
-     --pad_output \
+     --channel_last=False \
      --fuse_bn_relu=True \
      --fuse_bn_add_relu=True \
      --nccl_fusion_threshold_mb=16 \
