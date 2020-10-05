@@ -111,7 +111,8 @@ def get_parser(parser=None):
         default=False,
         help='Whether to use use fuse batch normalization add relu. Currently supported in origin/master of OneFlow only.'
     )
-
+    parser.add_argument("--bytes_decoder", type=str2bool,
+                        default=False, help='Whether to use use ImageDecoderRandomCropResize.')
     # inference
     parser.add_argument("--image_path", type=str, default='test_img/tiger.jpg', help="image path")
 

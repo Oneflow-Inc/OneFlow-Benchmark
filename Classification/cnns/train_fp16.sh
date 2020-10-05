@@ -35,11 +35,13 @@ python3 of_cnn_train_val.py \
      --optimizer="sgd" \
      --momentum=0.875 \
      --label_smoothing=0.1 \
-     --learning_rate=0.968 \
+     --learning_rate=1.024 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=64 \
+     --batch_size_per_device=128 \
      --val_batch_size_per_device=50 \
-     --channel_last=False \
+     --use_fp16 \
+     --channel_last=True \
+     --pad_output \
      --fuse_bn_relu=True \
      --fuse_bn_add_relu=True \
      --nccl_fusion_threshold_mb=16 \
