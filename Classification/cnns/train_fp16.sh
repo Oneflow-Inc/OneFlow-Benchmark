@@ -35,9 +35,9 @@ python3 of_cnn_train_val.py \
      --optimizer="sgd" \
      --momentum=0.875 \
      --label_smoothing=0.1 \
-     --learning_rate=1.024 \
+     --learning_rate=1.536 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=128 \
+     --batch_size_per_device=192 \
      --val_batch_size_per_device=50 \
      --use_fp16 \
      --channel_last=True \
