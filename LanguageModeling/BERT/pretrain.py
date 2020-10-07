@@ -39,6 +39,7 @@ def PreTrain(
     type_vocab_size=16,
     max_predictions_per_seq=20,
     initializer_range=0.02,
+    use_fp16=False,
 ):
     backbone = bert_util.BertBackbone(
         input_ids_blob=input_ids_blob,
@@ -81,6 +82,9 @@ def PreTrain(
         initializer_range=initializer_range,
     )
     with flow.scope.namespace("cls-loss"):
+        if use_fp16:
+            lm_loss = flow.reduce_mean(lm_loss)
+            ns_loss = flow.reduce_mean(ns_loss)
         total_loss = lm_loss + ns_loss
     return total_loss, lm_loss, ns_loss
 
