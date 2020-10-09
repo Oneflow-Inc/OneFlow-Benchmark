@@ -89,6 +89,7 @@ def PretrainJob():
         type_vocab_size=args.type_vocab_size,
         max_predictions_per_seq=args.max_predictions_per_seq,
         initializer_range=0.02,
+        use_fp16=args.use_fp16,
     )
     opt = CreateOptimizer(args)
     opt.minimize(total_loss)

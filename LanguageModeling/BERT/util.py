@@ -175,5 +175,7 @@ def GetFunctionConfig(args):
     config.enable_auto_mixed_precision(args.use_fp16)
     if args.use_xla:
         config.use_xla_jit(True)
+    config.enable_fuse_add_to_output(True)
+    config.enable_fuse_model_update_ops(True)
     return config
 
