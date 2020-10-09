@@ -92,7 +92,7 @@ def load_imagenet_for_training(args):
                                         shuffle_after_epoch=True)
     label = flow.data.OFRecordRawDecoder(
         ofrecord, "class/label", shape=(), dtype=flow.int32)
-    if args.bytes_decoder:
+    if args.gpu_image_decoder:
         encoded = flow.data.OFRecordBytesDecoder(ofrecord, "encoded")
         image = flow.data.ImageDecoderRandomCropResize(encoded, target_width=224, target_height=224, num_workers=3)
     else:

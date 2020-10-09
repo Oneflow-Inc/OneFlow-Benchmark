@@ -44,5 +44,5 @@ python3 $BENCH_ROOT/of_cnn_train_val.py \
     --fuse_bn_add_relu=True \
     --nccl_fusion_threshold_mb=16 \
     --nccl_fusion_max_ops=24 \
-    --bytes_decoder=True \
+    --gpu_image_decoder=True \
     --model="resnet50"
