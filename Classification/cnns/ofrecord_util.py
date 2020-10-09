@@ -90,14 +90,19 @@ def load_imagenet_for_training(args):
                                         part_name_suffix_length=5,
                                         random_shuffle=True,
                                         shuffle_after_epoch=True)
-    image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded",  # seed=seed,
-                                                    color_space=color_space)
     label = flow.data.OFRecordRawDecoder(
         ofrecord, "class/label", shape=(), dtype=flow.int32)
+    if args.gpu_image_decoder:
+        encoded = flow.data.OFRecordBytesDecoder(ofrecord, "encoded")
+        image = flow.data.ImageDecoderRandomCropResize(encoded, target_width=224, target_height=224, num_workers=3)
+    else:
+        image = flow.data.OFRecordImageDecoderRandomCrop(ofrecord, "encoded",  # seed=seed,
+                                                        color_space=color_space)
+        rsz = flow.image.Resize(image, target_size=[args.image_size, args.image_size])
+        image = rsz[0]
 
-    rsz = flow.image.Resize(image, target_size=[args.image_size, args.image_size]) 
     rng = flow.random.CoinFlip(batch_size=train_batch_size)  # , seed=seed)
-    normal = flow.image.CropMirrorNormalize(rsz[0], mirror_blob=rng,
+    normal = flow.image.CropMirrorNormalize(image, mirror_blob=rng,
                                             color_space=color_space, output_layout=output_layout,
                                             mean=args.rgb_mean, std=args.rgb_std, output_dtype=flow.float)
     return label, normal
