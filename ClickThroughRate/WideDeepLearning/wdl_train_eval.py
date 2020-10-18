@@ -137,7 +137,7 @@ def _create_train_callback(step):
         global global_loss
         info = nvmlDeviceGetMemoryInfo(handle)
         global_loss += loss.mean()
-        print(step+1, 'time', datetime.datetime.now(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter, 'mem', info.used)
+        print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter, 'mem', info.used)
         global_loss = 0.0
 
     if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
@@ -241,4 +241,5 @@ def main():
 if __name__ == '__main__':
     nvmlInit()
     main()
+    time.sleep(3)
     nvmlShutdown()
