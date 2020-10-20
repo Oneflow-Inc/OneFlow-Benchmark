@@ -26,11 +26,11 @@ from pynvml import *
 def str_list(x):
     return x.split(',')
 parser = argparse.ArgumentParser()
-parser.add_argument('--train_data_dir', type=str, required=True)
-parser.add_argument('--train_data_part_num', type=int, required=True)
+parser.add_argument('--train_data_dir', type=str, default='')
+parser.add_argument('--train_data_part_num', type=int, default=1)
 parser.add_argument('--train_part_name_suffix_length', type=int, default=-1)
-parser.add_argument('--eval_data_dir', type=str, required=True)
-parser.add_argument('--eval_data_part_num', type=int, required=True)
+parser.add_argument('--eval_data_dir', type=str, default='')
+parser.add_argument('--eval_data_part_num', type=int, default=1)
 parser.add_argument('--eval_part_name_suffix_length', type=int, default=-1)
 parser.add_argument('--eval_batchs', type=int, default=20)
 parser.add_argument('--eval_interval', type=int, default=1000)
@@ -62,18 +62,31 @@ DEEP_HIDDEN_UNITS = [FLAGS.hidden_size for i in range(FLAGS.hidden_units_num)]
 
 def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_length=-1,
                           shuffle=True):
-    ofrecord = flow.data.ofrecord_reader(data_dir,
-                                         batch_size=batch_size,
-                                         data_part_num=data_part_num,
-                                         part_name_suffix_length=part_name_suffix_length,
-                                         random_shuffle=shuffle,
-                                         shuffle_after_epoch=shuffle)
-    def _blob_decoder(bn, shape, dtype=flow.int32):
-        return flow.data.OFRecordRawDecoder(ofrecord, bn, shape=shape, dtype=dtype)
-    labels = _blob_decoder("labels", (1,))
-    dense_fields = _blob_decoder("dense_fields", (FLAGS.num_dense_fields,), flow.float)
-    wide_sparse_fields = _blob_decoder("wide_sparse_fields", (FLAGS.num_wide_sparse_fields,))
-    deep_sparse_fields = _blob_decoder("deep_sparse_fields", (FLAGS.num_deep_sparse_fields,))
+    if data_dir:
+        ofrecord = flow.data.ofrecord_reader(data_dir,
+                                             batch_size=batch_size,
+                                             data_part_num=data_part_num,
+                                             part_name_suffix_length=part_name_suffix_length,
+                                             random_shuffle=shuffle,
+                                             shuffle_after_epoch=shuffle)
+        def _blob_decoder(bn, shape, dtype=flow.int32):
+            return flow.data.OFRecordRawDecoder(ofrecord, bn, shape=shape, dtype=dtype)
+        labels = _blob_decoder("labels", (1,))
+        dense_fields = _blob_decoder("dense_fields", (FLAGS.num_dense_fields,), flow.float)
+        wide_sparse_fields = _blob_decoder("wide_sparse_fields", (FLAGS.num_wide_sparse_fields,))
+        deep_sparse_fields = _blob_decoder("deep_sparse_fields", (FLAGS.num_deep_sparse_fields,))
+        print('load data form', data_dir)
+    else:
+        def _blob_random(shape, dtype=flow.int32, initializer=flow.zeros_initializer(flow.int32)):
+            return flow.data.decode_random(shape=shape, dtype=dtype, batch_size=batch_size, 
+                                           initializer=initializer)
+        labels = _blob_random((1,), initializer=flow.random_uniform_initializer(dtype=flow.int32))
+        dense_fields = _blob_random((FLAGS.num_dense_fields,), dtype=flow.float, 
+                                    initializer=flow.random_uniform_initializer())
+        wide_sparse_fields = _blob_random((FLAGS.num_wide_sparse_fields,))
+        deep_sparse_fields = _blob_random((FLAGS.num_deep_sparse_fields,))
+        print('use synthetic data')
+
     return flow.identity_n([labels, dense_fields, wide_sparse_fields, deep_sparse_fields])
 
 
@@ -137,7 +150,7 @@ def _create_train_callback(step):
         global global_loss
         info = nvmlDeviceGetMemoryInfo(handle)
         global_loss += loss.mean()
-        print(step+1, 'time', datetime.datetime.now(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter, 'mem', info.used)
+        print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter, 'mem', info.used)
         global_loss = 0.0
 
     if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
@@ -241,4 +254,5 @@ def main():
 if __name__ == '__main__':
     nvmlInit()
     main()
+    time.sleep(3)
     nvmlShutdown()
