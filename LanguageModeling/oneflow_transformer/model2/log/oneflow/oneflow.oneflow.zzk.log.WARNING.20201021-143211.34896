@@ -1,4 +1,0 @@
-Log file created at: 2020/10/21 14:32:11
-Running on machine: oneflow
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-E1021 14:32:11.228379 34896 error.cpp:26]  Check failed: x_shape.At(i) == 1 || y_shape.At(i) == 1 || x_shape.At(i) == y_shape.At(i)	op: multi-broadcast_add_14, type: broadcast_add, i: 2, x_shape: (1,8,60,60), y_shape: (1,1,512,512)
