@@ -1,0 +1,54 @@
+Log file created at: 2020/10/21 14:30:55
+Running on machine: oneflow
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1021 14:30:55.752866 34600 global.h:32] NewGlobal 14cudaDeviceProp
+I1021 14:30:55.779994 34600 global.h:32] NewGlobal N7oneflow7EnvDescE
+I1021 14:30:55.780048 34600 global.h:32] NewGlobal N7oneflow10CtrlServerE
+I1021 14:30:55.780805 34600 ctrl_server.cpp:53] CtrlServer listening on 0.0.0.0:45149
+I1021 14:30:55.780860 34600 global.h:32] NewGlobal N7oneflow10CtrlClientE
+I1021 14:30:55.781790 34600 ctrl_client.cpp:231] LoadServer 127.0.0.1 Successful at 0 times
+I1021 14:30:55.781846 34600 global.h:32] NewGlobal N7oneflow10MachineCtxE
+I1021 14:30:55.781853 34600 machine_context.cpp:33] this machine id: 0
+I1021 14:30:55.781862 34600 global.h:32] NewGlobal N7oneflow12ResourceDescE
+I1021 14:30:55.781870 34600 global.h:32] NewGlobal N7oneflow12ResourceDescE
+I1021 14:30:55.781877 34600 global.h:32] NewGlobal N7oneflow10ThreadPoolE
+I1021 14:30:55.782058 34600 global.h:32] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1021 14:30:55.782069 34600 global.h:32] NewGlobal N7oneflow9OneflowVME
+I1021 14:30:55.784853 34600 global.h:32] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1021 14:30:55.784870 34600 global.h:32] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1021 14:30:55.784878 34600 global.h:32] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1021 14:30:55.793574 34600 cluster_instruction.cpp:84] ClusterInstructionKey/0
+I1021 14:30:55.794003 34600 job_desc.cpp:79] Set piece_num_of_experiment_phase 19
+I1021 14:30:55.794960 34600 cluster_instruction.cpp:84] ClusterInstructionKey/1
+I1021 14:30:55.798022 34600 global.h:37] DeleteGlobal N7oneflow12ResourceDescE
+I1021 14:30:55.798033 34600 version.cpp:62] OneFlow git version: v0.2b1-120-gf42dd82c2-snapshot
+I1021 14:30:55.798038 34600 version.cpp:70] CUDA runtime version: 10.2
+I1021 14:30:55.798044 34600 version.cpp:79] cuDNN version: 7.6.5
+I1021 14:30:55.798048 34600 version.cpp:90] NCCL version: 2.7.3
+I1021 14:30:55.798050 34600 global.h:32] NewGlobal N7oneflow12ResourceDescE
+I1021 14:30:55.798056 34600 global.h:32] NewGlobal N7oneflow6IOConfE
+I1021 14:30:55.798063 34600 global.h:32] NewGlobal N7oneflow12ProfilerConfE
+I1021 14:30:55.798066 34600 global.h:32] NewGlobal N7oneflow5IDMgrE
+I1021 14:30:55.798547 34600 global.h:32] NewGlobal N7oneflow16AvailableMemDescE
+I1021 14:30:55.798813 34600 global.h:32] NewGlobal St13unordered_mapINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEElSt4hashIS5_ESt8equal_toIS5_ESaISt4pairIKS5_lEEE
+I1021 14:30:55.798825 34600 global.h:32] NewGlobal N7oneflow19CriticalSectionDescE
+I1021 14:30:55.798830 34600 global.h:32] NewGlobal N7oneflow16InterUserJobInfoE
+I1021 14:30:55.798838 34600 global.h:32] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I1021 14:30:55.798843 34600 global.h:32] NewGlobal N7oneflow16JobSetCompileCtxE
+I1021 14:30:55.798852 34600 global.h:32] NewGlobal N7oneflow26RuntimeBufferManagersScopeE
+I1021 14:30:55.798856 34600 global.h:32] NewGlobal N7oneflow9BufferMgrIlEE
+I1021 14:30:55.798859 34600 global.h:32] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_18ForeignJobInstanceEEEE
+I1021 14:30:55.798864 34600 oneflow_internal_helper.h:134] NewGlobal N7oneflow25SessionGlobalObjectsScopeE
+I1021 14:30:55.799965 34600 cluster_instruction.cpp:84] ClusterInstructionKey/2
+I1021 14:30:55.800312 34600 job_desc.cpp:79] Set piece_num_of_experiment_phase 19
+I1021 14:30:55.801091 34600 global.h:32] NewGlobal N7oneflow7JobDescE
+I1021 14:30:55.801105 34600 job_desc.cpp:79] Set piece_num_of_experiment_phase 19
+I1021 14:30:55.801373 34600 cluster_instruction.cpp:84] ClusterInstructionKey/3
+I1021 14:30:55.812397 34600 cluster_instruction.cpp:84] ClusterInstructionKey/4
+I1021 14:30:55.835785 34600 cluster_instruction.cpp:84] ClusterInstructionKey/5
+I1021 14:30:55.858914 34600 cluster_instruction.cpp:84] ClusterInstructionKey/6
+I1021 14:30:55.876175 34600 cluster_instruction.cpp:84] ClusterInstructionKey/7
+I1021 14:30:55.888928 34600 cluster_instruction.cpp:84] ClusterInstructionKey/8
+I1021 14:30:55.901696 34600 cluster_instruction.cpp:84] ClusterInstructionKey/9
+I1021 14:30:55.930619 34600 global.h:37] DeleteGlobal N7oneflow7JobDescE
+I1021 14:30:55.941731 34600 cluster_instruction.cpp:84] ClusterInstructionKey/10
