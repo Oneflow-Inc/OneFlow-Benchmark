@@ -22,6 +22,7 @@ import config as configs
 from util import Snapshot, Summary, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
 import resnet_model
+import res2net_model
 import resnext_model
 import vgg_model
 import alexnet_model
@@ -42,6 +43,7 @@ num_val_steps = int(args.num_val_examples / val_batch_size)
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
+    "res2net50": res2net_model.res2net50,
     "vgg": vgg_model.vgg16bn,
     "alexnet": alexnet_model.alexnet,
     "inceptionv3": inception_model.inceptionv3,
