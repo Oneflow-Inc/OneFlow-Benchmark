@@ -30,8 +30,11 @@ class Res2netBuilder(object):
         self.fuse_bn_add_relu = fuse_bn_add_relu
         self.baseWidth = 26
         self.scale = 4
-        self.stype = "stage"
-        self.nums = self.scale-1
+        if self.scale == 1:
+            self.nums = 1
+        else:
+            self.nums = self.scale - 1
+        
 
     def _conv2d(
             self,
@@ -136,31 +139,36 @@ class Res2netBuilder(object):
         output = self._conv2d(name, input, filters, kernel_size, strides, padding)
         return output
 
-    def bottleneck_res2net(self, input, block_name, filters, filters_inner, stride):
+    def bottleneck_res2net(self, input, block_name, filters, filters_inner, stride, stype="normal"):
+        # width = int(math.floor(filters_inner * (self.baseWidth / 64.0)))
+        # self.conv1 = nn.Conv2d(inplanes, width * scale, kernel_size=1, bias=False)
+        # a = flow.slice(a, begin=[None, 0, None, None], size=[None, width * self.scale, None, None])
+
         a = self.conv2d_affine(
             input, block_name + "_branch2a", filters_inner, 1, 1)
         x = self._batch_norm_relu(a, block_name + "_branch2a")
-        if self.scale == 1:
-            self.nums = 1
 
         spx = []
-        width = int(x.shape[1] / 4)
-        for i in range(4):
-            spx.append(flow.slice(x, begin=[None, i * width, None, None], size=[None, width, None, None]))
-        out = flow.concat(inputs=[spx[0], spx[1], spx[2], spx[3]], axis=1)
+        split_num = int(x.shape[1] / self.scale)
+        for i in range(self.scale):
+            split_tensor = flow.slice(x, begin=[None, i * split_num, None, None], size=[None, split_num, None, None])
+            spx.append(split_tensor)
+        # input = flow.concat(inputs=[spx[0], spx[1], spx[2], spx[3]], axis=1)
 
-        for i in range(4):
-            if i == 0 or self.stype == 'stage':
-                sp = spx[i]
+        for i in range(self.nums):
+            if i == 0 or stype == 'stage':
+                sp_tmp = spx[i]
             else:
-                sp = sp + spx[i]
+                sp_tmp = sp_tmp + spx[i]
+            sp = self.conv2d_affine(sp_tmp, block_name + "_branch2b_"+str(i), filters, 3, 1)
+            sp = self._batch_norm_relu(sp, block_name + "_branch2b_"+str(i))
             if i == 0:
                 out = sp
             else:
-                out = flow.concat(inputs=[out, sp], axis=1)
-        if self.stype == 'normal':
-            out = flow.concat(inputs=[out, sp[self.nums]], axis=1)
-        elif self.stype == 'stage':
+                out = flow.concat(inputs=[x, sp], axis=1)
+        if stype == 'normal':
+            out = flow.concat(inputs=[out, spx[self.nums]], axis=1)
+        elif stype == 'stage':
             out = flow.nn.avg_pool2d(
                 spx[self.nums], ksize=3, strides=stride, padding="SAME",
                 data_format=self.data_format, name=block_name+"bottleneck_avg_pool",
@@ -169,17 +177,18 @@ class Res2netBuilder(object):
         z = self.conv2d_affine(out, block_name + "_branch2c", filters, 1, 1)
         return z
 
-    def bottleneck_transformation(self, input, block_name, filters, filters_inner, strides):
-        a = self.conv2d_affine(
-            input, block_name + "_branch2a", filters_inner, 1, 1)
-        a = self._batch_norm_relu(a, block_name + "_branch2a")
 
-        b = self.conv2d_affine(
-            a, block_name + "_branch2b", filters_inner, 3, strides)
-        b = self._batch_norm_relu(b, block_name + "_branch2b")
+    # def bottleneck_transformation(self, input, block_name, filters, filters_inner, strides):
+    #     a = self.conv2d_affine(
+    #         input, block_name + "_branch2a", filters_inner, 1, 1)
+    #     a = self._batch_norm_relu(a, block_name + "_branch2a")
 
-        c = self.conv2d_affine(b, block_name + "_branch2c", filters, 1, 1)
-        return c
+    #     b = self.conv2d_affine(
+    #         a, block_name + "_branch2b", filters_inner, 3, strides)
+    #     b = self._batch_norm_relu(b, block_name + "_branch2b")
+
+    #     c = self.conv2d_affine(b, block_name + "_branch2c", filters, 1, 1)
+    #     return c
 
     def residual_block(self, input, block_name, filters, filters_inner, strides_init):
         if strides_init != 1 or block_name == "res2_0":
@@ -188,13 +197,14 @@ class Res2netBuilder(object):
             )
             shortcut = self._batch_norm(shortcut, block_name + "_branch1_bn")
             stride = 1
+            stype="stage"
         else:
             shortcut = input
             stride = 2
-
+            stype="normal"
 
         bottleneck = self.bottleneck_res2net(
-            input, block_name, filters, filters_inner, strides_init,
+            input, block_name, filters, filters_inner, strides_init, stype
         )
 
         output = self._batch_norm_add_relu(bottleneck, shortcut, block_name + "_branch2c", last=True)
@@ -202,7 +212,6 @@ class Res2netBuilder(object):
 
     def residual_stage(self, input, stage_name, counts, filters, filters_inner, stride_init=2):
         output = input
-        stype = "stage"
         for i in range(counts):
             # print("ResNet body resnet_conv_x_body >> residual_stage i:", i, "input:", output.shape)
             block_name = "%s_%d" % (stage_name, i)
