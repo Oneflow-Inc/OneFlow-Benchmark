@@ -596,7 +596,43 @@ onnx_model = oneflow_to_onnx(InferenceNet, flow_weights_path, onnx_model_dir, ex
 
 生成 ONNX 模型之后可以使用 ONNX Runtime 运行 ONNX 模型，以验证 OneFlow 模型和 ONNX 模型能够在相同的输入下产生相同的结果。相应的代码在 resnet\_to\_onnx.py 的 `check_equality`。
 
-#### 训练AlexNet
+
+## 训练 Res2Net50
+```shell
+#Please change $DATA_ROOT this to your own data root.
+python3 of_cnn_train_val.py \
+     --train_data_dir=$DATA_ROOT/train \
+     --train_data_part_num=256 \
+     --val_data_dir=$DATA_ROOT/validation \
+     --val_data_part_num=256 \
+     --num_nodes=1 \
+     --gpu_num_per_node=8 \
+     --optimizer="sgd" \
+     --momentum=0.875 \
+     --lr_decay="cosine" \
+     --label_smoothing=0.1 \
+     --learning_rate=0.512 \
+     --loss_print_every_n_iter=100 \
+     --batch_size_per_device=64 \
+     --val_batch_size_per_device=50 \
+     --channel_last=False \
+     --fuse_bn_relu=True \
+     --fuse_bn_add_relu=True \
+     --nccl_fusion_threshold_mb=16 \
+     --nccl_fusion_max_ops=24 \
+     --gpu_image_decoder=False \
+     --num_epoch=100 \
+     --model="res2net50"
+
+```
+Res2Net源于论文：[Res2Net: A New Multi-scale Backbone Architecture](https://arxiv.org/pdf/1904.01169.pdf)，是基于ResNet网络改进的，多尺度的卷积神经网络，其和ResNet主要的不点在于 bottleneck处：
+<div align="center">
+    <img src="data/res2net.jpg" align='center'/>
+</div>
+
+此结构称为Res2Net块，可以将Res2Net块插入经典CNN网络如：ResNet，ResNeXt，BigLittleNet和DLA中以提高准确率。Res2Net各型号的网络，基于ImageNet上的分类准确率已经超越了传统的ResNet，本仓库也提供了基于ImageNet训练的Res2Net预训练模型(Top1 acc:;Top5 acc:)，更多模型参考官方[github预训练模型](https://github.com/Res2Net/Res2Net-PretrainedModels#pretrained-models)。
+
+## 训练AlexNet
 
 ```
 #Please change $DATA_ROOT this to your own data root.
@@ -622,7 +658,7 @@ python3 of_cnn_train_val.py \
 
 
 
-#### 训练 VGG-16
+## 训练 VGG-16
 ```
 #Please change $DATA_ROOT this to your own data root.
 python3 cnn_benchmark/of_cnn_train_val.py \
