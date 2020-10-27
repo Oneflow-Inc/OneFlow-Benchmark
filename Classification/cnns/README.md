@@ -636,7 +636,7 @@ python3 of_cnn_train_val.py \
 
 ```
 
-我们使用了和ResNet50一致的训练参数，经过90epoch的训练后，Res2Net模型精度达到了：Top1 acc:77.36%，点此下载[模型]。(https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/res2net50_v15_of_best_model_val_top1_77366.zip)
+我们使用了和ResNet50一致的训练参数，经过90epoch的训练后，Res2Net模型精度达到了：Top1 acc:77.36%，点此下载[模型](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/res2net50_v15_of_best_model_val_top1_77366.zip)。
 
 ## 训练AlexNet
 
