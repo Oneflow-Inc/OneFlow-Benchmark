@@ -568,7 +568,9 @@ Class: tiger, Panthera tigris; score: 0.8112028241157532
 
 #### 如何生成 ONNX 模型
 
+
 **步骤一：指定模型路径**  
+
 
 首先指定待转换的OneFlow模型路径，然后指定转换后的ONNX模型存放路径，例如示例中：
 
@@ -598,6 +600,14 @@ onnx_model = oneflow_to_onnx(InferenceNet, flow_weights_path, onnx_model_dir, ex
 
 
 ## 训练 Res2Net50
+Res2Net源于论文：[Res2Net: A New Multi-scale Backbone Architecture](https://arxiv.org/pdf/1904.01169.pdf)，是基于ResNet网络改进的，多尺度的卷积神经网络，其和ResNet主要的不点在于 bottleneck处：
+
+<div align="center">
+    <img src="data/res2net.jpg" align='center'/>
+</div>
+
+此结构称为Res2Net块，可以将Res2Net块插入经典CNN网络如：ResNet，ResNeXt，BigLittleNet和DLA中以提高准确率。
+训练脚本如下：
 ```shell
 #Please change $DATA_ROOT this to your own data root.
 python3 of_cnn_train_val.py \
@@ -625,12 +635,8 @@ python3 of_cnn_train_val.py \
      --model="res2net50"
 
 ```
-Res2Net源于论文：[Res2Net: A New Multi-scale Backbone Architecture](https://arxiv.org/pdf/1904.01169.pdf)，是基于ResNet网络改进的，多尺度的卷积神经网络，其和ResNet主要的不点在于 bottleneck处：
-<div align="center">
-    <img src="data/res2net.jpg" align='center'/>
-</div>
 
-此结构称为Res2Net块，可以将Res2Net块插入经典CNN网络如：ResNet，ResNeXt，BigLittleNet和DLA中以提高准确率。Res2Net各型号的网络，基于ImageNet上的分类准确率已经超越了传统的ResNet，本仓库也提供了基于ImageNet训练的Res2Net预训练模型(Top1 acc:;Top5 acc:)，更多模型参考官方[github预训练模型](https://github.com/Res2Net/Res2Net-PretrainedModels#pretrained-models)。
+我们使用了和ResNet50一致的训练参数，经过90epoch的训练后，Res2Net模型精度达到了：Top1 acc:77.36%，点此下载[模型]。(https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/res2net50_v15_of_best_model_val_top1_77366.zip)
 
 ## 训练AlexNet
 
