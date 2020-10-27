@@ -21,7 +21,6 @@ import glob
 from sklearn.metrics import roc_auc_score
 import numpy as np
 import time
-from pynvml import *
 
 def str_list(x):
     return x.split(',')
@@ -93,15 +92,17 @@ def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_
 
 
 def _data_loader_synthetic(batch_size):
-    def _blob_random(shape, dtype=flow.int32, initializer=flow.zeros_initializer(flow.int32)):
-        return flow.data.decode_random(shape=shape, dtype=dtype, batch_size=batch_size, 
-                                       initializer=initializer)
-    labels = _blob_random((1,), initializer=flow.random_uniform_initializer(dtype=flow.int32))
-    dense_fields = _blob_random((FLAGS.num_dense_fields,), dtype=flow.float, 
-                                initializer=flow.random_uniform_initializer())
-    wide_sparse_fields = _blob_random((FLAGS.num_wide_sparse_fields,))
-    deep_sparse_fields = _blob_random((FLAGS.num_deep_sparse_fields,))
-    print('use synthetic data')
+    devices = ['{}:0-{}'.format(i, FLAGS.gpu_num_per_node - 1) for i in range(FLAGS.num_nodes)]
+    with flow.scope.placement("cpu", devices):
+        def _blob_random(shape, dtype=flow.int32, initializer=flow.zeros_initializer(flow.int32)):
+            return flow.data.decode_random(shape=shape, dtype=dtype, batch_size=batch_size, 
+                                           initializer=initializer)
+        labels = _blob_random((1,), initializer=flow.random_uniform_initializer(dtype=flow.int32))
+        dense_fields = _blob_random((FLAGS.num_dense_fields,), dtype=flow.float, 
+                                    initializer=flow.random_uniform_initializer())
+        wide_sparse_fields = _blob_random((FLAGS.num_wide_sparse_fields,))
+        deep_sparse_fields = _blob_random((FLAGS.num_deep_sparse_fields,))
+        print('use synthetic data')
     return flow.identity_n([labels, dense_fields, wide_sparse_fields, deep_sparse_fields])
 
 
@@ -110,6 +111,8 @@ def _data_loader_onerec(data_dir, batch_size, shuffle):
     print('load onerec data form', data_dir)
     files = glob.glob(os.path.join(data_dir, '*.onerec'))
     readdata = flow.data.onerec_reader(files=files, batch_size=batch_size, random_shuffle=shuffle,
+                                       verify_example=False,
+                                       shuffle_buffer_size=64,
                                        shuffle_after_epoch=shuffle)
 
     def _blob_decoder(bn, shape, dtype=flow.int32):
@@ -172,7 +175,6 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
 
 global_loss = 0.0
 def _create_train_callback(step):
-    handle = nvmlDeviceGetHandleByIndex(0)
     def nop(loss):
         global global_loss
         global_loss += loss.mean()
@@ -180,9 +182,8 @@ def _create_train_callback(step):
 
     def print_loss(loss):
         global global_loss
-        info = nvmlDeviceGetMemoryInfo(handle)
         global_loss += loss.mean()
-        print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter, 'mem', info.used)
+        print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter)
         global_loss = 0.0
 
     if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
@@ -213,6 +214,7 @@ def train_job():
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
     opt = CreateOptimizer(FLAGS)
     opt.minimize(loss)
+    loss = flow.math.reduce_mean(loss)
     return loss
 
 
@@ -258,6 +260,7 @@ def main():
     flow.config.gpu_device_num(FLAGS.gpu_num_per_node)
     flow.config.enable_model_io_v2(True)
     flow.config.enable_debug_mode(True)
+    flow.config.collective_boxing.nccl_enable_all_to_all(True)
     #flow.config.enable_numa_aware_cuda_malloc_host(True)
     #flow.config.collective_boxing.enable_fusion(False)
     check_point = flow.train.CheckPoint()
@@ -280,7 +283,4 @@ def main():
 
 
 if __name__ == '__main__':
-    nvmlInit()
     main()
-    time.sleep(3)
-    nvmlShutdown()
