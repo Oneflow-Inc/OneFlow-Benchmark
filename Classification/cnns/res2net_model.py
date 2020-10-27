@@ -306,7 +306,7 @@ def test_job(
         images: tp.Numpy.Placeholder((32, 3, 224, 224), dtype=flow.float),
         labels: tp.Numpy.Placeholder((32,), dtype=flow.int32)) -> tp.Numpy:
     output = res2net50(images, args)
-    print("images.shape, labels.shape, output.shape:", images.shape, labels.shape, output.shape)
+    # print("images.shape, labels.shape, output.shape:", images.shape, labels.shape, output.shape)
     return output
 
 
