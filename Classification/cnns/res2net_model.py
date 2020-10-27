@@ -140,20 +140,16 @@ class Res2netBuilder(object):
         return output
 
     def bottleneck_res2net(self, input, block_name, filters, filters_inner, stride, stype="normal"):
-        # width = int(math.floor(filters_inner * (self.baseWidth / 64.0)))
-        # self.conv1 = nn.Conv2d(inplanes, width * scale, kernel_size=1, bias=False)
-        # a = flow.slice(a, begin=[None, 0, None, None], size=[None, width * self.scale, None, None])
-
         a = self.conv2d_affine(
             input, block_name + "_branch2a", filters_inner, 1, 1)
         x = self._batch_norm_relu(a, block_name + "_branch2a")
 
         spx = []
+        # x = flow.concat(inputs=[spx[0], spx[1], spx[2], spx[3]], axis=1)
         split_num = int(x.shape[1] / self.scale)
         for i in range(self.scale):
             split_tensor = flow.slice(x, begin=[None, i * split_num, None, None], size=[None, split_num, None, None])
             spx.append(split_tensor)
-        # input = flow.concat(inputs=[spx[0], spx[1], spx[2], spx[3]], axis=1)
 
         for i in range(self.nums):
             if i == 0 or stype == 'stage':
@@ -178,18 +174,6 @@ class Res2netBuilder(object):
         return z
 
 
-    # def bottleneck_transformation(self, input, block_name, filters, filters_inner, strides):
-    #     a = self.conv2d_affine(
-    #         input, block_name + "_branch2a", filters_inner, 1, 1)
-    #     a = self._batch_norm_relu(a, block_name + "_branch2a")
-
-    #     b = self.conv2d_affine(
-    #         a, block_name + "_branch2b", filters_inner, 3, strides)
-    #     b = self._batch_norm_relu(b, block_name + "_branch2b")
-
-    #     c = self.conv2d_affine(b, block_name + "_branch2c", filters, 1, 1)
-    #     return c
-
     def residual_block(self, input, block_name, filters, filters_inner, strides_init):
         if strides_init != 1 or block_name == "res2_0":
             shortcut = self.conv2d_affine(
@@ -210,10 +194,10 @@ class Res2netBuilder(object):
         output = self._batch_norm_add_relu(bottleneck, shortcut, block_name + "_branch2c", last=True)
         return output
 
+
     def residual_stage(self, input, stage_name, counts, filters, filters_inner, stride_init=2):
         output = input
         for i in range(counts):
-            # print("ResNet body resnet_conv_x_body >> residual_stage i:", i, "input:", output.shape)
             block_name = "%s_%d" % (stage_name, i)
             output = self.residual_block(
                 output, block_name, filters, filters_inner, stride_init if i == 0 else 1
@@ -223,7 +207,6 @@ class Res2netBuilder(object):
     def resnet_conv_x_body(self, input, resnet_blocks):
         output = input
         for i, (counts, filters, filters_inner) in enumerate(resnet_blocks):
-            # print("ResNet body resnet_conv_x_body i:", i, "input:", output.shape)
             stage_name = "res%d" % (i + 2)
             output = self.residual_stage(
                 output, stage_name, counts, filters, filters_inner, 1 if i == 0 else 2
@@ -256,15 +239,11 @@ def res2net50(images, args, trainable=True, training=True):
             paddings = ((0, 0), (0, 1), (0, 0), (0, 0))
         images = flow.pad(images, paddings=paddings)
     with flow.scope.namespace("Resnet"):
-        #print("ResNet stem input ", images.shape)
         stem = builder.resnet_stem(images)
-        #print("ResNet body input ", stem.shape)
         body = builder.resnet_conv_x_body(stem, resnet_blocks)
-        #print("ResNet body output ", body.shape)
         pool5 = flow.nn.avg_pool2d(
             body, ksize=7, strides=1, padding="VALID", data_format=builder.data_format, name="pool5",
         )
-        #print("ResNet body-pool output ", pool5.shape)
         fc1001 = flow.layers.dense(
             flow.reshape(pool5, (pool5.shape[0], -1)),
             units=1000,
@@ -276,7 +255,6 @@ def res2net50(images, args, trainable=True, training=True):
             trainable=trainable,
             name="fc1001",
         )
-        # print("ResNet body-pool-fc output ", fc1001.shape)
     return fc1001
 
 
@@ -315,24 +293,24 @@ def res2net18(images, args, trainable=True, training=True):
     return fc1001
 
 
-# import numpy as np
-# import config as configs
-# import oneflow.typing as tp
-#
-# parser = configs.get_parser()
-# args = parser.parse_args()
-#
-#
-# @flow.global_function(type="predict")
-# def test_job(
-#         images: tp.Numpy.Placeholder((32, 3, 224, 224), dtype=flow.float),
-#         labels: tp.Numpy.Placeholder((32,), dtype=flow.int32)) -> tp.Numpy:
-#     output = res2net50(images, args)
-#     # print("images.shape, labels.shape, output.shape:", images.shape, labels.shape, output.shape)
-#     return output
-#
-#
-# if __name__ == '__main__':
-#     images = np.random.uniform(-10, 10, (32, 1, 224, 224)).astype(np.float32)
-#     labels = np.random.randint(-10, 10, (32,)).astype(np.int32)
-#     output = test_job(images, labels)
+import numpy as np
+import config as configs
+import oneflow.typing as tp
+
+parser = configs.get_parser()
+args = parser.parse_args()
+
+
+@flow.global_function(type="predict")
+def test_job(
+        images: tp.Numpy.Placeholder((32, 3, 224, 224), dtype=flow.float),
+        labels: tp.Numpy.Placeholder((32,), dtype=flow.int32)) -> tp.Numpy:
+    output = res2net50(images, args)
+    print("images.shape, labels.shape, output.shape:", images.shape, labels.shape, output.shape)
+    return output
+
+
+if __name__ == '__main__':
+    images = np.random.uniform(-10, 10, (32, 1, 224, 224)).astype(np.float32)
+    labels = np.random.randint(-10, 10, (32,)).astype(np.int32)
+    output = test_job(images, labels)
