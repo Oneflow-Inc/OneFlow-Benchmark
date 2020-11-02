@@ -159,7 +159,7 @@ class SelfAttention(Attention):
 #     def multi_attention() -> tp.Numpy:
 #         with flow.scope.namespace("multi"):
 #             mha = SelfAttention(512, 8, 0.1, True)
-#
+
 #             x = flow.get_variable("x",
 #                                   shape=(1, 60, 512),
 #                                   initializer=flow.zeros_initializer(),
@@ -169,8 +169,8 @@ class SelfAttention(Attention):
 #                                   initializer=flow.zeros_initializer(),
 #                                   )
 #             out = mha(x, bias=bias_blob)
-#
+
 #             return out
-#
+
 #     out = multi_attention()
 #     print(out.shape)

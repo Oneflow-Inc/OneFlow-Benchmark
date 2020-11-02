@@ -35,10 +35,6 @@ def get_position_encoding(
       geometrically increasing wavelengths.
       Defined and formulized in Attention is All You Need, section 3.5.
 
-      TODO: OneFlow has no op like `tf.range`, so i use numpy to instead, and give it to GlobalFunction
-
-      TOO: We need a operator like `tf.range` to instead numpy
-
       Args:
         length: Sequence length.
         hidden_size: Size
@@ -48,15 +44,17 @@ def get_position_encoding(
       Returns:
         Tensor with shape [length, hidden_size]
     """
-    position = np.arange(length).astype(np.float32)
+    position = flow.range(length, dtype=flow.float32, name="position")
     num_timescales = hidden_size // 2
     log_timescale_increment = (
             math.log(float(max_timescale) / float(min_timescale)) /
-            (float(num_timescales) - 1))
-    inv_timescales = min_timescale * np.exp(
-        np.arange(num_timescales).astype(np.float32) * -log_timescale_increment)
-    scaled_time = np.expand_dims(position, 1) * np.expand_dims(inv_timescales, 0)
-    signal = np.concatenate([np.sin(scaled_time), np.cos(scaled_time)], axis=1)
+            (flow.constant(num_timescales, dtype=flow.float32, shape=(1, ), name="num_timescale") - 1))
+    inv_timescales = min_timescale * flow.math.exp(
+        flow.range(num_timescales, dtype=flow.float32, name="inv_time") * (0-log_timescale_increment))
+    scaled_time = flow.expand_dims(position, 1) * flow.expand_dims(inv_timescales, 0)
+    # may have some problems in expand 0 dim
+    signal = flow.concat([flow.math.sin(scaled_time), flow.math.cos(scaled_time)], axis=1)
+
     return signal
 
 
@@ -73,14 +71,18 @@ def get_decoder_self_attention_bias(length):
   Returns:
     float tensor of shape [1, 1, length, length]
   """
-    raise Exception("We still cannot use OneFlow to build `tf.matrix_band_part` ")
+    with flow.scope.namespace("decoder_self_attention_bias"):
+        # Create Ones Blob
+        ones_blob = flow.get_variable(name="ones_blob",
+                                      shape=[length, length],
+                                      dtype=flow.float32,
+                                      initializer=flow.ones_initializer(),
+                                      trainable=False)
+        valid_locs = flow.math.tril(ones_blob, 0)
+        valid_locs = flow.reshape(valid_locs, shape=[1, 1, length, length])
+        decoder_bias = _NEG_INF * (1.0 - valid_locs)
 
-
-#     with tf.name_scope("decoder_self_attention_bias"):
-#         valid_locs = tf.matrix_band_part(tf.ones([length, length]), -1, 0)
-#         valid_locs = tf.reshape(valid_locs, [1, 1, length, length])
-#         decoder_bias = _NEG_INF * (1.0 - valid_locs)
-#     return decoder_bias
+    return decoder_bias
 
 
 def get_padding(x, padding_value=0):
@@ -121,24 +123,51 @@ def get_padding_bias(x):
 
 
 # test
-# if __name__ == "__main__":
-#     @flow.global_function()
-#     def multi_attention() -> tp.Numpy:
-#         with flow.scope.namespace("multi"):
-#
-#             x = flow.get_variable("x",
-#                                   shape=(10, 10),
-#                                   initializer=flow.random_normal_initializer(mean=5.0),
-#                                   )
-#
-#             out = get_padding_bias(x)
-#
-#             return out
-#
-#
-#     check = flow.train.CheckPoint()
-#     check.init()
-#
-#     out = multi_attention()
-#     print(out.shape)
-#     print(out)
+if __name__ == "__main__":
+    # @flow.global_function()
+    # def multi_attention() -> tp.Numpy:
+    #     with flow.scope.namespace("multi"):
+    #
+    #         x = flow.get_variable("x",
+    #                               shape=(10, 10),
+    #                               initializer=flow.random_normal_initializer(mean=5.0),
+    #                               )
+    #
+    #         out = get_padding_bias(x)
+    #
+    #         return out
+    #
+    #
+    # check = flow.train.CheckPoint()
+    # check.init()
+    #
+    # out = multi_attention()
+    # print(out.shape)
+    # print(out)
+
+    # @flow.global_function()
+    # def pos_encode() -> tp.Numpy:
+    #     with flow.scope.namespace("pos_encoding"):
+    #         out = get_position_encoding(5000, 512)
+    
+    #         return out
+    
+    # out = pos_encode()
+    # print(out.shape)
+    # print(out)
+
+    # @flow.global_function()
+    # def test_get_decoder_self_attention_bias() -> tp.Numpy:
+    #     with flow.scope.namespace("get_decoder_self_attention_bias"):
+    #         out = get_decoder_self_attention_bias(512)
+    #
+    #         return out
+    #
+    #
+    # check = flow.train.CheckPoint()
+    # check.init()
+    # out = test_get_decoder_self_attention_bias()
+    # print(out.shape)
+    # print(out[0][0][-2])
+
+

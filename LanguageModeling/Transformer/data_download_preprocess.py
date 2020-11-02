@@ -13,11 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """Download and preprocess WMT17 ende training and evaluation datasets."""
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import os
 import shutil
@@ -158,7 +153,7 @@ def download_from_url(path, url):
         print("Downloading from %s to %s." % (url, filename))
 
         inprogress_filepath = filename + ".incomplete"
-        inprogress_filepath, _ = urllib.urlretrieve(
+        inprogress_filepath, _ = urllib.request.urlretrieve(
             url, inprogress_filepath, reporthook=download_report_hook)
         # Print newline to clear the carriage return from the download progress.
         print()
