@@ -123,7 +123,7 @@ def get_padding_bias(x):
 
 
 # test
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # @flow.global_function()
     # def multi_attention() -> tp.Numpy:
     #     with flow.scope.namespace("multi"):
@@ -169,5 +169,4 @@ if __name__ == "__main__":
     # out = test_get_decoder_self_attention_bias()
     # print(out.shape)
     # print(out[0][0][-2])
-
 
