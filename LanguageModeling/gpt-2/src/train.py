@@ -22,18 +22,8 @@ parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
 
-#def TrainNet(X: tp.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow.int32)):
-#    gpt2_model = GPT2(args)
-#    logits = gpt2_model.forward(X)
-#    loss = logits
-#    opt = CreateOptimizer(args)
-#    opt.minimize(loss)
-#    return {'loss', loss}
-#@flow.global_function()
 @flow.global_function("train", util.GetFunctionConfig(args))
-def GPT2_Job(
-    X: tp.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow.int64)
-)-> tp.Numpy:
+def GPT2_Job(X: tp.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow.int64)):
     bsz, seq_len = X.shape
     gpt2_model = GPT2(args)
     results = gpt2_model.forward(X)
@@ -47,7 +37,7 @@ def GPT2_Job(
     loss = flow.math.reduce_mean(loss)
     opt = util.CreateOptimizer(args)
     opt.minimize(loss)
-    return loss
+    return {'loss': loss}
 
 
 def main():
@@ -61,17 +51,15 @@ def main():
     print('Loading dataset...')
     enc = encoder.get_encoder(args)
     chunks = load_dataset(enc, args.dataset, args.combine, encoding=args.encoding)
-    data_sampler = Sampler(chunks)
+    data_sampler = Sampler(chunks, seed=1)
     print('dataset has', data_sampler.total_size, 'tokens')
 
     print('Training...')
     try:
-        #while True:
-        for iter in range(1000):
+        for iter in range(100):
             b = data_sampler.sample_batch(args.batch_size, args.seq_len)         
-            #print(b)
-            output = GPT2_Job(b)
-            print(output)
+            output = GPT2_Job(b).get()
+            print(iter, output['loss'].numpy())
     except KeyboardInterrupt:
         snapshot.save("last_snapshot")
         print('interrupted')
