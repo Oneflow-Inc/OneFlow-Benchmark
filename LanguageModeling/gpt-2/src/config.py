@@ -30,9 +30,10 @@ def get_parser(parser=None):
     parser.add_argument('--cfg_dir', metavar='CONFIG', type=str, default='models/117M', 
                         help='folder contains `hparams.json`, `encoder.json` and `vocab.bpe`')
                     
-    parser.add_argument('--batch_size', metavar='SIZE', type=int, default=2, help='Batch size')
+    parser.add_argument('--batch_size', metavar='SIZE', type=int, default=1, help='Batch size')
     parser.add_argument('--seq_len', metavar='SEQUENCE', type=int, default=1024, help='sequence length')
-    parser.add_argument('--learning_rate', metavar='LR', type=float, default=0.002, 
+    parser.add_argument('--optimizer', type=str, default='adam', help='Optimizer. <adam|sgd>.')
+    parser.add_argument('--learning_rate', metavar='LR', type=float, default=0.00002, 
                         help='Learning rate for Adam')
     
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
