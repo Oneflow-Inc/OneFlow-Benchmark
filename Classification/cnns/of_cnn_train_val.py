@@ -88,7 +88,6 @@ def TrainNet():
 
     if not args.use_fp16:
         loss = flow.math.reduce_mean(loss)
-    flow.losses.add_loss(loss)
     predictions = flow.nn.softmax(logits)
     outputs = {"loss": loss, "predictions": predictions, "labels": labels}
 
