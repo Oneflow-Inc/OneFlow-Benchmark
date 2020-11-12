@@ -54,7 +54,8 @@ class GPT2(object):
             self.n_embd = hparams['n_embd']
             self.n_head = hparams['n_head']
             self.n_layer = hparams['n_layer']
-        self.batch, self.sequence = args.batch_size, args.seq_len
+        self.sequence = args.seq_len
+        self.batch = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
     
     def forward(self, X, past=None):
         with flow.scope.namespace(self.scope):

@@ -22,8 +22,10 @@ parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
 
+batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
+
 @flow.global_function("train", util.GetFunctionConfig(args))
-def GPT2_Job(X: tp.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow.int64)):
+def GPT2_Job(X: tp.Numpy.Placeholder((batch_size, args.seq_len), dtype=flow.int64)):
     bsz, seq_len = X.shape
     gpt2_model = GPT2(args)
     results = gpt2_model.forward(X)
@@ -57,7 +59,7 @@ def main():
     print('Training...')
     try:
         for iter in range(100):
-            b = data_sampler.sample_batch(args.batch_size, args.seq_len)         
+            b = data_sampler.sample_batch(batch_size, args.seq_len)         
             output = GPT2_Job(b).get()
             print(iter, output['loss'].numpy())
     except KeyboardInterrupt:
