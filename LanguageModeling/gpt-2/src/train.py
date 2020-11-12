@@ -18,9 +18,7 @@ from model import GPT2
 import oneflow.typing as tp
 import oneflow as flow
 
-parser = configs.get_parser()
-args = parser.parse_args()
-configs.print_args(args)
+args = configs.get_args()
 
 batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
 

@@ -46,14 +46,11 @@ def mlp(x, scope, n_state):
 class GPT2(object):
     def __init__(self, args, scope='model'):
         self.scope = scope
-        with open(os.path.join(args.cfg_dir, 'hparams.json')) as f:
-            hparams = json.load(f)
-            print('hparams', hparams)
-            self.n_vocab = hparams['n_vocab']
-            self.n_ctx = hparams['n_ctx']
-            self.n_embd = hparams['n_embd']
-            self.n_head = hparams['n_head']
-            self.n_layer = hparams['n_layer']
+        self.n_vocab = args.n_vocab
+        self.n_ctx = args.n_ctx
+        self.n_embd = args.n_embd
+        self.n_head = args.n_head
+        self.n_layer = args.n_layer
         self.sequence = args.seq_len
         self.batch = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
     

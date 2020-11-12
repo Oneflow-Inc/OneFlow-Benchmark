@@ -1,3 +1,5 @@
+import os
+import json
 import argparse
 from datetime import datetime
 
@@ -18,8 +20,17 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Unsupported value encountered.')
 
+
 def get_parser(parser=None):
     parser = argparse.ArgumentParser(description='Train GPT-2 on your custom dataset.')
+    
+    parser.add_argument('--hparams_file', metavar='HPARAMS', type=str,  
+                        help='path of `hparams.json`, use following arguments if absent.')
+    parser.add_argument('--n_vocab', type=int, default=50257, help='vocab size')
+    parser.add_argument('--n_ctx', type=int, default=1024, help='length of context')
+    parser.add_argument('--n_embd', type=int, default=768, help='embedding/hidden size')
+    parser.add_argument('--n_head', type=int, default=12, help='number of attention head')
+    parser.add_argument('--n_layer', type=int, default=12, help='number of layer')
     
     parser.add_argument('--dataset', metavar='PATH', type=str, required=True, 
                         help='Input file, directory (utf-8 text, or preencoded .npz files).')
@@ -28,7 +39,7 @@ def get_parser(parser=None):
     parser.add_argument('--encoding', type=str, default='utf-8', 
                         help='Set the encoding for reading and writing files.')
     parser.add_argument('--cfg_dir', metavar='CONFIG', type=str, default='models/117M', 
-                        help='folder contains `hparams.json`, `encoder.json` and `vocab.bpe`')
+                        help='folder contains `encoder.json` and `vocab.bpe`')
                     
     parser.add_argument('--batch_size_per_device', metavar='SIZE', type=int, default=1, help='Batch size')
     parser.add_argument('--seq_len', metavar='SEQUENCE', type=int, default=1024, help='sequence length')
@@ -71,7 +82,22 @@ def print_args(args):
         str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
 
 
-if __name__ == '__main__':
+def get_args():
     parser = get_parser()
     args = parser.parse_args()
+    if args.hparams_file:
+        assert os.path.isfile(args.hparams_file)
+        print('use hparams.json', args.hparams_file, 'some arguments will be replaced.')
+        with open(args.hparams_file) as f:
+            hparams = json.load(f)
+            args.n_vocab = hparams['n_vocab']
+            args.n_ctx = hparams['n_ctx']
+            args.n_embd = hparams['n_embd']
+            args.n_head = hparams['n_head']
+            args.n_layer = hparams['n_layer']
     print_args(args)
+    return args
+
+
+if __name__ == '__main__':
+    get_args()
