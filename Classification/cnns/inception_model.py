@@ -71,7 +71,7 @@ def conv2d_layer(
 
     if activation is not None:
         if activation == "Relu":
-            output = flow.keras.activations.relu(output)
+            output = flow.math.relu(output)
         else:
             raise NotImplementedError
 
@@ -124,14 +124,14 @@ def conv2d_layer_with_bn(
 def InceptionA(in_blob, index):
     with flow.scope.namespace("mixed_{}".format(index)):
         with flow.scope.namespace("branch1x1"):
-            branch1x1 = conv2d_layer_with_bn(
+            branch1x1 = conv2d_layer(
                 "conv0", in_blob, filters=64, kernel_size=1, strides=1, padding="SAME"
             )
         with flow.scope.namespace("branch5x5"):
-            branch5x5_1 = conv2d_layer_with_bn(
+            branch5x5_1 = conv2d_layer(
                 "conv0", in_blob, filters=48, kernel_size=1, strides=1, padding="SAME"
             )
-            branch5x5_2 = conv2d_layer_with_bn(
+            branch5x5_2 = conv2d_layer(
                 "conv1",
                 branch5x5_1,
                 filters=64,
@@ -140,10 +140,10 @@ def InceptionA(in_blob, index):
                 padding="SAME",
             )
         with flow.scope.namespace("branch3x3dbl"):
-            branch3x3dbl_1 = conv2d_layer_with_bn(
+            branch3x3dbl_1 = conv2d_layer(
                 "conv0", in_blob, filters=64, kernel_size=1, strides=1, padding="SAME"
             )
-            branch3x3dbl_2 = conv2d_layer_with_bn(
+            branch3x3dbl_2 = conv2d_layer(
                 "conv1",
                 branch3x3dbl_1,
                 filters=96,
@@ -151,7 +151,7 @@ def InceptionA(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-            branch3x3dbl_3 = conv2d_layer_with_bn(
+            branch3x3dbl_3 = conv2d_layer(
                 "conv2",
                 branch3x3dbl_2,
                 filters=96,
@@ -168,7 +168,7 @@ def InceptionA(in_blob, index):
                 data_format="NCHW",
                 name="pool",
             )
-            branch_pool_2 = conv2d_layer_with_bn(
+            branch_pool_2 = conv2d_layer(
                 "conv",
                 branch_pool_1,
                 filters=32 if index == 0 else 64,
@@ -191,14 +191,14 @@ def InceptionA(in_blob, index):
 def InceptionB(in_blob, index):
     with flow.scope.namespace("mixed_{}".format(index)):
         with flow.scope.namespace("branch3x3"):
-            branch3x3 = conv2d_layer_with_bn(
+            branch3x3 = conv2d_layer(
                 "conv0", in_blob, filters=384, kernel_size=3, strides=2, padding="VALID"
             )
         with flow.scope.namespace("branch3x3dbl"):
-            branch3x3dbl_1 = conv2d_layer_with_bn(
+            branch3x3dbl_1 = conv2d_layer(
                 "conv0", in_blob, filters=64, kernel_size=1, strides=1, padding="SAME"
             )
-            branch3x3dbl_2 = conv2d_layer_with_bn(
+            branch3x3dbl_2 = conv2d_layer(
                 "conv1",
                 branch3x3dbl_1,
                 filters=96,
@@ -206,7 +206,7 @@ def InceptionB(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-            branch3x3dbl_3 = conv2d_layer_with_bn(
+            branch3x3dbl_3 = conv2d_layer(
                 "conv2",
                 branch3x3dbl_2,
                 filters=96,
@@ -236,11 +236,11 @@ def InceptionB(in_blob, index):
 def InceptionC(in_blob, index, filters):
     with flow.scope.namespace("mixed_{}".format(index)):
         with flow.scope.namespace("branch1x1"):
-            branch1x1 = conv2d_layer_with_bn(
+            branch1x1 = conv2d_layer(
                 "conv0", in_blob, filters=192, kernel_size=1, strides=1, padding="SAME"
             )
         with flow.scope.namespace("branch7x7"):
-            branch7x7_1 = conv2d_layer_with_bn(
+            branch7x7_1 = conv2d_layer(
                 "conv0",
                 in_blob,
                 filters=filters,
@@ -248,7 +248,7 @@ def InceptionC(in_blob, index, filters):
                 strides=1,
                 padding="SAME",
             )
-            branch7x7_2 = conv2d_layer_with_bn(
+            branch7x7_2 = conv2d_layer(
                 "conv1",
                 branch7x7_1,
                 filters=filters,
@@ -256,7 +256,7 @@ def InceptionC(in_blob, index, filters):
                 strides=1,
                 padding="SAME",
             )
-            branch7x7_3 = conv2d_layer_with_bn(
+            branch7x7_3 = conv2d_layer(
                 "conv2",
                 branch7x7_2,
                 filters=192,
@@ -265,7 +265,7 @@ def InceptionC(in_blob, index, filters):
                 padding="SAME",
             )
         with flow.scope.namespace("branch7x7dbl"):
-            branch7x7dbl_1 = conv2d_layer_with_bn(
+            branch7x7dbl_1 = conv2d_layer(
                 "conv0",
                 in_blob,
                 filters=filters,
@@ -273,7 +273,7 @@ def InceptionC(in_blob, index, filters):
                 strides=1,
                 padding="SAME",
             )
-            branch7x7dbl_2 = conv2d_layer_with_bn(
+            branch7x7dbl_2 = conv2d_layer(
                 "conv1",
                 branch7x7dbl_1,
                 filters=filters,
@@ -281,7 +281,7 @@ def InceptionC(in_blob, index, filters):
                 strides=1,
                 padding="SAME",
             )
-            branch7x7dbl_3 = conv2d_layer_with_bn(
+            branch7x7dbl_3 = conv2d_layer(
                 "conv2",
                 branch7x7dbl_2,
                 filters=filters,
@@ -289,7 +289,7 @@ def InceptionC(in_blob, index, filters):
                 strides=1,
                 padding="SAME",
             )
-            branch7x7dbl_4 = conv2d_layer_with_bn(
+            branch7x7dbl_4 = conv2d_layer(
                 "conv3",
                 branch7x7dbl_3,
                 filters=filters,
@@ -297,7 +297,7 @@ def InceptionC(in_blob, index, filters):
                 strides=1,
                 padding="SAME",
             )
-            branch7x7dbl_5 = conv2d_layer_with_bn(
+            branch7x7dbl_5 = conv2d_layer(
                 "conv4",
                 branch7x7dbl_4,
                 filters=192,
@@ -314,7 +314,7 @@ def InceptionC(in_blob, index, filters):
                 data_format="NCHW",
                 name="pool",
             )
-            branch_pool_2 = conv2d_layer_with_bn(
+            branch_pool_2 = conv2d_layer(
                 "conv",
                 branch_pool_1,
                 filters=192,
@@ -336,10 +336,10 @@ def InceptionC(in_blob, index, filters):
 def InceptionD(in_blob, index):
     with flow.scope.namespace("mixed_{}".format(index)):
         with flow.scope.namespace("branch3x3"):
-            branch3x3_1 = conv2d_layer_with_bn(
+            branch3x3_1 = conv2d_layer(
                 "conv0", in_blob, filters=192, kernel_size=1, strides=1, padding="SAME"
             )
-            branch3x3_2 = conv2d_layer_with_bn(
+            branch3x3_2 = conv2d_layer(
                 "conv1",
                 branch3x3_1,
                 filters=320,
@@ -348,10 +348,10 @@ def InceptionD(in_blob, index):
                 padding="VALID",
             )
         with flow.scope.namespace("branch7x7x3"):
-            branch7x7x3_1 = conv2d_layer_with_bn(
+            branch7x7x3_1 = conv2d_layer(
                 "conv0", in_blob, filters=192, kernel_size=1, strides=1, padding="SAME"
             )
-            branch7x7x3_2 = conv2d_layer_with_bn(
+            branch7x7x3_2 = conv2d_layer(
                 "conv1",
                 branch7x7x3_1,
                 filters=192,
@@ -359,7 +359,7 @@ def InceptionD(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-            branch7x7x3_3 = conv2d_layer_with_bn(
+            branch7x7x3_3 = conv2d_layer(
                 "conv2",
                 branch7x7x3_2,
                 filters=192,
@@ -367,7 +367,7 @@ def InceptionD(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-            branch7x7x3_4 = conv2d_layer_with_bn(
+            branch7x7x3_4 = conv2d_layer(
                 "conv3",
                 branch7x7x3_3,
                 filters=192,
@@ -395,17 +395,17 @@ def InceptionD(in_blob, index):
     return mixed_concat
 
 
-def InceptionE(in_blob, index):
+def InceptionE(in_blob, index, pooltype):
     with flow.scope.namespace("mixed_{}".format(index)):
         with flow.scope.namespace("branch1x1"):
-            branch1x1 = conv2d_layer_with_bn(
+            branch1x1 = conv2d_layer(
                 "conv0", in_blob, filters=320, kernel_size=1, strides=1, padding="SAME"
             )
         with flow.scope.namespace("branch3x3"):
-            branch3x3_1 = conv2d_layer_with_bn(
+            branch3x3_1 = conv2d_layer(
                 "conv0", in_blob, filters=384, kernel_size=1, strides=1, padding="SAME"
             )
-            branch3x3_2 = conv2d_layer_with_bn(
+            branch3x3_2 = conv2d_layer(
                 "conv1",
                 branch3x3_1,
                 filters=384,
@@ -413,7 +413,7 @@ def InceptionE(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-            branch3x3_3 = conv2d_layer_with_bn(
+            branch3x3_3 = conv2d_layer(
                 "conv2",
                 branch3x3_1,
                 filters=384,
@@ -428,10 +428,10 @@ def InceptionE(in_blob, index):
                 values=inceptionE_1_bn, axis=1, name="concat"
             )
         with flow.scope.namespace("branch3x3dbl"):
-            branch3x3dbl_1 = conv2d_layer_with_bn(
+            branch3x3dbl_1 = conv2d_layer(
                 "conv0", in_blob, filters=448, kernel_size=1, strides=1, padding="SAME"
             )
-            branch3x3dbl_2 = conv2d_layer_with_bn(
+            branch3x3dbl_2 = conv2d_layer(
                 "conv1",
                 branch3x3dbl_1,
                 filters=384,
@@ -439,7 +439,7 @@ def InceptionE(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-            branch3x3dbl_3 = conv2d_layer_with_bn(
+            branch3x3dbl_3 = conv2d_layer(
                 "conv2",
                 branch3x3dbl_2,
                 filters=384,
@@ -447,7 +447,7 @@ def InceptionE(in_blob, index):
                 strides=1,
                 padding="SAME",
             )
-            branch3x3dbl_4 = conv2d_layer_with_bn(
+            branch3x3dbl_4 = conv2d_layer(
                 "conv3",
                 branch3x3dbl_2,
                 filters=384,
@@ -462,15 +462,25 @@ def InceptionE(in_blob, index):
                 values=inceptionE_2_bn, axis=1, name="concat"
             )
         with flow.scope.namespace("branch_pool"):
-            branch_pool_1 = flow.nn.avg_pool2d(
-                in_blob,
-                ksize=3,
-                strides=1,
-                padding="SAME",
-                data_format="NCHW",
-                name="pool",
-            )
-            branch_pool_2 = conv2d_layer_with_bn(
+            if pooltype == 'avg':
+                branch_pool_1 = flow.nn.avg_pool2d(
+                    in_blob,
+                    ksize=3,
+                    strides=1,
+                    padding="SAME",
+                    data_format="NCHW",
+                    name="pool",
+                )
+            elif pooltype == 'max':
+                branch_pool_1 = flow.nn.max_pool2d(
+                    in_blob,
+                    ksize=3,
+                    strides=1,
+                    padding="SAME",
+                    data_format="NCHW",
+                    name="pool",
+                )
+            branch_pool_2 = conv2d_layer(
                 "conv",
                 branch_pool_1,
                 filters=192,
@@ -491,26 +501,30 @@ def InceptionE(in_blob, index):
     return concat_total
 
 
-def inceptionv3(images, trainable=True, channel_last=False):
-    assert   channel_last==False, "InceptionV3 does not support channel_last mode, set channel_last=False will be right!"
+def inceptionv3(images, trainable=True, need_transpose=False, channel_last=False):
+    if need_transpose:
+        images = flow.transpose(images, name="transpose", perm=[0, 3, 1, 2])
+    if channel_last:
+    # if channel_last=True, then change mode from 'nchw' to 'nhwc'
+        images = flow.transpose(images, name="transpose", perm=[0, 2, 3, 1])
     with flow.scope.namespace("InceptionV3"):
         # conv0: 299 x 299 x 3
-        conv0 = conv2d_layer_with_bn(
+        conv0 = conv2d_layer(
             "conv0", images, filters=32, kernel_size=3, strides=2, padding="VALID"
         )
-        conv1 = conv2d_layer_with_bn(
+        conv1 = conv2d_layer(
             "conv1", conv0, filters=32, kernel_size=3, strides=1, padding="VALID"
         )
-        conv2 = conv2d_layer_with_bn(
+        conv2 = conv2d_layer(
             "conv2", conv1, filters=64, kernel_size=3, strides=1, padding="SAME"
         )
         pool1 = flow.nn.max_pool2d(
             conv2, ksize=3, strides=2, padding="VALID", data_format="NCHW", name="pool1"
         )
-        conv3 = conv2d_layer_with_bn(
+        conv3 = conv2d_layer(
             "conv3", pool1, filters=80, kernel_size=1, strides=1, padding="VALID"
         )
-        conv4 = conv2d_layer_with_bn(
+        conv4 = conv2d_layer(
             "conv4", conv3, filters=192, kernel_size=3, strides=1, padding="VALID"
         )
         pool2 = flow.nn.max_pool2d(
@@ -534,8 +548,8 @@ def inceptionv3(images, trainable=True, channel_last=False):
         mixed_8 = InceptionD(mixed_7, 8)
 
         # mixed_9 ~ mixed_10
-        mixed_9 = InceptionE(mixed_8, 9)
-        mixed_10 = InceptionE(mixed_9, 10)
+        mixed_9 = InceptionE(mixed_8, 9, 'avg')
+        mixed_10 = InceptionE(mixed_9, 10, 'max')
 
         pool3 = flow.nn.avg_pool2d(
             mixed_10, ksize=8, strides=1, padding="VALID", data_format="NCHW", name="pool3"
