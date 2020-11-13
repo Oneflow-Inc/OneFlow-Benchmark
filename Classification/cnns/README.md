@@ -8,7 +8,7 @@ ImageNet大规模视觉识别挑战赛（ILSVRC），常称为ImageNet竞赛，�
 
 在2012年的ImageNet竞赛中，深度卷积网络AlexNet横空出世。以超出第二名10%以上的top-5准确率，勇夺ImageNet2012比赛的冠军。从此，以 CNN（卷积神经网络） 为代表的深度学习方法开始在计算机视觉领域的应用开始大放异彩，更多的更深的CNN网络被提出，比如ImageNet2014比赛的冠军VGGNet, ImageNet2015比赛的冠军ResNet。
 
-OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **Resnet50** **InceptionV3** **MobileNetV2**等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
+OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **Resnet50** 、　**InceptionV3** 、　**MobileNetV2**等经典的cnn模型，未来会陆续添加新的cnn模型。这些cnn模型共享一套训练、验证和推理代码，您只需要指定模型，即可使用一套代码完成这些cnn网络模型的训练、测试和验证。
 
 
 
@@ -66,6 +66,9 @@ OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **
 
 [alexnet_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/alexnet_of_best_model_val_top1_54762.zip) (validation accuracy: 54.762% top1，78.1914% top5 )
 
+#### InceptionV3 
+
+[inceptionv3_model](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/inceptionv3_of_best_model_val_top1_74.19.zip) (validation accuracy: 74.19% top1，91.46% top5 )
 
 
 ### 预测/推理
@@ -675,6 +678,6 @@ python3 of_cnn_train_val.py \
     --warmup_epochs=0 \
 ```
 
-经过100个epochs的训练后，oneflow模型在验证集上的top1准确率和top5准确率分别为72.53％和90.04％；在训练集上的top1准确率和top5准确率分别为81.19％和93.15％。
-目前训练结果和主流benchmark的准确率还有差距，我们会在后续调整数据预处理方式，并进一步调整训练参数，已达到预期效果，并提供预训练模型。
+经过100个epochs的训练后，oneflow模型在验证集上的top1准确率和top5准确率分别为74.19％和91.46％；在训练集上的top1准确率和top5准确率分别为81.19％和93.15％。目前训练结果和主流benchmark在top1
+准确率上相差约为1.6%，我们会在后续调整数据预处理方式，并进一步调整训练参数，以达到预期效果。
 
