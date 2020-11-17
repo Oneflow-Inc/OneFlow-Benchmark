@@ -135,6 +135,7 @@ class Metric(object):
 
     def update_and_save(self, key, value, step, **kwargs):
         self.metric_dict[key] = value
+        self.metric_dict.pop('n_' + key, None)
         if self.save_summary:
             self.summary.scalar(self.desc + "_" + key, step, value, **kwargs)
 
