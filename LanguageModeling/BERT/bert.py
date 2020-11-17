@@ -222,11 +222,7 @@ def _AttentionLayer(from_blob,
   attention_scores_blob = flow.matmul(query_blob, key_blob, transpose_b=True)
   attention_scores_blob = attention_scores_blob * (1.0 / math.sqrt(float(size_per_head)))
 
-  attention_mask_blob = flow.reshape(attention_mask_blob, [-1, 1, from_seq_length, to_seq_length])
-  attention_mask_blob = flow.cast(attention_mask_blob, dtype=flow.float)
-  addr_blob = (attention_mask_blob - 1.0) * 10000.0
-
-  attention_scores_blob = attention_scores_blob + addr_blob
+  attention_scores_blob = attention_scores_blob + attention_mask_blob
   attention_probs_blob = flow.nn.softmax(attention_scores_blob)
   attention_probs_blob = _Dropout(attention_probs_blob, attention_probs_dropout_prob)
 
@@ -271,8 +267,11 @@ def _CreateAttentionMaskFromInputMask(to_mask_blob, from_seq_length, to_seq_leng
   output = flow.cast(to_mask_blob, dtype=flow.float)
   output = flow.reshape(output, [-1, 1, to_seq_length])
   zeros = flow.constant(0.0, dtype=flow.float, shape=[from_seq_length, to_seq_length])
-  output = zeros + output
-  return output
+  attention_mask_blob = zeros + output
+  attention_mask_blob = flow.reshape(attention_mask_blob, [-1, 1, from_seq_length, to_seq_length])
+  attention_mask_blob = flow.cast(attention_mask_blob, dtype=flow.float)
+  attention_mask_blob = (attention_mask_blob - 1.0) * 10000.0
+  return attention_mask_blob
 
 
 def _EmbeddingPostprocessor(input_blob,
