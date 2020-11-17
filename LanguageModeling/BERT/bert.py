@@ -276,8 +276,8 @@ def _CreateAttentionMaskFromInputMask(to_mask_blob, from_seq_length, to_seq_leng
 def _CreateAddrFromAttentionMask(attention_mask_blob, from_seq_length, to_seq_length):
   attention_mask_blob = flow.reshape(attention_mask_blob, [-1, 1, from_seq_length, to_seq_length])
   attention_mask_blob = flow.cast(attention_mask_blob, dtype=flow.float)
-  attention_mask_blob = (attention_mask_blob - 1.0) * 10000.0
-  return attention_mask_blob
+  addr_blob = (attention_mask_blob - 1.0) * 10000.0
+  return addr_blob
 
 
 def _EmbeddingPostprocessor(input_blob,
