@@ -82,9 +82,6 @@ def PreTrain(
         initializer_range=initializer_range,
     )
     with flow.scope.namespace("cls-loss"):
-        if not use_fp16:
-            lm_loss = flow.math.reduce_mean(lm_loss)
-            ns_loss = flow.math.reduce_mean(ns_loss)
         total_loss = lm_loss + ns_loss
     return total_loss, lm_loss, ns_loss
 
