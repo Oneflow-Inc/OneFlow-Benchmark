@@ -11,7 +11,7 @@ tools文件夹中存放的文件和python代码专门用于 **ImageNet(2012)数�
 
 内部借助“Protocol Buffer”二进制数据编码方案，它只占用一个内存块，只需要一次性加载一个二进制文件的方式即可，简单，快速，尤其对大型训练数据很友好。另外，当我们的训练数据量比较大的时候，可以将数据分成多个OFRecord文件，来提高处理效率。
 
-关于OFRecord的详细说明请参考：[OFRecord数据格式](https://github.com/Oneflow-Inc/oneflow-documentation/cn/docs/basics_topics/ofrecord.md)
+关于OFRecord的详细说明请参考：[OFRecord数据格式](https://github.com/Oneflow-Inc/oneflow-documentation/blob/master/cn/docs/extended_topics/ofrecord.md)
 
 
 
