@@ -23,38 +23,39 @@ def str2bool(v):
 
 def get_parser(parser=None):
     parser = argparse.ArgumentParser(description='Train GPT-2 on your custom dataset.')
-    
-    parser.add_argument('--hparams_file', metavar='HPARAMS', type=str,  
+
+    parser.add_argument('--hparams_file', metavar='HPARAMS', type=str,
                         help='path of `hparams.json`, use following arguments if absent.')
     parser.add_argument('--n_vocab', type=int, default=50257, help='vocab size')
     parser.add_argument('--n_ctx', type=int, default=1024, help='length of context')
     parser.add_argument('--n_embd', type=int, default=768, help='embedding/hidden size')
     parser.add_argument('--n_head', type=int, default=12, help='number of attention head')
     parser.add_argument('--n_layer', type=int, default=12, help='number of layer')
-    
-    parser.add_argument('--dataset', metavar='PATH', type=str, required=True, 
+
+    parser.add_argument('--dataset', metavar='PATH', type=str, required=True,
                         help='Input file, directory (utf-8 text, or preencoded .npz files).')
-    parser.add_argument('--combine', metavar='CHARS', type=int, default=50000, 
+    parser.add_argument('--combine', metavar='CHARS', type=int, default=50000,
                         help='Concatenate input files with <|endoftext|> separator into chunks of this minimum size')
-    parser.add_argument('--encoding', type=str, default='utf-8', 
+    parser.add_argument('--encoding', type=str, default='utf-8',
                         help='Set the encoding for reading and writing files.')
-    parser.add_argument('--cfg_dir', metavar='CONFIG', type=str, default='models/117M', 
+    parser.add_argument('--cfg_dir', metavar='CONFIG', type=str, default='models/117M',
                         help='folder contains `encoder.json` and `vocab.bpe`')
-                    
+
     parser.add_argument('--batch_size_per_device', metavar='SIZE', type=int, default=1, help='Batch size')
     parser.add_argument('--seq_len', metavar='SEQUENCE', type=int, default=1024, help='sequence length')
     parser.add_argument('--optimizer', type=str, default='adam', help='Optimizer. <adam|sgd>.')
-    parser.add_argument('--learning_rate', metavar='LR', type=float, default=0.00002, 
+    parser.add_argument('--learning_rate', metavar='LR', type=float, default=0.00002,
                         help='Learning rate for Adam')
-    
+
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
     parser.add_argument('--num_nodes', type=int, default=1,
                         help='node/machine number for training')
     parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
                         help='nodes ip list for training, devided by ",", length >= num_nodes')
     parser.add_argument("--ctrl_port", type=int, default=50051, help='ctrl_port for multinode job')
-    
+
     # log and resore/save
+    parser.add_argument("--iter_num", type=int, default=110, help="total iterations to run")
     parser.add_argument("--loss_print_every_n_iter", type=int, default=10, required=False,
         help="print loss every n iteration")
     parser.add_argument("--model_save_every_n_iter", type=int, default=10000, required=False,
@@ -66,7 +67,7 @@ def get_parser(parser=None):
         help="save model snapshot for last iteration")
     parser.add_argument("--model_load_dir", type=str, default=None, help="model load directory")
     parser.add_argument("--log_dir", type=str, default="./output", help="log info save directory")
-    
+
     return parser
 
 
