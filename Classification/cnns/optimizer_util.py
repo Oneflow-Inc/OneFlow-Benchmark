@@ -103,12 +103,14 @@ def set_up_optimizer(loss, args):
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
             print("Optimizer:  AdamW")
+            loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=20);
             flow.optimizer.AdamW(
                 lr_scheduler = lr_scheduler,
                 weight_decay = args.wd,
                 weight_decay_excludes='_bn-',
                 grad_clipping = grad_clipping,
-                epsilon=args.epsilon
+                epsilon=args.epsilon,
+                loss_scale_policy=loss_scale_policy
             ).minimize(loss)
         else:
             print("Optimizer:  Adam")
