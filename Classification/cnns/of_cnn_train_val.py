@@ -86,8 +86,7 @@ def TrainNet():
     else:
         loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
 
-    if not args.use_fp16:
-        loss = flow.math.reduce_mean(loss)
+    loss = flow.math.reduce_mean(loss)
     predictions = flow.nn.softmax(logits)
     outputs = {"loss": loss, "predictions": predictions, "labels": labels}
 

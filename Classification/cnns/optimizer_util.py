@@ -101,9 +101,11 @@ def set_up_optimizer(loss, args):
             grad_clipping = grad_clipping
         ).minimize(loss)
     elif args.optimizer=='adam':
+        loss_scale_policy = None
+        if args.use_fp16:
+            loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
         if args.wd > 0 and args.wd < 1.0 :
             print("Optimizer:  AdamW")
-            loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=20);
             flow.optimizer.AdamW(
                 lr_scheduler = lr_scheduler,
                 weight_decay = args.wd,
@@ -116,7 +118,8 @@ def set_up_optimizer(loss, args):
             print("Optimizer:  Adam")
             flow.optimizer.Adam(lr_scheduler=lr_scheduler,
                 grad_clipping=grad_clipping,
-                epsilon=args.epsilon
+                epsilon=args.epsilon,
+                loss_scale_policy=loss_scale_policy
             ).minimize(loss)
     elif args.optimizer=='rmsprop':
         print("Optimizer:  RMSProp")
