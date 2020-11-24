@@ -30,22 +30,26 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
                               initializer=flow.random_normal_initializer(stddev=w_init_stdev))
         b = flow.get_variable(name='b', shape=[nf], dtype=x.dtype,
                               initializer=flow.constant_initializer(0.0))
-        #if split == 1:
-        #    w = flow.parallel_cast(w, distribute=flow.distribute.split(0))
-        #elif split == 0:
-        #    w = flow.parallel_cast(w, distribute=flow.distribute.split(1))
-        #    b = flow.parallel_cast(b, distribute=flow.distribute.split(0))
+        split = None
+        if split == 0:
+            w = flow.parallel_cast(w, distribute=flow.distribute.split(0))
+        elif split == 1:
+            x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
+            w = flow.parallel_cast(w, distribute=flow.distribute.split(1))
+            b = flow.parallel_cast(b, distribute=flow.distribute.split(0))
 
         c = flow.matmul(flow.reshape(x, [-1, nx]), w)
         c = flow.nn.bias_add(c, b)
+        if split == 0:
+            c = flow.parallel_cast(c, distribute=flow.distribute.broadcast())
         return flow.reshape(c, start + [nf])
 
 def mlp(x, scope, n_state):
     with flow.scope.namespace(scope):
         nx = x.shape[-1]
-        h = conv1d(x, 'c_fc', n_state, split=0)
+        h = conv1d(x, 'c_fc', n_state, split=1)
         h = gelu(h)
-        return conv1d(h, 'c_proj', nx, split=1)
+        return conv1d(h, 'c_proj', nx, split=0)
 
 
 class GPT2(object):
@@ -67,16 +71,16 @@ class GPT2(object):
                                     initializer=flow.random_normal_initializer(stddev=0.01))
             wte = flow.get_variable('wte', [self.n_vocab, self.n_embd],
                                     initializer=flow.random_normal_initializer(stddev=0.02),
-                                    #distribute=flow.distribute.split(1),
+                                    #distribute=flow.distribute.split(0),
             )
-            split = True
+            split = False#True
             if split:
-                wte = flow.parallel_cast(wte, distribute=flow.distribute.split(1))
+                wte = flow.parallel_cast(wte, distribute=flow.distribute.split(0))
                 X = flow.parallel_cast(X, distribute=flow.distribute.broadcast())
             h = flow.gather(wte, X)# + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
             if split:
                 h = flow.parallel_cast(h, distribute=flow.distribute.split(0),
-                                       gradient_distribute=flow.distribute.split(2))
+                                       gradient_distribute=flow.distribute.broadcast())
             h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
             presents = []
             for layer in range(self.n_layer):
@@ -87,9 +91,13 @@ class GPT2(object):
 
             *start, _ = h.shape
             h_flat = flow.reshape(h, [-1, self.n_embd])
+            #if split:
+            #    wte = flow.parallel_cast(wte, distribute=flow.distribute.broadcast())
             if split:
-                wte = flow.parallel_cast(wte, distribute=flow.distribute.broadcast())
+                h_flat = flow.parallel_cast(h_flat, distribute=flow.distribute.broadcast())
             logits = flow.matmul(h_flat, wte, transpose_b=True)
+            if split:
+                logits = flow.parallel_cast(logits, distribute=flow.distribute.split(0))
             logits = flow.reshape(logits, start + [self.n_vocab])
             results['logits'] = logits
         return results 
@@ -145,9 +153,9 @@ class GPT2(object):
         with flow.scope.namespace(scope):
             #c = conv1d(x, 'c_attn', n_state*3)
             #q, k, v = map(split_heads, tf.split(c, 3, axis=2))
-            q = conv1d(x, 'q_attn', n_state, split=0)
-            k = conv1d(x, 'k_attn', n_state, split=0)
-            v = conv1d(x, 'v_attn', n_state, split=0)
+            q = conv1d(x, 'q_attn', n_state, split=1)
+            k = conv1d(x, 'k_attn', n_state, split=1)
+            v = conv1d(x, 'v_attn', n_state, split=1)
             q, k, v = map(split_heads, [q, k, v])
 
             present = [] # TODO: tf.stack([k, v], axis=1)
@@ -157,6 +165,6 @@ class GPT2(object):
                 v = tf.concat([pv, v], axis=-2)
             a = multihead_attn(q, k, v)
             a = merge_heads(a)
-            a = conv1d(a, 'c_proj', n_state, split=1)
+            a = conv1d(a, 'c_proj', n_state, split=0)
             return a, present
 

@@ -28,7 +28,7 @@ def GPT2_Job(X: tp.Numpy.Placeholder((batch_size, args.seq_len), dtype=flow.int6
     gpt2_model = GPT2(args)
     results = gpt2_model.forward(X)
     logits = results['logits']
-    
+
     labels = flow.slice(X, begin=[None, 1], size=[None, seq_len-1])
     logits = flow.slice(logits, begin=[None, 0, None], size=[None, seq_len-1, None])
 
@@ -41,6 +41,7 @@ def GPT2_Job(X: tp.Numpy.Placeholder((batch_size, args.seq_len), dtype=flow.int6
 
 
 def main():
+    flow.config.enable_debug_mode(True)
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.log_dir(args.log_dir)
 
@@ -54,14 +55,15 @@ def main():
     data_sampler = Sampler(chunks, seed=1)
     print('dataset has', data_sampler.total_size, 'tokens')
 
+    metric = util.Metric(desc='train', print_steps=args.loss_print_every_n_iter,
+                         batch_size=batch_size, keys=['loss'])
     print('Training...')
     try:
-        for iter in range(100):
-            b = data_sampler.sample_batch(batch_size, args.seq_len)         
-            output = GPT2_Job(b).get()
-            print(iter, output['loss'].numpy())
+        for iter in range(args.iter_num):
+            b = data_sampler.sample_batch(batch_size, args.seq_len)
+            GPT2_Job(b).async_get(metric.metric_cb(iter))
     except KeyboardInterrupt:
-        snapshot.save("last_snapshot")
+        #snapshot.save("last_snapshot")
         print('interrupted')
 
 if __name__ == '__main__':
