@@ -79,6 +79,9 @@ def main():
     
     for i in range(args.num_epochs):
         for j in range(num_val_steps):
+            if args.use_int8 and j ==10:
+                flow.tensorrt.cache_int8_calibration()
+
             InferenceNet().async_get(metric.metric_cb(0, j))
 
 

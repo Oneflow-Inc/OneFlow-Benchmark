@@ -39,7 +39,6 @@ val_batch_size = total_device_num * args.val_batch_size_per_device
 epoch_size = math.ceil(args.num_examples / train_batch_size)
 num_val_steps = int(args.num_val_examples / val_batch_size)
 
-
 model_dict = {
     "resnet50": resnet_model.resnet50,
     "vgg": vgg_model.vgg16bn,
@@ -126,12 +125,19 @@ def main():
                         batch_size=train_batch_size, loss_key='loss')
         for i in range(epoch_size):
             TrainNet().async_get(metric.metric_cb(epoch, i))
-
+       # flow.tensorrt.write_int8_calibration("./int8_calibration") # mkdir int8_calibration
         if args.val_data_dir:
             metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
                             save_summary_steps=num_val_steps, batch_size=val_batch_size)
-            for i in range(num_val_steps):
+            for i in range(val_batch_size):
+               # if i<=10:
+               #     InferenceNet().get()
+               #     if i ==10:
+               #         flow.tensorrt.cache_int8_calibration()
+               # else:
+               #     InferenceNet().async_get(metric.metric_cb(epoch, i))
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
+
         snapshot.save('epoch_{}'.format(epoch))
 
 

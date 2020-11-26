@@ -68,8 +68,22 @@ def get_parser(parser=None):
         type=str2bool,
         nargs='?',
         const=True,
-        help='Whether to use use xla'
+        help='Whether to use xla'
     )
+    parser.add_argument(
+        '--use_tensorrt',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        help='Whether to use tensorrt'
+        )
+    parser.add_argument(
+        '--use_int8',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        help='Whether to use int8 calibration'
+        )
     parser.add_argument(
         '--channel_last',
         type=str2bool,

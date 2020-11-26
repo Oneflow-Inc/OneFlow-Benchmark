@@ -26,6 +26,14 @@ def _default_config(args):
     if args.use_xla:
         config.use_xla_jit(True)
     config.enable_fuse_add_to_output(True)
+    if args.use_tensorrt:
+        config.use_tensorrt(True)
+        if args.use_int8:
+            config.tensorrt.use_int8()
+    elif args.use_int8:
+        raise Exception("You can set use_int8 only after use_tensorrt is True!")
+   # int8_calibration_path = "./int8_calibration"
+   # config.tensorrt.int8_calibration(int8_calibration_path)    
     return config
 
 
