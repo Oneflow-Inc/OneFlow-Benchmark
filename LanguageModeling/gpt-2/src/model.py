@@ -16,8 +16,8 @@ import oneflow as flow
 def softmax(x, axis=-1):
     return flow.nn.softmax(x, axis=axis)
 
-def gelu(x):
-    return flow.math.gelu(x)
+def gelu(x, name='gelu'):
+    return flow.math.gelu(x, name=name)
 
 def norm(x, scope, *, axis=-1, epsilon=1e-5):
     """Normalize to mean = 0, std = 1, then do a diagonal affine transform."""
@@ -30,7 +30,7 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
                               initializer=flow.random_normal_initializer(stddev=w_init_stdev))
         b = flow.get_variable(name='b', shape=[nf], dtype=x.dtype,
                               initializer=flow.constant_initializer(0.0))
-        split = None
+        #split = None
         if split == 0:
             w = flow.parallel_cast(w, distribute=flow.distribute.split(0))
         elif split == 1:
@@ -38,17 +38,28 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
             w = flow.parallel_cast(w, distribute=flow.distribute.split(1))
             b = flow.parallel_cast(b, distribute=flow.distribute.split(0))
 
-        c = flow.matmul(flow.reshape(x, [-1, nx]), w)
+        if split == 0:
+            parallel_size = flow.current_scope().device_parallel_desc_symbol.parallel_num
+            nx = nx // parallel_size
+
+        c = flow.matmul(flow.reshape(x, [-1, nx], name='reshape1'), w)
         c = flow.nn.bias_add(c, b)
         if split == 0:
             c = flow.parallel_cast(c, distribute=flow.distribute.broadcast())
-        return flow.reshape(c, start + [nf])
+        #elif split == 1:
+        #    c = flow.parallel_cast(c, gradient_distribute=flow.distribute.split(1))
+        print('--------------------', start + [nf])
+        print(c.split_axis)
+        return flow.reshape(c, start + [nf], name='reshape2')
 
 def mlp(x, scope, n_state):
     with flow.scope.namespace(scope):
         nx = x.shape[-1]
+        print('before mlp conv1d x.shape', x.shape, x.split_axis)
         h = conv1d(x, 'c_fc', n_state, split=1)
-        h = gelu(h)
+        print('after mlp conv1d h.shape', h.shape, h.split_axis)
+        h = gelu(h, name='mlp_gelu')
+        print('gelu h.shape=', h.shape, h.split_axis)
         return conv1d(h, 'c_proj', nx, split=0)
 
 
