@@ -21,11 +21,11 @@ import glob
 from sklearn.metrics import roc_auc_score
 import numpy as np
 import time
-from pynvml import *
 
 def str_list(x):
     return x.split(',')
 parser = argparse.ArgumentParser()
+parser.add_argument('--dataset_format', type=str, default='ofrecord', help='ofrecord or onerec')
 parser.add_argument('--train_data_dir', type=str, default='')
 parser.add_argument('--train_data_part_num', type=int, default=1)
 parser.add_argument('--train_part_name_suffix_length', type=int, default=-1)
@@ -59,24 +59,41 @@ FLAGS = parser.parse_args()
 #DEEP_HIDDEN_UNITS = [1024, 1024]#, 1024, 1024, 1024, 1024, 1024]
 DEEP_HIDDEN_UNITS = [FLAGS.hidden_size for i in range(FLAGS.hidden_units_num)]
 
+def _data_loader(data_dir, data_part_num, batch_size, part_name_suffix_length=-1, shuffle=True):
+    if FLAGS.dataset_format == 'ofrecord':
+        return _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_length,
+                                     shuffle) 
+    elif FLAGS.dataset_format == 'onerec':
+        return _data_loader_onerec(data_dir, batch_size, shuffle)
+    elif FLAGS.dataset_format == 'synthetic':
+        return _data_loader_synthetic(batch_size)
+    else:
+        assert 0, "Please specify dataset_type as `ofrecord`, `onerec` or `synthetic`."
+        
+    
 
 def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_length=-1,
                           shuffle=True):
-    if data_dir:
-        ofrecord = flow.data.ofrecord_reader(data_dir,
-                                             batch_size=batch_size,
-                                             data_part_num=data_part_num,
-                                             part_name_suffix_length=part_name_suffix_length,
-                                             random_shuffle=shuffle,
-                                             shuffle_after_epoch=shuffle)
-        def _blob_decoder(bn, shape, dtype=flow.int32):
-            return flow.data.OFRecordRawDecoder(ofrecord, bn, shape=shape, dtype=dtype)
-        labels = _blob_decoder("labels", (1,))
-        dense_fields = _blob_decoder("dense_fields", (FLAGS.num_dense_fields,), flow.float)
-        wide_sparse_fields = _blob_decoder("wide_sparse_fields", (FLAGS.num_wide_sparse_fields,))
-        deep_sparse_fields = _blob_decoder("deep_sparse_fields", (FLAGS.num_deep_sparse_fields,))
-        print('load data form', data_dir)
-    else:
+    assert data_dir
+    print('load ofrecord data form', data_dir)
+    ofrecord = flow.data.ofrecord_reader(data_dir,
+                                         batch_size=batch_size,
+                                         data_part_num=data_part_num,
+                                         part_name_suffix_length=part_name_suffix_length,
+                                         random_shuffle=shuffle,
+                                         shuffle_after_epoch=shuffle)
+    def _blob_decoder(bn, shape, dtype=flow.int32):
+        return flow.data.OFRecordRawDecoder(ofrecord, bn, shape=shape, dtype=dtype)
+    labels = _blob_decoder("labels", (1,))
+    dense_fields = _blob_decoder("dense_fields", (FLAGS.num_dense_fields,), flow.float)
+    wide_sparse_fields = _blob_decoder("wide_sparse_fields", (FLAGS.num_wide_sparse_fields,))
+    deep_sparse_fields = _blob_decoder("deep_sparse_fields", (FLAGS.num_deep_sparse_fields,))
+    return flow.identity_n([labels, dense_fields, wide_sparse_fields, deep_sparse_fields])
+
+
+def _data_loader_synthetic(batch_size):
+    devices = ['{}:0-{}'.format(i, FLAGS.gpu_num_per_node - 1) for i in range(FLAGS.num_nodes)]
+    with flow.scope.placement("cpu", devices):
         def _blob_random(shape, dtype=flow.int32, initializer=flow.zeros_initializer(flow.int32)):
             return flow.data.decode_random(shape=shape, dtype=dtype, batch_size=batch_size, 
                                            initializer=initializer)
@@ -86,7 +103,25 @@ def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_
         wide_sparse_fields = _blob_random((FLAGS.num_wide_sparse_fields,))
         deep_sparse_fields = _blob_random((FLAGS.num_deep_sparse_fields,))
         print('use synthetic data')
+    return flow.identity_n([labels, dense_fields, wide_sparse_fields, deep_sparse_fields])
 
+
+def _data_loader_onerec(data_dir, batch_size, shuffle):
+    assert data_dir
+    print('load onerec data form', data_dir)
+    files = glob.glob(os.path.join(data_dir, '*.onerec'))
+    readdata = flow.data.onerec_reader(files=files, batch_size=batch_size, random_shuffle=shuffle,
+                                       verify_example=False,
+                                       shuffle_buffer_size=64,
+                                       shuffle_after_epoch=shuffle)
+
+    def _blob_decoder(bn, shape, dtype=flow.int32):
+        return flow.data.onerec_decoder(readdata, key=bn, shape=shape, dtype=dtype)
+
+    labels = _blob_decoder('labels', shape=(1,))
+    dense_fields = _blob_decoder("dense_fields", (FLAGS.num_dense_fields,), flow.float)
+    wide_sparse_fields = _blob_decoder("wide_sparse_fields", (FLAGS.num_wide_sparse_fields,))
+    deep_sparse_fields = _blob_decoder("deep_sparse_fields", (FLAGS.num_deep_sparse_fields,))
     return flow.identity_n([labels, dense_fields, wide_sparse_fields, deep_sparse_fields])
 
 
@@ -140,7 +175,6 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
 
 global_loss = 0.0
 def _create_train_callback(step):
-    handle = nvmlDeviceGetHandleByIndex(0)
     def nop(loss):
         global global_loss
         global_loss += loss.mean()
@@ -148,9 +182,8 @@ def _create_train_callback(step):
 
     def print_loss(loss):
         global global_loss
-        info = nvmlDeviceGetMemoryInfo(handle)
         global_loss += loss.mean()
-        print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter, 'mem', info.used)
+        print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter)
         global_loss = 0.0
 
     if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
@@ -174,26 +207,23 @@ def _get_train_conf():
 @flow.global_function('train', _get_train_conf())
 def train_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
-        _data_loader_ofrecord(data_dir=FLAGS.train_data_dir,
-                              data_part_num=FLAGS.train_data_part_num,
-                              batch_size=FLAGS.batch_size,
-                              part_name_suffix_length=FLAGS.train_part_name_suffix_length,
-                              shuffle=True)
+        _data_loader(data_dir=FLAGS.train_data_dir, data_part_num=FLAGS.train_data_part_num, 
+                     batch_size=FLAGS.batch_size, 
+                     part_name_suffix_length=FLAGS.train_part_name_suffix_length, shuffle=True)
     logits = _model(dense_fields, wide_sparse_fields, deep_sparse_fields)
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
     opt = CreateOptimizer(FLAGS)
     opt.minimize(loss)
+    loss = flow.math.reduce_mean(loss)
     return loss
 
 
 @flow.global_function()
 def eval_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
-        _data_loader_ofrecord(data_dir=FLAGS.eval_data_dir,
-                              data_part_num=FLAGS.eval_data_part_num,
-                              batch_size=FLAGS.batch_size,
-                              part_name_suffix_length=FLAGS.eval_part_name_suffix_length,
-                              shuffle=False)
+        _data_loader(data_dir=FLAGS.eval_data_dir, data_part_num=FLAGS.eval_data_part_num,
+                     batch_size=FLAGS.batch_size,
+                     part_name_suffix_length=FLAGS.eval_part_name_suffix_length, shuffle=False)
     logits = _model(dense_fields, wide_sparse_fields, deep_sparse_fields)
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
     predict = flow.math.sigmoid(logits)
@@ -230,6 +260,7 @@ def main():
     flow.config.gpu_device_num(FLAGS.gpu_num_per_node)
     flow.config.enable_model_io_v2(True)
     flow.config.enable_debug_mode(True)
+    flow.config.collective_boxing.nccl_enable_all_to_all(True)
     #flow.config.enable_numa_aware_cuda_malloc_host(True)
     #flow.config.collective_boxing.enable_fusion(False)
     check_point = flow.train.CheckPoint()
@@ -252,7 +283,4 @@ def main():
 
 
 if __name__ == '__main__':
-    nvmlInit()
     main()
-    time.sleep(3)
-    nvmlShutdown()
