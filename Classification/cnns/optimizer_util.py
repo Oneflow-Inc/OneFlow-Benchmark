@@ -94,11 +94,15 @@ def set_up_optimizer(loss, args):
 
     
     # set up optimizer
+    loss_scale_policy = None
+    if args.use_fp16:
+        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
     if args.optimizer=='sgd':
         print("Optimizer:  SGD")
         flow.optimizer.SGD(lr_scheduler,
             momentum=args.momentum if args.momentum>0 else None,
-            grad_clipping = grad_clipping
+            grad_clipping = grad_clipping,
+            loss_scale_policy=loss_scale_policy
         ).minimize(loss)
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
@@ -108,19 +112,22 @@ def set_up_optimizer(loss, args):
                 weight_decay = args.wd,
                 weight_decay_excludes='_bn-',
                 grad_clipping = grad_clipping,
-                epsilon=args.epsilon
+                epsilon=args.epsilon,
+                loss_scale_policy=loss_scale_policy
             ).minimize(loss)
         else:
             print("Optimizer:  Adam")
             flow.optimizer.Adam(lr_scheduler=lr_scheduler,
                 grad_clipping=grad_clipping,
-                epsilon=args.epsilon
+                epsilon=args.epsilon,
+                loss_scale_policy=loss_scale_policy
             ).minimize(loss)
     elif args.optimizer=='rmsprop':
         print("Optimizer:  RMSProp")
         flow.optimizer.RMSProp(lr_scheduler=lr_scheduler,
             decay_rate=args.decay_rate,
-            epsilon=args.epsilon
+            epsilon=args.epsilon,
+            loss_scale_policy=loss_scale_policy
         ).minimize(loss)
 
 
