@@ -20,6 +20,7 @@ def GetFunctionConfig(args):
     #if args.use_xla:
     #    config.use_xla_jit(True)
     config.enable_fuse_add_to_output(True)
+    config.prune_parallel_cast_ops(False)
     config.enable_fuse_model_update_ops(True)
     return config
 
