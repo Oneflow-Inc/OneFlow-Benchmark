@@ -62,6 +62,9 @@ class GPT2(object):
         self.n_layer = args.n_layer
         self.sequence = args.seq_len
         self.batch = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
+        self.embedding_dropout = args.embedding_dropout
+        self.attention_dropout = args.attention_dropout
+        self.output_dropout = args.output_dropout
 
     def forward(self, X, past=None, split=None):
         with flow.scope.namespace(self.scope):
@@ -82,6 +85,9 @@ class GPT2(object):
                 h = flow.parallel_cast(h, distribute=flow.distribute.split(0),
                                        gradient_distribute=flow.distribute.broadcast())
             h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
+            # embedding_dropout
+            if (self.embedding_dropout>0.0):
+                h =  flow.nn.dropout(h, rate=self.embedding_dropout, name="embedding_dropout")
             presents = []
             for layer in range(self.n_layer):
                 h, present = self.block(h, 'h%d' % layer, past=past)
@@ -147,6 +153,9 @@ class GPT2(object):
     
             w = mask_attn_weights(w)
             w = softmax(w)
+            # attention_dropout
+            if (self.attention_dropout>0.0):
+                w = flow.nn.dropout(w, rate=self.attention_dropout, name="attention_dropout")
             a = flow.matmul(w, v)
             return a
 
@@ -166,5 +175,8 @@ class GPT2(object):
             a = multihead_attn(q, k, v)
             a = merge_heads(a)
             a = conv1d(a, 'c_proj', n_state, split=0)
+            # output_dropout
+            if (self.output_dropout>0.0):
+                a =  flow.nn.dropout(a, rate=self.output_dropout, name="output_dropout")
             return a, present
 
