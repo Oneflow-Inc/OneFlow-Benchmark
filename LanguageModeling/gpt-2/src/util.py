@@ -21,6 +21,8 @@ def GetFunctionConfig(args):
     #    config.use_xla_jit(True)
     config.enable_fuse_add_to_output(True)
     config.enable_fuse_model_update_ops(True)
+    # turn on the flag of none-distributed-optimizer
+    config.enable_non_distributed_optimizer(False)
     return config
 
 
