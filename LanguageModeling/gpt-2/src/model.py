@@ -16,8 +16,8 @@ import oneflow as flow
 def softmax(x, axis=-1):
     return flow.nn.softmax(x, axis=axis)
 
-def gelu(x, name='gelu'):
-    return flow.math.gelu(x, name=name)
+def gelu(x):
+    return flow.math.gelu(x)
 
 def norm(x, scope, *, axis=-1, epsilon=1e-5):
     """Normalize to mean = 0, std = 1, then do a diagonal affine transform."""
@@ -25,41 +25,31 @@ def norm(x, scope, *, axis=-1, epsilon=1e-5):
 
 def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
     with flow.scope.namespace(scope):
-        *start, nx = x.shape
-        w = flow.get_variable(name='w', shape=[nx, nf], dtype=x.dtype,
-                              initializer=flow.random_normal_initializer(stddev=w_init_stdev))
-        b = flow.get_variable(name='b', shape=[nf], dtype=x.dtype,
-                              initializer=flow.constant_initializer(0.0))
         #split = None
-        if split == 0:
-            w = flow.parallel_cast(w, distribute=flow.distribute.split(0))
-        elif split == 1:
+        *start, nx = x.shape
+        w_sbp = flow.distribute.split(split) if split == 0 or split == 1 else None
+        b_sbp = flow.distribute.split(0) if split == 1 else None
+        w = flow.get_variable(name='w', shape=[nx, nf], dtype=x.dtype,
+                              initializer=flow.random_normal_initializer(stddev=w_init_stdev),
+                              distribute=w_sbp)
+        b = flow.get_variable(name='b', shape=[nf], dtype=x.dtype,
+                              initializer=flow.constant_initializer(0.0),
+                              distribute=b_sbp)
+        
+        if split == 1:
             x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
-            w = flow.parallel_cast(w, distribute=flow.distribute.split(1))
-            b = flow.parallel_cast(b, distribute=flow.distribute.split(0))
-
-        if split == 0:
-            parallel_size = flow.current_scope().device_parallel_desc_symbol.parallel_num
-            nx = nx // parallel_size
 
         c = flow.matmul(flow.reshape(x, [-1, nx], name='reshape1'), w)
         c = flow.nn.bias_add(c, b)
         if split == 0:
             c = flow.parallel_cast(c, distribute=flow.distribute.broadcast())
-        #elif split == 1:
-        #    c = flow.parallel_cast(c, gradient_distribute=flow.distribute.split(1))
-        print('--------------------', start + [nf])
-        print(c.split_axis)
         return flow.reshape(c, start + [nf], name='reshape2')
 
 def mlp(x, scope, n_state):
     with flow.scope.namespace(scope):
         nx = x.shape[-1]
-        print('before mlp conv1d x.shape', x.shape, x.split_axis)
         h = conv1d(x, 'c_fc', n_state, split=1)
-        print('after mlp conv1d h.shape', h.shape, h.split_axis)
-        h = gelu(h, name='mlp_gelu')
-        print('gelu h.shape=', h.shape, h.split_axis)
+        h = gelu(h)
         return conv1d(h, 'c_proj', nx, split=0)
 
 
@@ -76,6 +66,7 @@ class GPT2(object):
 
     def forward(self, X, past=None, split=None):
         with flow.scope.namespace(self.scope):
+            split = False#True
             results = {}
             flow.identity_n([X])
             wpe = flow.get_variable('wpe', [self.n_ctx, self.n_embd],
@@ -84,7 +75,6 @@ class GPT2(object):
                                     initializer=flow.random_normal_initializer(stddev=0.02),
                                     #distribute=flow.distribute.split(0),
             )
-            split = False#True
             if split:
                 wte = flow.parallel_cast(wte, distribute=flow.distribute.split(0))
                 X = flow.parallel_cast(X, distribute=flow.distribute.broadcast())
