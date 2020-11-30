@@ -68,6 +68,10 @@ def get_parser(parser=None):
     parser.add_argument("--model_load_dir", type=str, default=None, help="model load directory")
     parser.add_argument("--log_dir", type=str, default="./output", help="log info save directory")
 
+    parser.add_argument("--wte_split", type=int, default=-1, help="token embd model split axis")
+    parser.add_argument("--wpe_split", type=int, default=-1, help="pos embd model split axis")
+    parser.add_argument("--is_model_parallel", type=bool, default=False, 
+                        help="is model parallel for decoder blocks")
     return parser
 
 
