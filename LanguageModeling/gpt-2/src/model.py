@@ -86,7 +86,8 @@ class GPT2(object):
                                        gradient_distribute=flow.distribute.broadcast())
             h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
             # embedding_dropout
-            h =  flow.nn.dropout(h, rate=self.embedding_dropout, name="embedding_dropout")
+            if (self.embedding_dropout>0.0):
+                h =  flow.nn.dropout(h, rate=self.embedding_dropout, name="embedding_dropout")
             presents = []
             for layer in range(self.n_layer):
                 h, present = self.block(h, 'h%d' % layer, past=past)
@@ -153,7 +154,8 @@ class GPT2(object):
             w = mask_attn_weights(w)
             w = softmax(w)
             # attention_dropout
-            w = flow.nn.dropout(w, rate=self.attention_dropout, name="attention_dropout")
+            if (self.attention_dropout>0.0):
+                w = flow.nn.dropout(w, rate=self.attention_dropout, name="attention_dropout")
             a = flow.matmul(w, v)
             return a
 
@@ -174,6 +176,7 @@ class GPT2(object):
             a = merge_heads(a)
             a = conv1d(a, 'c_proj', n_state, split=0)
             # output_dropout
-            a =  flow.nn.dropout(a, rate=self.output_dropout, name="output_dropout")
+            if (self.output_dropout>0.0):
+                a =  flow.nn.dropout(a, rate=self.output_dropout, name="output_dropout")
             return a, present
 
