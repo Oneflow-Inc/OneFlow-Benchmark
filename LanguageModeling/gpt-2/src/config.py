@@ -31,6 +31,9 @@ def get_parser(parser=None):
     parser.add_argument('--n_embd', type=int, default=768, help='embedding/hidden size')
     parser.add_argument('--n_head', type=int, default=12, help='number of attention head')
     parser.add_argument('--n_layer', type=int, default=12, help='number of layer')
+    parser.add_argument('--embedding_dropout', type=float, default=0.1,help='embedding dropout rate')
+    parser.add_argument('--output_dropout', type=float, default=0.1,help='output dropout rate')
+    parser.add_argument('--attention_dropout', type=float, default=0.1,help='attention dropout rate')
 
     parser.add_argument('--dataset', metavar='PATH', type=str, required=True,
                         help='Input file, directory (utf-8 text, or preencoded .npz files).')
