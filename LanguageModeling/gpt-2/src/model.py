@@ -82,7 +82,7 @@ class GPT2(object):
 
             h = flow.gather(wte, X)# + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
             h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
-            h =  flow.nn.dropout(h, rate=self.embedding_dropout)#, name="embedding_dropout")
+            h =  flow.nn.dropout(h, rate=self.embedding_dropout)
             presents = []
             for layer in range(self.n_layer):
                 h, present = self.block(h, 'h%d' % layer, past=past)
@@ -147,7 +147,7 @@ class GPT2(object):
     
             w = mask_attn_weights(w)
             w = softmax(w)
-            w = flow.nn.dropout(w, rate=self.attention_dropout)#, name="attention_dropout")
+            w = flow.nn.dropout(w, rate=self.attention_dropout)
             a = flow.matmul(w, v)
             return a
 
@@ -169,7 +169,7 @@ class GPT2(object):
             a = merge_heads(a)
             split = 0 if self.decoder_model_parallel else None 
             a = conv1d(a, 'c_proj', n_state, split=split)
-            a =  flow.nn.dropout(a, rate=self.output_dropout)#, name="output_dropout")
+            a =  flow.nn.dropout(a, rate=self.output_dropout)
             return a, present
 
     def mlp(self, x, scope, n_state):
