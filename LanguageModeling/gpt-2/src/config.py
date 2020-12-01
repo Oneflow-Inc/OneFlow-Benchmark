@@ -73,7 +73,7 @@ def get_parser(parser=None):
 
     parser.add_argument("--wte_split", type=int, default=-1, help="token embd model split axis")
     parser.add_argument("--wpe_split", type=int, default=-1, help="pos embd model split axis")
-    parser.add_argument("--is_model_parallel", type=bool, default=False, 
+    parser.add_argument("--decoder_model_parallel", type=str2bool, default=False, 
                         help="is model parallel for decoder blocks")
     return parser
 

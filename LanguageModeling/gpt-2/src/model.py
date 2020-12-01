@@ -29,6 +29,7 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
         *start, nx = x.shape
         w_sbp = flow.distribute.split(split) if split == 0 or split == 1 else None
         b_sbp = flow.distribute.split(0) if split == 1 else None
+        print(scope, w_sbp, b_sbp)
         w = flow.get_variable(name='w', shape=[nx, nf], dtype=x.dtype,
                               initializer=flow.random_normal_initializer(stddev=w_init_stdev),
                               distribute=w_sbp)
@@ -45,13 +46,6 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
             c = flow.parallel_cast(c, distribute=flow.distribute.broadcast())
         return flow.reshape(c, start + [nf], name='reshape2')
 
-def mlp(x, scope, n_state):
-    with flow.scope.namespace(scope):
-        nx = x.shape[-1]
-        h = conv1d(x, 'c_fc', n_state, split=1)
-        h = gelu(h)
-        return conv1d(h, 'c_proj', nx, split=0)
-
 
 class GPT2(object):
     def __init__(self, args, scope='model'):
@@ -66,29 +60,29 @@ class GPT2(object):
         self.embedding_dropout = args.embedding_dropout
         self.attention_dropout = args.attention_dropout
         self.output_dropout = args.output_dropout
+        assert (args.wte_split in [0, 1]) == (args.wpe_split in [0, 1])
+        self.wte_split = args.wte_split
+        self.wpe_split = args.wpe_split
+        self.decoder_model_parallel = args.decoder_model_parallel
 
     def forward(self, X, past=None, split=None):
         with flow.scope.namespace(self.scope):
-            split = False#True
             results = {}
             flow.identity_n([X])
-            wpe = flow.get_variable('wpe', [self.n_ctx, self.n_embd],
+            embd_model_parallel = self.wte_split in [0, 1]
+            wte_sbp = flow.distribute.split(self.wte_split) if self.wte_split in [0, 1] else None 
+            wpe_sbp = flow.distribute.split(self.wpe_split) if self.wpe_split in [0, 1] else None 
+            print(wte_sbp, wpe_sbp)
+            wpe = flow.get_variable('wpe', [self.n_ctx, self.n_embd], distribute=wpe_sbp, 
                                     initializer=flow.random_normal_initializer(stddev=0.01))
-            wte = flow.get_variable('wte', [self.n_vocab, self.n_embd],
-                                    initializer=flow.random_normal_initializer(stddev=0.02),
-                                    #distribute=flow.distribute.split(0),
-            )
-            if split:
-                wte = flow.parallel_cast(wte, distribute=flow.distribute.split(0))
+            wte = flow.get_variable('wte', [self.n_vocab, self.n_embd], distribute=wte_sbp,
+                                    initializer=flow.random_normal_initializer(stddev=0.02))
+            if embd_model_parallel:
                 X = flow.parallel_cast(X, distribute=flow.distribute.broadcast())
+
             h = flow.gather(wte, X)# + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
-            if split:
-                h = flow.parallel_cast(h, distribute=flow.distribute.split(0),
-                                       gradient_distribute=flow.distribute.broadcast())
             h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
-            # embedding_dropout
-            if (self.embedding_dropout>0.0):
-                h =  flow.nn.dropout(h, rate=self.embedding_dropout, name="embedding_dropout")
+            h =  flow.nn.dropout(h, rate=self.embedding_dropout)#, name="embedding_dropout")
             presents = []
             for layer in range(self.n_layer):
                 h, present = self.block(h, 'h%d' % layer, past=past)
@@ -98,13 +92,12 @@ class GPT2(object):
 
             *start, _ = h.shape
             h_flat = flow.reshape(h, [-1, self.n_embd])
-            #if split:
-            #    wte = flow.parallel_cast(wte, distribute=flow.distribute.broadcast())
-            if split:
+            if embd_model_parallel:
                 h_flat = flow.parallel_cast(h_flat, distribute=flow.distribute.broadcast())
             logits = flow.matmul(h_flat, wte, transpose_b=True)
-            if split:
-                logits = flow.parallel_cast(logits, distribute=flow.distribute.split(0))
+
+            if embd_model_parallel:
+                logits = flow.parallel_cast(logits, distribute=wte_sbp)
             logits = flow.reshape(logits, start + [self.n_vocab])
             results['logits'] = logits
         return results 
@@ -116,7 +109,7 @@ class GPT2(object):
             assert nx == self.n_embd
             a, present = self.attn(norm(x, 'ln_1'), 'attn', nx, past=past)
             x = x + a
-            m = mlp(norm(x, 'ln_2'), 'mlp', nx*4)
+            m = self.mlp(norm(x, 'ln_2'), 'mlp', nx*4)
             x = x + m
             return x, present
 
@@ -154,18 +147,17 @@ class GPT2(object):
     
             w = mask_attn_weights(w)
             w = softmax(w)
-            # attention_dropout
-            if (self.attention_dropout>0.0):
-                w = flow.nn.dropout(w, rate=self.attention_dropout, name="attention_dropout")
+            w = flow.nn.dropout(w, rate=self.attention_dropout)#, name="attention_dropout")
             a = flow.matmul(w, v)
             return a
 
         with flow.scope.namespace(scope):
             #c = conv1d(x, 'c_attn', n_state*3)
             #q, k, v = map(split_heads, tf.split(c, 3, axis=2))
-            q = conv1d(x, 'q_attn', n_state, split=1)
-            k = conv1d(x, 'k_attn', n_state, split=1)
-            v = conv1d(x, 'v_attn', n_state, split=1)
+            split = 1 if self.decoder_model_parallel else None 
+            q = conv1d(x, 'q_attn', n_state, split=split)
+            k = conv1d(x, 'k_attn', n_state, split=split)
+            v = conv1d(x, 'v_attn', n_state, split=split)
             q, k, v = map(split_heads, [q, k, v])
 
             present = [] # TODO: tf.stack([k, v], axis=1)
@@ -175,9 +167,16 @@ class GPT2(object):
                 v = tf.concat([pv, v], axis=-2)
             a = multihead_attn(q, k, v)
             a = merge_heads(a)
-            a = conv1d(a, 'c_proj', n_state, split=0)
-            # output_dropout
-            if (self.output_dropout>0.0):
-                a =  flow.nn.dropout(a, rate=self.output_dropout, name="output_dropout")
+            split = 0 if self.decoder_model_parallel else None 
+            a = conv1d(a, 'c_proj', n_state, split=split)
+            a =  flow.nn.dropout(a, rate=self.output_dropout)#, name="output_dropout")
             return a, present
 
+    def mlp(self, x, scope, n_state):
+        with flow.scope.namespace(scope):
+            split = 1 if self.decoder_model_parallel else None 
+            nx = x.shape[-1]
+            h = conv1d(x, 'c_fc', n_state, split=split)
+            h = gelu(h)
+            split = 0 if self.decoder_model_parallel else None 
+            return conv1d(h, 'c_proj', nx, split=split)
