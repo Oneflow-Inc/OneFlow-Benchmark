@@ -40,6 +40,13 @@ def get_train_config(args):
     else:
         train_config.cudnn_conv_heuristic_search_algo(False)
     train_config.enable_fuse_model_update_ops(True)
+
+    if args.ssp_placement:
+        flow.env.init()
+        train_config.ssp_placement(
+            *[flow.stage(flow.scope.placement("gpu", device_name)) for device_name in args.ssp_placement]
+        )
+
     return train_config
 
 
