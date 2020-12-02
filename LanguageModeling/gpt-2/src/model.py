@@ -134,14 +134,7 @@ class GPT2(object):
             return flow.reshape(x, start + [-1])
     
         def mask_attn_weights(w):
-            # w has shape [batch, heads, dst_sequence, src_sequence], where information flows from src to dst.
-            assert len(w.shape) == 4
-            _, _, nd, ns = w.shape
-            b = flow.math.tril(flow.constant(value=int(-1), dtype=flow.int32, shape=(nd, ns)), ns-nd)
-            b = b + flow.ones_like(like=b, dtype=flow.int32)
-            b = flow.reshape(b, [1, 1, nd, ns])
-            w = flow.masked_fill(w, b, float('-inf'))
-            return w
+            return flow.math.tril(w, fill_value=float('-inf'))
     
         def multihead_attn(q, k, v):
             # q, k, v have shape [batch, heads, sequence, features]
@@ -155,12 +148,11 @@ class GPT2(object):
             return a
 
         with flow.scope.namespace(scope):
-            #c = conv1d(x, 'c_attn', n_state*3)
-            #q, k, v = map(split_heads, tf.split(c, 3, axis=2))
             split = 1 if self.decoder_model_parallel else None 
-            q = conv1d(x, 'q_attn', n_state, split=split)
-            k = conv1d(x, 'k_attn', n_state, split=split)
-            v = conv1d(x, 'v_attn', n_state, split=split)
+            c = conv1d(x, 'c_attn', n_state*3, split=split)
+            q = flow.slice(c, begin=[None, None, 0], size=[None, None, n_state])
+            k = flow.slice(c, begin=[None, None, n_state], size=[None, None, n_state])
+            v = flow.slice(c, begin=[None, None, 2*n_state], size=[None, None, n_state])
             q, k, v = map(split_heads, [q, k, v])
 
             present = [] # TODO: tf.stack([k, v], axis=1)
