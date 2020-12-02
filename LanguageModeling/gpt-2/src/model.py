@@ -64,6 +64,7 @@ class GPT2(object):
         self.wte_split = args.wte_split
         self.wpe_split = args.wpe_split
         self.decoder_model_parallel = args.decoder_model_parallel
+        self.use_fp16 = args.use_fp16
 
     def forward(self, X, past=None, split=None):
         with flow.scope.namespace(self.scope):
@@ -80,6 +81,8 @@ class GPT2(object):
             if embd_model_parallel:
                 X = flow.parallel_cast(X, distribute=flow.distribute.broadcast())
 
+            if self.use_fp16:
+                X = flow.amp_white_identity(X)
             h = flow.gather(wte, X)# + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
             h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
             h =  flow.nn.dropout(h, rate=self.embedding_dropout)
