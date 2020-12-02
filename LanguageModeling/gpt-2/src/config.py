@@ -56,7 +56,7 @@ def get_parser(parser=None):
     parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
                         help='nodes ip list for training, devided by ",", length >= num_nodes')
     parser.add_argument("--ctrl_port", type=int, default=50051, help='ctrl_port for multinode job')
-
+    parser.add_argument('--use_fp16', type=str2bool, default=False, help='Whether to use use fp16')
     # log and resore/save
     parser.add_argument("--iter_num", type=int, default=110, help="total iterations to run")
     parser.add_argument("--loss_print_every_n_iter", type=int, default=10, required=False,

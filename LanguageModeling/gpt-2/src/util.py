@@ -5,8 +5,9 @@ import oneflow as flow
 
 def CreateOptimizer(args):
     lr_scheduler = flow.optimizer.PiecewiseConstantScheduler([], [args.learning_rate])
+    loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=20) if args.use_fp16 else None
     if args.optimizer == 'adam':
-        opt = flow.optimizer.Adam(lr_scheduler, do_bias_correction=True)
+        opt = flow.optimizer.Adam(lr_scheduler, do_bias_correction=True, loss_scale_policy=loss_scale_policy)
     elif args.optimizer == 'sgd':
         opt = flow.optimizer.SGD(lr_scheduler, momentum=0.0)
     else:
@@ -19,6 +20,8 @@ def GetFunctionConfig(args):
     #config.enable_auto_mixed_precision(args.use_fp16)
     #if args.use_xla:
     #    config.use_xla_jit(True)
+    if args.use_fp16:
+        config.enable_auto_mixed_precision(True)
     config.enable_fuse_add_to_output(True)
     config.prune_parallel_cast_ops(False)
     config.enable_fuse_model_update_ops(True)
@@ -39,7 +42,7 @@ def InitNodes(args):
 
         flow.env.machine(nodes)
 
-class Snapshot(object):
+class Snapshot_new(object):
     def __init__(self, model_save_dir, model_load_dir):
         self._model_save_dir = model_save_dir
         if model_load_dir:
@@ -51,6 +54,25 @@ class Snapshot(object):
         #    self._check_point.init()
         #    #self.save('initial_model')
         #    print("Init model on demand.")
+class Snapshot(object):
+    def __init__(self, model_save_dir, model_load_dir):
+        self._model_save_dir = model_save_dir
+        self._check_point = flow.train.CheckPoint()
+        if model_load_dir:
+            assert os.path.isdir(model_load_dir)
+            print("Restoring model from {}.".format(model_load_dir))
+            self._check_point.load(model_load_dir)
+        else:
+            self._check_point.init()
+            #self.save('initial_model')
+            print("Init model on demand.")
+
+    def save(self, name):
+        snapshot_save_path = os.path.join(self._model_save_dir, "snapshot_{}".format(name))
+        if not os.path.exists(snapshot_save_path):
+            os.makedirs(snapshot_save_path)
+        print("Saving model to {}.".format(snapshot_save_path))
+        self._check_point.save(snapshot_save_path)
 
     def save(self, name):
         snapshot_save_path = os.path.join(self._model_save_dir, "snapshot_{}".format(name))
