@@ -16,10 +16,13 @@ else
 fi
 echo DATA_ROOT=$DATA_ROOT
 
-SSP_PLACEMENT=${3:-""}
+BATCH_SIZE=${3:-""}
+echo BATCH_SIZE=$BATCH_SIZE
+
+SSP_PLACEMENT=${4:-""}
 echo SSP_PLACEMENT=$SSP_PLACEMENT
 
-MODEL_NAME=${4:-"alexnet"}
+MODEL_NAME=${5:-"alexnet"}
 echo MODEL_NAME=$MODEL_NAME
 
 LOG_FOLDER=../logs
@@ -42,7 +45,7 @@ python3 of_ssp_cnn_train_val.py \
      --label_smoothing=0.1 \
      --learning_rate=0.768 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=32 \
+     --batch_size_per_device=$BATCH_SIZE \
      --val_batch_size_per_device=50 \
      --channel_last=False \
      --fuse_bn_relu=True \
