@@ -52,7 +52,8 @@ def convert():
             for k, v in zip(['q_attn', 'k_attn', 'v_attn'], np.split(array, 3, axis=-1)):
                 new_op_name = op_name.replace('c_attn', k) + '-' + blob_name
                 _SaveWeightBlob2File(v, new_op_name)
-            continue
+            #continue
+            op_name = op_name + '-' + blob_name
         else:
             op_name = op_name + '-' + blob_name
 
