@@ -37,7 +37,7 @@ python3 of_ssp_cnn_train_val.py \
      --train_data_dir=$DATA_ROOT/train \
      --train_data_part_num=256 \
      --num_nodes=2 \
-     --gpu_num_per_node=8 \
+     --gpu_num_per_node=4 \
      --node_ips=$NODE_IPS \
      --ssp_placement=$SSP_PLACEMENT \
      --optimizer="sgd" \
