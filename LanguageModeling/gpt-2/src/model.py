@@ -165,7 +165,7 @@ class GPT2(object):
             a = merge_heads(a)
             split = 0 if self.decoder_model_parallel else None 
             a = conv1d(a, 'c_proj', n_state, split=split)
-            a =  flow.nn.dropout(a, rate=self.output_dropout)
+            a = flow.nn.dropout(a, rate=self.output_dropout)
             return a, present
 
     def mlp(self, x, scope, n_state):
@@ -175,4 +175,5 @@ class GPT2(object):
             h = conv1d(x, 'c_fc', n_state, split=split)
             h = gelu(h)
             split = 0 if self.decoder_model_parallel else None 
-            return conv1d(h, 'c_proj', nx, split=split)
+            h = conv1d(h, 'c_proj', nx, split=split)
+            return flow.nn.dropout(h, rate=self.output_dropout)
