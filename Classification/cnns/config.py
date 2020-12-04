@@ -27,6 +27,8 @@ def get_parser(parser=None):
         return x.split(',')
     
     def str1_list(x):
+        if not x:
+            return None
         return x.split('.')
 
     def int_list(x):
