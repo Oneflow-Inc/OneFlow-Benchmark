@@ -80,6 +80,20 @@ def get_parser(parser=None):
     parser.add_argument('--make-vocab-size-divisible-by', type=int, default=128,
                         help='Pad the vocab size to be divisible by this value.'
                         'This is added for computational efficieny reasons.')
+
+    # optimizer args
+    parser.add_argument('--weight-decay', type=float, default=0.01,
+                        help='Weight decay coefficient for L2 regularization.')
+    parser.add_argument('--clip-grad', type=float, default=1.0,
+                        help='Gradient clipping based on global L2 norm.')
+    parser.add_argument('--adam-beta1', type=float, default=0.9,
+                        help='First coefficient for computing running averages of'
+                        'gradient and its square')
+    parser.add_argument('--adam-beta2', type=float, default=0.999,
+                        help='Second coefficient for computing running averages of'
+                        'gradient and its square')
+    parser.add_argument('--adam-eps', type=float, default=1e-08,
+                        help='Term added to the denominator to improve numerical stability')
     return parser
 
 

@@ -10,6 +10,12 @@ def CreateOptimizer(args):
         opt = flow.optimizer.Adam(lr_scheduler, do_bias_correction=True, loss_scale_policy=loss_scale_policy)
     elif args.optimizer == 'sgd':
         opt = flow.optimizer.SGD(lr_scheduler, momentum=0.0)
+    elif args.optimizer == 'adamw':
+        opt = flow.optimizer.AdamW(lr_scheduler, do_bias_correction=True, loss_scale_policy=loss_scale_policy,
+                                   beta1=args.adam_beta1, beta2=args.adam_beta2, epsilon=args.adam_eps, 
+                                   weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
+                                   weight_decay=args.weight_decay,
+                                   grad_clipping=flow.optimizer.grad_clipping.by_global_norm(args.clip_grad))
     else:
         exit('Bad optimizer:', args.optimizer)
     return opt
