@@ -30,10 +30,10 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
         w_sbp = flow.distribute.split(split) if split == 0 or split == 1 else None
         b_sbp = flow.distribute.split(0) if split == 1 else None
         print(scope, w_sbp, b_sbp)
-        w = flow.get_variable(name='w', shape=[nx, nf], dtype=x.dtype,
+        w = flow.get_variable(name='weight', shape=[nx, nf], dtype=x.dtype,
                               initializer=flow.random_normal_initializer(stddev=w_init_stdev),
                               distribute=w_sbp)
-        b = flow.get_variable(name='b', shape=[nf], dtype=x.dtype,
+        b = flow.get_variable(name='bias', shape=[nf], dtype=x.dtype,
                               initializer=flow.constant_initializer(0.0),
                               distribute=b_sbp)
         
@@ -92,7 +92,7 @@ class GPT2(object):
                 h, present = self.block(h, 'h%d' % layer, past=past)
                 presents.append(present)
             results['presents'] = presents
-            h = norm(h, 'ln_f')
+            h = norm(h, 'layernorm_f')
 
             *start, _ = h.shape
             h_flat = flow.reshape(h, [-1, self.n_embd])
@@ -111,9 +111,9 @@ class GPT2(object):
         with flow.scope.namespace(scope):
             nx = x.shape[-1]
             assert nx == self.n_embd
-            a, present = self.attn(norm(x, 'ln_1'), 'attn', nx, past=past)
+            a, present = self.attn(norm(x, 'layernorm_1'), 'attn', nx, past=past)
             x = x + a
-            m = self.mlp(norm(x, 'ln_2'), 'mlp', nx*4)
+            m = self.mlp(norm(x, 'layernorm_2'), 'mlp', nx*4)
             x = x + m
             return x, present
 
