@@ -25,6 +25,9 @@ from ofrecord_util import add_ofrecord_args
 def get_parser(parser=None):
     def str_list(x):
         return x.split(',')
+    
+    def str1_list(x):
+        return x.split('.')
 
     def int_list(x):
         return list(map(int, x.split(',')))
@@ -53,7 +56,8 @@ def get_parser(parser=None):
     parser.add_argument('--node_ips', type=str_list, default=['192.168.1.13', '192.168.1.14'],
                         help='nodes ip list for training, devided by ",", length >= num_nodes')
     parser.add_argument("--ctrl_port", type=int, default=50051, help='ctrl_port for multinode job')
-
+    parser.add_argument('--ssp_placement', type=str1_list, default=[],
+                        help='stage partition strategy list for placement, devided by ".", stage is 2 : "0:0-7,1:0-6"|"1-7')
     parser.add_argument("--model", type=str, default="resnet50",
                         help="resnet50")
     parser.add_argument(
