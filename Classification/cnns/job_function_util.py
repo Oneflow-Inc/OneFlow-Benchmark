@@ -43,8 +43,8 @@ def get_train_config(args):
 
     if args.ssp_placement:
         flow.env.init()
-        train_config.ssp_placement(
-            *[flow.stage(flow.scope.placement("gpu", device_name)) for device_name in args.ssp_placement]
+        train_config.ssp_stage(
+            *[flow.stage(*[flow.scope.placement("gpu", device_name.split(','))]*1) for device_name in args.ssp_placement]
         )
 
     return train_config

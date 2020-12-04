@@ -109,7 +109,7 @@ def main():
         for i in range(epoch_size):
             TrainNet().async_get(metric.metric_cb(epoch, i))
 
-        snapshot.save('epoch_{}'.format(epoch))
+        #snapshot.save('epoch_{}'.format(epoch))
 
 
 if __name__ == "__main__":

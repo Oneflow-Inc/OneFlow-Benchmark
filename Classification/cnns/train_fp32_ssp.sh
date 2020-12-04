@@ -8,26 +8,25 @@ else
 fi
 echo NUM_EPOCH=$NUM_EPOCH
 
-# training with imagenet
-if [ -n "$2" ]; then
-    DATA_ROOT=$2
-else
-    DATA_ROOT=/data/imagenet/ofrecord
-fi
-echo DATA_ROOT=$DATA_ROOT
-
-BATCH_SIZE=${3:-""}
+BATCH_SIZE=${2:-""}
 echo BATCH_SIZE=$BATCH_SIZE
 
-SSP_PLACEMENT=${4:-""}
+SSP_PLACEMENT=${3:-""}
 echo SSP_PLACEMENT=$SSP_PLACEMENT
 
-MODEL_NAME=${5:-"alexnet"}
+MODEL_NAME=${4:-"alexnet"}
 echo MODEL_NAME=$MODEL_NAME
 
-LOG_FOLDER=../logs
+# training with imagenet
+DATA_ROOT=${5:-""}
+echo DATA_ROOT=$DATA_ROOT
+
+NODE_IPS=${6:-"192.168.1.12,192.168.1.13"}
+echo NODE_IPS=$NODE_IPS
+
+LOG_FOLDER=./logs
 mkdir -p $LOG_FOLDER
-LOGFILE=$LOG_FOLDER/resnet_training.log
+LOGFILE=$LOG_FOLDER/{$MODEL_NAME}_training.log
 
 export PYTHONUNBUFFERED=1
 echo PYTHONUNBUFFERED=$PYTHONUNBUFFERED
@@ -39,6 +38,7 @@ python3 of_ssp_cnn_train_val.py \
      --train_data_part_num=256 \
      --num_nodes=2 \
      --gpu_num_per_node=8 \
+     --node_ips=$NODE_IPS \
      --ssp_placement=$SSP_PLACEMENT \
      --optimizer="sgd" \
      --momentum=0.875 \
