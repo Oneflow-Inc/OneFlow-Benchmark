@@ -41,19 +41,17 @@ def convert():
         op_name = name[:sep]
         op_name = op_name.replace('/', '-')
         if 'ln_' in op_name:
+            op_name = op_name.replace('ln_', 'layernorm_')
             if blob_name.endswith('b'):
                 op_name = op_name + '-beta'  
             elif blob_name.endswith('g'):
                 op_name = op_name + '-gamma'  
             else:
                 assert 0
-        elif 'c_attn' in op_name:                
-            # split to q k v
-            for k, v in zip(['q_attn', 'k_attn', 'v_attn'], np.split(array, 3, axis=-1)):
-                new_op_name = op_name.replace('c_attn', k) + '-' + blob_name
-                _SaveWeightBlob2File(v, new_op_name)
-            #continue
-            op_name = op_name + '-' + blob_name
+        elif blob_name.endswith('b'):                
+            op_name = op_name + '-' + 'bias' 
+        elif blob_name.endswith('w'):                
+            op_name = op_name + '-' + 'weight' 
         else:
             op_name = op_name + '-' + blob_name
 
