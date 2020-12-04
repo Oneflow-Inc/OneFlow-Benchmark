@@ -75,6 +75,11 @@ def get_parser(parser=None):
     parser.add_argument("--wpe_split", type=int, default=-1, help="pos embd model split axis")
     parser.add_argument("--decoder_model_parallel", type=str2bool, default=False, 
                         help="is model parallel for decoder blocks")
+    #parser.add_argument('--model-parallel-size', type=int, default=1,
+    #                    help='Size of the model parallel.')
+    parser.add_argument('--make-vocab-size-divisible-by', type=int, default=128,
+                        help='Pad the vocab size to be divisible by this value.'
+                        'This is added for computational efficieny reasons.')
     return parser
 
 
@@ -90,6 +95,23 @@ def print_args(args):
         str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
 
 
+def _vocab_size_with_padding(orig_vocab_size, args):
+    """Pad vocab size so it is divisible by model parallel size and
+    still having GPU friendly size."""
+
+    if args.make_vocab_size_divisible_by == 0:
+        return orig_vocab_size
+    num_devices = args.num_nodes * args.gpu_num_per_node 
+    embd_model_parallel_size = num_devices if args.wte_split in [0, 1] else 1
+    after = orig_vocab_size
+    multiple = args.make_vocab_size_divisible_by * embd_model_parallel_size
+    while (after % multiple) != 0:
+        after += 1
+    print(' > padded vocab (size: {}) with {} dummy tokens '
+          '(new size: {})'.format(orig_vocab_size, after - orig_vocab_size, after), flush=True)
+    return after
+
+
 def get_args():
     parser = get_parser()
     args = parser.parse_args()
@@ -103,6 +125,7 @@ def get_args():
             args.n_embd = hparams['n_embd']
             args.n_head = hparams['n_head']
             args.n_layer = hparams['n_layer']
+    args.padded_vocab_size = _vocab_size_with_padding(args.n_vocab, args)
     print_args(args)
     return args
 

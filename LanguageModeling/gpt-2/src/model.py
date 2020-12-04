@@ -50,7 +50,8 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
 class GPT2(object):
     def __init__(self, args, scope='model'):
         self.scope = scope
-        self.n_vocab = args.n_vocab
+        #self.n_vocab = args.n_vocab
+        self.n_vocab = args.padded_vocab_size
         self.n_ctx = args.n_ctx
         self.n_embd = args.n_embd
         self.n_head = args.n_head
