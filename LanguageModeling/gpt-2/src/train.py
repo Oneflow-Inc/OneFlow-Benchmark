@@ -34,7 +34,7 @@ def GPT2_Job(X: tp.Numpy.Placeholder((batch_size, args.seq_len), dtype=flow.int6
 
     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
     #loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels=X[:, 1:], logits=logits[:, :-1])
-    loss = flow.math.reduce_mean(loss)
+    loss = flow.math.reduce_mean(loss, axis=-1)
     opt = util.CreateOptimizer(args)
     opt.minimize(loss)
     return {'loss': loss}
