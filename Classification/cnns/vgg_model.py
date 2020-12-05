@@ -96,7 +96,7 @@ def _conv_block(in_blob, index, filters, conv_times, data_format="NCHW"):
             strides=1,
             data_format=data_format,
             weight_initializer=weight_initializer,
-            bn=True,
+            bn=False,
         )
 
         conv_block.append(conv_i)
