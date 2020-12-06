@@ -57,7 +57,8 @@ class GPT2(object):
         self.n_head = args.n_head
         self.n_layer = args.n_layer
         self.sequence = args.seq_len
-        self.batch = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
+        #self.batch = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
+        self.batch = args.batch_size
         self.embedding_dropout = args.embedding_dropout
         self.attention_dropout = args.attention_dropout
         self.output_dropout = args.output_dropout

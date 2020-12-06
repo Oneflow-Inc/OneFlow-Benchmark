@@ -20,10 +20,11 @@ import oneflow as flow
 
 args = configs.get_args()
 
-batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
+#batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
+args.batch_size = args.total_batch_size
 
 @flow.global_function("train", util.GetFunctionConfig(args))
-def GPT2_Job(X: tp.Numpy.Placeholder((batch_size, args.seq_len), dtype=flow.int64)):
+def GPT2_Job(X: tp.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow.int64)):
     bsz, seq_len = X.shape
     gpt2_model = GPT2(args)
     results = gpt2_model.forward(X)
@@ -57,11 +58,11 @@ def main():
     print('dataset has', data_sampler.total_size, 'tokens')
 
     metric = util.Metric(desc='train', print_steps=args.loss_print_every_n_iter,
-                         batch_size=batch_size, keys=['loss'])
+                         batch_size=args.batch_size, keys=['loss'])
     print('Training...')
     try:
         for iter in range(args.iter_num):
-            b = data_sampler.sample_batch(batch_size, args.seq_len)
+            b = data_sampler.sample_batch(args.batch_size, args.seq_len)
             GPT2_Job(b).async_get(metric.metric_cb(iter))
     except KeyboardInterrupt:
         #snapshot.save("last_snapshot")
