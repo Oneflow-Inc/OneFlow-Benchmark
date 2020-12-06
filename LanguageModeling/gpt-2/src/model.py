@@ -144,9 +144,10 @@ class GPT2(object):
         def multihead_attn(q, k, v):
             # q, k, v have shape [batch, heads, sequence, features]
             w = flow.matmul(q, k, transpose_b=True)
-            w = w * (1.0 / math.sqrt(float(v.shape[-1])))
+            #w = w * (1.0 / math.sqrt(float(v.shape[-1])))
     
-            w = mask_attn_weights(w)
+            #w = mask_attn_weights(w)
+            w = flow.math.fused_scale_tril(w, fill_value=float('-inf'), scale=(1.0 / math.sqrt(float(v.shape[-1]))))
             w = softmax(w)
             w = flow.nn.dropout(w, rate=self.attention_dropout)
             a = flow.matmul(w, v)
