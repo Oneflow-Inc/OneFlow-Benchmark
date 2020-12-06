@@ -28,11 +28,13 @@ def GetFunctionConfig(args):
     #    config.use_xla_jit(True)
     if args.use_fp16:
         config.enable_auto_mixed_precision(True)
+    if args.non_distributed_optimizer == 'on':
+        config.train.optimizer_placement_optimization_mode("distributed_split")
     config.enable_fuse_add_to_output(True)
     #config.prune_parallel_cast_ops(False)
     config.enable_fuse_model_update_ops(True)
     # turn on the flag of none-distributed-optimizer
-    config.enable_non_distributed_optimizer(False)
+    # config.enable_non_distributed_optimizer(False)
     return config
 
 

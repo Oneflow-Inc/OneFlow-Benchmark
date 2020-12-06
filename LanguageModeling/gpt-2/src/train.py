@@ -42,8 +42,11 @@ def GPT2_Job(X: tp.Numpy.Placeholder((batch_size, args.seq_len), dtype=flow.int6
 
 
 def main():
-    flow.config.enable_debug_mode(True)
+    # flow.config.enable_debug_mode(True)
     flow.config.gpu_device_num(args.gpu_num_per_node)
+    flow.config.collective_boxing.nccl_fusion_reduce_scatter(True)
+    flow.config.collective_boxing.nccl_fusion_all_gather(True)
+    flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
     flow.env.log_dir(args.log_dir)
 
     util.InitNodes(args)

@@ -34,6 +34,8 @@ def get_parser(parser=None):
     parser.add_argument('--embedding_dropout', type=float, default=0.1,help='embedding dropout rate')
     parser.add_argument('--output_dropout', type=float, default=0.1,help='output dropout rate')
     parser.add_argument('--attention_dropout', type=float, default=0.1,help='attention dropout rate')
+    parser.add_argument('--non_distributed_optimizer',  type=str, required=False, default='off',
+                        help=' Use non_distributed_optimizer mode or not')
 
     parser.add_argument('--dataset', metavar='PATH', type=str, required=True,
                         help='Input file, directory (utf-8 text, or preencoded .npz files).')

@@ -111,14 +111,23 @@ class GPT2(object):
     def block(self, x, scope, *, past):
         with flow.scope.namespace(scope):
             x = flow.identity(x)
-            with flow.experimental.scope.config(checkpointing = self.checkpoint_activations):
-                nx = x.shape[-1]
-                assert nx == self.n_embd
-                a, present = self.attn(norm(x, 'layernorm_1'), 'attn', nx, past=past)
-                x = x + a
-                m = self.mlp(norm(x, 'layernorm_2'), 'mlp', nx*4)
-                x = x + m
-                return x, present
+
+            nx = x.shape[-1]
+            assert nx == self.n_embd
+            a, present = self.attn(norm(x, 'layernorm_1'), 'attn', nx, past=past)
+            x = x + a
+            m = self.mlp(norm(x, 'layernorm_2'), 'mlp', nx*4)
+            x = x + m
+            return x, present
+
+            # with flow.experimental.scope.config(checkpointing = self.checkpoint_activations):
+            #     nx = x.shape[-1]
+            #     assert nx == self.n_embd
+            #     a, present = self.attn(norm(x, 'layernorm_1'), 'attn', nx, past=past)
+            #     x = x + a
+            #     m = self.mlp(norm(x, 'layernorm_2'), 'mlp', nx*4)
+            #     x = x + m
+            #     return x, present
 
     def attn(self, x, scope, n_state, *, past):
         assert len(x.shape) == 3  # Should be [batch, sequence, features]
@@ -143,9 +152,10 @@ class GPT2(object):
         def multihead_attn(q, k, v):
             # q, k, v have shape [batch, heads, sequence, features]
             w = flow.matmul(q, k, transpose_b=True)
-            w = w * (1.0 / math.sqrt(float(v.shape[-1])))
-    
-            w = mask_attn_weights(w)
+            
+            w = flow.math.fused_scale_tril(w, fill_value=float('-inf'), scale=(1.0 / math.sqrt(float(v.shape[-1]))))
+            # w = w * (1.0 / math.sqrt(float(v.shape[-1])))
+            # w = mask_attn_weights(w)
             w = softmax(w)
             w = flow.nn.dropout(w, rate=self.attention_dropout)
             a = flow.matmul(w, v)
