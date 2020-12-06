@@ -49,6 +49,10 @@ def get_parser(parser=None):
     parser.add_argument('--optimizer', type=str, default='adam', help='Optimizer. <adam|sgd>.')
     parser.add_argument('--learning_rate', metavar='LR', type=float, default=0.00002,
                         help='Learning rate for Adam')
+    parser.add_argument('--checkpoint-activations', action='store_true',
+                        help='Checkpoint activation to allow for training '
+                        'with larger models, sequences, and batch sizes.')
+
 
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
     parser.add_argument('--num_nodes', type=int, default=1,

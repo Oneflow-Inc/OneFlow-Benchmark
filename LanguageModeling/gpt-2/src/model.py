@@ -66,6 +66,7 @@ class GPT2(object):
         self.wpe_split = args.wpe_split
         self.decoder_model_parallel = args.decoder_model_parallel
         self.use_fp16 = args.use_fp16
+        self.checkpoint_activations = args.checkpoint_activations
 
     def forward(self, X, past=None, split=None):
         with flow.scope.namespace(self.scope):
@@ -109,13 +110,15 @@ class GPT2(object):
     #def vocab_embedding(self, X, split=None):
     def block(self, x, scope, *, past):
         with flow.scope.namespace(scope):
-            nx = x.shape[-1]
-            assert nx == self.n_embd
-            a, present = self.attn(norm(x, 'layernorm_1'), 'attn', nx, past=past)
-            x = x + a
-            m = self.mlp(norm(x, 'layernorm_2'), 'mlp', nx*4)
-            x = x + m
-            return x, present
+            x = flow.identity(x)
+            with flow.experimental.scope.config(checkpointing = self.checkpoint_activations):
+                nx = x.shape[-1]
+                assert nx == self.n_embd
+                a, present = self.attn(norm(x, 'layernorm_1'), 'attn', nx, past=past)
+                x = x + a
+                m = self.mlp(norm(x, 'layernorm_2'), 'mlp', nx*4)
+                x = x + m
+                return x, present
 
     def attn(self, x, scope, n_state, *, past):
         assert len(x.shape) == 3  # Should be [batch, sequence, features]
