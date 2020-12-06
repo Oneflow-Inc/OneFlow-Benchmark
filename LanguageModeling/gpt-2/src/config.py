@@ -38,7 +38,8 @@ def get_parser(parser=None):
     parser.add_argument('--dataset', metavar='PATH', type=str, required=True,
                         help='Input file, directory (utf-8 text, or preencoded .npz files).')
     parser.add_argument('--combine', metavar='CHARS', type=int, default=50000,
-                        help='Concatenate input files with <|endoftext|> separator into chunks of this minimum size')
+                        help='Concatenate input files with <|endoftext|> '
+                        'separator into chunks of this minimum size')
     parser.add_argument('--encoding', type=str, default='utf-8',
                         help='Set the encoding for reading and writing files.')
     parser.add_argument('--cfg_dir', metavar='CONFIG', type=str, default='models/117M',
