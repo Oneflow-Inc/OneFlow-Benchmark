@@ -1,6 +1,6 @@
 non_distributed_optimizer=${1:-"off"}
 gpus=${2:-0,1,2,3,4,5,6,7}
-batch_size_per_device=${3:-1}
+batch_size_per_device=${3:-4}
 dtype=${4:-"fp16"}
 
 a=`expr ${#gpus} + 1`
@@ -10,7 +10,7 @@ export CUDA_VISIBLE_DEVICES=${gpus}
 export PYTHONUNBUFFERED=1
 export ONEFLOW_DEBUG_MODE=1
 
-# gpt2-medium
+# gpt2-small
 n_head=12
 n_embd=768
 n_layer=12
@@ -28,8 +28,8 @@ else
     use_fp16=False
 fi
 
-PREFIX=1207-test-16
-test_case=${PREFIX}_oneflow_gpt2-medium_${dtype}_${num_node}n${gpu_num_per_node}g_bz${batch_size_per_device}_${non_distributed_optimizer}
+PREFIX=1207-test-oneflow-gpt2-small
+test_case=${PREFIX}_${dtype}_${num_node}n${gpu_num_per_node}g_bz${batch_size_per_device}_${non_distributed_optimizer}
 mem_file=$test_case.mem
 log_file=$test_case.log
 output_dir=${PREFIX}_output_${non_distributed_optimizer}_distributed_split_${num_node}n${gpu_num_per_node}g_bz${batch_size_per_device}
