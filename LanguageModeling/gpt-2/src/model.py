@@ -24,7 +24,8 @@ def norm(x, scope, *, axis=-1, epsilon=1e-5):
     return flow.layers.layer_norm(x, name=scope, begin_norm_axis=axis, epsilon=epsilon)
 
 def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
-    with flow.scope.namespace(scope):
+    #with flow.scope.namespace(scope):
+    with flow.scope.namespace(scope), flow.experimental.scope.config(checkpointing=False):
         #split = None
         *start, nx = x.shape
         w_sbp = flow.distribute.split(split) if split == 0 or split == 1 else None
@@ -41,9 +42,10 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
             x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
 
         c = flow.matmul(flow.reshape(x, [-1, nx], name='reshape1'), w)
-        c = flow.nn.bias_add(c, b)
         if split == 0:
-            c = flow.parallel_cast(c, distribute=flow.distribute.broadcast())
+            c = flow.parallel_cast(c, distribute=flow.distribute.broadcast(),
+                                   gradient_distribute=flow.distribute.broadcast())
+        c = flow.nn.bias_add(c, b)
         return flow.reshape(c, start + [nf], name='reshape2')
 
 
@@ -72,7 +74,6 @@ class GPT2(object):
     def forward(self, X, past=None, split=None):
         with flow.scope.namespace(self.scope):
             results = {}
-            flow.identity_n([X])
             embd_model_parallel = self.wte_split in [0, 1]
             wte_sbp = flow.distribute.split(self.wte_split) if self.wte_split in [0, 1] else None 
             wpe_sbp = flow.distribute.split(self.wpe_split) if self.wpe_split in [0, 1] else None 
@@ -86,9 +87,11 @@ class GPT2(object):
 
             if self.use_fp16:
                 X = flow.amp_white_identity(X)
+                wpe = flow.amp_white_identity(wpe)
+
             h = flow.gather(wte, X)# + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
             h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
-            h =  flow.nn.dropout(h, rate=self.embedding_dropout)
+            h = flow.nn.dropout(h, rate=self.embedding_dropout)
             presents = []
             for layer in range(self.n_layer):
                 h, present = self.block(h, 'h%d' % layer, past=past)
@@ -130,12 +133,14 @@ class GPT2(object):
         def split_heads(x):
             # From [batch, sequence, features] to [batch, heads, sequence, features]
             *start, _ = x.shape
-            return flow.transpose(flow.reshape(x, start + [self.n_head, -1]), perm=[0, 2, 1, 3])
+            x = flow.reshape(x, start + [self.n_head, -1])
+            print('x.split_axis =', x.split_axis)
+            return flow.transpose(x, perm=[0, 2, 1, 3])
     
         def merge_heads(x):
             # Reverse of split_heads
             x = flow.transpose(x, [0, 2, 1, 3])
-            *start, _, _ = x.shape
+            *start, _, _, = x.shape
             return flow.reshape(x, start + [-1])
     
         def mask_attn_weights(w):
@@ -155,10 +160,22 @@ class GPT2(object):
 
         with flow.scope.namespace(scope):
             split = 1 if self.decoder_model_parallel else None 
-            c = conv1d(x, 'c_attn', n_state*3, split=split)
-            q = flow.slice(c, begin=[None, None, 0], size=[None, None, n_state])
-            k = flow.slice(c, begin=[None, None, n_state], size=[None, None, n_state])
-            v = flow.slice(c, begin=[None, None, 2*n_state], size=[None, None, n_state])
+            use_big_fc = False
+            if use_big_fc:
+                c = conv1d(x, 'c_attn', n_state*3, split=split)
+
+                *start, _ = c.shape
+                print('c.shape =', c.shape)
+                print('n_state =', n_state)
+                c = flow.reshape(c, start + [3, n_state], name='reshape_before_slice')
+                q = flow.slice(c, begin=[None, None, 0, None], size=[None, None, 1, None])
+                k = flow.slice(c, begin=[None, None, 1, None], size=[None, None, 1, None])
+                v = flow.slice(c, begin=[None, None, 2, None], size=[None, None, 1, None])
+            else:
+                q = conv1d(x, 'q_attn', n_state, split=split)
+                k = conv1d(x, 'k_attn', n_state, split=split)
+                v = conv1d(x, 'v_attn', n_state, split=split)
+            
             q, k, v = map(split_heads, [q, k, v])
 
             present = [] # TODO: tf.stack([k, v], axis=1)

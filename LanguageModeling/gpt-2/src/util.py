@@ -29,7 +29,7 @@ def GetFunctionConfig(args):
     if args.use_fp16:
         config.enable_auto_mixed_precision(True)
     config.enable_fuse_add_to_output(True)
-    #config.prune_parallel_cast_ops(False)
+    config.prune_parallel_cast_ops(False)
     config.enable_fuse_model_update_ops(True)
     # turn on the flag of none-distributed-optimizer
     config.enable_non_distributed_optimizer(False)
