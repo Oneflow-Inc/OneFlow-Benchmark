@@ -110,7 +110,7 @@ class GPT2(object):
     #def vocab_embedding(self, X, split=None):
     def block(self, x, scope, *, past):
         with flow.scope.namespace(scope):
-            x = flow.identity(x)
+            # x = flow.identity(x)
 
             nx = x.shape[-1]
             assert nx == self.n_embd
