@@ -34,6 +34,7 @@ def get_parser(parser=None):
     parser.add_argument('--embedding_dropout', type=float, default=0.1,help='embedding dropout rate')
     parser.add_argument('--output_dropout', type=float, default=0.1,help='output dropout rate')
     parser.add_argument('--attention_dropout', type=float, default=0.1,help='attention dropout rate')
+    parser.add_argument('--use_big_fc', type=str2bool, default=False, help='use big fc in attn')
 
     parser.add_argument('--dataset', metavar='PATH', type=str, required=True,
                         help='Input file, directory (utf-8 text, or preencoded .npz files).')
@@ -53,6 +54,8 @@ def get_parser(parser=None):
     parser.add_argument('--checkpoint-activations', action='store_true',
                         help='Checkpoint activation to allow for training '
                         'with larger models, sequences, and batch sizes.')
+    parser.add_argument('--checkpoint_matmul', type=str2bool, default=False, 
+                        help='include matmul in checkpoint activations or not')
 
 
     parser.add_argument("--gpu_num_per_node", type=int, default=1)

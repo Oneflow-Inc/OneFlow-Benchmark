@@ -23,9 +23,9 @@ def norm(x, scope, *, axis=-1, epsilon=1e-5):
     """Normalize to mean = 0, std = 1, then do a diagonal affine transform."""
     return flow.layers.layer_norm(x, name=scope, begin_norm_axis=axis, epsilon=epsilon)
 
-def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None):
+def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None, checkpointing=False):
     #with flow.scope.namespace(scope):
-    with flow.scope.namespace(scope), flow.experimental.scope.config(checkpointing=False):
+    with flow.scope.namespace(scope), flow.experimental.scope.config(checkpointing=checkpointing):
         #split = None
         *start, nx = x.shape
         w_sbp = flow.distribute.split(split) if split == 0 or split == 1 else None
@@ -70,6 +70,8 @@ class GPT2(object):
         self.decoder_model_parallel = args.decoder_model_parallel
         self.use_fp16 = args.use_fp16
         self.checkpoint_activations = args.checkpoint_activations
+        self.checkpoint_matmul = args.checkpoint_matmul
+        self.use_big_fc = args.use_big_fc
 
     def forward(self, X, past=None, split=None):
         with flow.scope.namespace(self.scope):
@@ -134,13 +136,12 @@ class GPT2(object):
             # From [batch, sequence, features] to [batch, heads, sequence, features]
             *start, _ = x.shape
             x = flow.reshape(x, start + [self.n_head, -1])
-            print('x.split_axis =', x.split_axis)
             return flow.transpose(x, perm=[0, 2, 1, 3])
     
         def merge_heads(x):
             # Reverse of split_heads
             x = flow.transpose(x, [0, 2, 1, 3])
-            *start, _, _, = x.shape
+            *start, _, _ = x.shape
             return flow.reshape(x, start + [-1])
     
         def mask_attn_weights(w):
@@ -160,21 +161,15 @@ class GPT2(object):
 
         with flow.scope.namespace(scope):
             split = 1 if self.decoder_model_parallel else None 
-            use_big_fc = False
-            if use_big_fc:
-                c = conv1d(x, 'c_attn', n_state*3, split=split)
-
-                *start, _ = c.shape
-                print('c.shape =', c.shape)
-                print('n_state =', n_state)
-                c = flow.reshape(c, start + [3, n_state], name='reshape_before_slice')
-                q = flow.slice(c, begin=[None, None, 0, None], size=[None, None, 1, None])
-                k = flow.slice(c, begin=[None, None, 1, None], size=[None, None, 1, None])
-                v = flow.slice(c, begin=[None, None, 2, None], size=[None, None, 1, None])
+            if self.use_big_fc:
+                c = conv1d(x, 'c_attn', n_state*3, split=split, checkpointing=self.checkpoint_matmul)
+                q = flow.slice(c, begin=[None, None, 0], size=[None, None, n_state])
+                k = flow.slice(c, begin=[None, None, n_state], size=[None, None, n_state])
+                v = flow.slice(c, begin=[None, None, 2*n_state], size=[None, None, n_state])
             else:
-                q = conv1d(x, 'q_attn', n_state, split=split)
-                k = conv1d(x, 'k_attn', n_state, split=split)
-                v = conv1d(x, 'v_attn', n_state, split=split)
+                q = conv1d(x, 'q_attn', n_state, split=split, checkpointing=self.checkpoint_matmul)
+                k = conv1d(x, 'k_attn', n_state, split=split, checkpointing=self.checkpoint_matmul)
+                v = conv1d(x, 'v_attn', n_state, split=split, checkpointing=self.checkpoint_matmul)
             
             q, k, v = map(split_heads, [q, k, v])
 
@@ -186,7 +181,7 @@ class GPT2(object):
             a = multihead_attn(q, k, v)
             a = merge_heads(a)
             split = 0 if self.decoder_model_parallel else None 
-            a = conv1d(a, 'c_proj', n_state, split=split)
+            a = conv1d(a, 'c_proj', n_state, split=split, checkpointing=self.checkpoint_matmul)
             a = flow.nn.dropout(a, rate=self.output_dropout)
             return a, present
 
@@ -194,8 +189,8 @@ class GPT2(object):
         with flow.scope.namespace(scope):
             split = 1 if self.decoder_model_parallel else None 
             nx = x.shape[-1]
-            h = conv1d(x, 'c_fc', n_state, split=split)
+            h = conv1d(x, 'c_fc', n_state, split=split, checkpointing=self.checkpoint_matmul)
             h = gelu(h)
             split = 0 if self.decoder_model_parallel else None 
-            h = conv1d(h, 'c_proj', nx, split=split)
+            h = conv1d(h, 'c_proj', nx, split=split, checkpointing=self.checkpoint_matmul)
             return flow.nn.dropout(h, rate=self.output_dropout)
