@@ -46,7 +46,7 @@ python3 of_ssp_cnn_train_val.py \
      --learning_rate=0.768 \
      --loss_print_every_n_iter=100 \
      --batch_size_per_device=$BATCH_SIZE \
-     --val_batch_size_per_device=50 \
+     --val_batch_size_per_device=$BATCH_SIZE \
      --channel_last=False \
      --fuse_bn_relu=True \
      --fuse_bn_add_relu=True \

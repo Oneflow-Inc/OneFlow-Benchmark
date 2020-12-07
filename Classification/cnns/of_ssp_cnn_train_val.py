@@ -50,6 +50,7 @@ model_dict = {
 }
 
 
+flow.config.enable_legacy_model_io(True)
 flow.config.gpu_device_num(args.gpu_num_per_node)
 flow.config.enable_debug_mode(True)
 
