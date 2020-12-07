@@ -114,7 +114,7 @@ class GPT2(object):
     #def vocab_embedding(self, X, split=None):
     def block(self, x, scope, *, past):
         with flow.scope.namespace(scope):
-            x = flow.identity(x)
+            x = flow.amp_white_identity(x)
             with flow.experimental.scope.config(checkpointing = self.checkpoint_activations):
                 nx = x.shape[-1]
                 assert nx == self.n_embd
