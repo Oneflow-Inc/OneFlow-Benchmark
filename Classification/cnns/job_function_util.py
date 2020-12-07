@@ -40,6 +40,12 @@ def get_train_config(args):
     else:
         train_config.cudnn_conv_heuristic_search_algo(False)
     train_config.enable_fuse_model_update_ops(True)
+
+    if args.ssp_placement:
+        stage0 = flow.stage(*[flow.scope.placement("gpu", args.ssp_placement[0].split(','))]*1)
+        stage1 = flow.stage(*[flow.scope.placement("gpu", args.ssp_placement[1].split(','))]*27)
+        train_config.ssp_stage(stage0, stage1, enable_stage_static_scheduling=False)
+
     return train_config
 
 
