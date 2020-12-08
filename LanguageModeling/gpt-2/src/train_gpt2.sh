@@ -28,7 +28,7 @@ else
     use_fp16=False
 fi
 
-PREFIX=1207-test-oneflow-gpt2-small
+PREFIX=1208-test-10-oneflow-gpt2-small
 test_case=${PREFIX}_${dtype}_${num_node}n${gpu_num_per_node}g_bz${batch_size_per_device}_${non_distributed_optimizer}
 mem_file=$test_case.mem
 log_file=$test_case.log

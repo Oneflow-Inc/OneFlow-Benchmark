@@ -65,7 +65,7 @@ def get_parser(parser=None):
     parser.add_argument("--ctrl_port", type=int, default=50051, help='ctrl_port for multinode job')
     parser.add_argument('--use_fp16', type=str2bool, default=False, help='Whether to use use fp16')
     # log and resore/save
-    parser.add_argument("--iter_num", type=int, default=110, help="total iterations to run")
+    parser.add_argument("--iter_num", type=int, default=1000, help="total iterations to run")
     parser.add_argument("--loss_print_every_n_iter", type=int, default=10, required=False,
         help="print loss every n iteration")
     parser.add_argument("--model_save_every_n_iter", type=int, default=10000, required=False,
