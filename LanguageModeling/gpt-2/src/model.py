@@ -21,6 +21,8 @@ def gelu(x):
 
 def norm(x, scope, *, axis=-1, epsilon=1e-5):
     """Normalize to mean = 0, std = 1, then do a diagonal affine transform."""
+    #return flow.layers.layer_norm(x.with_distribute(flow.distribute.broadcast()), 
+    #        name=scope, begin_norm_axis=axis, epsilon=epsilon)
     return flow.layers.layer_norm(x, name=scope, begin_norm_axis=axis, epsilon=epsilon)
 
 def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None, checkpointing=False):
@@ -30,7 +32,6 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None, checkpointing=False):
         *start, nx = x.shape
         w_sbp = flow.distribute.split(split) if split == 0 or split == 1 else None
         b_sbp = flow.distribute.split(0) if split == 1 else None
-        print(scope, w_sbp, b_sbp)
         w = flow.get_variable(name='weight', shape=[nx, nf], dtype=x.dtype,
                               initializer=flow.random_normal_initializer(stddev=w_init_stdev),
                               distribute=w_sbp)
@@ -64,7 +65,6 @@ class GPT2(object):
         self.embedding_dropout = args.embedding_dropout
         self.attention_dropout = args.attention_dropout
         self.output_dropout = args.output_dropout
-        assert (args.wte_split in [0, 1]) == (args.wpe_split in [0, 1])
         self.wte_split = args.wte_split
         self.wpe_split = args.wpe_split
         self.decoder_model_parallel = args.decoder_model_parallel
@@ -79,21 +79,25 @@ class GPT2(object):
             embd_model_parallel = self.wte_split in [0, 1]
             wte_sbp = flow.distribute.split(self.wte_split) if self.wte_split in [0, 1] else None 
             wpe_sbp = flow.distribute.split(self.wpe_split) if self.wpe_split in [0, 1] else None 
-            print(wte_sbp, wpe_sbp)
             wpe = flow.get_variable('wpe', [self.n_ctx, self.n_embd], distribute=wpe_sbp, 
                                     initializer=flow.random_normal_initializer(stddev=0.01))
             wte = flow.get_variable('wte', [self.n_vocab, self.n_embd], distribute=wte_sbp,
                                     initializer=flow.random_normal_initializer(stddev=0.02))
-            if embd_model_parallel:
-                X = flow.parallel_cast(X, distribute=flow.distribute.broadcast())
 
             if self.use_fp16:
                 X = flow.amp_white_identity(X)
                 wpe = flow.amp_white_identity(wpe)
 
+            if embd_model_parallel:
+                X = flow.parallel_cast(X, distribute=flow.distribute.broadcast())
+
             h = flow.gather(wte, X)# + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
-            h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
+            # h = h + flow.reshape(wpe, shape=(1, self.n_ctx, self.n_embd))
+            h = h + wpe
             h = flow.nn.dropout(h, rate=self.embedding_dropout)
+            if embd_model_parallel:
+                h = flow.parallel_cast(h, distribute=flow.distribute.broadcast(),
+                        gradient_distribute=flow.distribute.split(0))
             presents = []
             for layer in range(self.n_layer):
                 h, present = self.block(h, 'h%d' % layer, past=past)
@@ -107,9 +111,9 @@ class GPT2(object):
                 h_flat = flow.parallel_cast(h_flat, distribute=flow.distribute.broadcast())
             logits = flow.matmul(h_flat, wte, transpose_b=True)
 
-            if embd_model_parallel:
-                logits = flow.parallel_cast(logits, distribute=wte_sbp)
-            logits = flow.reshape(logits, start + [self.n_vocab])
+            # if embd_model_parallel:
+            #     logits = flow.parallel_cast(logits, distribute=wte_sbp)
+            # logits = flow.reshape(logits, start + [self.n_vocab])
             results['logits'] = logits
         return results 
 

@@ -32,11 +32,15 @@ def GPT2_Job(X: tp.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow
 
     labels = flow.slice(X, begin=[None, 1], size=[None, seq_len-1])
     labels = flow.pad(labels, paddings=((0, 0), (0, 1)), constant_value=0.0)
+    dims = labels.shape
+    labels = flow.flatten(labels)
 
-    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
+    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, 
+            logits=logits.with_distribute(flow.distribute.split(1)))
+    loss = flow.reshape(loss, dims)
     loss = flow.slice(loss, begin=[None, 0], size=[None, seq_len-1])
     #loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels=X[:, 1:], logits=logits[:, :-1])
-    loss = flow.math.reduce_mean(loss, axis=-1)
+    loss = flow.math.reduce_mean(loss)
     opt = util.CreateOptimizer(args)
     opt.minimize(loss)
     return {'loss': loss}
@@ -45,6 +49,9 @@ def GPT2_Job(X: tp.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow
 def main():
     flow.config.enable_debug_mode(True)
     flow.config.gpu_device_num(args.gpu_num_per_node)
+    flow.config.collective_boxing.nccl_fusion_reduce_scatter(True)
+    flow.config.collective_boxing.nccl_fusion_all_gather(True)
+    flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
     flow.env.log_dir(args.log_dir)
 
     util.InitNodes(args)
