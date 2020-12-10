@@ -6,6 +6,7 @@ import oneflow as flow
 def CreateOptimizer(args):
     lr_scheduler = flow.optimizer.PiecewiseConstantScheduler([], [args.learning_rate])
     loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=20) if args.use_fp16 else None
+    #loss_scale_policy = None
     if args.optimizer == 'adam':
         opt = flow.optimizer.Adam(lr_scheduler, do_bias_correction=True, loss_scale_policy=loss_scale_policy)
     elif args.optimizer == 'sgd':
@@ -29,7 +30,7 @@ def GetFunctionConfig(args):
     if args.use_fp16:
         config.enable_auto_mixed_precision(True)
     config.enable_fuse_add_to_output(True)
-    config.prune_parallel_cast_ops(False)
+    config.prune_parallel_cast_ops(True)
     config.enable_fuse_model_update_ops(True)
     # turn on the flag of none-distributed-optimizer
     config.enable_non_distributed_optimizer(False)

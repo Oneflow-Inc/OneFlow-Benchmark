@@ -39,8 +39,8 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None, checkpointing=False):
                               initializer=flow.constant_initializer(0.0),
                               distribute=b_sbp)
         
-        if split == 1:
-            x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
+        #if split == 1:
+        #    x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
 
         c = flow.matmul(flow.reshape(x, [-1, nx], name='reshape1'), w)
         if split == 0:
@@ -167,9 +167,14 @@ class GPT2(object):
             split = 1 if self.decoder_model_parallel else None 
             if self.use_big_fc:
                 c = conv1d(x, 'c_attn', n_state*3, split=split, checkpointing=self.checkpoint_matmul)
-                q = flow.slice(c, begin=[None, None, 0], size=[None, None, n_state])
-                k = flow.slice(c, begin=[None, None, n_state], size=[None, None, n_state])
-                v = flow.slice(c, begin=[None, None, 2*n_state], size=[None, None, n_state])
+                *c_start, _ = c.shape
+                c = flow.reshape(c, c_start + [n_state, 3]) 
+                q = flow.slice(c, begin=[None, None, None, 0], size=[None, None, None, 1])
+                k = flow.slice(c, begin=[None, None, None, 1], size=[None, None, None, 1])
+                v = flow.slice(c, begin=[None, None, None, 2], size=[None, None, None, 1])
+                q = flow.reshape(q, c_start + [-1])
+                k = flow.reshape(k, c_start + [-1])
+                v = flow.reshape(v, c_start + [-1])
             else:
                 q = conv1d(x, 'q_attn', n_state, split=split, checkpointing=self.checkpoint_matmul)
                 k = conv1d(x, 'k_attn', n_state, split=split, checkpointing=self.checkpoint_matmul)
