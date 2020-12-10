@@ -4,17 +4,21 @@ import math
 import numpy as np
 import oneflow as flow
 
+
 def softmax(x, axis=-1):
     return flow.nn.softmax(x, axis=axis)
 
+
 def gelu(x):
     return flow.math.gelu(x)
+
 
 def norm(x, axis=-1, epsilon=1e-5, name=None):
     """Normalize to mean = 0, std = 1, then do a diagonal affine transform."""
     assert len(x.shape) == 3
     y = flow.layers.layer_norm(x, begin_norm_axis=axis, epsilon=epsilon, name=name)
     return flow.flatten(y, start_dim=0, end_dim=2)
+
 
 def linear(name, x, nf, *, model_parallel_mode=None, w_init_stdev=0.02):
     assert len(x.shape) == 2
@@ -33,25 +37,29 @@ def linear(name, x, nf, *, model_parallel_mode=None, w_init_stdev=0.02):
 
     with flow.scope.namespace(name):
         w = flow.get_variable(
-            name='weight', shape=(nx, nf), dtype=x.dtype,
+            name="weight",
+            shape=(nx, nf),
+            dtype=x.dtype,
             initializer=flow.random_normal_initializer(stddev=w_init_stdev),
-            distribute=w_sbp
+            distribute=w_sbp,
         )
         b = flow.get_variable(
-            name='bias', shape=(nf,), dtype=x.dtype,
+            name="bias",
+            shape=(nf,),
+            dtype=x.dtype,
             initializer=flow.constant_initializer(0.0),
-            distribute=b_sbp
+            distribute=b_sbp,
         )
 
         c = flow.matmul(x, w, name="matmul")
         if w.split_axis == 0 and x.split_axis == 1:
             c = flow.parallel_cast(
-                c, 
+                c,
                 distribute=flow.distribute.broadcast(),
-                gradient_distribute=flow.distribute.broadcast()
+                gradient_distribute=flow.distribute.broadcast(),
             )
         c = flow.nn.bias_add(c, b, name="biasadd")
-        c = flow.reshape(c, (b, s, nf), name='reshape')
+        c = flow.reshape(c, (b, s, nf), name="reshape")
 
     return c
 
@@ -85,7 +93,7 @@ class GPT2(object):
         assert len(x.shape) == 2
         assert x.shape[0] == self.batch_size
         assert x.shape[-1] == self.seq_len
-        
+
         outputs = {}
         presents = []
 
@@ -95,8 +103,8 @@ class GPT2(object):
                 h, present = self.transformer_layer(f"h{i}", h, past=past)
                 presents.append(present)
 
-            outputs['presents'] = presents
-            h = norm(h, name='layernorm_f')
+            outputs["presents"] = presents
+            h = norm(h, name="layernorm_f")
             logits = flow.matmul(h, wte, transpose_b=True)
             outputs["logits"] = logits  # maybe reshape
 
@@ -114,12 +122,12 @@ class GPT2(object):
             "wpe",
             shape=(self.n_ctx, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.01),
-            distribute=wpe_sbp
+            distribute=wpe_sbp,
         )
         wte = flow.get_variable(
-            'wte', 
-            shape=(self.n_vocab, self.n_embd), 
-            initializer=flow.random_normal_initializer(stddev=0.02),    
+            "wte",
+            shape=(self.n_vocab, self.n_embd),
+            initializer=flow.random_normal_initializer(stddev=0.02),
             distribute=wte_sbp,
         )
 
@@ -137,13 +145,12 @@ class GPT2(object):
 
         if self.embd_parallel:
             h = flow.parallel_cast(
-                h, 
+                h,
                 distribute=flow.distribute.broadcast(),
-                gradient_distribute=flow.distribute.split(0)
+                gradient_distribute=flow.distribute.split(0),
             )
-        
-        return h, wte
 
+        return h, wte
 
     def transformer_layer(self, name, x, *, past):
         assert len(x.shape) == 3
@@ -154,11 +161,13 @@ class GPT2(object):
 
         with flow.scope.namespace(name):
             x = flow.identity(x)
-            with flow.experimental.scope.config(checkpointing = self.checkpoint_activations):
-                x = norm(x, name='layernorm_1')
+            with flow.experimental.scope.config(
+                checkpointing=self.checkpoint_activations
+            ):
+                x = norm(x, name="layernorm_1")
                 a, present = self.attn(x, past=past)
                 x = x + a
-                x = norm(x, name='layernorm_2')
+                x = norm(x, name="layernorm_2")
                 m = self.mlp(x)
                 x = x + m
 
@@ -174,22 +183,24 @@ class GPT2(object):
             b, s, _ = tuple(x.shape)
             x = flow.reshape(x, (b, s, self.n_head, -1))
             return flow.transpose(x, perm=[0, 2, 1, 3])
-    
+
         def merge_heads(x):
             # Reverse of split_heads
             x = flow.transpose(x, [0, 2, 1, 3])
             b, s, _, _ = x.shape
             return flow.reshape(x, (b * s, -1))
-    
+
         def multihead_attn(q, k, v):
             # q, k, v have shape [batch, heads, sequence, features]
             w = flow.matmul(q, k, transpose_b=True)
-            w = flow.math.fused_scale_tril(w, fill_value=float('-inf'), scale=(1.0 / math.sqrt(float(v.shape[-1]))))
+            w = flow.math.fused_scale_tril(
+                w, fill_value=float("-inf"), scale=(1.0 / math.sqrt(float(v.shape[-1])))
+            )
             w = softmax(w)
             w = flow.nn.dropout(w, rate=self.attention_dropout, name="attn_dropout")
             a = flow.matmul(w, v)
             return a
- 
+
         with flow.scope.namespace("attn"):
             parallel_mode = "s0" if self.decoder_parallel else None
             if self.use_big_c_attn:
@@ -198,16 +209,22 @@ class GPT2(object):
                 assert c.shape[-1] == e * 3
                 b, s, _ = tuple(c.shape)
                 c = flow.reshape(c, (b, s, e, 3))
-                q = flow.slice(c, begin=[None, None, None, 0], size=[None, None, None, 1])
-                k = flow.slice(c, begin=[None, None, None, 1], size=[None, None, None, 1])
-                v = flow.slice(c, begin=[None, None, None, 2], size=[None, None, None, 1])
+                q = flow.slice(
+                    c, begin=[None, None, None, 0], size=[None, None, None, 1]
+                )
+                k = flow.slice(
+                    c, begin=[None, None, None, 1], size=[None, None, None, 1]
+                )
+                v = flow.slice(
+                    c, begin=[None, None, None, 2], size=[None, None, None, 1]
+                )
             else:
                 q = linear("q_attn", x, e, model_parallel_mode=parallel_mode)
                 k = linear("k_attn", x, e, model_parallel_mode=parallel_mode)
                 v = linear("v_attn", x, e, model_parallel_mode=parallel_mode)
 
             q, k, v = map(split_heads, [q, k, v])
-            present = [] # TODO: tf.stack([k, v], axis=1)
+            present = []  # TODO: tf.stack([k, v], axis=1)
             if past is not None:
                 pk, pv = tf.unstack(past, axis=1)
                 k = tf.concat([pk, k], axis=-2)
@@ -243,16 +260,15 @@ class GPT2(object):
         assert b == self.batch_size
         assert s == self.seq_len
 
-        labels = flow.slice(labels, begin=(None, 1), size=(None, s-1))
+        labels = flow.slice(labels, begin=(None, 1), size=(None, s - 1))
         labels = flow.pad(labels, paddings=((0, 0), (0, 1)), constant_value=0.0)
 
         if loss_parallel:
             loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-                labels=labels,
-                logits=logits.with_distribute(flow.distribute.split(1))
+                labels=labels, logits=logits.with_distribute(flow.distribute.split(1))
             )
         else:
             loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits)
 
-        loss = flow.slice(loss, begin=(None, 0), size=(None, s-1))
+        loss = flow.slice(loss, begin=(None, 0), size=(None, s - 1))
         return flow.math.reduce_mean(loss)

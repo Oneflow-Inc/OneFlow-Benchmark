@@ -5,10 +5,13 @@ import json
 import util
 import config as configs
 
+
 def set_python_path():
     absolute_path = os.path.join(os.getcwd(), __file__)
     gpt2_path = os.path.dirname(os.path.dirname(absolute_path))
     sys.path.insert(0, gpt2_path)
+
+
 set_python_path()
 
 from third_party.load_dataset import load_dataset, Sampler
@@ -21,7 +24,11 @@ import oneflow as flow
 
 def make_gpt2_train_func(args):
     @flow.global_function("train", util.GetFunctionConfig(args))
-    def gpt2_func(x: flow.typing.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow.int64)):
+    def gpt2_func(
+        x: flow.typing.Numpy.Placeholder(
+            (args.batch_size, args.seq_len), dtype=flow.int64
+        )
+    ):
         outputs = {}
         gpt2 = GPT2(args)
         outputs = gpt2.forward(X)
@@ -50,23 +57,27 @@ def main():
     gpt2_trainer = make_gpt2_train_func(args)
     snapshot = util.Snapshot(args.model_save_dir, args.model_load_dir)
 
-    print('Loading dataset...')
+    print("Loading dataset...")
     enc = encoder.get_encoder(args)
     chunks = load_dataset(enc, args.dataset, args.combine, encoding=args.encoding)
     data_sampler = Sampler(chunks, seed=1)
-    print('dataset has', data_sampler.total_size, 'tokens')
+    print("dataset has", data_sampler.total_size, "tokens")
 
-    metric = util.Metric(desc='train', print_steps=args.loss_print_every_n_iter,
-                         batch_size=args.batch_size, keys=['loss'])
-    print('Training...')
+    metric = util.Metric(
+        desc="train",
+        print_steps=args.loss_print_every_n_iter,
+        batch_size=args.batch_size,
+        keys=["loss"],
+    )
+    print("Training...")
     try:
         for iter in range(args.iter_num):
             b = data_sampler.sample_batch(args.batch_size, args.seq_len)
             gpt2_trainer(b).async_get(metric.metric_cb(iter))
     except KeyboardInterrupt:
         # snapshot.save("last_snapshot")
-        print('interrupted')
+        print("interrupted")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
