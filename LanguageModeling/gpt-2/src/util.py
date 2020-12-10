@@ -3,7 +3,7 @@ import time
 from collections import OrderedDict
 import oneflow as flow
 
-def CreateOptimizer(args):
+def make_optimizer(args):
     lr_scheduler = flow.optimizer.PiecewiseConstantScheduler([], [args.learning_rate])
     loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=20) if args.use_fp16 else None
     #loss_scale_policy = None

@@ -18,44 +18,36 @@ from model import GPT2
 import oneflow.typing as tp
 import oneflow as flow
 
-args = configs.get_args()
 
-#batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
-args.batch_size = args.total_batch_size
+def make_gpt2_train_func(args):
+    @flow.global_function("train", util.GetFunctionConfig(args))
+    def gpt2_func(x: flow.typing.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow.int64)):
+        outputs = {}
+        gpt2 = GPT2(args)
+        outputs = gpt2.forward(X)
+        loss = gpt2.loss(x, outputs["logits"])
+        outputs["loss"] = loss
+        optimizer = util.make_optimizer(args)
+        optimizer.minimize(loss)
+        return {"loss": loss}
 
-@flow.global_function("train", util.GetFunctionConfig(args))
-def GPT2_Job(X: tp.Numpy.Placeholder((args.batch_size, args.seq_len), dtype=flow.int64)):
-    bsz, seq_len = X.shape
-    gpt2_model = GPT2(args)
-    results = gpt2_model.forward(X)
-    logits = results['logits']
-
-    labels = flow.slice(X, begin=[None, 1], size=[None, seq_len-1])
-    labels = flow.pad(labels, paddings=((0, 0), (0, 1)), constant_value=0.0)
-    dims = labels.shape
-    labels = flow.flatten(labels)
-
-    loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, 
-            logits=logits.with_distribute(flow.distribute.split(1)))
-    loss = flow.reshape(loss, dims)
-    loss = flow.slice(loss, begin=[None, 0], size=[None, seq_len-1])
-    #loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels=X[:, 1:], logits=logits[:, :-1])
-    loss = flow.math.reduce_mean(loss)
-    opt = util.CreateOptimizer(args)
-    opt.minimize(loss)
-    return {'loss': loss}
+    return gpt2_func
 
 
 def main():
+    args = configs.get_args()
+    # batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
+    args.batch_size = args.total_batch_size
+
+    util.InitNodes(args)
+    flow.env.log_dir(args.log_dir)
     flow.config.enable_debug_mode(True)
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.config.collective_boxing.nccl_fusion_reduce_scatter(True)
     flow.config.collective_boxing.nccl_fusion_all_gather(True)
     flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
-    flow.env.log_dir(args.log_dir)
 
-    util.InitNodes(args)
-
+    gpt2_trainer = make_gpt2_train_func(args)
     snapshot = util.Snapshot(args.model_save_dir, args.model_load_dir)
 
     print('Loading dataset...')
@@ -70,10 +62,11 @@ def main():
     try:
         for iter in range(args.iter_num):
             b = data_sampler.sample_batch(args.batch_size, args.seq_len)
-            GPT2_Job(b).async_get(metric.metric_cb(iter))
+            gpt2_trainer(b).async_get(metric.metric_cb(iter))
     except KeyboardInterrupt:
-        #snapshot.save("last_snapshot")
+        # snapshot.save("last_snapshot")
         print('interrupted')
+
 
 if __name__ == '__main__':
     main()
