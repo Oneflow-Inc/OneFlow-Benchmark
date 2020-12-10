@@ -82,29 +82,31 @@ def alexnet(images, args, need_transpose=False, training=True):
     data_format = "NHWC" if args.channel_last else "NCHW"
 
     conv1 = conv2d_layer(
-        "conv1", images, filters=64, kernel_size=11, strides=4, padding="VALID",
+        "conv1", images, filters=64, kernel_size=11, strides=4, padding=[[0, 0],[0, 0], [2, 2], [2, 2]],
          data_format=data_format
     )
 
-    pool1 = flow.nn.avg_pool2d(conv1, 3, 2, "VALID", data_format, name="pool1")
+    pool1 = flow.nn.max_pool2d(conv1, 3, 2, "VALID", data_format, name="pool1")
 
-    conv2 = conv2d_layer("conv2", pool1, filters=192, kernel_size=5, data_format=data_format)
+    conv2 = conv2d_layer("conv2", pool1, filters=192, kernel_size=5, padding=[[0, 0],[0, 0], [2, 2], [2, 2]], data_format=data_format)
 
-    pool2 = flow.nn.avg_pool2d(conv2, 3, 2, "VALID", data_format, name="pool2")
+    pool2 = flow.nn.max_pool2d(conv2, 3, 2, "VALID", data_format, name="pool2")
 
-    conv3 = conv2d_layer("conv3", pool2, filters=384, data_format=data_format)
+    conv3 = conv2d_layer("conv3", pool2, filters=384, padding=[[0, 0],[0, 0], [1, 1], [1, 1]], data_format=data_format)
 
-    conv4 = conv2d_layer("conv4", conv3, filters=384, data_format=data_format)
+    conv4 = conv2d_layer("conv4", conv3, filters=256, padding=[[0, 0],[0, 0], [1, 1], [1, 1]], data_format=data_format)
 
-    conv5 = conv2d_layer("conv5", conv4, filters=256, data_format=data_format)
+    conv5 = conv2d_layer("conv5", conv4, filters=256, padding=[[0, 0],[0, 0], [1, 1], [1, 1]], data_format=data_format)
 
-    pool5 = flow.nn.avg_pool2d(conv5, 3, 2, "VALID", data_format, name="pool5")
+    pool5 = flow.nn.max_pool2d(conv5, 3, 2, "VALID", data_format, name="pool5")
 
     if len(pool5.shape) > 2:
         pool5 = flow.reshape(pool5, shape=(pool5.shape[0], -1))
 
+    dropout1 = flow.nn.dropout(pool5, rate=0.5)
+
     fc1 = flow.layers.dense(
-        inputs=pool5,
+        inputs=dropout1,
         units=4096,
         activation=flow.nn.relu,
         use_bias=True,
@@ -116,10 +118,10 @@ def alexnet(images, args, need_transpose=False, training=True):
         name="fc1",
     )
 
-    dropout1 = flow.nn.dropout(fc1, rate=0.5)
+    dropout2 = flow.nn.dropout(fc1, rate=0.5)
 
     fc2 = flow.layers.dense(
-        inputs=dropout1,
+        inputs=dropout2,
         units=4096,
         activation=flow.nn.relu,
         use_bias=True,        
@@ -130,13 +132,11 @@ def alexnet(images, args, need_transpose=False, training=True):
         name="fc2",
     )
 
-    dropout2 = flow.nn.dropout(fc2, rate=0.5)
-
     fc3 = flow.layers.dense(
-        inputs=dropout2,
+        inputs=fc2,
         units=1000,
         activation=None,
-        use_bias=False,
+        use_bias=True,
         kernel_initializer=_get_kernel_initializer(),
         kernel_regularizer=_get_regularizer(),
         bias_initializer=False,
