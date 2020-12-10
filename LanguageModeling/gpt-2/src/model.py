@@ -260,15 +260,17 @@ class GPT2(object):
         assert b == self.batch_size
         assert s == self.seq_len
 
-        labels = flow.slice(labels, begin=(None, 1), size=(None, s - 1))
-        labels = flow.pad(labels, paddings=((0, 0), (0, 1)), constant_value=0.0)
+        with flow.scope.namespace("loss"):
+            labels = flow.slice(labels, begin=(None, 1), size=(None, s - 1))
+            labels = flow.pad(labels, paddings=((0, 0), (0, 1)), constant_value=0.0)
 
-        if loss_parallel:
-            loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-                labels=labels, logits=logits.with_distribute(flow.distribute.split(1))
-            )
-        else:
-            loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits)
+            if loss_parallel:
+                loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
+                    labels=labels,
+                    logits=logits.with_distribute(flow.distribute.split(1)),
+                )
+            else:
+                loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits)
 
-        loss = flow.slice(loss, begin=(None, 0), size=(None, s - 1))
-        return flow.math.reduce_mean(loss)
+            loss = flow.slice(loss, begin=(None, 0), size=(None, s - 1))
+            return flow.math.reduce_mean(loss)
