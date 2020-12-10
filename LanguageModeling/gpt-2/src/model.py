@@ -25,29 +25,38 @@ def norm(x, scope, *, axis=-1, epsilon=1e-5):
     #        name=scope, begin_norm_axis=axis, epsilon=epsilon)
     return flow.layers.layer_norm(x, name=scope, begin_norm_axis=axis, epsilon=epsilon)
 
-def conv1d(x, scope, nf, *, w_init_stdev=0.02, split=None, checkpointing=False):
-    #with flow.scope.namespace(scope):
-    with flow.scope.namespace(scope), flow.experimental.scope.config(checkpointing=checkpointing):
-        #split = None
-        *start, nx = x.shape
-        w_sbp = flow.distribute.split(split) if split == 0 or split == 1 else None
-        b_sbp = flow.distribute.split(0) if split == 1 else None
-        w = flow.get_variable(name='weight', shape=[nx, nf], dtype=x.dtype,
-                              initializer=flow.random_normal_initializer(stddev=w_init_stdev),
-                              distribute=w_sbp)
-        b = flow.get_variable(name='bias', shape=[nf], dtype=x.dtype,
-                              initializer=flow.constant_initializer(0.0),
-                              distribute=b_sbp)
-        
-        #if split == 1:
-        #    x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
+def conv1d(
+    x, scope, nf, *, w_init_stdev=0.02, split=None, 
+    checkpointing_matmul=False, 
+    checkpointing_variable=False
+):
+    *start, nx = x.shape
 
-        c = flow.matmul(flow.reshape(x, [-1, nx], name='reshape1'), w)
-        if split == 0:
-            c = flow.parallel_cast(c, distribute=flow.distribute.broadcast(),
-                                   gradient_distribute=flow.distribute.broadcast())
-        c = flow.nn.bias_add(c, b)
-        return flow.reshape(c, start + [nf], name='reshape2')
+    with flow.scope.namespace(scope):
+        with flow.experimental.scope.config(checkpointing=checkpointing_variable):
+            w_sbp = flow.distribute.split(split) if split == 0 or split == 1 else None
+            b_sbp = flow.distribute.split(0) if split == 1 else None
+            w = flow.get_variable(
+                name='weight', shape=[nx, nf], dtype=x.dtype,
+                initializer=flow.random_normal_initializer(stddev=w_init_stdev),
+                distribute=w_sbp
+            )
+            b = flow.get_variable(
+                name='bias', shape=[nf], dtype=x.dtype,
+                initializer=flow.constant_initializer(0.0),
+                distribute=b_sbp
+            )
+
+        with flow.experimental.scope.config(checkpointing=checkpointing_matmul):
+            c = flow.matmul(flow.reshape(x, [-1, nx], name='reshape1'), w)
+            if split == 0:
+                c = flow.parallel_cast(
+                    c, 
+                    distribute=flow.distribute.broadcast(),
+                    gradient_distribute=flow.distribute.broadcast()
+                )
+            c = flow.nn.bias_add(c, b)
+            return flow.reshape(c, start + [nf], name='reshape2')
 
 
 class GPT2(object):
@@ -71,6 +80,7 @@ class GPT2(object):
         self.use_fp16 = args.use_fp16
         self.checkpoint_activations = args.checkpoint_activations
         self.checkpoint_matmul = args.checkpoint_matmul
+        self.checkpoint_variable = args.checkpoint_variable
         self.use_big_fc = args.use_big_fc
 
     def forward(self, X, past=None, split=None):
@@ -166,7 +176,11 @@ class GPT2(object):
         with flow.scope.namespace(scope):
             split = 1 if self.decoder_model_parallel else None 
             if self.use_big_fc:
-                c = conv1d(x, 'c_attn', n_state*3, split=split, checkpointing=self.checkpoint_matmul)
+                c = conv1d(
+                    x, 'c_attn', n_state*3, split=split, 
+                    checkpointing_matmul=self.checkpoint_matmul,
+                    checkpointing_variable=self.checkpoint_variable
+                )
                 *c_start, _ = c.shape
                 c = flow.reshape(c, c_start + [n_state, 3]) 
                 q = flow.slice(c, begin=[None, None, None, 0], size=[None, None, None, 1])
@@ -176,9 +190,19 @@ class GPT2(object):
                 k = flow.reshape(k, c_start + [-1])
                 v = flow.reshape(v, c_start + [-1])
             else:
-                q = conv1d(x, 'q_attn', n_state, split=split, checkpointing=self.checkpoint_matmul)
-                k = conv1d(x, 'k_attn', n_state, split=split, checkpointing=self.checkpoint_matmul)
-                v = conv1d(x, 'v_attn', n_state, split=split, checkpointing=self.checkpoint_matmul)
+                q = conv1d(
+                    x, 'q_attn', n_state, split=split, 
+                    checkpointing_matmul=self.checkpoint_matmul,
+                    checkpointing_variable=self.checkpoint_variable
+                )
+                k = conv1d(x, 'k_attn', n_state, split=split, 
+                    checkpointing_matmul=self.checkpoint_matmul,
+                    checkpointing_variable=self.checkpoint_variable
+                )
+                v = conv1d(x, 'v_attn', n_state, split=split, 
+                    checkpointing_matmul=self.checkpoint_matmul,
+                    checkpointing_variable=self.checkpoint_variable
+                )
             
             q, k, v = map(split_heads, [q, k, v])
 
@@ -190,7 +214,11 @@ class GPT2(object):
             a = multihead_attn(q, k, v)
             a = merge_heads(a)
             split = 0 if self.decoder_model_parallel else None 
-            a = conv1d(a, 'c_proj', n_state, split=split, checkpointing=self.checkpoint_matmul)
+            a = conv1d(
+                a, 'c_proj', n_state, split=split, 
+                checkpointing_matmul=self.checkpoint_matmul,
+                checkpointing_variable=self.checkpoint_variable
+            )
             a = flow.nn.dropout(a, rate=self.output_dropout)
             return a, present
 
@@ -198,8 +226,16 @@ class GPT2(object):
         with flow.scope.namespace(scope):
             split = 1 if self.decoder_model_parallel else None 
             nx = x.shape[-1]
-            h = conv1d(x, 'c_fc', n_state, split=split, checkpointing=self.checkpoint_matmul)
+            h = conv1d(
+                x, 'c_fc', n_state, split=split, 
+                checkpointing_matmul=self.checkpoint_matmul,
+                checkpointing_variable=self.checkpoint_variable
+            )
             h = gelu(h)
             split = 0 if self.decoder_model_parallel else None 
-            h = conv1d(h, 'c_proj', nx, split=split, checkpointing=self.checkpoint_matmul)
+            h = conv1d(
+                h, 'c_proj', nx, split=split, 
+                checkpointing_matmul=self.checkpoint_matmul,
+                checkpointing_variable=self.checkpoint_variable
+            )
             return flow.nn.dropout(h, rate=self.output_dropout)

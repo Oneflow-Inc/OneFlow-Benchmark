@@ -56,6 +56,8 @@ def get_parser(parser=None):
                         'with larger models, sequences, and batch sizes.')
     parser.add_argument('--checkpoint_matmul', type=str2bool, default=False, 
                         help='include matmul in checkpoint activations or not')
+    parser.add_argument('--checkpoint_variable', type=str2bool, default=True, 
+                        help='include variable in checkpoint or not')
 
 
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
