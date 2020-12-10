@@ -39,7 +39,7 @@ def conv2d_layer(
     weight_initializer,
     kernel_size=3,
     strides=1,
-    padding="SAME",
+    padding=[[0, 0],[0, 0], [1, 1], [1, 1]], 
     data_format="NCHW",
     dilation_rate=1,
     activation="Relu",

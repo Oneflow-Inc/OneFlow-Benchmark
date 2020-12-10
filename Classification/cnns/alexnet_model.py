@@ -139,7 +139,7 @@ def alexnet(images, args, need_transpose=False, training=True):
         use_bias=True,
         kernel_initializer=_get_kernel_initializer(),
         kernel_regularizer=_get_regularizer(),
-        bias_initializer=False,
+        bias_initializer=_get_bias_initializer(),
         name="fc3",
     )
 
