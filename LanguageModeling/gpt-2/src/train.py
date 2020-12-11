@@ -29,10 +29,13 @@ def make_gpt2_train_func(args):
             (args.batch_size, args.seq_len), dtype=flow.int64
         )
     ):
+        if x.split_axis == 0:
+            x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
+
         outputs = {}
         gpt2 = GPT2(args)
-        outputs = gpt2.forward(X)
-        loss = gpt2.loss(x, outputs["logits"])
+        outputs = gpt2.forward(x)
+        loss = gpt2.loss(x, outputs["logits"], parallel_loss=args.parallel_loss)
         outputs["loss"] = loss
         optimizer = util.make_optimizer(args)
         optimizer.minimize(loss)
@@ -43,8 +46,6 @@ def make_gpt2_train_func(args):
 
 def main():
     args = configs.get_args()
-    # batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
-    args.batch_size = args.total_batch_size
 
     util.InitNodes(args)
     flow.env.log_dir(args.log_dir)
@@ -69,6 +70,7 @@ def main():
         batch_size=args.batch_size,
         keys=["loss"],
     )
+
     print("Training...")
     try:
         for iter in range(args.iter_num):
