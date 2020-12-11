@@ -12,6 +12,7 @@ def gelu(x):
 
 def flatten(x, start_dim=0, end_dim=-1):
     # flow.flatten need to be added to auto mixed precision clear list
+    # we use reshape as a stand in for flatten
     # return flow.flatten(x, start_dim, end_dim)
     ndim = len(x.shape)
     if start_dim < 0:
