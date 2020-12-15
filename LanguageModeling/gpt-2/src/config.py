@@ -1,9 +1,9 @@
 import os
 import json
 import argparse
-import util
-
 from datetime import datetime
+
+from .util import pad_vocab_size
 
 
 def str_list(x):
@@ -281,7 +281,7 @@ def get_args():
     # batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
     args.batch_size = args.total_batch_size
 
-    args.padded_vocab_size = util.pad_vocab_size(
+    args.padded_vocab_size = pad_vocab_size(
         args.n_vocab,
         args.make_vocab_size_divisible_by,
         args.num_nodes * args.gpu_num_per_node,

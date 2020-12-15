@@ -1,29 +1,14 @@
-import os
-import sys
-import json
-
-import util
-import config as configs
-
-
-def set_python_path():
-    absolute_path = os.path.join(os.getcwd(), __file__)
-    gpt2_path = os.path.dirname(os.path.dirname(absolute_path))
-    sys.path.insert(0, gpt2_path)
-
-
-set_python_path()
-
-from third_party.load_dataset import load_dataset, Sampler
-from third_party import encoder
-
-from model import GPT2
-import oneflow.typing as tp
 import oneflow as flow
+from ..third_party.load_dataset import load_dataset, Sampler
+from ..third_party.encoder import get_encoder
+
+from . import config
+from . import util
+from .model import GPT2
 
 
 def make_gpt2_train_func(args):
-    @flow.global_function("train", util.GetFunctionConfig(args))
+    @flow.global_function("train", util.make_func_config(args))
     def gpt2_func(
         x: flow.typing.Numpy.Placeholder(
             (args.batch_size, args.seq_len), dtype=flow.int64
@@ -44,22 +29,14 @@ def make_gpt2_train_func(args):
     return gpt2_func
 
 
-def main():
-    args = configs.get_args()
-
-    util.InitNodes(args)
-    flow.env.log_dir(args.log_dir)
-    flow.config.enable_debug_mode(True)
-    flow.config.gpu_device_num(args.gpu_num_per_node)
-    flow.config.collective_boxing.nccl_fusion_reduce_scatter(True)
-    flow.config.collective_boxing.nccl_fusion_all_gather(True)
-    flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
-
+def train(args):
+    util.init_env(args)
+    util.init_config(args)
     gpt2_trainer = make_gpt2_train_func(args)
     snapshot = util.Snapshot(args.model_save_dir, args.model_load_dir)
 
     print("Loading dataset...")
-    enc = encoder.get_encoder(args)
+    enc = get_encoder(args)
     chunks = load_dataset(enc, args.dataset, args.combine, encoding=args.encoding)
     data_sampler = Sampler(chunks, seed=1)
     print("dataset has", data_sampler.total_size, "tokens")
@@ -82,4 +59,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = config.get_args()
+    train(args)

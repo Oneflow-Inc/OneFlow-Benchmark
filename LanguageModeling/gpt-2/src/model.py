@@ -243,11 +243,13 @@ class GPT2(object):
                 v = linear("v_attn", x, e, model_parallel_mode=parallel_mode)
 
             q, k, v = map(split_heads, [q, k, v])
-            present = []  # TODO: tf.stack([k, v], axis=1)
+            # TODO: tf.stack([k, v], axis=1)
+            present = []  
             if past is not None:
                 pk, pv = tf.unstack(past, axis=1)
                 k = tf.concat([pk, k], axis=-2)
                 v = tf.concat([pv, v], axis=-2)
+
             a = multihead_attn(q, k, v)
             a = merge_heads(a)
 

@@ -6,22 +6,56 @@ import oneflow as flow
 from collections import OrderedDict
 
 
+def init_env(args):
+    if args.num_nodes > 1:
+        assert args.num_nodes <= len(args.node_ips)
+        flow.env.ctrl_port(args.ctrl_port)
+        nodes = []
+        for ip in args.node_ips[: args.num_nodes]:
+            addr_dict = {}
+            addr_dict["addr"] = ip
+            nodes.append(addr_dict)
+
+        flow.env.machine(nodes)
+
+    flow.env.log_dir(args.log_dir)
+
+
+def init_config(args):
+    flow.config.enable_debug_mode(True)
+    flow.config.gpu_device_num(args.gpu_num_per_node)
+    flow.config.collective_boxing.nccl_fusion_reduce_scatter(True)
+    flow.config.collective_boxing.nccl_fusion_all_gather(True)
+    flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
+
+
+def make_func_config(args):
+    config = flow.function_config()
+    if args.use_fp16:
+        config.enable_auto_mixed_precision(True)
+    config.prune_parallel_cast_ops(True)
+    config.enable_fuse_add_to_output(True)
+    config.enable_fuse_model_update_ops(True)
+    config.enable_fuse_cast_scale(True)
+    # turn on the flag of none-distributed-optimizer
+    config.enable_non_distributed_optimizer(False)
+    return config
+
+
 def make_optimizer(args):
     lr_scheduler = flow.optimizer.PiecewiseConstantScheduler([], [args.learning_rate])
-    loss_scale_policy = (
+    loss_scale_policy = None
+    if args.use_fp16:
         flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=20)
-        if args.use_fp16
-        else None
-    )
-    # loss_scale_policy = None
+
     if args.optimizer == "adam":
-        opt = flow.optimizer.Adam(
+        optimizer = flow.optimizer.Adam(
             lr_scheduler, do_bias_correction=True, loss_scale_policy=loss_scale_policy
         )
     elif args.optimizer == "sgd":
-        opt = flow.optimizer.SGD(lr_scheduler, momentum=0.0)
+        optimizer = flow.optimizer.SGD(lr_scheduler, momentum=0.0)
     elif args.optimizer == "adamw":
-        opt = flow.optimizer.AdamW(
+        optimizer = flow.optimizer.AdamW(
             lr_scheduler,
             do_bias_correction=True,
             loss_scale_policy=loss_scale_policy,
@@ -33,36 +67,8 @@ def make_optimizer(args):
             grad_clipping=flow.optimizer.grad_clipping.by_global_norm(args.clip_grad),
         )
     else:
-        exit("Bad optimizer:", args.optimizer)
-    return opt
-
-
-def GetFunctionConfig(args):
-    config = flow.function_config()
-    # config.enable_auto_mixed_precision(args.use_fp16)
-    # if args.use_xla:
-    #    config.use_xla_jit(True)
-    if args.use_fp16:
-        config.enable_auto_mixed_precision(True)
-    config.enable_fuse_add_to_output(True)
-    config.prune_parallel_cast_ops(True)
-    config.enable_fuse_model_update_ops(True)
-    # turn on the flag of none-distributed-optimizer
-    config.enable_non_distributed_optimizer(False)
-    return config
-
-
-def InitNodes(args):
-    if args.num_nodes > 1:
-        assert args.num_nodes <= len(args.node_ips)
-        flow.env.ctrl_port(args.ctrl_port)
-        nodes = []
-        for ip in args.node_ips[: args.num_nodes]:
-            addr_dict = {}
-            addr_dict["addr"] = ip
-            nodes.append(addr_dict)
-
-        flow.env.machine(nodes)
+        raise ValueError("Unsupported optimizer:", args.optimizer)
+    return optimizer
 
 
 def pad_vocab_size(vocab_size, alignment, num_devices, parallel_embedding):
@@ -120,15 +126,6 @@ class Snapshot(object):
             os.makedirs(snapshot_save_path)
         print("Saving model to {}.".format(snapshot_save_path))
         self._check_point.save(snapshot_save_path)
-
-    def save(self, name):
-        snapshot_save_path = os.path.join(
-            self._model_save_dir, "snapshot_{}".format(name)
-        )
-        if not os.path.exists(snapshot_save_path):
-            os.makedirs(snapshot_save_path)
-        print("Saving model to {}.".format(snapshot_save_path))
-        flow.checkpoint.save(snapshot_save_path)
 
 
 class StopWatch(object):
