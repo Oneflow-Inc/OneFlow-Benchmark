@@ -129,11 +129,13 @@ class Metric(object):
     def _clear(self):
         for key in self.keys:
             self.metric_dict[key] = 0.0
+            self.metric_dict['n_' + key] = 0.0
         self.metric_dict['throughput'] = 0.0
         self.num_samples = 0.0
 
     def update_and_save(self, key, value, step, **kwargs):
         self.metric_dict[key] = value
+        self.metric_dict.pop('n_' + key, None)
         if self.save_summary:
             self.summary.scalar(self.desc + "_" + key, step, value, **kwargs)
 
@@ -143,6 +145,7 @@ class Metric(object):
 
             for key in self.keys:
                 self.metric_dict[key] += outputs[key].sum()
+                self.metric_dict['n_' + key] += outputs[key].size
 
             self.num_samples += self.batch_size
 
@@ -153,7 +156,7 @@ class Metric(object):
                 throughput = self.num_samples / self.timer.split()
                 self.update_and_save('throughput', throughput, step)
                 for key in self.keys:
-                    value = self.metric_dict[key] / self.num_samples
+                    value = self.metric_dict[key] / self.metric_dict['n_' + key]
                     self.update_and_save(key, value, step, **kwargs)
                 print(', '.join(('{}: {}' if type(v) is int else '{}: {:.3f}').format(k, v) \
                                 for k, v in self.metric_dict.items()), time.time())
