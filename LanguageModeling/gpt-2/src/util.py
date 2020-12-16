@@ -133,17 +133,18 @@ class StopWatch(object):
         pass
 
     def start(self):
-        self.start_time = time.time()
-        self.last_split = self.start_time
+        now = time.perf_counter()
+        self.start_time = now
+        self.last_split = now
 
     def split(self):
-        now = time.time()
+        now = time.perf_counter()
         duration = now - self.last_split
         self.last_split = now
         return duration
 
     def stop(self):
-        self.stop_time = time.time()
+        self.stop_time = time.perf_counter()
 
     def duration(self):
         return self.stop_time - self.start_time
@@ -197,17 +198,32 @@ class Metric(object):
                 self.metric_dict["step"] = step + 1
                 for k, v in kwargs.items():
                     self.metric_dict[k] = v
-                throughput = self.num_samples / self.timer.split()
+
+                elapsed_time = self.timer.split()
+                throughput = self.num_samples / elapsed_time
                 self.update_and_save("throughput", throughput, step)
+                lantency = elapsed_time / self.print_steps
+                self.update_and_save("lantency", lantency, step)
                 for key in self.keys:
                     value = self.metric_dict[key] / self.num_samples
                     self.update_and_save(key, value, step, **kwargs)
+
+                if step + 1 == self.print_steps:
+                    print(
+                        f"| {'step'.ljust(8)} "
+                        f"| {'loss'.ljust(10)} "
+                        f"| {'throughput'.ljust(10)} "
+                        f"| {'lantency'.ljust(10)} "
+                        "|"
+                    )
+                    print(f"| {'-' * 8} | {'-' * 10} | {'-' * 10} | {'-' * 10} |")
+
                 print(
-                    ", ".join(
-                        ("{}: {}" if type(v) is int else "{}: {:.3f}").format(k, v)
-                        for k, v in self.metric_dict.items()
-                    ),
-                    time.time(),
+                    f"| {self.metric_dict['step']:<8d} "
+                    f"| {self.metric_dict['loss']:<10.3f} "
+                    f"| {self.metric_dict['throughput']:<10.3f} "
+                    f"| {self.metric_dict['lantency']:<10.3f} "
+                    "|"
                 )
                 self._clear()
 
