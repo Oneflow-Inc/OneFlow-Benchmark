@@ -89,6 +89,13 @@ def get_parser(parser=None):
         "--attention_dropout", type=float, default=0.1, help="attention dropout rate"
     )
     parser.add_argument(
+        "--make-vocab-size-divisible-by",
+        type=int,
+        default=128,
+        help="Pad the vocab size to be divisible by this value."
+        "This is added for computational efficieny reasons.",
+    )
+    parser.add_argument(
         "--use_big_fc", type=str2bool, default=False, help="use big fc in attn"
     )
     parser.add_argument(
@@ -172,16 +179,14 @@ def get_parser(parser=None):
     parser.add_argument(
         "--model_save_every_n_iter",
         type=int,
-        default=10000,
+        default=0,
         required=False,
         help="save model every n iteration",
     )
     parser.add_argument(
         "--model_save_dir",
         type=str,
-        default="./output/model_save-{}".format(
-            str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))
-        ),
+        default="model_save",
         required=False,
         help="model save directory",
     )
@@ -198,7 +203,6 @@ def get_parser(parser=None):
     parser.add_argument(
         "--log_dir", type=str, default="./output", help="log info save directory"
     )
-
     # distribute
     parser.add_argument("--gpu_num_per_node", type=int, default=1)
     parser.add_argument(
@@ -238,13 +242,6 @@ def get_parser(parser=None):
         "--parallel-loss",
         action="store_true",
         help="distributed softmax cross entropy loss",
-    )
-    parser.add_argument(
-        "--make-vocab-size-divisible-by",
-        type=int,
-        default=128,
-        help="Pad the vocab size to be divisible by this value."
-        "This is added for computational efficieny reasons.",
     )
     # misc
     parser.add_argument(

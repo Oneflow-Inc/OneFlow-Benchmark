@@ -33,6 +33,7 @@ python3 -m $gpt2_dir.src.train \
   --dataset=$data_path \
   --cfg_dir=$cfg_path \
   --model_load_dir=$model_load_path \
+  --save_last_snapshot=True \
   --iter_num=100 \
   --loss_print_every_n_iter=1 \
   --total_batch_size=$batch_size \
