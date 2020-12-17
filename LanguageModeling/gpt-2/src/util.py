@@ -27,6 +27,7 @@ def init_config(args):
     flow.config.collective_boxing.nccl_fusion_reduce_scatter(True)
     flow.config.collective_boxing.nccl_fusion_all_gather(True)
     flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
+    flow.config.enable_legacy_model_io(True)
 
 
 def make_func_config(args):
@@ -91,20 +92,6 @@ def pad_vocab_size(vocab_size, alignment, num_devices, parallel_embedding):
     return padded_vocab_size
 
 
-class Snapshot_new(object):
-    def __init__(self, model_save_dir, model_load_dir):
-        self._model_save_dir = model_save_dir
-        if model_load_dir:
-            assert os.path.isdir(model_load_dir)
-            print("Restoring model from {}.".format(model_load_dir))
-            # self._check_point.load(model_load_dir)
-            flow.load_variables(flow.checkpoint.get(model_load_dir))
-        # else:
-        #    self._check_point.init()
-        #    #self.save('initial_model')
-        #    print("Init model on demand.")
-
-
 class Snapshot(object):
     def __init__(self, model_save_dir, model_load_dir):
         self._model_save_dir = model_save_dir
@@ -151,7 +138,14 @@ class StopWatch(object):
 
 
 class Metric(object):
-    def __init__(self, desc="train", print_steps=-1, batch_size=256, keys=[]):
+    def __init__(
+        self,
+        desc="train",
+        print_steps=-1,
+        batch_size=256,
+        keys=[],
+        print_format="normal",
+    ):
         r"""accumulate and calculate metric
 
         Args:
@@ -175,6 +169,13 @@ class Metric(object):
         self.timer.start()
         self._clear()
 
+        if print_format == "normal":
+            self.print_fn = self.step_print
+        elif print_format == "table":
+            self.print_fn = self.step_print_by_table
+        else:
+            raise ValueError("print_format must be <normal|table>")
+
     def _clear(self):
         for key in self.keys:
             self.metric_dict[key] = 0.0
@@ -183,6 +184,33 @@ class Metric(object):
 
     def update_and_save(self, key, value, step, **kwargs):
         self.metric_dict[key] = value
+
+    def step_print(self):
+        print(
+            f"step={self.metric_dict['step']},"
+            f"loss={self.metric_dict['loss']:.5f},"
+            f"throughput={self.metric_dict['throughput']:.5f},"
+            f"lantency={self.metric_dict['lantency']:.5f}"
+        )
+
+    def step_print_by_table(self):
+        if self.metric_dict["step"] == self.print_steps:
+            print(
+                f"| {'step'.ljust(8)} "
+                f"| {'loss'.ljust(10)} "
+                f"| {'throughput'.ljust(10)} "
+                f"| {'lantency'.ljust(10)} "
+                "|"
+            )
+            print(f"| {'-' * 8} | {'-' * 10} | {'-' * 10} | {'-' * 10} |")
+
+        print(
+            f"| {self.metric_dict['step']:<8d} "
+            f"| {self.metric_dict['loss']:<10.5f} "
+            f"| {self.metric_dict['throughput']:<10.5f} "
+            f"| {self.metric_dict['lantency']:<10.5f} "
+            "|"
+        )
 
     def metric_cb(self, step=0, **kwargs):
         def callback(outputs):
@@ -208,23 +236,7 @@ class Metric(object):
                     value = self.metric_dict[key] / self.num_samples
                     self.update_and_save(key, value, step, **kwargs)
 
-                if step + 1 == self.print_steps:
-                    print(
-                        f"| {'step'.ljust(8)} "
-                        f"| {'loss'.ljust(10)} "
-                        f"| {'throughput'.ljust(10)} "
-                        f"| {'lantency'.ljust(10)} "
-                        "|"
-                    )
-                    print(f"| {'-' * 8} | {'-' * 10} | {'-' * 10} | {'-' * 10} |")
-
-                print(
-                    f"| {self.metric_dict['step']:<8d} "
-                    f"| {self.metric_dict['loss']:<10.3f} "
-                    f"| {self.metric_dict['throughput']:<10.3f} "
-                    f"| {self.metric_dict['lantency']:<10.3f} "
-                    "|"
-                )
+                self.print_fn()
                 self._clear()
 
         return callback

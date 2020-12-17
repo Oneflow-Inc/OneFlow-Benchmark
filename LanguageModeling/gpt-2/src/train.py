@@ -18,7 +18,7 @@ def make_gpt2_train_func(args):
             x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
 
         outputs = {}
-        gpt2 = GPT2(args)
+        gpt2 = GPT2(args, name="model")
         outputs = gpt2.forward(x)
         loss = gpt2.loss(x, outputs["logits"], parallel_loss=args.parallel_loss)
         outputs["loss"] = loss
@@ -46,6 +46,7 @@ def train(args):
         print_steps=args.loss_print_every_n_iter,
         batch_size=args.batch_size,
         keys=["loss"],
+        print_format=args.metric_print_format,
     )
 
     print("Training...")

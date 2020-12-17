@@ -4,9 +4,9 @@ export PYTHONUNBUFFERED=1
 
 gpt2_dir=gpt-2
 gpt2_path=/OneFlow-Benchmark/LanguageModeling/$gpt2_dir
-dataset=/wksp/gpt2_small_of_models_4_regression/wiki_00
-cfg_dir=/wksp/gpt2_small_of_models_4_regression/117M
-#model_load_dir=/home/xiexuan/model_zoo/of_gpt2_models
+model_path=/wksp/gpt2_small_of_models_4_regression
+dataset=$model_path/data/wiki_00
+cfg_dir=$model_path/117M
 
 gpu_num_per_node=$1
 batch_size=8
@@ -17,7 +17,7 @@ seq_len=1024
 dropout_rate=0.1
 
 log_dir=log
-test_case=bsz${batch_size}_g${gpu_num}_e${n_embd}_h${n_head}_l${n_layer}
+test_case=bsz${batch_size}_g${gpu_num_per_node}_e${n_embd}_h${n_head}_l${n_layer}
 mem_file=$log_dir/$test_case.mem
 log_file=$log_dir/$test_case.log
 
@@ -45,6 +45,7 @@ cmd+="--parallel-decoder "
 cmd+="--parallel-loss "
 cmd+="--iter_num=110 "
 cmd+="--loss_print_every_n_iter=10 "
+cmd+="--metric-print-format=table "
 cmd+="--total_batch_size=$batch_size "
 cmd+="--gpu_num_per_node=$gpu_num_per_node "
 cmd+="--num_nodes=1 "

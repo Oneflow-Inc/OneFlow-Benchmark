@@ -246,6 +246,13 @@ def get_parser(parser=None):
         help="Pad the vocab size to be divisible by this value."
         "This is added for computational efficieny reasons.",
     )
+    # misc
+    parser.add_argument(
+        "--metric-print-format",
+        type=str,
+        default="normal",
+        help="metric print format <normal|table>",
+    )
     return parser
 
 
