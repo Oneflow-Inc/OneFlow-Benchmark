@@ -21,7 +21,7 @@ import numpy as np
 import oneflow as flow
 
 from classifier import GlueBERT
-from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
+from util import Snapshot, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
 
 import config as configs
 from sklearn.metrics import accuracy_score, matthews_corrcoef, precision_score, recall_score, f1_score
@@ -187,9 +187,8 @@ def main():
     #    import sys
     #    sys.exit()
 
-    summary = Summary(args.log_dir, args)
     for epoch in range(args.num_epochs):
-        metric = Metric(desc='finetune', print_steps=args.loss_print_every_n_iter, summary=summary, 
+        metric = Metric(desc='finetune', print_steps=args.loss_print_every_n_iter,  
                         batch_size=batch_size, keys=['loss'])
 
         for step in range(epoch_size):
