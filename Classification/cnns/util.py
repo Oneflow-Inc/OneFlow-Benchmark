@@ -85,12 +85,8 @@ def match_top_k(predictions, labels, top_k=1):
 
 
 class Metric(object):
-    def __init__(self, desc='train', calculate_batches=-1,
-                 batch_size=256, top_k=5, prediction_key='predictions', label_key='labels',
-                 loss_key=None):
-        self.summary = summary
-        self.save_summary = isinstance(self.summary, Summary)
-        self.save_summary_steps = save_summary_steps
+    def __init__(self, desc='train', calculate_batches=-1, batch_size=256, top_k=5, 
+                 prediction_key='predictions', label_key='labels', loss_key=None):
         self.desc = desc
         self.calculate_batches = calculate_batches
         self.top_k = top_k
@@ -139,23 +135,11 @@ class Metric(object):
                     loss = outputs[self.loss_key].mean()
                     print(self.fmt.format(self.desc, epoch, step + 1, loss, top_1_accuracy,
                                           top_k_accuracy, throughput), time.time())
-                    if self.save_summary:
-                        self.summary.scalar(self.desc+"_" + self.loss_key, loss, epoch, step)
                 else:
                     print(self.fmt.format(self.desc, epoch, step + 1, top_1_accuracy,
                                           top_k_accuracy, throughput), time.time())
 
                 self._clear()
-                if self.save_summary:
-                    self.summary.scalar(self.desc + "_throughput", throughput, epoch, step)
-                    if self.prediction_key:
-                        self.summary.scalar(self.desc + "_top_1", top_1_accuracy, epoch, step)
-                        self.summary.scalar(self.desc + "_top_{}".format(self.top_k),
-                                            top_k_accuracy, epoch, step)
-
-            if self.save_summary:
-                if (step + 1) % self.save_summary_steps == 0:
-                    self.summary.save()
 
         return callback
 
