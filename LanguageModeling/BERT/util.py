@@ -57,26 +57,6 @@ class Snapshot(object):
         self._check_point.save(snapshot_save_path)
 
 
-class Summary(object):
-    def __init__(self, log_dir, config, filename='summary.csv'):
-        self._filename = filename
-        self._log_dir = log_dir
-        if not os.path.exists(log_dir): os.makedirs(log_dir)
-        self._metrics = pd.DataFrame({"legend": "cfg", "value": str(config)}, index=[0])
-
-    def scalar(self, legend, iter, value, **kwargs):
-        kwargs['legend'] = legend
-        kwargs['iter'] = int(iter)
-        kwargs['value'] = value
-        df = pd.DataFrame(kwargs, index=[0])
-        self._metrics = pd.concat([self._metrics, df], axis=0, sort=False)
-        self.save()
-
-    def save(self):
-        save_path = os.path.join(self._log_dir, self._filename)
-        self._metrics.to_csv(save_path, index=False)
-
-
 class StopWatch(object):
     def __init__(self):
         pass
@@ -99,19 +79,16 @@ class StopWatch(object):
 
 
 class Metric(object):
-    def __init__(self, summary=None, desc='train', print_steps=-1, batch_size=256, keys=[]):
+    def __init__(self, desc='train', print_steps=-1, batch_size=256, keys=[]):
         r"""accumulate and calculate metric
 
         Args:
-            summary: A `Summary` object to write in.
             desc: `str` general description of the metric to show
             print_steps: `Int` print metrics every nth steps
             batch_size: `Int` batch size per step
             keys: keys in callback outputs
         Returns:
         """
-        self.summary = summary
-        self.save_summary = isinstance(self.summary, Summary)
         self.desc = desc
         self.print_steps = print_steps
         assert batch_size > 0
@@ -136,8 +113,6 @@ class Metric(object):
     def update_and_save(self, key, value, step, **kwargs):
         self.metric_dict[key] = value
         self.metric_dict.pop('n_' + key, None)
-        if self.save_summary:
-            self.summary.scalar(self.desc + "_" + key, step, value, **kwargs)
 
     def metric_cb(self, step=0, **kwargs):
         def callback(outputs):
