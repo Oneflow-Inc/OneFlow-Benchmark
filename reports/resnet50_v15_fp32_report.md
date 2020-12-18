@@ -144,9 +144,8 @@ Note: Please to make sure all servers can login each other automaticly with ssh-
 ```
 
 ### Calculate `Throughput` from Test Results
-`Throughput(samples/s)` information as well as `loss` and `top-k` can be found in `oneflow_temp` folder in the first node's home directory, there are two files:
-1. `oneflow.log` - redirected stdout 
-2. `log/summary.csv` - same information in csv format 
+`Throughput(samples/s)` information as well as `loss` and `top-k` can be found in `oneflow_temp` folder in the first node's home directory, there is a log file:
+- `oneflow.log` - redirected stdout 
 
 We use `oneflow.log` for instance, here is an example:
 ```

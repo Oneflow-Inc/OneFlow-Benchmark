@@ -22,7 +22,7 @@ import config as configs
 import oneflow as flow
 
 from pretrain import PreTrain
-from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
+from util import Snapshot, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
 
 parser = configs.get_parser()
 parser.add_argument("--data_dir", type=str, default=None)
@@ -104,8 +104,7 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-    summary = Summary(args.log_dir, args)
-    metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, summary=summary, 
+    metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, 
                     batch_size=batch_size, keys=['total_loss', 'mlm_loss', 'nsp_loss'])
     for step in range(args.iter_num):
         PretrainJob().async_get(metric.metric_cb(step))

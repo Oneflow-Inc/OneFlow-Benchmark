@@ -138,7 +138,7 @@ def load_imagenet_for_validation(args):
 if __name__ == "__main__":
     import os
     import config as configs
-    from util import Summary, InitNodes, Metric
+    from util import InitNodes, Metric
     from job_function_util import get_val_config
     parser = configs.get_parser()
     args = parser.parse_args()
@@ -160,9 +160,7 @@ if __name__ == "__main__":
 
     total_device_num = args.num_nodes * args.gpu_num_per_node
     train_batch_size = total_device_num * args.batch_size_per_device
-    summary = Summary(args.log_dir, args, filename='io_test.csv')
     metric = Metric(desc='io_test', calculate_batches=args.loss_print_every_n_iter,
-                    summary=summary, save_summary_steps=args.loss_print_every_n_iter,
                     batch_size=train_batch_size, prediction_key=None)
     for i in range(1000):
         IOTest().async_get(metric.metric_cb(0, i))

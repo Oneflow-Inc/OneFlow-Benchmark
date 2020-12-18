@@ -19,7 +19,7 @@ import oneflow as flow
 import ofrecord_util
 import optimizer_util
 import config as configs
-from util import Snapshot, Summary, InitNodes, Metric
+from util import Snapshot, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
 import resnet_model
 import resnext_model
@@ -116,19 +116,17 @@ def main():
     InitNodes(args)
     flow.env.log_dir(args.log_dir)
 
-    summary = Summary(args.log_dir, args)
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
     for epoch in range(args.num_epochs):
         metric = Metric(desc='train', calculate_batches=args.loss_print_every_n_iter,
-                        summary=summary, save_summary_steps=epoch_size,
                         batch_size=train_batch_size, loss_key='loss')
         for i in range(epoch_size):
             TrainNet().async_get(metric.metric_cb(epoch, i))
 
         if args.val_data_dir:
-            metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
-                            save_summary_steps=num_val_steps, batch_size=val_batch_size)
+            metric = Metric(desc='validation', calculate_batches=num_val_steps, 
+                            batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
         snapshot.save('epoch_{}'.format(epoch))

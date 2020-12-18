@@ -24,7 +24,7 @@ parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
 
-from util import Snapshot, Summary, InitNodes, Metric
+from util import Snapshot, InitNodes, Metric
 import ofrecord_util
 from job_function_util import get_train_config, get_val_config
 import oneflow as flow
@@ -69,13 +69,12 @@ def main():
     assert args.model_load_dir, 'Must have model load dir!'
 
     flow.env.log_dir(args.log_dir)
-    summary = Summary(args.log_dir, args)
     # snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
     print("Restoring model from {}.".format(args.model_load_dir))
     checkpoint = flow.train.CheckPoint()
     checkpoint.load(args.model_load_dir)
-    metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
-                    save_summary_steps=num_val_steps, batch_size=val_batch_size)
+    metric = Metric(desc='validation', calculate_batches=num_val_steps, 
+                    batch_size=val_batch_size)
     
     for i in range(args.num_epochs):
         for j in range(num_val_steps):

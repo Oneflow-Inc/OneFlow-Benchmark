@@ -24,7 +24,7 @@ from config import str2bool
 import oneflow as flow
 
 from squad import SQuAD
-from util import Snapshot, Summary, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
+from util import Snapshot, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
 from squad_util import RawResult, gen_eval_predict_json
 
 parser = configs.get_parser()
@@ -179,9 +179,8 @@ def main():
         snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
     if args.do_train:
-        summary = Summary(args.log_dir, args)
         for epoch in range(args.num_epochs):
-            metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, summary=summary, 
+            metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter,  
                             batch_size=batch_size, keys=['total_loss'])
 
             for step in range(epoch_size):
