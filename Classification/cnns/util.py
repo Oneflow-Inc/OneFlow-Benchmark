@@ -56,25 +56,6 @@ class Snapshot(object):
         self._check_point.save(snapshot_save_path)
 
 
-class Summary(object):
-    def __init__(self, log_dir, config, filename='summary.csv'):
-        self._filename = filename
-        self._log_dir = log_dir
-        if not os.path.exists(log_dir): os.makedirs(log_dir)
-        self._metrics = pd.DataFrame({"epoch":0, "iter": 0, "legend": "cfg", "note": str(config)}, index=[0])
-
-    def scalar(self, legend, value, epoch, step=-1):
-        # TODO: support rank(which device/gpu)
-        df = pd.DataFrame(
-            {"epoch": epoch, "iter": step, "legend": legend, "value": value, "rank": 0},
-            index=[0])
-        self._metrics = pd.concat([self._metrics, df], axis=0, sort=False)
-
-    def save(self):
-        save_path = os.path.join(self._log_dir, self._filename)
-        self._metrics.to_csv(save_path, index=False)
-
-
 class StopWatch(object):
     def __init__(self):
         pass
@@ -104,7 +85,7 @@ def match_top_k(predictions, labels, top_k=1):
 
 
 class Metric(object):
-    def __init__(self, summary=None, save_summary_steps=-1, desc='train', calculate_batches=-1,
+    def __init__(self, desc='train', calculate_batches=-1,
                  batch_size=256, top_k=5, prediction_key='predictions', label_key='labels',
                  loss_key=None):
         self.summary = summary
