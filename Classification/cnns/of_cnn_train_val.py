@@ -89,22 +89,22 @@ def TrainNet():
     return outputs
 
 
-@flow.global_function("predict", get_val_config(args))
-def InferenceNet():
-    if args.val_data_dir:
-        assert os.path.exists(args.val_data_dir)
-        print("Loading data from {}".format(args.val_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
+# @flow.global_function("predict", get_val_config(args))
+# def InferenceNet():
+#     if args.val_data_dir:
+#         assert os.path.exists(args.val_data_dir)
+#         print("Loading data from {}".format(args.val_data_dir))
+#         (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
 
-    else:
-        print("Loading synthetic data.")
-        (labels, images) = ofrecord_util.load_synthetic(args)
+#     else:
+#         print("Loading synthetic data.")
+#         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](
-        images, need_transpose=False if args.val_data_dir else True)
-    predictions = flow.nn.softmax(logits)
-    outputs = {"predictions": predictions, "labels": labels}
-    return outputs
+#     logits = model_dict[args.model](
+#         images, need_transpose=False if args.val_data_dir else True)
+#     predictions = flow.nn.softmax(logits)
+#     outputs = {"predictions": predictions, "labels": labels}
+#     return outputs
 
 
 def main():
@@ -126,8 +126,9 @@ def main():
             metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
                             save_summary_steps=num_val_steps, batch_size=val_batch_size)
             for i in range(num_val_steps):
-                InferenceNet().async_get(metric.metric_cb(epoch, i))
-        snapshot.save('epoch_{}'.format(epoch))
+                pass
+                # InferenceNet().async_get(metric.metric_cb(epoch, i))
+        # snapshot.save('epoch_{}'.format(epoch))
 
 
 if __name__ == "__main__":
