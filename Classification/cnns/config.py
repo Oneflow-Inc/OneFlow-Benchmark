@@ -24,7 +24,7 @@ from ofrecord_util import add_ofrecord_args
 
 def get_parser(parser=None):
     def str_list(x):
-        return x.split(',')
+        return [i.strip() for i in x.split(',')]
 
     def int_list(x):
         return list(map(int, x.split(',')))
