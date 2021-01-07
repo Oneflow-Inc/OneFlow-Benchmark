@@ -74,16 +74,23 @@ def get_parser(parser=None):
         '--use_tensorrt',
         type=str2bool,
         nargs='?',
-        const=True,
+        default=False,
         help='Whether to use tensorrt'
         )
     parser.add_argument(
-        '--use_int8',
+        '--use_int8_online',
         type=str2bool,
         nargs='?',
-        const=True,
-        help='Whether to use int8 calibration'
+        default=False,
+        help='Whether to use online int8 calibration'
         )
+    parser.add_argument(
+            '--use_int8_offline',
+             type=str2bool,
+             nargs='?', 
+            default=False,                                                                 help='Whether to use online int8 calibration'
+             )          
+
     parser.add_argument(
         '--channel_last',
         type=str2bool,

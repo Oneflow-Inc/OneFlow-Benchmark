@@ -74,15 +74,31 @@ def main():
     print("Restoring model from {}.".format(args.model_load_dir))
     checkpoint = flow.train.CheckPoint()
     checkpoint.load(args.model_load_dir)
+
+    if args.use_int8_online:
+        for j in range(10):
+            flow.tensorrt.cache_int8_calibration()
+
+    warmup = 2
+    for j in range(warmup): 
+        InferenceNet().get()
+
     metric = Metric(desc='validation', calculate_batches=num_val_steps, summary=summary,
                     save_summary_steps=num_val_steps, batch_size=val_batch_size)
-    
     for i in range(args.num_epochs):
         for j in range(num_val_steps):
-            if args.use_int8 and j ==10:
-                flow.tensorrt.cache_int8_calibration()
-
             InferenceNet().async_get(metric.metric_cb(0, j))
+
+    # for i in range(args.num_epochs):
+    #     for j in range(num_val_steps):
+    #         if i == 0 and j == 10:
+    #             if args.use_int8_online:
+    #                 flow.tensorrt.cache_int8_calibration()
+    #             if args.use_int8_offline:  
+    #                 flow.tensorrt.write_int8_calibration("./int8_calibration")
+
+
+    #         InferenceNet().async_get(metric.metric_cb(0, j))
 
 
 if __name__ == "__main__":

@@ -172,9 +172,9 @@ class Metric(object):
                         self.summary.scalar(self.desc + "_top_{}".format(self.top_k),
                                             top_k_accuracy, epoch, step)
 
-            if self.save_summary:
-                if (step + 1) % self.save_summary_steps == 0:
-                    self.summary.save()
+            # if self.save_summary:
+            #     if (step + 1) % self.save_summary_steps == 0:
+            #         self.summary.save()
 
         return callback
 
