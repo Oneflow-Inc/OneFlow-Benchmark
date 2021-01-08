@@ -89,17 +89,5 @@ def main():
         for j in range(num_val_steps):
             InferenceNet().async_get(metric.metric_cb(0, j))
 
-    # for i in range(args.num_epochs):
-    #     for j in range(num_val_steps):
-    #         if i == 0 and j == 10:
-    #             if args.use_int8_online:
-    #                 flow.tensorrt.cache_int8_calibration()
-    #             if args.use_int8_offline:  
-    #                 flow.tensorrt.write_int8_calibration("./int8_calibration")
-
-
-    #         InferenceNet().async_get(metric.metric_cb(0, j))
-
-
 if __name__ == "__main__":
     main()

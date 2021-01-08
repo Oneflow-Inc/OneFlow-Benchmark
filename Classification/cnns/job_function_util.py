@@ -30,11 +30,13 @@ def _default_config(args):
         config.use_tensorrt(True)
         if args.use_int8_online or args.use_int8_offline:
             config.tensorrt.use_int8()
-    elif args.use_int8_online:
-        raise Exception("You can set use_int8 only after use_tensorrt is True!")
+    elif args.use_int8_online or args.use_int8_offline:
+        raise Exception("You can set use_int8_online or use_int8_offline only after use_tensorrt is True!")
     if args.use_int8_offline:
         int8_calibration_path = "./int8_calibration"
         config.tensorrt.int8_calibration(int8_calibration_path)
+    if args.use_int8_offline and if use_int8_online:
+        raise ValueError("You cannot use use_int8_offline or use_int8_online at the same time!")
     return config
 
 
