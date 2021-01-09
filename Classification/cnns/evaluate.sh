@@ -16,7 +16,7 @@ python3  of_cnn_evaluate.py \
     --num_nodes=1 \
     --node_ips='127.0.0.1' \
     --gpu_num_per_node=1 \
-    --val_batch_size_per_device=320 \
+    --val_batch_size_per_device=350 \
     --model="resnet50" \
     --use_tensorrt=True \
     --use_int8_online=True \

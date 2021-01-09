@@ -75,9 +75,11 @@ def main():
     checkpoint = flow.train.CheckPoint()
     checkpoint.load(args.model_load_dir)
 
+    
     if args.use_int8_online:
         for j in range(10):
-            flow.tensorrt.cache_int8_calibration()
+            InferenceNet().get()
+        flow.tensorrt.cache_int8_calibration()
 
     warmup = 2
     for j in range(warmup): 
