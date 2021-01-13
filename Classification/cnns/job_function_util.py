@@ -35,7 +35,7 @@ def _default_config(args):
     if args.use_int8_offline:
         int8_calibration_path = "./int8_calibration"
         config.tensorrt.int8_calibration(int8_calibration_path)
-    if args.use_int8_offline and use_int8_online:
+    if args.use_int8_offline and args.use_int8_online:
         raise ValueError("You cannot use use_int8_offline or use_int8_online at the same time!")
     return config
 
