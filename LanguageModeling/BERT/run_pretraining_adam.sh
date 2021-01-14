@@ -32,6 +32,7 @@ python3 $BENCH_ROOT_DIR/run_pretraining.py \
   --max_predictions_per_seq=20 \
   --num_hidden_layers=12 \
   --num_attention_heads=12 \
+  --num_accumulation_steps=1 \
   --max_position_embeddings=512 \
   --type_vocab_size=2 \
   --vocab_size=30522 \

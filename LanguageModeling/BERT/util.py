@@ -155,6 +155,7 @@ def CreateOptimizer(args):
 def GetFunctionConfig(args):
     config = flow.function_config()
     config.enable_auto_mixed_precision(args.use_fp16)
+    config.train.num_gradient_accumulation_steps(args.num_accumulation_steps)
     if args.use_xla:
         config.use_xla_jit(True)
     config.enable_fuse_add_to_output(True)
