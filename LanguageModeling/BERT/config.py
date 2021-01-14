@@ -58,7 +58,7 @@ def get_parser(parser=None):
                         help='use use fp16 or not')
     parser.add_argument('--use_xla', type=str2bool, nargs='?', const=True,
                         help='Whether to use use xla')
-    parser.add_argument("num_accumulation_steps", type=int, default=1,
+    parser.add_argument("--num_accumulation_steps", type=int, default=1,
                         help='Number of accumulation steps before gradient update, Global batch size = num_accumulation_steps * train_batch_size')
 
     # log and resore/save
