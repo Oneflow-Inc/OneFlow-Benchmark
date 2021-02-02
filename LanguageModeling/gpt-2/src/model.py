@@ -102,8 +102,6 @@ class GPT2(object):
         self.embedding_dropout = args.embedding_dropout
         self.attention_dropout = args.attention_dropout
         self.hidden_dropout = args.hidden_dropout
-        # self.wte_split = args.wte_split
-        # self.wpe_split = args.wpe_split
         self.parallel_embedding = args.parallel_embedding
         self.parallel_decoder = args.parallel_decoder
         self.use_fp16 = args.use_fp16

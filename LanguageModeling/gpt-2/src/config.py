@@ -218,18 +218,6 @@ def get_parser(parser=None):
         "--ctrl_port", type=int, default=50051, help="ctrl_port for multinode job"
     )
     parser.add_argument(
-        "--wte_split", type=int, default=-1, help="token embd model split axis"
-    )
-    parser.add_argument(
-        "--wpe_split", type=int, default=-1, help="pos embd model split axis"
-    )
-    parser.add_argument(
-        "--decoder_model_parallel",
-        type=str2bool,
-        default=False,
-        help="is model parallel for decoder blocks",
-    )
-    parser.add_argument(
         "--model-parallel-size", type=int, default=1, help="Size of the model parallel."
     )
     parser.add_argument(
