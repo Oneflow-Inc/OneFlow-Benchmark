@@ -1,9 +1,8 @@
 import os
 import json
+import math
 import argparse
 from datetime import datetime
-
-from .util import pad_vocab_size
 
 
 def str_list(x):
@@ -218,7 +217,12 @@ def get_parser(parser=None):
         "--ctrl_port", type=int, default=50051, help="ctrl_port for multinode job"
     )
     parser.add_argument(
-        "--model-parallel-size", type=int, default=1, help="Size of the model parallel."
+        "--embd_model_parallel_size", type=int, default=1,
+        help="Size of the model parallel for embedding tables."
+    )
+    parser.add_argument(
+        "--attn_model_parallel_size", type=int, default=1,
+        help="Size of the model parallel for attention layers."
     )
     parser.add_argument(
         "--parallel-embedding", action="store_true", help="distributed embedding",
@@ -239,6 +243,40 @@ def get_parser(parser=None):
         help="metric print format <normal|table>",
     )
     return parser
+
+
+def initialize_model_parallel(args):
+    device_num = args.gpu_num_per_node * args.num_nodes
+    if device_num == 1:
+        print('warning! there is only 1 device, set model parallel size to 1')
+        return None, None
+
+    assert device_num % args.embd_model_parallel_size == 0
+    assert device_num % args.attn_model_parallel_size == 0
+    embd_parallel_hierarchy = [device_num // args.embd_model_parallel_size,
+                               args.embd_model_parallel_size]
+    attn_parallel_hierarchy = [device_num // args.attn_model_parallel_size,
+                               args.attn_model_parallel_size]
+    return embd_parallel_hierarchy, attn_parallel_hierarchy
+
+
+def pad_vocab_size(vocab_size, alignment, model_parallel_size):
+    """Pad vocab size so it is divisible by model parallel size and
+    still having GPU friendly size."""
+    assert isinstance(alignment, int)
+    if alignment == 0:
+        return vocab_size
+
+    alignment *= model_parallel_size
+
+    padded_vocab_size = int(math.ceil(vocab_size / alignment)) * alignment
+    print(
+        " > padded vocab (size: {}) with {} dummy tokens "
+        "(new size: {})".format(
+            vocab_size, padded_vocab_size - vocab_size, padded_vocab_size
+        )
+    )
+    return padded_vocab_size
 
 
 def print_args(args):
@@ -273,11 +311,14 @@ def get_args():
     # batch_size = args.batch_size_per_device * args.gpu_num_per_node * args.num_nodes
     args.batch_size = args.total_batch_size
 
+    args.embd_parallel_hierarchy, args.attn_parallel_hierarchy = initialize_model_parallel(args)
+
+    embd_model_parallel_size = 1
+
     args.padded_vocab_size = pad_vocab_size(
         args.n_vocab,
         args.make_vocab_size_divisible_by,
-        args.num_nodes * args.gpu_num_per_node,
-        args.parallel_embedding,
+        args.embd_parallel_hierarchy[1] if args.embd_parallel_hierarchy else 1,
     )
 
     print_args(args)

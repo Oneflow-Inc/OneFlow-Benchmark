@@ -1,6 +1,5 @@
 import os
 import time
-import math
 from collections import OrderedDict
 from datetime import datetime
 
@@ -72,25 +71,6 @@ def make_optimizer(args):
         raise ValueError("Unsupported optimizer:", args.optimizer)
     return optimizer
 
-
-def pad_vocab_size(vocab_size, alignment, num_devices, parallel_embedding):
-    """Pad vocab size so it is divisible by model parallel size and
-    still having GPU friendly size."""
-    assert isinstance(alignment, int)
-    if alignment == 0:
-        return vocab_size
-
-    if parallel_embedding:
-        alignment *= num_devices
-
-    padded_vocab_size = int(math.ceil(vocab_size / alignment)) * alignment
-    print(
-        " > padded vocab (size: {}) with {} dummy tokens "
-        "(new size: {})".format(
-            vocab_size, padded_vocab_size - vocab_size, padded_vocab_size
-        )
-    )
-    return padded_vocab_size
 
 
 class Snapshot(object):
