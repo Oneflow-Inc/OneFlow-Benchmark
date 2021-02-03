@@ -102,6 +102,8 @@ class GPT2(object):
         self.embedding_dropout = args.embedding_dropout
         self.attention_dropout = args.attention_dropout
         self.hidden_dropout = args.hidden_dropout
+        self.embd_parallel_hierarchy = args.embd_parallel_hierarchy
+        self.attn_parallel_hierarchy = args.attn_parallel_hierarchy 
         self.parallel_embedding = args.parallel_embedding
         self.parallel_decoder = args.parallel_decoder
         self.use_fp16 = args.use_fp16
@@ -111,6 +113,22 @@ class GPT2(object):
         self.checkpoint_variable = args.checkpoint_variable
 
         assert self.n_embd % self.n_head == 0
+        self.init_parallel_distribution()
+
+    
+    def init_parallel_distribution(self):
+        '''
+
+        '''
+        if len(self.embd_parallel_hierarchy) == 1:
+            self.wpe_parallel_distribution = ["S(0)"]
+        elif len(self.embd_parallel_hierarchy) == 2:
+            self.wpe_parallel_distribution = ["B", "S(0)"]
+        else:
+            assert 0, '1D, 2D only'
+        self.wpe_parallel_distribution = ["B" for _ in self.embd_parallel_hierarchy]
+
+
 
     def forward(self, x, past=None):
         assert len(x.shape) == 2
@@ -137,22 +155,19 @@ class GPT2(object):
     def embedding(self, x):
         """ position embedding and token embedding
         """
-        wpe_sbp, wte_sbp = None, None
-        if self.parallel_embedding:
-            wpe_sbp = flow.distribute.broadcast()
-            wte_sbp = flow.distribute.split(0)
-
         wpe = flow.get_variable(
             "wpe",
             shape=(self.n_ctx, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.01),
-            distribute=wpe_sbp,
+            distribute=self.wpe_parallel_distribution,
+            parallel_hierarchy=self.embd_parallel_hierarchy,
         )
         wte = flow.get_variable(
             "wte",
             shape=(self.n_vocab, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.02),
-            distribute=wte_sbp,
+            distribute=self.wte_parallel_distribution,
+            parallel_hierarchy=self.embd_parallel_hierarchy,
         )
 
         if self.use_fp16:
