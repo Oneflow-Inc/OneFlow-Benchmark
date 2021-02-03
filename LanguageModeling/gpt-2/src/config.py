@@ -249,7 +249,7 @@ def initialize_model_parallel(args):
     device_num = args.gpu_num_per_node * args.num_nodes
     if device_num == 1:
         print('warning! there is only 1 device, set model parallel size to 1')
-        return None, None
+        return [1], [1]
 
     assert device_num % args.embd_model_parallel_size == 0
     assert device_num % args.attn_model_parallel_size == 0
@@ -318,7 +318,7 @@ def get_args():
     args.padded_vocab_size = pad_vocab_size(
         args.n_vocab,
         args.make_vocab_size_divisible_by,
-        args.embd_parallel_hierarchy[1] if args.embd_parallel_hierarchy else 1,
+        args.embd_parallel_hierarchy[-1],
     )
 
     print_args(args)
