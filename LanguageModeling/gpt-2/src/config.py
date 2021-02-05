@@ -249,8 +249,10 @@ def initialize_model_parallel(args):
     assert device_num % args.attn_model_parallel_size == 0
     embd_parallel_hierarchy = [device_num // args.embd_model_parallel_size,
                                args.embd_model_parallel_size]
+    embd_parallel_hierarchy = [4]
     attn_parallel_hierarchy = [device_num // args.attn_model_parallel_size,
                                args.attn_model_parallel_size]
+    attn_parallel_hierarchy = [4]
     return embd_parallel_hierarchy, attn_parallel_hierarchy
 
 

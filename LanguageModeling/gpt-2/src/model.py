@@ -143,11 +143,11 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
         #)
 
         c = flow.matmul(x, weight, name="matmul")
-        c = flow.hierarchical_parallel_cast(
-            c,
-            parallel_hierarchy=parallel_hierarchy,
-            parallel_distribution=c_parallel_distribution,
-        )
+        #c = flow.hierarchical_parallel_cast(
+        #    c,
+        #    parallel_hierarchy=parallel_hierarchy,
+        #    parallel_distribution=c_parallel_distribution,
+        #)
         c = flow.nn.bias_add(c, bias, name="biasadd")
 
     return c
@@ -191,10 +191,10 @@ class GPT2(object):
 
             # set h SBP before decoder layer 
             pd = ["S(0)", "B"] if len(self.attn_parallel_hierarchy) == 2 else ["S(0)"]
-            h = flow.hierarchical_parallel_cast(
-                h, parallel_hierarchy=self.attn_parallel_hierarchy, 
-                parallel_distribution=pd,
-            )
+            #h = flow.hierarchical_parallel_cast(
+            #    h, parallel_hierarchy=self.attn_parallel_hierarchy, 
+            #    parallel_distribution=pd,
+            #)
             for i in range(self.n_layer):
                 h, present = self.encoder_layer(f"h{i}", h, past=past)
                 presents.append(present)
@@ -202,10 +202,10 @@ class GPT2(object):
             outputs["presents"] = presents
             h = norm(h, name="layernorm_f")
             pd = ["S(0)", "B"] if len(self.embd_parallel_hierarchy) == 2 else ["S(0)"]
-            h = flow.hierarchical_parallel_cast(
-                h, parallel_hierarchy=self.embd_parallel_hierarchy, 
-                parallel_distribution=pd,
-            )
+            #h = flow.hierarchical_parallel_cast(
+            #    h, parallel_hierarchy=self.embd_parallel_hierarchy, 
+            #    parallel_distribution=pd,
+            #)
             logits = flow.matmul(h, wte, transpose_b=True)
             outputs["logits"] = logits
 
@@ -227,15 +227,15 @@ class GPT2(object):
             "wpe",
             shape=(self.n_ctx, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.01),
-            parallel_hierarchy=self.embd_parallel_hierarchy,
-            parallel_distribution=wpe_parallel_distribution,
+            #parallel_hierarchy=self.embd_parallel_hierarchy,
+            #parallel_distribution=wpe_parallel_distribution,
         )
         wte = flow.get_variable(
             "wte",
             shape=(self.n_vocab, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.02),
-            parallel_hierarchy=self.embd_parallel_hierarchy,
-            parallel_distribution=wte_parallel_distribution,
+            #parallel_hierarchy=self.embd_parallel_hierarchy,
+            #parallel_distribution=wte_parallel_distribution,
         )
 
         if self.use_fp16:
@@ -246,7 +246,11 @@ class GPT2(object):
         h = flow.gather(wte, x, name="embd_gather")
         h = h + wpe
         h = flow.nn.dropout(h, rate=self.embedding_dropout, name="embd_dropout")
-
+        h = flow.parallel_cast(
+            h,
+            distribute=flow.distribute.broadcast(),
+            gradient_distribute=flow.distribute.split(0),
+        )
         return h, wte
 
     def encoder_layer(self, name, x, *, past):
