@@ -58,6 +58,10 @@ def get_parser(parser=None):
                         help='use use fp16 or not')
     parser.add_argument('--use_xla', type=str2bool, nargs='?', const=True,
                         help='Whether to use use xla')
+    parser.add_argument("--num_accumulation_steps", type=int, default=1,
+                        help='Number of accumulation steps before gradient update, Global batch size = num_accumulation_steps * train_batch_size')
+    parser.add_argument("--optimizer_type", type=str, default="adam",
+                        help="Optimizer used for training - LAMB or ADAM")
 
     # log and resore/save
     parser.add_argument("--loss_print_every_n_iter", type=int, default=10, required=False,

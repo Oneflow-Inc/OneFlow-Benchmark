@@ -105,7 +105,7 @@ def main():
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
     metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, 
-                    batch_size=batch_size, keys=['total_loss', 'mlm_loss', 'nsp_loss'])
+                    batch_size=batch_size * args.num_accumulation_steps, keys=['total_loss', 'mlm_loss', 'nsp_loss'])
     for step in range(args.iter_num):
         PretrainJob().async_get(metric.metric_cb(step))
         #PretrainJob().async_get(metric.metric_cb(step, epoch=3))
