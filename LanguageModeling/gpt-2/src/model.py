@@ -43,16 +43,15 @@ def norm(x, axis=-1, epsilon=1e-5, name=None):
     return flatten(y, start_dim=0, end_dim=1)
 
 
-def linear(name, x, nf, *, model_parallel_mode=None, w_init_stdev=0.02):
-    w_sbp, b_sbp = None, None
-    if model_parallel_mode == "s1":
-        w_sbp = flow.distribute.split(1)
-        b_sbp = flow.distribute.split(0)
-    elif model_parallel_mode == "s0":
-        w_sbp = flow.distribute.split(0)
-        b_sbp = flow.distribute.broadcast()
+def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
+    if len(parallel_hierarchy) == 1:
+        weight_parallel_distribution = ["S(1)"]
+        bias_parallel_distribution = ["S(0)"]
+    elif len(parallel_hierarchy) == 2:
+        weight_parallel_distribution = ["B", "S(1)"]
+        bias_parallel_distribution = ["B", "S(0)"]
     else:
-        pass
+        assert 0
 
     with flow.scope.namespace(name):
         if len(x.shape) == 3:
@@ -66,24 +65,59 @@ def linear(name, x, nf, *, model_parallel_mode=None, w_init_stdev=0.02):
             shape=(nx, nf),
             dtype=x.dtype,
             initializer=flow.random_normal_initializer(stddev=w_init_stdev),
-            distribute=w_sbp,
+            parallel_hierarchy=parallel_hierarchy,
+            parallel_distribution=weight_parallel_distribution,
         )
         bias = flow.get_variable(
             name="bias",
             shape=(nf,),
             dtype=x.dtype,
             initializer=flow.constant_initializer(0.0),
-            distribute=b_sbp,
+            parallel_hierarchy=parallel_hierarchy,
+            parallel_distribution=bias_parallel_distribution,
         )
 
         c = flow.matmul(x, weight, name="matmul")
-        if weight.split_axis == 0 and x.split_axis == 1:
-            # P -> B
-            c = flow.parallel_cast(
-                c,
-                distribute=flow.distribute.broadcast(),
-                gradient_distribute=flow.distribute.broadcast(),
-            )
+        c = flow.nn.bias_add(c, bias, name="biasadd")
+
+    return c
+
+
+def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
+    if len(parallel_hierarchy) == 1:
+        weight_parallel_distribution = ["S(0)"]
+        bias_parallel_distribution = ["B"]
+    elif len(parallel_hierarchy) == 2:
+        weight_parallel_distribution = ["B", "S(0)"]
+        bias_parallel_distribution = ["B", "B"]
+    else:
+        assert 0
+
+    with flow.scope.namespace(name):
+        if len(x.shape) == 3:
+            x = flatten(x, start_dim=0, end_dim=1)
+        else:
+            assert len(x.shape) == 2
+        nx = x.shape[-1]
+
+        weight = flow.get_variable(
+            name="weight",
+            shape=(nx, nf),
+            dtype=x.dtype,
+            initializer=flow.random_normal_initializer(stddev=w_init_stdev),
+            parallel_hierarchy=parallel_hierarchy,
+            parallel_distribution=weight_parallel_distribution,
+        )
+        bias = flow.get_variable(
+            name="bias",
+            shape=(nf,),
+            dtype=x.dtype,
+            initializer=flow.constant_initializer(0.0),
+            parallel_hierarchy=parallel_hierarchy,
+            parallel_distribution=bias_parallel_distribution,
+        )
+
+        c = flow.matmul(x, weight, name="matmul")
         c = flow.nn.bias_add(c, bias, name="biasadd")
 
     return c
@@ -113,21 +147,6 @@ class GPT2(object):
         self.checkpoint_variable = args.checkpoint_variable
 
         assert self.n_embd % self.n_head == 0
-        self.init_parallel_distribution()
-
-    
-    def init_parallel_distribution(self):
-        '''
-
-        '''
-        if len(self.embd_parallel_hierarchy) == 1:
-            self.wpe_parallel_distribution = ["S(0)"]
-        elif len(self.embd_parallel_hierarchy) == 2:
-            self.wpe_parallel_distribution = ["B", "S(0)"]
-        else:
-            assert 0, '1D, 2D only'
-        self.wpe_parallel_distribution = ["B" for _ in self.embd_parallel_hierarchy]
-
 
 
     def forward(self, x, past=None):
@@ -152,22 +171,31 @@ class GPT2(object):
 
         return outputs
 
+
     def embedding(self, x):
         """ position embedding and token embedding
         """
+        if len(self.embd_parallel_hierarchy) == 1:
+            wte_parallel_distribution = ["S(0)"]
+        elif len(self.embd_parallel_hierarchy) == 2:
+            wte_parallel_distribution = ["B", "S(0)"]
+        else:
+            assert 0, '1D, 2D SBP only'
+        wpe_parallel_distribution = ["B" for _ in self.embd_parallel_hierarchy]
+
         wpe = flow.get_variable(
             "wpe",
             shape=(self.n_ctx, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.01),
-            distribute=self.wpe_parallel_distribution,
             parallel_hierarchy=self.embd_parallel_hierarchy,
+            parallel_distribution=wpe_parallel_distribution,
         )
         wte = flow.get_variable(
             "wte",
             shape=(self.n_vocab, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.02),
-            distribute=self.wte_parallel_distribution,
             parallel_hierarchy=self.embd_parallel_hierarchy,
+            parallel_distribution=wte_parallel_distribution,
         )
 
         if self.use_fp16:
@@ -234,9 +262,8 @@ class GPT2(object):
             return a
 
         with flow.scope.namespace("attn"):
-            parallel_mode = "s1" if self.parallel_decoder else None
             if self.use_big_fc:
-                c = linear("c_attn", x, e * 3, model_parallel_mode=parallel_mode)
+                c = col_parallel_linear("c_attn", x, e * 3, self.attn_parallel_hierarchy)
                 assert len(c.shape) == 2
                 assert c.shape[-1] == e * 3
                 bs = c.shape[0]
@@ -251,9 +278,9 @@ class GPT2(object):
                     c, begin=[None, None, 2], size=[None, None, 1]
                 )
             else:
-                q = linear("q_attn", x, e, model_parallel_mode=parallel_mode)
-                k = linear("k_attn", x, e, model_parallel_mode=parallel_mode)
-                v = linear("v_attn", x, e, model_parallel_mode=parallel_mode)
+                q = col_parallel_linear("q_attn", x, e, self.attn_parallel_hierarchy)
+                k = col_parallel_linear("k_attn", x, e, self.attn_parallel_hierarchy)
+                v = col_parallel_linear("v_attn", x, e, self.attn_parallel_hierarchy)
 
             q, k, v = map(split_heads, [q, k, v])
             # TODO: tf.stack([k, v], axis=1)
@@ -266,8 +293,7 @@ class GPT2(object):
             a = multihead_attn(q, k, v)
             a = merge_heads(a)
 
-            parallel_mode = "s0" if self.parallel_decoder else None
-            a = linear("c_proj", a, e, model_parallel_mode=parallel_mode)
+            a = row_parallel_linear("c_proj", a, e, self.attn_parallel_hierarchy)
             a = flow.nn.dropout(a, rate=self.hidden_dropout)
             a = flow.reshape(a, (self.batch_size, self.seq_len, self.n_embd))
             return a, present
@@ -277,12 +303,10 @@ class GPT2(object):
         e = x.shape[-1]
 
         with flow.scope.namespace("mlp"):
-            parallel_mode = "s1" if self.parallel_decoder else None
-            h = linear("c_fc", x, e * 4, model_parallel_mode=parallel_mode)
+            h = col_parallel_linear("c_fc", x, e * 4, self.attn_parallel_hierarchy)
             h = gelu(h)
             assert h.shape[-1] == e * 4
-            parallel_mode = "s0" if self.parallel_decoder else None
-            h = linear("c_proj", h, e, model_parallel_mode=parallel_mode)
+            h = row_parallel_linear("c_proj", h, e, self.attn_parallel_hierarchy)
             h = flow.nn.dropout(h, rate=self.hidden_dropout)
             h = flow.reshape(h, (self.batch_size, self.seq_len, self.n_embd))
             return h
