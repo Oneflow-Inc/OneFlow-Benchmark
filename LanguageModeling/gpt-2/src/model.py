@@ -138,8 +138,6 @@ class GPT2(object):
         self.hidden_dropout = args.hidden_dropout
         self.embd_parallel_hierarchy = args.embd_parallel_hierarchy
         self.attn_parallel_hierarchy = args.attn_parallel_hierarchy 
-        self.parallel_embedding = args.parallel_embedding
-        self.parallel_decoder = args.parallel_decoder
         self.use_fp16 = args.use_fp16
         self.use_big_fc = args.use_big_fc
         self.checkpoint_activations = args.checkpoint_activations
@@ -206,13 +204,6 @@ class GPT2(object):
         h = flow.gather(wte, x, name="embd_gather")
         h = h + wpe
         h = flow.nn.dropout(h, rate=self.embedding_dropout, name="embd_dropout")
-
-        if self.parallel_embedding:
-            h = flow.parallel_cast(
-                h,
-                distribute=flow.distribute.broadcast(),
-                gradient_distribute=flow.distribute.split(0),
-            )
 
         return h, wte
 

@@ -225,12 +225,6 @@ def get_parser(parser=None):
         help="Size of the model parallel for attention layers."
     )
     parser.add_argument(
-        "--parallel-embedding", action="store_true", help="distributed embedding",
-    )
-    parser.add_argument(
-        "--parallel-decoder", action="store_true", help="distributed decoder",
-    )
-    parser.add_argument(
         "--parallel-loss",
         action="store_true",
         help="distributed softmax cross entropy loss",
