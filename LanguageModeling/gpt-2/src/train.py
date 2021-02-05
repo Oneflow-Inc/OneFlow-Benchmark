@@ -1,6 +1,6 @@
 import oneflow as flow
-from ..third_party.load_dataset import load_dataset, Sampler
-from ..third_party.encoder import get_encoder
+from third_party.load_dataset import load_dataset, Sampler
+from third_party.encoder import get_encoder
 
 from . import config
 from . import util
