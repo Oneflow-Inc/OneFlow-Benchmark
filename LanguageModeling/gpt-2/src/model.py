@@ -227,15 +227,15 @@ class GPT2(object):
             "wpe",
             shape=(self.n_ctx, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.01),
-            parallel_hierarchy=self.embd_parallel_hierarchy,
-            parallel_distribution=wpe_parallel_distribution,
+            parallel_hierarchy=[2, 2],
+            parallel_distribution=["B", "B"],
         )
         wte = flow.get_variable(
             "wte",
             shape=(self.n_vocab, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.02),
-            parallel_hierarchy=self.embd_parallel_hierarchy,
-            parallel_distribution=wte_parallel_distribution,
+            parallel_hierarchy=[2, 2],
+            parallel_distribution=["B", "S(0)"],
         )
 
         if self.use_fp16:
@@ -243,7 +243,28 @@ class GPT2(object):
             wpe = flow.amp_white_identity(wpe)
             wte = flow.amp_white_identity(wte)
 
-        h = flow.gather(wte, x, name="embd_gather")
+        x = flow.hierarchical_parallel_cast(
+            x, parallel_hierarchy=[2, 2], 
+            parallel_distribution=["S(0)", "B"],
+            grad_mode="manual",
+            grad_parallel_hierarchy=[4],
+            grad_parallel_distribution=["S(0)"]
+        )
+        wte_model = flow.hierarchical_parallel_cast(
+            wte, parallel_hierarchy=[2, 2], 
+            parallel_distribution=["B", "S(0)"],
+            grad_mode="manual",
+            grad_parallel_hierarchy=[2, 2],
+            grad_parallel_distribution=["B", "S(0)"]
+        )
+        h = flow.gather(wte_model, x, name="embd_gather")
+        h = flow.hierarchical_parallel_cast(
+            h, parallel_hierarchy=[2, 2], 
+            parallel_distribution=["S(0)", "B"],
+            grad_mode="manual",
+            grad_parallel_hierarchy=[2, 2],
+            grad_parallel_distribution=["S(0)", "B"]
+        )
         h = h + wpe
         h = flow.nn.dropout(h, rate=self.embedding_dropout, name="embd_dropout")
         #h = flow.parallel_cast(
@@ -255,15 +276,15 @@ class GPT2(object):
             h, parallel_hierarchy=[4], 
             parallel_distribution=["S(0)"],
             grad_mode="manual",
-            grad_parallel_hierarchy=[4],
-            grad_parallel_distribution=["B"]
+            grad_parallel_hierarchy=[2, 2],
+            grad_parallel_distribution=["S(0)", "B"]
         )
         wte = flow.hierarchical_parallel_cast(
             wte, parallel_hierarchy=[4], 
             parallel_distribution=["S(0)"],
             grad_mode="manual",
-            grad_parallel_hierarchy=[4],
-            grad_parallel_distribution=["S(0)"]
+            grad_parallel_hierarchy=[2, 2],
+            grad_parallel_distribution=["B", "S(0)"]
         )
         return h, wte
 
