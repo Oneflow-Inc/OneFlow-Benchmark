@@ -221,7 +221,7 @@ def get_parser(parser=None):
         help="Size of the model parallel for embedding tables."
     )
     parser.add_argument(
-        "--attn_model_parallel_size", type=int, default=1,
+        "--attn_model_parallel_size", type=int, default=2,
         help="Size of the model parallel for attention layers."
     )
     parser.add_argument(

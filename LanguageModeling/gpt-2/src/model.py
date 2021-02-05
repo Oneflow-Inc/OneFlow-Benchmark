@@ -47,9 +47,11 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
     if len(parallel_hierarchy) == 1:
         weight_parallel_distribution = ["S(1)"]
         bias_parallel_distribution = ["S(0)"]
+        #x_grad_parallel_distribution = ["S(0)"]
     elif len(parallel_hierarchy) == 2:
         weight_parallel_distribution = ["B", "S(1)"]
         bias_parallel_distribution = ["B", "S(0)"]
+        #x_grad_parallel_distribution = ["S(0)", "B"]
     else:
         assert 0
 
@@ -60,6 +62,11 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             assert len(x.shape) == 2
         nx = x.shape[-1]
 
+        #x = flow.hierarchical_parallel_cast(
+        #    x, 
+        #    parallel_hierarchy=parallel_hierarchy,
+        #    grad_parallel_distribution=x_grad_parallel_distribution,
+        #)
         weight = flow.get_variable(
             name="weight",
             shape=(nx, nf),
@@ -68,6 +75,10 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=weight_parallel_distribution,
         )
+        #weight = flow.hierarchical_parallel_cast(
+        #    weight, 
+        #    grad_parallel_distribution=weight_parallel_distribution,
+        #)
         bias = flow.get_variable(
             name="bias",
             shape=(nf,),
@@ -76,6 +87,10 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=bias_parallel_distribution,
         )
+        #bias = flow.hierarchical_parallel_cast(
+        #    bias, 
+        #    grad_parallel_distribution=bias_parallel_distribution,
+        #)
 
         c = flow.matmul(x, weight, name="matmul")
         c = flow.nn.bias_add(c, bias, name="biasadd")
@@ -87,9 +102,11 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
     if len(parallel_hierarchy) == 1:
         weight_parallel_distribution = ["S(0)"]
         bias_parallel_distribution = ["B"]
+        c_parallel_distribution = ["B"]
     elif len(parallel_hierarchy) == 2:
         weight_parallel_distribution = ["B", "S(0)"]
         bias_parallel_distribution = ["B", "B"]
+        c_parallel_distribution = ["S(0)", "B"]
     else:
         assert 0
 
@@ -108,6 +125,10 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=weight_parallel_distribution,
         )
+        #weight = flow.hierarchical_parallel_cast(
+        #    weight, 
+        #    grad_parallel_distribution=weight_parallel_distribution,
+        #)
         bias = flow.get_variable(
             name="bias",
             shape=(nf,),
@@ -116,8 +137,17 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=bias_parallel_distribution,
         )
+        #bias = flow.hierarchical_parallel_cast(
+        #    bias, 
+        #    grad_parallel_distribution=bias_parallel_distribution,
+        #)
 
         c = flow.matmul(x, weight, name="matmul")
+        c = flow.hierarchical_parallel_cast(
+            c,
+            parallel_hierarchy=parallel_hierarchy,
+            parallel_distribution=c_parallel_distribution,
+        )
         c = flow.nn.bias_add(c, bias, name="biasadd")
 
     return c
@@ -158,12 +188,24 @@ class GPT2(object):
 
         with flow.scope.namespace(self.name):
             h, wte = self.embedding(x)
+
+            # set h SBP before decoder layer 
+            pd = ["S(0)", "B"] if len(self.attn_parallel_hierarchy) == 2 else ["S(0)"]
+            h = flow.hierarchical_parallel_cast(
+                h, parallel_hierarchy=self.attn_parallel_hierarchy, 
+                parallel_distribution=pd,
+            )
             for i in range(self.n_layer):
-                h, present = self.transformer_layer(f"h{i}", h, past=past)
+                h, present = self.encoder_layer(f"h{i}", h, past=past)
                 presents.append(present)
 
             outputs["presents"] = presents
             h = norm(h, name="layernorm_f")
+            pd = ["S(0)", "B"] if len(self.embd_parallel_hierarchy) == 2 else ["S(0)"]
+            h = flow.hierarchical_parallel_cast(
+                h, parallel_hierarchy=self.embd_parallel_hierarchy, 
+                parallel_distribution=pd,
+            )
             logits = flow.matmul(h, wte, transpose_b=True)
             outputs["logits"] = logits
 
@@ -207,7 +249,7 @@ class GPT2(object):
 
         return h, wte
 
-    def transformer_layer(self, name, x, *, past):
+    def encoder_layer(self, name, x, *, past):
         assert len(x.shape) == 3
         b, s, e = x.shape
         assert b == self.batch_size
