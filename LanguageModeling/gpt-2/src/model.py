@@ -517,25 +517,9 @@ class GPT2(object):
                 grad_parallel_distribution=["S(0)"]
             )
             a = multihead_attn(q, k, v) #(b,n,s,h)[S0, S1]
-            #change to 1d for reshape
-            #a = flow.hierarchical_parallel_cast(
-            #    a, parallel_hierarchy=[4], 
-            #    parallel_distribution=["S(0)"],
-            #    grad_mode="manual",
-            #    grad_parallel_hierarchy=[2, 2],
-            #    grad_parallel_distribution=["S(0)", "S(1)"]
-            #)
             print("before merge_heads a", a.shape) #(b,n,s,h)[S0, S1]
             a = merge_heads(a)
             print("after merge_heads a", a.shape)  #(b,s,e)[S0, S2]
-            # 1d for reshape
-            #a = flow.hierarchical_parallel_cast(
-            #    a, parallel_hierarchy=[2, 2], 
-            #    parallel_distribution=["S(0)", "S(2)"],
-            #    grad_mode="manual",
-            #    grad_parallel_hierarchy=[4],
-            #    grad_parallel_distribution=["S(0)"]
-            #)
             a = row_parallel_linear("c_proj", a, e, [2, 2])
             a = flow.nn.dropout(a, rate=self.hidden_dropout) #[S0,B]
             a = flow.hierarchical_parallel_cast(
@@ -609,7 +593,21 @@ class GPT2(object):
                 grad_mode="manual",
                 grad_parallel_hierarchy=[2, 2],
                 grad_parallel_distribution=["S(0)", "S(0)"]
-                )
+                )#to 1d for reshape
             loss = flow.reshape(loss, (b, s))
+            loss = flow.hierarchical_parallel_cast(
+                loss, parallel_hierarchy=[2, 2], 
+                parallel_distribution=["S(0)", "S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[4],
+                grad_parallel_distribution=["S(0)"]
+                )#to 2d after reshape
             loss = flow.slice(loss, begin=(None, 0), size=(None, s - 1))
+            loss = flow.hierarchical_parallel_cast(
+                loss, parallel_hierarchy=[4], 
+                parallel_distribution=["S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[2, 2],
+                grad_parallel_distribution=["S(0)", "S(0)"]
+                )
             return flow.math.reduce_mean(loss)
