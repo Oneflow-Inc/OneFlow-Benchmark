@@ -285,7 +285,13 @@ class GPT2(object):
             for i in range(self.n_layer):
                 h, present = self.encoder_layer(f"h{i}", h, past=past)
                 presents.append(present)
-
+            h = flow.hierarchical_parallel_cast(
+                    h, parallel_hierarchy=[4], 
+                    parallel_distribution=["S(0)"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[2, 2],
+                    grad_parallel_distribution=["S(0)", "B"]
+            )
             outputs["presents"] = presents
             h = norm(h, name="layernorm_f")
             #h = norm_2d(h, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_f")
@@ -429,13 +435,13 @@ class GPT2(object):
                 )
                 x = x + a
                 norm2 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_2")
-                x = flow.hierarchical_parallel_cast(
-                    x, parallel_hierarchy=[4], 
-                    parallel_distribution=["S(0)"],
-                    grad_mode="manual",
-                    grad_parallel_hierarchy=[2, 2],
-                    grad_parallel_distribution=["S(0)", "B"]
-                )
+                #x = flow.hierarchical_parallel_cast(
+                #    x, parallel_hierarchy=[4], 
+                #    parallel_distribution=["S(0)"],
+                #    grad_mode="manual",
+                #    grad_parallel_hierarchy=[2, 2],
+                #    grad_parallel_distribution=["S(0)", "B"]
+                #)
                 #norm2 = flow.hierarchical_parallel_cast(
                 #    norm2, parallel_hierarchy=[4], 
                 #    parallel_distribution=["S(0)"],
@@ -445,6 +451,13 @@ class GPT2(object):
                 #)
                 print("norm2 shape", norm2.shape)
                 m = self.mlp(norm2)
+                m = flow.hierarchical_parallel_cast(
+                    m, parallel_hierarchy=[2, 2], 
+                    parallel_distribution=["S(0)", "B"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[4],
+                    grad_parallel_distribution=["S(0)"]
+                )
                 x = x + m
 
         return x, present

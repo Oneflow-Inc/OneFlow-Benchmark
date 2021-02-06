@@ -9,7 +9,7 @@ gpu_num_per_node=$1
 batch_size=4
 n_embd=768
 n_head=12
-n_layer=1
+n_layer=2
 seq_len=1024
 dropout_rate=0.1
 
