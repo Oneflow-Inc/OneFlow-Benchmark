@@ -285,21 +285,10 @@ class GPT2(object):
             for i in range(self.n_layer):
                 h, present = self.encoder_layer(f"h{i}", h, past=past)
                 presents.append(present)
-            #h = flow.hierarchical_parallel_cast(
-            #        h, parallel_hierarchy=[4], 
-            #        parallel_distribution=["S(0)"],
-            #        grad_mode="manual",
-            #        grad_parallel_hierarchy=[2, 2],
-            #        grad_parallel_distribution=["S(0)", "B"]
-            #)
             outputs["presents"] = presents
             #h = norm(h, name="layernorm_f")
             h = norm_2d(h, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_f") #[S0, B]
-            #pd = ["S(0)", "B"] if len(self.embd_parallel_hierarchy) == 2 else ["S(0)"]
-            #h = flow.hierarchical_parallel_cast(
-            #    h, parallel_hierarchy=self.embd_parallel_hierarchy, 
-            #    parallel_distribution=pd,
-            #)
+
             wte = flow.hierarchical_parallel_cast(
                     wte, parallel_hierarchy=[2, 2], 
                     parallel_distribution=["B", "S(0)"],
@@ -383,25 +372,6 @@ class GPT2(object):
         )
         h = h + wpe
         h = flow.nn.dropout(h, rate=self.embedding_dropout, name="embd_dropout")
-        #h = flow.parallel_cast(
-        #    h,
-        #    distribute=flow.distribute.broadcast(),
-        #    gradient_distribute=flow.distribute.split(0),
-        #)
-        #h = flow.hierarchical_parallel_cast(
-        #    h, parallel_hierarchy=[4], 
-        #    parallel_distribution=["S(0)"],
-        #    grad_mode="manual",
-        #    grad_parallel_hierarchy=[2, 2],
-        #    grad_parallel_distribution=["S(0)", "B"]
-        #)
-        #wte = flow.hierarchical_parallel_cast(
-        #    wte, parallel_hierarchy=[4], 
-        #    parallel_distribution=["S(0)"],
-        #    grad_mode="manual",
-        #    grad_parallel_hierarchy=[2, 2],
-        #    grad_parallel_distribution=["B", "S(0)"]
-        #)
         return h, wte
 
     def encoder_layer(self, name, x, *, past):
@@ -418,20 +388,6 @@ class GPT2(object):
             ):
                 #norm1 = norm(x, name="layernorm_1")
                 norm1 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_1")
-                #norm1 = flow.hierarchical_parallel_cast(
-                #    norm1, parallel_hierarchy=[4], 
-                #    parallel_distribution=["S(0)"],
-                #    grad_mode="manual",
-                #    grad_parallel_hierarchy=[2, 2],
-                #    grad_parallel_distribution=["S(0)", "B"]
-                #)
-                #x = flow.hierarchical_parallel_cast(
-                #    x, parallel_hierarchy=[4], 
-                #    parallel_distribution=["S(0)"],
-                #    grad_mode="manual",
-                #    grad_parallel_hierarchy=[2, 2],
-                #    grad_parallel_distribution=["S(0)", "B"]
-                #)
                 a, present = self.attn(norm1, past=past)
                 #to 2d sbp after reshape
                 a = flow.hierarchical_parallel_cast(
@@ -443,20 +399,6 @@ class GPT2(object):
                 )
                 x = x + a
                 norm2 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_2")
-                #x = flow.hierarchical_parallel_cast(
-                #    x, parallel_hierarchy=[4], 
-                #    parallel_distribution=["S(0)"],
-                #    grad_mode="manual",
-                #    grad_parallel_hierarchy=[2, 2],
-                #    grad_parallel_distribution=["S(0)", "B"]
-                #)
-                #norm2 = flow.hierarchical_parallel_cast(
-                #    norm2, parallel_hierarchy=[4], 
-                #    parallel_distribution=["S(0)"],
-                #    grad_mode="manual",
-                #    grad_parallel_hierarchy=[2, 2],
-                #    grad_parallel_distribution=["S(0)", "B"]
-                #)
                 print("norm2 shape", norm2.shape)
                 m = self.mlp(norm2)
                 m = flow.hierarchical_parallel_cast(
@@ -481,7 +423,7 @@ class GPT2(object):
         def merge_heads(x):
             # Reverse of split_heads
             x = flow.transpose(x, [0, 2, 1, 3])
-            return flatten(x, start_dim=2, end_dim=3)
+            return flow.flatten(x, start_dim=2, end_dim=3)
 
         def multihead_attn(q, k, v):
             # q, k, v have shape [batch, heads, sequence, features]
@@ -576,24 +518,24 @@ class GPT2(object):
             )
             a = multihead_attn(q, k, v) #(b,n,s,h)[S0, S1]
             #change to 1d for reshape
-            a = flow.hierarchical_parallel_cast(
-                a, parallel_hierarchy=[4], 
-                parallel_distribution=["S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "S(1)"]
-            )
+            #a = flow.hierarchical_parallel_cast(
+            #    a, parallel_hierarchy=[4], 
+            #    parallel_distribution=["S(0)"],
+            #    grad_mode="manual",
+            #    grad_parallel_hierarchy=[2, 2],
+            #    grad_parallel_distribution=["S(0)", "S(1)"]
+            #)
             print("before merge_heads a", a.shape) #(b,n,s,h)[S0, S1]
             a = merge_heads(a)
             print("after merge_heads a", a.shape)  #(b,s,e)[S0, S2]
             # 1d for reshape
-            a = flow.hierarchical_parallel_cast(
-                a, parallel_hierarchy=[2, 2], 
-                parallel_distribution=["S(0)", "S(2)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[4],
-                grad_parallel_distribution=["S(0)"]
-            )
+            #a = flow.hierarchical_parallel_cast(
+            #    a, parallel_hierarchy=[2, 2], 
+            #    parallel_distribution=["S(0)", "S(2)"],
+            #    grad_mode="manual",
+            #    grad_parallel_hierarchy=[4],
+            #    grad_parallel_distribution=["S(0)"]
+            #)
             a = row_parallel_linear("c_proj", a, e, [2, 2])
             a = flow.nn.dropout(a, rate=self.hidden_dropout) #[S0,B]
             a = flow.hierarchical_parallel_cast(
@@ -652,7 +594,6 @@ class GPT2(object):
             labels = flow.flatten(labels)
 
             parallel_loss=False
-            print("logits shape", logits.shape)
             if parallel_loss:
                 # split vocab dim (v)
                 loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
