@@ -435,13 +435,13 @@ class GPT2(object):
 
         def multihead_attn(q, k, v):
             # q, k, v have shape [batch, heads, sequence, features]
-            w = flow.matmul(q, k, transpose_b=True)
+            w = flow.matmul(q, k, transpose_b=True) #q (b,n,s,h)["S(0)", "S(1)"] k(b,n,s,h)["S(0)", "S(1)"]  -> out(b,n,s,s) ["S(0)", "S(1)"]
             w = flow.math.fused_scale_tril(
                 w, fill_value=float("-inf"), scale=(1.0 / math.sqrt(float(v.shape[-1])))
             )
-            w = softmax(w)
+            w = softmax(w) #(b,n,s,s) ["S(0)", "S(1)"] axis=-1
             w = flow.nn.dropout(w, rate=self.attention_dropout)
-            a = flow.matmul(w, v)
+            a = flow.matmul(w, v) #w(b,n,s,s) ["S(0)", "S(1)"]  v(b,n,s,h)["S(0)", "S(1)"] -> a(b,n,s,h)["S(0)", "S(1)"]
             return a
 
         with flow.scope.namespace("attn"):
@@ -467,8 +467,8 @@ class GPT2(object):
                     grad_mode="manual",
                     grad_parallel_hierarchy=[2, 2],
                     grad_parallel_distribution=["S(0)", "B"]
-                ) #grad P->B
-                q = col_parallel_linear("q_attn", x, e, [2, 2]) # x ["S(0)", "B"] w[B,S1] b[B,S0] -> [S0, S2]
+                ) #for grad P->B
+                q = col_parallel_linear("q_attn", x, e, [2, 2]) # x ["S(0)", "B"] w[B,S1] b[B,S0] -> [S0, S1]
                 k = col_parallel_linear("k_attn", x, e, [2, 2])
                 v = col_parallel_linear("v_attn", x, e, [2, 2])
 
@@ -501,7 +501,37 @@ class GPT2(object):
                 k = tf.concat([pk, k], axis=-2)
                 v = tf.concat([pv, v], axis=-2)
 
-            a = multihead_attn(q, k, v)
+            print("q k v shape", q.shape, k.shape, v.shape)
+            # for reshape use 1D sbp
+            q = flow.hierarchical_parallel_cast(
+                q, parallel_hierarchy=[2, 2], 
+                parallel_distribution=["S(0)", "S(1)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[4],
+                grad_parallel_distribution=["S(0)"]
+            )
+            k = flow.hierarchical_parallel_cast(
+                k, parallel_hierarchy=[2, 2], 
+                parallel_distribution=["S(0)", "S(1)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[4],
+                grad_parallel_distribution=["S(0)"]
+            )
+            v = flow.hierarchical_parallel_cast(
+                v, parallel_hierarchy=[2, 2], 
+                parallel_distribution=["S(0)", "S(1)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[4],
+                grad_parallel_distribution=["S(0)"]
+            )
+            a = multihead_attn(q, k, v) #(b,n,s,h)[S0, S1]
+            a = flow.hierarchical_parallel_cast(
+                a, parallel_hierarchy=[4], 
+                parallel_distribution=["S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[2, 2],
+                grad_parallel_distribution=["S(0)", "S(1)"]
+            )
             a = merge_heads(a)
 
             a = row_parallel_linear("c_proj", a, e, self.attn_parallel_hierarchy)
