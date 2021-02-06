@@ -285,36 +285,44 @@ class GPT2(object):
             for i in range(self.n_layer):
                 h, present = self.encoder_layer(f"h{i}", h, past=past)
                 presents.append(present)
-            h = flow.hierarchical_parallel_cast(
-                    h, parallel_hierarchy=[4], 
-                    parallel_distribution=["S(0)"],
-                    grad_mode="manual",
-                    grad_parallel_hierarchy=[2, 2],
-                    grad_parallel_distribution=["S(0)", "B"]
-            )
+            #h = flow.hierarchical_parallel_cast(
+            #        h, parallel_hierarchy=[4], 
+            #        parallel_distribution=["S(0)"],
+            #        grad_mode="manual",
+            #        grad_parallel_hierarchy=[2, 2],
+            #        grad_parallel_distribution=["S(0)", "B"]
+            #)
             outputs["presents"] = presents
-            h = norm(h, name="layernorm_f")
-            #h = norm_2d(h, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_f")
+            #h = norm(h, name="layernorm_f")
+            h = norm_2d(h, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_f") #[S0, B]
             #pd = ["S(0)", "B"] if len(self.embd_parallel_hierarchy) == 2 else ["S(0)"]
             #h = flow.hierarchical_parallel_cast(
             #    h, parallel_hierarchy=self.embd_parallel_hierarchy, 
             #    parallel_distribution=pd,
             #)
             wte = flow.hierarchical_parallel_cast(
-                    wte, parallel_hierarchy=[4], 
-                    parallel_distribution=["B"],
+                    wte, parallel_hierarchy=[2, 2], 
+                    parallel_distribution=["B", "S(0)"],
                     grad_mode="manual",
                     grad_parallel_hierarchy=[2, 2],
                     grad_parallel_distribution=["B", "S(0)"]
             )
-            logits = flow.matmul(h, wte, transpose_b=True) #h(S0, B) wte(B, S0) out(S0, S2)
-            #logits = flow.hierarchical_parallel_cast(
-            #    logits, parallel_hierarchy=[4], 
-            #    parallel_distribution=["S(0)"],
-            #    grad_mode="manual",
-            #    grad_parallel_hierarchy=[2, 2],
-            #    grad_parallel_distribution=["S(0)", "S(2)"]
-            #)
+            h = flow.hierarchical_parallel_cast(
+                    h, parallel_hierarchy=[2, 2], 
+                    parallel_distribution=["S(0)", "B"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[2, 2],
+                    grad_parallel_distribution=["S(0)", "B"]
+            )#for layernorm_f dy is B not P
+            logits = flow.matmul(h, wte, transpose_b=True) #h(S0, B) wte(B, S0) out(S0, S1)  h shape (4096, 768) wte shape (50688, 768) logits shape (4096, 50688)
+            print("h shape", h.shape, "wte shape", wte.shape, "logits shape", logits.shape)
+            logits = flow.hierarchical_parallel_cast(
+                logits, parallel_hierarchy=[4], 
+                parallel_distribution=["S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[2, 2],
+                grad_parallel_distribution=["S(0)", "S(1)"]
+            )
             outputs["logits"] = logits
 
         return outputs
