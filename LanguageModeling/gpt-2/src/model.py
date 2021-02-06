@@ -317,8 +317,8 @@ class GPT2(object):
             logits = flow.matmul(h, wte, transpose_b=True) #h(S0, B) wte(B, S0) out(S0, S1)  h shape (4096, 768) wte shape (50688, 768) logits shape (4096, 50688)
             print("h shape", h.shape, "wte shape", wte.shape, "logits shape", logits.shape)
             logits = flow.hierarchical_parallel_cast(
-                logits, parallel_hierarchy=[4], 
-                parallel_distribution=["S(0)"],
+                logits, parallel_hierarchy=[2, 2], 
+                parallel_distribution=["S(0)", "S(0)"],
                 grad_mode="manual",
                 grad_parallel_hierarchy=[2, 2],
                 grad_parallel_distribution=["S(0)", "S(1)"]
@@ -636,12 +636,23 @@ class GPT2(object):
         assert s == self.seq_len
         assert bs == b * s
         assert v == self.n_vocab
-
+        print("labels", labels.shape, labels.dtype)
+        labels = flow.hierarchical_parallel_cast(
+            labels, parallel_hierarchy=[2, 2], 
+            parallel_distribution=["S(0)", "S(0)"],
+            grad_mode="manual",
+            grad_parallel_hierarchy=[4],
+            grad_parallel_distribution=["S(0)"]
+        )
         with flow.scope.namespace("loss"):
             labels = flow.slice(labels, begin=(None, 1), size=(None, s - 1))
-            labels = flow.pad(labels, paddings=((0, 0), (0, 1)), constant_value=0.0)
-            labels = flatten(labels)
 
+            labels = flow.pad(labels, paddings=((0, 0), (0, 1)), constant_value=0.0)
+
+            labels = flow.flatten(labels)
+
+            parallel_loss=False
+            print("logits shape", logits.shape)
             if parallel_loss:
                 # split vocab dim (v)
                 loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
@@ -651,6 +662,13 @@ class GPT2(object):
             else:
                 loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits)
 
+            loss = flow.hierarchical_parallel_cast(
+                loss, parallel_hierarchy=[4], 
+                parallel_distribution=["S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[2, 2],
+                grad_parallel_distribution=["S(0)", "S(0)"]
+                )
             loss = flow.reshape(loss, (b, s))
             loss = flow.slice(loss, begin=(None, 0), size=(None, s - 1))
             return flow.math.reduce_mean(loss)
