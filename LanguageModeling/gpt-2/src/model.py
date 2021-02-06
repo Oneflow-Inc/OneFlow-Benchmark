@@ -33,7 +33,13 @@ def layer_norm_2D(
                 parallel_hierarchy=parallel_hierarchy,
                 parallel_distribution=parallel_distribution,
             )
-
+            beta = flow.hierarchical_parallel_cast(
+                beta, parallel_hierarchy=parallel_hierarchy, 
+                parallel_distribution=parallel_distribution,
+                grad_mode="manual",
+                grad_parallel_hierarchy=parallel_hierarchy,
+                grad_parallel_distribution=parallel_distribution
+            )
     if scale:
         with flow.scope.namespace(name):
             gamma = flow.get_variable(
@@ -46,6 +52,13 @@ def layer_norm_2D(
                 reuse=False,
                 parallel_hierarchy=parallel_hierarchy,
                 parallel_distribution=parallel_distribution,
+            )
+            beta = flow.hierarchical_parallel_cast(
+                beta, parallel_hierarchy=parallel_hierarchy, 
+                parallel_distribution=parallel_distribution,
+                grad_mode="manual",
+                grad_parallel_hierarchy=parallel_hierarchy,
+                grad_parallel_distribution=parallel_distribution
             )
 
     op_builder = (
@@ -137,11 +150,6 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             assert len(x.shape) == 2
         nx = x.shape[-1]
 
-        #x = flow.hierarchical_parallel_cast(
-        #    x, 
-        #    parallel_hierarchy=parallel_hierarchy,
-        #    grad_parallel_distribution=x_grad_parallel_distribution,
-        #)
         weight = flow.get_variable(
             name="weight",
             shape=(nx, nf),
@@ -150,10 +158,7 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=weight_parallel_distribution,
         )
-        #weight = flow.hierarchical_parallel_cast(
-        #    weight, 
-        #    grad_parallel_distribution=weight_parallel_distribution,
-        #)
+
         bias = flow.get_variable(
             name="bias",
             shape=(nf,),
@@ -162,13 +167,12 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=bias_parallel_distribution,
         )
-        #bias = flow.hierarchical_parallel_cast(
-        #    bias, 
-        #    grad_parallel_distribution=bias_parallel_distribution,
-        #)
 
         c = flow.matmul(x, weight, name="matmul")
+        print("c.shape", c.shape, "x.shape", x.shape, "weight.shape", weight.shape, "bias.shape", bias.shape)
         c = flow.nn.bias_add(c, bias, name="biasadd")
+        print("c.shape", c.shape)
+
 
     return c
 
@@ -393,13 +397,13 @@ class GPT2(object):
             ):
                 #norm1 = norm(x, name="layernorm_1")
                 norm1 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_1")
-                norm1 = flow.hierarchical_parallel_cast(
-                    norm1, parallel_hierarchy=[4], 
-                    parallel_distribution=["S(0)"],
-                    grad_mode="manual",
-                    grad_parallel_hierarchy=[2, 2],
-                    grad_parallel_distribution=["S(0)", "B"]
-                )
+                #norm1 = flow.hierarchical_parallel_cast(
+                #    norm1, parallel_hierarchy=[4], 
+                #    parallel_distribution=["S(0)"],
+                #    grad_mode="manual",
+                #    grad_parallel_hierarchy=[2, 2],
+                #    grad_parallel_distribution=["S(0)", "B"]
+                #)
                 x = flow.hierarchical_parallel_cast(
                     x, parallel_hierarchy=[4], 
                     parallel_distribution=["S(0)"],
@@ -457,10 +461,38 @@ class GPT2(object):
                     c, begin=[None, None, 2], size=[None, None, 1]
                 )
             else:
-                q = col_parallel_linear("q_attn", x, e, self.attn_parallel_hierarchy)
-                k = col_parallel_linear("k_attn", x, e, self.attn_parallel_hierarchy)
-                v = col_parallel_linear("v_attn", x, e, self.attn_parallel_hierarchy)
+                x = flow.hierarchical_parallel_cast(
+                    x, parallel_hierarchy=[2, 2], 
+                    parallel_distribution=["S(0)", "B"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[2, 2],
+                    grad_parallel_distribution=["S(0)", "B"]
+                ) #grad P->B
+                q = col_parallel_linear("q_attn", x, e, [2, 2]) # x ["S(0)", "B"] w[B,S1] b[B,S0] -> [S0, S2]
+                k = col_parallel_linear("k_attn", x, e, [2, 2])
+                v = col_parallel_linear("v_attn", x, e, [2, 2])
 
+            q = flow.hierarchical_parallel_cast(
+                q, parallel_hierarchy=[4], 
+                parallel_distribution=["S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[2, 2],
+                grad_parallel_distribution=["S(0)", "S(1)"]
+            )
+            k = flow.hierarchical_parallel_cast(
+                k, parallel_hierarchy=[4], 
+                parallel_distribution=["S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[2, 2],
+                grad_parallel_distribution=["S(0)", "S(1)"]
+            )
+            v = flow.hierarchical_parallel_cast(
+                v, parallel_hierarchy=[4], 
+                parallel_distribution=["S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[2, 2],
+                grad_parallel_distribution=["S(0)", "S(1)"]
+            )
             q, k, v = map(split_heads, [q, k, v])
             # TODO: tf.stack([k, v], axis=1)
             present = []  
