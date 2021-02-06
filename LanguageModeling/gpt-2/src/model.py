@@ -191,7 +191,7 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
 
     with flow.scope.namespace(name):
         if len(x.shape) == 3:
-            x = flatten(x, start_dim=0, end_dim=1)
+            x = flow.flatten(x, start_dim=0, end_dim=1)
         else:
             assert len(x.shape) == 2
         nx = x.shape[-1]
@@ -204,10 +204,13 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=weight_parallel_distribution,
         )
-        #weight = flow.hierarchical_parallel_cast(
-        #    weight, 
-        #    grad_parallel_distribution=weight_parallel_distribution,
-        #)
+        weight = flow.hierarchical_parallel_cast(
+            weight, parallel_hierarchy=parallel_hierarchy, 
+            parallel_distribution=weight_parallel_distribution,
+            grad_mode="manual",
+            grad_parallel_hierarchy=parallel_hierarchy,
+            grad_parallel_distribution=weight_parallel_distribution
+        )
         bias = flow.get_variable(
             name="bias",
             shape=(nf,),
@@ -216,17 +219,21 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=bias_parallel_distribution,
         )
-        #bias = flow.hierarchical_parallel_cast(
-        #    bias, 
-        #    grad_parallel_distribution=bias_parallel_distribution,
-        #)
-
+        bias = flow.hierarchical_parallel_cast(
+            bias, parallel_hierarchy=parallel_hierarchy, 
+            parallel_distribution=bias_parallel_distribution,
+            grad_mode="manual",
+            grad_parallel_hierarchy=parallel_hierarchy,
+            grad_parallel_distribution=bias_parallel_distribution
+        )
         c = flow.matmul(x, weight, name="matmul")
-        #c = flow.hierarchical_parallel_cast(
-        #    c,
-        #    parallel_hierarchy=parallel_hierarchy,
-        #    parallel_distribution=c_parallel_distribution,
-        #)
+        c = flow.hierarchical_parallel_cast(
+            c, parallel_hierarchy=parallel_hierarchy, 
+            parallel_distribution=c_parallel_distribution,
+            grad_mode="manual",
+            grad_parallel_hierarchy=parallel_hierarchy,
+            grad_parallel_distribution=c_parallel_distribution
+        )
         c = flow.nn.bias_add(c, bias, name="biasadd")
 
     return c
@@ -404,6 +411,24 @@ class GPT2(object):
                 #    grad_parallel_hierarchy=[2, 2],
                 #    grad_parallel_distribution=["S(0)", "B"]
                 #)
+                #x = flow.hierarchical_parallel_cast(
+                #    x, parallel_hierarchy=[4], 
+                #    parallel_distribution=["S(0)"],
+                #    grad_mode="manual",
+                #    grad_parallel_hierarchy=[2, 2],
+                #    grad_parallel_distribution=["S(0)", "B"]
+                #)
+                a, present = self.attn(norm1, past=past)
+                #to 2d sbp after reshape
+                a = flow.hierarchical_parallel_cast(
+                    a, parallel_hierarchy=[2, 2], 
+                    parallel_distribution=["S(0)", "B"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[4],
+                    grad_parallel_distribution=["S(0)"]
+                )
+                x = x + a
+                norm2 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_2")
                 x = flow.hierarchical_parallel_cast(
                     x, parallel_hierarchy=[4], 
                     parallel_distribution=["S(0)"],
@@ -411,10 +436,13 @@ class GPT2(object):
                     grad_parallel_hierarchy=[2, 2],
                     grad_parallel_distribution=["S(0)", "B"]
                 )
-                a, present = self.attn(norm1, past=past)
-                x = x + a
-                norm2 = norm(x, name="layernorm_2")
-
+                norm2 = flow.hierarchical_parallel_cast(
+                    norm2, parallel_hierarchy=[4], 
+                    parallel_distribution=["S(0)"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[2, 2],
+                    grad_parallel_distribution=["S(0)", "B"]
+                )
                 m = self.mlp(norm2)
                 x = x + m
 
@@ -525,6 +553,7 @@ class GPT2(object):
                 grad_parallel_distribution=["S(0)"]
             )
             a = multihead_attn(q, k, v) #(b,n,s,h)[S0, S1]
+            #change to 1d for reshape
             a = flow.hierarchical_parallel_cast(
                 a, parallel_hierarchy=[4], 
                 parallel_distribution=["S(0)"],
@@ -532,10 +561,27 @@ class GPT2(object):
                 grad_parallel_hierarchy=[2, 2],
                 grad_parallel_distribution=["S(0)", "S(1)"]
             )
+            print("before merge_heads a", a.shape) #(b,n,s,h)[S0, S1]
             a = merge_heads(a)
-
-            a = row_parallel_linear("c_proj", a, e, self.attn_parallel_hierarchy)
-            a = flow.nn.dropout(a, rate=self.hidden_dropout)
+            print("after merge_heads a", a.shape)  #(b,s,e)[S0, S2]
+            # 1d for reshape
+            a = flow.hierarchical_parallel_cast(
+                a, parallel_hierarchy=[2, 2], 
+                parallel_distribution=["S(0)", "S(2)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[4],
+                grad_parallel_distribution=["S(0)"]
+            )
+            a = row_parallel_linear("c_proj", a, e, [2, 2])
+            a = flow.nn.dropout(a, rate=self.hidden_dropout) #[S0,B]
+            a = flow.hierarchical_parallel_cast(
+                a, parallel_hierarchy=[4], 
+                parallel_distribution=["S(0)"],
+                grad_mode="manual",
+                grad_parallel_hierarchy=[2, 2],
+                grad_parallel_distribution=["S(0)", "B"]
+            )
+            #to 1d for reshape
             a = flow.reshape(a, (self.batch_size, self.seq_len, self.n_embd))
             return a, present
 
