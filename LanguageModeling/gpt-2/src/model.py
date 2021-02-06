@@ -1,6 +1,73 @@
 import math
 import oneflow as flow
 
+def layer_norm_2D(
+    inputs,
+    center: bool = True,
+    scale: bool = True,
+    trainable: bool = True,
+    begin_norm_axis: int = 1,
+    begin_params_axis: int = -1,
+    epsilon: float = 1e-5,
+    parallel_hierarchy=[2, 2], 
+    parallel_distribution=["B", "B"],
+    name: str = "LayerNorm",
+):
+    if center is False and scale is False:
+        trainable = False
+
+    beta = None
+    gamma = None
+
+    param_shape = inputs.shape[begin_params_axis:]
+    if center:
+        with flow.scope.namespace(name):
+            beta = flow.get_variable(
+                name="beta",
+                shape=param_shape,
+                dtype=inputs.dtype,
+                initializer=flow.constant_initializer(0.0),
+                trainable=trainable,
+                model_name="beta",
+                reuse=False,
+                parallel_hierarchy=parallel_hierarchy,
+                parallel_distribution=parallel_distribution,
+            )
+
+    if scale:
+        with flow.scope.namespace(name):
+            gamma = flow.get_variable(
+                name="gamma",
+                shape=param_shape,
+                dtype=inputs.dtype,
+                initializer=flow.constant_initializer(1.0),
+                trainable=trainable,
+                model_name="gamma",
+                reuse=False,
+                parallel_hierarchy=parallel_hierarchy,
+                parallel_distribution=parallel_distribution,
+            )
+
+    op_builder = (
+        flow.user_op_builder(name)
+        .Op("layer_norm")
+        .Input("x", [inputs])
+        .Output("y")
+        .Output("mean")
+        .Output("inv_variance")
+    )
+    if beta is not None:
+        op_builder.Input("beta", [beta])
+    if gamma is not None:
+        op_builder.Input("gamma", [gamma])
+        op_builder.Output("normalized")
+    op_builder.Attr("center", center)
+    op_builder.Attr("scale", scale)
+    op_builder.Attr("begin_norm_axis", begin_norm_axis)
+    op_builder.Attr("begin_params_axis", begin_params_axis)
+    op_builder.Attr("epsilon", epsilon)
+    return op_builder.Build().InferAndTryRun().RemoteBlobList()[0]
+
 
 def softmax(x, axis=-1):
     return flow.nn.softmax(x, axis=axis)
@@ -31,8 +98,8 @@ def flatten(x, start_dim=0, end_dim=-1):
             dims[-1] *= dim_size
         else:
             raise ValueError
-
-    # print(f"flatten start={start_dim} end={end_dim} from {x.shape} to {dims}")
+    
+    print(f"flatten start={start_dim} end={end_dim} from {x.shape} to {dims}")
     return flow.reshape(x, dims)
 
 
@@ -41,6 +108,14 @@ def norm(x, axis=-1, epsilon=1e-5, name=None):
     assert len(x.shape) == 3, name
     y = flow.layers.layer_norm(x, begin_norm_axis=axis, epsilon=epsilon, name=name)
     return flatten(y, start_dim=0, end_dim=1)
+
+
+def norm_2d(x, axis=-1, epsilon=1e-5, parallel_hierarchy=[2, 2], parallel_distribution=["B", "B"], name=None):
+    """Normalize to mean = 0, std = 1, then do a diagonal affine transform."""
+    assert len(x.shape) == 3, name
+    y = layer_norm_2D(x, begin_norm_axis=axis, epsilon=epsilon, parallel_hierarchy=parallel_hierarchy, parallel_distribution=parallel_distribution, name=name)
+    #return flatten(y, start_dim=0, end_dim=1)
+    return flow.flatten(y, 0, 1) #can't process sbp in reshape op.cpp, use flatten op
 
 
 def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
@@ -188,6 +263,7 @@ class GPT2(object):
 
         with flow.scope.namespace(self.name):
             h, wte = self.embedding(x)
+            # h(S0, B) wte(B, S0)
 
             # set h SBP before decoder layer 
             pd = ["S(0)", "B"] if len(self.attn_parallel_hierarchy) == 2 else ["S(0)"]
@@ -201,12 +277,27 @@ class GPT2(object):
 
             outputs["presents"] = presents
             h = norm(h, name="layernorm_f")
-            pd = ["S(0)", "B"] if len(self.embd_parallel_hierarchy) == 2 else ["S(0)"]
+            #h = norm_2d(h, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_f")
+            #pd = ["S(0)", "B"] if len(self.embd_parallel_hierarchy) == 2 else ["S(0)"]
             #h = flow.hierarchical_parallel_cast(
             #    h, parallel_hierarchy=self.embd_parallel_hierarchy, 
             #    parallel_distribution=pd,
             #)
-            logits = flow.matmul(h, wte, transpose_b=True)
+            wte = flow.hierarchical_parallel_cast(
+                    wte, parallel_hierarchy=[4], 
+                    parallel_distribution=["B"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[2, 2],
+                    grad_parallel_distribution=["B", "S(0)"]
+            )
+            logits = flow.matmul(h, wte, transpose_b=True) #h(S0, B) wte(B, S0) out(S0, S2)
+            #logits = flow.hierarchical_parallel_cast(
+            #    logits, parallel_hierarchy=[4], 
+            #    parallel_distribution=["S(0)"],
+            #    grad_mode="manual",
+            #    grad_parallel_hierarchy=[2, 2],
+            #    grad_parallel_distribution=["S(0)", "S(2)"]
+            #)
             outputs["logits"] = logits
 
         return outputs
@@ -272,20 +363,20 @@ class GPT2(object):
         #    distribute=flow.distribute.broadcast(),
         #    gradient_distribute=flow.distribute.split(0),
         #)
-        h = flow.hierarchical_parallel_cast(
-            h, parallel_hierarchy=[4], 
-            parallel_distribution=["S(0)"],
-            grad_mode="manual",
-            grad_parallel_hierarchy=[2, 2],
-            grad_parallel_distribution=["S(0)", "B"]
-        )
-        wte = flow.hierarchical_parallel_cast(
-            wte, parallel_hierarchy=[4], 
-            parallel_distribution=["S(0)"],
-            grad_mode="manual",
-            grad_parallel_hierarchy=[2, 2],
-            grad_parallel_distribution=["B", "S(0)"]
-        )
+        #h = flow.hierarchical_parallel_cast(
+        #    h, parallel_hierarchy=[4], 
+        #    parallel_distribution=["S(0)"],
+        #    grad_mode="manual",
+        #    grad_parallel_hierarchy=[2, 2],
+        #    grad_parallel_distribution=["S(0)", "B"]
+        #)
+        #wte = flow.hierarchical_parallel_cast(
+        #    wte, parallel_hierarchy=[4], 
+        #    parallel_distribution=["S(0)"],
+        #    grad_mode="manual",
+        #    grad_parallel_hierarchy=[2, 2],
+        #    grad_parallel_distribution=["B", "S(0)"]
+        #)
         return h, wte
 
     def encoder_layer(self, name, x, *, past):
@@ -300,10 +391,26 @@ class GPT2(object):
             with flow.experimental.scope.config(
                 checkpointing=self.checkpoint_activations
             ):
-                norm1 = norm(x, name="layernorm_1")
+                #norm1 = norm(x, name="layernorm_1")
+                norm1 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_1")
+                norm1 = flow.hierarchical_parallel_cast(
+                    norm1, parallel_hierarchy=[4], 
+                    parallel_distribution=["S(0)"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[2, 2],
+                    grad_parallel_distribution=["S(0)", "B"]
+                )
+                x = flow.hierarchical_parallel_cast(
+                    x, parallel_hierarchy=[4], 
+                    parallel_distribution=["S(0)"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[2, 2],
+                    grad_parallel_distribution=["S(0)", "B"]
+                )
                 a, present = self.attn(norm1, past=past)
                 x = x + a
                 norm2 = norm(x, name="layernorm_2")
+
                 m = self.mlp(norm2)
                 x = x + m
 
