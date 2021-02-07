@@ -33,13 +33,6 @@ def layer_norm_2D(
                 parallel_hierarchy=parallel_hierarchy,
                 parallel_distribution=parallel_distribution,
             )
-            beta = flow.hierarchical_parallel_cast(
-                beta, parallel_hierarchy=parallel_hierarchy, 
-                parallel_distribution=parallel_distribution,
-                grad_mode="manual",
-                grad_parallel_hierarchy=parallel_hierarchy,
-                grad_parallel_distribution=parallel_distribution
-            )
     if scale:
         with flow.scope.namespace(name):
             gamma = flow.get_variable(
@@ -52,13 +45,6 @@ def layer_norm_2D(
                 reuse=False,
                 parallel_hierarchy=parallel_hierarchy,
                 parallel_distribution=parallel_distribution,
-            )
-            beta = flow.hierarchical_parallel_cast(
-                beta, parallel_hierarchy=parallel_hierarchy, 
-                parallel_distribution=parallel_distribution,
-                grad_mode="manual",
-                grad_parallel_hierarchy=parallel_hierarchy,
-                grad_parallel_distribution=parallel_distribution
             )
 
     op_builder = (
@@ -204,13 +190,6 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=weight_parallel_distribution,
         )
-        weight = flow.hierarchical_parallel_cast(
-            weight, parallel_hierarchy=parallel_hierarchy, 
-            parallel_distribution=weight_parallel_distribution,
-            grad_mode="manual",
-            grad_parallel_hierarchy=parallel_hierarchy,
-            grad_parallel_distribution=weight_parallel_distribution
-        )
         bias = flow.get_variable(
             name="bias",
             shape=(nf,),
@@ -218,13 +197,6 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             initializer=flow.constant_initializer(0.0),
             parallel_hierarchy=parallel_hierarchy,
             parallel_distribution=bias_parallel_distribution,
-        )
-        bias = flow.hierarchical_parallel_cast(
-            bias, parallel_hierarchy=parallel_hierarchy, 
-            parallel_distribution=bias_parallel_distribution,
-            grad_mode="manual",
-            grad_parallel_hierarchy=parallel_hierarchy,
-            grad_parallel_distribution=bias_parallel_distribution
         )
         c = flow.matmul(x, weight, name="matmul")
         c = flow.hierarchical_parallel_cast(
