@@ -44,10 +44,7 @@ def make_func_config(args):
     config.enable_fuse_cast_scale(True)
     # turn on the flag of none-distributed-optimizer
     if args.enable_non_distributed_optimizer:
-        print("enable_non_distributed_optimizer >>>>>> True")
         config.train.optimizer_placement_optimization_mode("distributed_split")
-    else:
-        print("enable_non_distributed_optimizer >>>>>> False")
     return config
 
 
