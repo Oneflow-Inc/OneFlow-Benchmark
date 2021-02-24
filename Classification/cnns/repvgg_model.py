@@ -13,13 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
 import oneflow as flow
 import math
-
-
-# TODO: Our default conv2d initializer is Xaview_uniform
-# However, pytorch default initializer is Kaiming_uniform
 
 
 def _get_regularizer(model_name):
