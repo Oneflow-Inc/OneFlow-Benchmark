@@ -1,15 +1,13 @@
 #!/bin/bash
 export PYTHONUNBUFFERED=1
 
-gpt2_dir=gpt-2
-gpt2_path=/OneFlow-Benchmark/LanguageModeling/$gpt2_dir
-model_path=/wksp/gpt2_small_of_models_4_regression
-data_path=$model_path/data/wiki_00
-cfg_path=$model_path/117M
-model_load_path=$model_path/of_models_new
+script_path=$(realpath $0)
+gpt_root=$(dirname $script_path)
+data_path=$gpt_root/data/wiki_00
+cfg_path=$gpt_root/models/117M
 
-gpu_num_per_node=1
-batch_size=1
+gpu_num_per_node=8
+batch_size=8
 
 n_vocab=50257
 n_ctx=1024
@@ -24,16 +22,13 @@ log_dir=log
 test_case=bsz${batch_size}_g${gpu_num_per_node}_e${n_embd}_h${n_head}_l${n_layer}
 log_file=$log_dir/$test_case.log
 
-set -x
 
 mkdir -p $log_dir
-ln -s $gpt2_path
 
-python3 -m $gpt2_dir.src.train \
+python3 -m src.train \
   --dataset=$data_path \
   --cfg_dir=$cfg_path \
-  --model_load_dir=$model_load_path \
-  --save_last_snapshot=True \
+  --save_last_snapshot=False \
   --iter_num=100 \
   --loss_print_every_n_iter=1 \
   --total_batch_size=$batch_size \

@@ -30,6 +30,9 @@ def init_config(args):
     flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
     # flow.config.enable_legacy_model_io(True)
 
+    flow.config.nccl_use_compute_stream(True)
+    flow.config.disable_group_boxing_by_dst_parallel(False)
+
 
 def make_func_config(args):
     config = flow.function_config()
@@ -40,7 +43,11 @@ def make_func_config(args):
     config.enable_fuse_model_update_ops(True)
     config.enable_fuse_cast_scale(True)
     # turn on the flag of none-distributed-optimizer
-    config.enable_non_distributed_optimizer(False)
+    if args.enable_non_distributed_optimizer:
+        print("enable_non_distributed_optimizer >>>>>> True")
+        config.train.optimizer_placement_optimization_mode("distributed_split")
+    else:
+        print("enable_non_distributed_optimizer >>>>>> False")
     return config
 
 
