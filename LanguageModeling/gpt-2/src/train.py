@@ -14,7 +14,7 @@ def make_gpt2_train_func(args):
             (args.batch_size, args.seq_len), dtype=flow.int64
         )
     ):
-        if x.split_axis == 0:
+        if args.parallel_decoder and x.split_axis == 0:
             x = flow.parallel_cast(x, distribute=flow.distribute.broadcast())
 
         outputs = {}

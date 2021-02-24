@@ -128,7 +128,7 @@ class GPT2(object):
             for i in range(self.n_layer):
                 h, present = self.transformer_layer(f"h{i}", h, past=past)
                 presents.append(present)
-
+            print("output h >>>>>>>>>>>>>>>>>> shape ", h.shape)
             outputs["presents"] = presents
             h = norm(h, name="layernorm_f")
             logits = flow.matmul(h, wte, transpose_b=True)
@@ -141,11 +141,8 @@ class GPT2(object):
         """
         wpe_sbp, wte_sbp = None, None
         if self.parallel_embedding:
-            print("user >>>>>>>>>>>>>>>>>>> parallel_embedding")
             wpe_sbp = flow.distribute.broadcast()
             wte_sbp = flow.distribute.split(0)
-        else:
-            print("user >>>>>>>>>>>>>>>>>>> normal embedding")
 
         wpe = flow.get_variable(
             "wpe",
