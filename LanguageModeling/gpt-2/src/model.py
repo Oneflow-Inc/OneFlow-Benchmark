@@ -141,8 +141,11 @@ class GPT2(object):
         """
         wpe_sbp, wte_sbp = None, None
         if self.parallel_embedding:
+            print("user >>>>>>>>>>>>>>>>>>> parallel_embedding")
             wpe_sbp = flow.distribute.broadcast()
             wte_sbp = flow.distribute.split(0)
+        else:
+            print("user >>>>>>>>>>>>>>>>>>> normal embedding")
 
         wpe = flow.get_variable(
             "wpe",

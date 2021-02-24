@@ -105,7 +105,7 @@ def get_parser(parser=None):
         "--enable_non_distributed_optimizer", type=str2bool, default=False, help="Whether to use use non_distributed_optimizer"
     )
     parser.add_argument(
-        "--checkpoint-activations",
+        "--checkpoint_activations",
         action="store_true",
         help="Checkpoint activation to allow for training "
         "with larger models, sequences, and batch sizes.",
@@ -233,22 +233,22 @@ def get_parser(parser=None):
         help="is model parallel for decoder blocks",
     )
     parser.add_argument(
-        "--model-parallel-size", type=int, default=1, help="Size of the model parallel."
+        "--model_parallel_size", type=int, default=1, help="Size of the model parallel."
     )
     parser.add_argument(
-        "--parallel-embedding", action="store_true", help="distributed embedding",
+        "--parallel_embedding", action="store_true", help="distributed embedding",
     )
     parser.add_argument(
-        "--parallel-decoder", action="store_true", help="distributed decoder",
+        "--parallel_decoder", action="store_true", help="distributed decoder",
     )
     parser.add_argument(
-        "--parallel-loss",
+        "--parallel_loss",
         action="store_true",
         help="distributed softmax cross entropy loss",
     )
     # misc
     parser.add_argument(
-        "--metric-print-format",
+        "--metric_print_format",
         type=str,
         default="normal",
         help="metric print format <normal|table>",
