@@ -27,8 +27,11 @@ import onnx
 import onnxruntime as ort
 
 from resnet_model import resnet50
+import config as configs
 from imagenet1000_clsidx_to_labels import clsidx_2_labels
 
+parser = configs.get_parser()
+args = parser.parse_args()
 
 def load_image(image_path: Text) -> np.ndarray:
     rgb_mean = [123.68, 116.779, 103.939]
@@ -46,7 +49,7 @@ def load_image(image_path: Text) -> np.ndarray:
 
 @flow.global_function("predict")
 def InferenceNet(images: tp.Numpy.Placeholder((1, 3, 224, 224), dtype=flow.float)) -> tp.Numpy:
-    logits = resnet50(images, training=False)
+    logits = resnet50(images, args, training=False)
     predictions = flow.nn.softmax(logits)
     return predictions
 
