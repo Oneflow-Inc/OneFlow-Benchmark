@@ -12,18 +12,21 @@ echo NUM_EPOCH=$NUM_EPOCH
 if [ -n "$2" ]; then
     DATA_ROOT=$2
 else
-    DATA_ROOT=/data/imagenet/ofrecord
+    DATA_ROOT=/datasets/imagenet/ofrecord
 fi
 echo DATA_ROOT=$DATA_ROOT
 
 LOG_FOLDER=../logs
 mkdir -p $LOG_FOLDER
 LOGFILE=$LOG_FOLDER/resnet_training.log
+mem_file=$LOG_FOLDER/resent_fp16_b192_1ng8_50e.mem
 
 export PYTHONUNBUFFERED=1
 echo PYTHONUNBUFFERED=$PYTHONUNBUFFERED
 export NCCL_LAUNCH_MODE=PARALLEL
 echo NCCL_LAUNCH_MODE=$NCCL_LAUNCH_MODE
+
+python3 gpu_memory_usage.py -g=8 -n=1 >$mem_file 2>&1 </dev/null &
 
 python3 of_cnn_train_val.py \
      --train_data_dir=$DATA_ROOT/train \
