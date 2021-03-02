@@ -493,21 +493,7 @@ class GPT2(object):
             else:
                 loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits)
 
-            loss = flow.hierarchical_parallel_cast(
-                loss, parallel_hierarchy=[4], 
-                parallel_distribution=["S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "S(0)"]
-                )#to 1d for reshape
             loss = flow.reshape(loss, (b, s))
-            loss = flow.hierarchical_parallel_cast(
-                loss, parallel_hierarchy=[2, 2], 
-                parallel_distribution=["S(0)", "S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[4],
-                grad_parallel_distribution=["S(0)"]
-                )#to 2d after reshape
             loss = flow.slice(loss, begin=(None, 0), size=(None, s - 1))
             loss = flow.hierarchical_parallel_cast(
                 loss, parallel_hierarchy=[4], 
