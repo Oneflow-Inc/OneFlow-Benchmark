@@ -428,27 +428,6 @@ class GPT2(object):
                 k = col_parallel_linear("k_attn", x, e, [2, 2])
                 v = col_parallel_linear("v_attn", x, e, [2, 2])
 
-            q = flow.hierarchical_parallel_cast(
-                q, parallel_hierarchy=[4], 
-                parallel_distribution=["S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "S(1)"]
-            )
-            k = flow.hierarchical_parallel_cast(
-                k, parallel_hierarchy=[4], 
-                parallel_distribution=["S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "S(1)"]
-            )
-            v = flow.hierarchical_parallel_cast(
-                v, parallel_hierarchy=[4], 
-                parallel_distribution=["S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "S(1)"]
-            )
             q, k, v = map(split_heads, [q, k, v])
             # TODO: tf.stack([k, v], axis=1)
             present = []  
@@ -458,28 +437,6 @@ class GPT2(object):
                 v = tf.concat([pv, v], axis=-2)
 
             print("q k v shape", q.shape, k.shape, v.shape)
-            # for reshape use 1D sbp
-            q = flow.hierarchical_parallel_cast(
-                q, parallel_hierarchy=[2, 2], 
-                parallel_distribution=["S(0)", "S(1)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[4],
-                grad_parallel_distribution=["S(0)"]
-            )
-            k = flow.hierarchical_parallel_cast(
-                k, parallel_hierarchy=[2, 2], 
-                parallel_distribution=["S(0)", "S(1)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[4],
-                grad_parallel_distribution=["S(0)"]
-            )
-            v = flow.hierarchical_parallel_cast(
-                v, parallel_hierarchy=[2, 2], 
-                parallel_distribution=["S(0)", "S(1)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[4],
-                grad_parallel_distribution=["S(0)"]
-            )
             a = multihead_attn(q, k, v) #(b,n,s,h)[S0, S1]
             print("before merge_heads a", a.shape) #(b,n,s,h)[S0, S1]
             a = merge_heads(a)
