@@ -361,14 +361,6 @@ class GPT2(object):
                 #norm1 = norm(x, name="layernorm_1")
                 norm1 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_1")
                 a, present = self.attn(norm1, past=past)
-                #to 2d sbp after reshape
-                a = flow.hierarchical_parallel_cast(
-                    a, parallel_hierarchy=[2, 2], 
-                    parallel_distribution=["S(0)", "B"],
-                    grad_mode="manual",
-                    grad_parallel_hierarchy=[4],
-                    grad_parallel_distribution=["S(0)"]
-                )
                 x = x + a
                 norm2 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_2")
                 print("norm2 shape", norm2.shape)
@@ -494,14 +486,6 @@ class GPT2(object):
             print("after merge_heads a", a.shape)  #(b,s,e)[S0, S2]
             a = row_parallel_linear("c_proj", a, e, [2, 2])
             a = flow.nn.dropout(a, rate=self.hidden_dropout) #[S0,B]
-            a = flow.hierarchical_parallel_cast(
-                a, parallel_hierarchy=[4], 
-                parallel_distribution=["S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "B"]
-            )
-            #to 1d for reshape
             a = flow.reshape(a, (self.batch_size, self.seq_len, self.n_embd))
             return a, present
 
