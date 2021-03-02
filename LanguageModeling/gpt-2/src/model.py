@@ -267,7 +267,7 @@ class GPT2(object):
                     grad_mode="manual",
                     grad_parallel_hierarchy=[2, 2],
                     grad_parallel_distribution=["B", "S(0)"]
-            )
+            ) #cant delete model-AmpWhiteIdentity_2_clone_grad_79
             h = flow.hierarchical_parallel_cast(
                     h, parallel_hierarchy=[2, 2], 
                     parallel_distribution=["S(0)", "B"],
@@ -333,7 +333,7 @@ class GPT2(object):
             grad_mode="manual",
             grad_parallel_hierarchy=[2, 2],
             grad_parallel_distribution=["B", "S(0)"]
-        )
+        ) #cant delete model-AmpWhiteIdentity_2_clone_grad
         h = flow.gather(wte_model, x, name="embd_gather")
         h = flow.hierarchical_parallel_cast(
             h, parallel_hierarchy=[2, 2], 
