@@ -30,8 +30,6 @@ def layer_norm_2D(
                 trainable=trainable,
                 model_name="beta",
                 reuse=False,
-                parallel_hierarchy=parallel_hierarchy,
-                parallel_distribution=parallel_distribution,
             )
     if scale:
         with flow.scope.namespace(name):
@@ -43,8 +41,6 @@ def layer_norm_2D(
                 trainable=trainable,
                 model_name="gamma",
                 reuse=False,
-                parallel_hierarchy=parallel_hierarchy,
-                parallel_distribution=parallel_distribution,
             )
 
     op_builder = (
@@ -141,8 +137,6 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             shape=(nx, nf),
             dtype=x.dtype,
             initializer=flow.random_normal_initializer(stddev=w_init_stdev),
-            parallel_hierarchy=parallel_hierarchy,
-            parallel_distribution=weight_parallel_distribution,
         )
 
         bias = flow.get_variable(
@@ -150,8 +144,6 @@ def col_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             shape=(nf,),
             dtype=x.dtype,
             initializer=flow.constant_initializer(0.0),
-            parallel_hierarchy=parallel_hierarchy,
-            parallel_distribution=bias_parallel_distribution,
         )
 
         c = flow.matmul(x, weight, name="matmul")
@@ -187,25 +179,14 @@ def row_parallel_linear(name, x, nf, parallel_hierarchy, *, w_init_stdev=0.02):
             shape=(nx, nf),
             dtype=x.dtype,
             initializer=flow.random_normal_initializer(stddev=w_init_stdev),
-            parallel_hierarchy=parallel_hierarchy,
-            parallel_distribution=weight_parallel_distribution,
         )
         bias = flow.get_variable(
             name="bias",
             shape=(nf,),
             dtype=x.dtype,
             initializer=flow.constant_initializer(0.0),
-            parallel_hierarchy=parallel_hierarchy,
-            parallel_distribution=bias_parallel_distribution,
         )
         c = flow.matmul(x, weight, name="matmul")
-        c = flow.hierarchical_parallel_cast(
-            c, parallel_hierarchy=parallel_hierarchy, 
-            parallel_distribution=c_parallel_distribution,
-            grad_mode="manual",
-            grad_parallel_hierarchy=parallel_hierarchy,
-            grad_parallel_distribution=c_parallel_distribution
-        )
         c = flow.nn.bias_add(c, bias, name="biasadd")
 
     return c
@@ -261,29 +242,8 @@ class GPT2(object):
             #h = norm(h, name="layernorm_f")
             h = norm_2d(h, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_f") #[S0, B]
 
-            wte = flow.hierarchical_parallel_cast(
-                    wte, parallel_hierarchy=[2, 2], 
-                    parallel_distribution=["B", "S(0)"],
-                    grad_mode="manual",
-                    grad_parallel_hierarchy=[2, 2],
-                    grad_parallel_distribution=["B", "S(0)"]
-            ) #cant delete model-AmpWhiteIdentity_2_clone_grad_79
-            h = flow.hierarchical_parallel_cast(
-                    h, parallel_hierarchy=[2, 2], 
-                    parallel_distribution=["S(0)", "B"],
-                    grad_mode="manual",
-                    grad_parallel_hierarchy=[2, 2],
-                    grad_parallel_distribution=["S(0)", "B"]
-            )#for layernorm_f dy is B not P
             logits = flow.matmul(h, wte, transpose_b=True) #h(S0, B) wte(B, S0) out(S0, S1)  h shape (4096, 768) wte shape (50688, 768) logits shape (4096, 50688)
             print("h shape", h.shape, "wte shape", wte.shape, "logits shape", logits.shape)
-            logits = flow.hierarchical_parallel_cast(
-                logits, parallel_hierarchy=[2, 2], 
-                parallel_distribution=["S(0)", "S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "S(1)"]
-            )
             outputs["logits"] = logits
 
         return outputs
@@ -304,44 +264,20 @@ class GPT2(object):
             "wpe",
             shape=(self.n_ctx, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.01),
-            parallel_hierarchy=[2, 2],
-            parallel_distribution=["B", "B"],
         )
         wte = flow.get_variable(
             "wte",
             shape=(self.n_vocab, self.n_embd),
             initializer=flow.random_normal_initializer(stddev=0.02),
-            parallel_hierarchy=[2, 2],
-            parallel_distribution=["B", "S(0)"],
         )
 
         if self.use_fp16:
             # x = flow.amp_white_identity(x)
             wpe = flow.amp_white_identity(wpe)
             wte = flow.amp_white_identity(wte)
-
-        x = flow.hierarchical_parallel_cast(
-            x, parallel_hierarchy=[2, 2], 
-            parallel_distribution=["S(0)", "B"],
-            grad_mode="manual",
-            grad_parallel_hierarchy=[4],
-            grad_parallel_distribution=["S(0)"]
-        )
-        wte_model = flow.hierarchical_parallel_cast(
-            wte, parallel_hierarchy=[2, 2], 
-            parallel_distribution=["B", "S(0)"],
-            grad_mode="manual",
-            grad_parallel_hierarchy=[2, 2],
-            grad_parallel_distribution=["B", "S(0)"]
-        ) #cant delete model-AmpWhiteIdentity_2_clone_grad
+        
+        wte_model = flow.identity(wte)
         h = flow.gather(wte_model, x, name="embd_gather")
-        h = flow.hierarchical_parallel_cast(
-            h, parallel_hierarchy=[2, 2], 
-            parallel_distribution=["S(0)", "B"],
-            grad_mode="manual",
-            grad_parallel_hierarchy=[2, 2],
-            grad_parallel_distribution=["S(0)", "B"]
-        )
         h = h + wpe
         h = flow.nn.dropout(h, rate=self.embedding_dropout, name="embd_dropout")
         return h, wte
@@ -410,13 +346,6 @@ class GPT2(object):
                     c, begin=[None, None, 2], size=[None, None, 1]
                 )
             else:
-                x = flow.hierarchical_parallel_cast(
-                    x, parallel_hierarchy=[2, 2], 
-                    parallel_distribution=["S(0)", "B"],
-                    grad_mode="manual",
-                    grad_parallel_hierarchy=[2, 2],
-                    grad_parallel_distribution=["S(0)", "B"]
-                ) #for grad P->B
                 q = col_parallel_linear("q_attn", x, e, [2, 2]) # x ["S(0)", "B"] w[B,S1] b[B,S0] -> [S0, S1]
                 k = col_parallel_linear("k_attn", x, e, [2, 2])
                 v = col_parallel_linear("v_attn", x, e, [2, 2])
@@ -449,13 +378,6 @@ class GPT2(object):
             assert h.shape[-1] == e * 4
             h = row_parallel_linear("c_proj", h, e, [2, 2])
             h = flow.nn.dropout(h, rate=self.hidden_dropout)
-            h = flow.hierarchical_parallel_cast(
-                x, parallel_hierarchy=[2, 2], 
-                parallel_distribution=["S(0)", "B"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "B"]
-            ) 
             h = flow.reshape(h, (self.batch_size, self.seq_len, self.n_embd))
             return h
 
@@ -469,13 +391,6 @@ class GPT2(object):
         assert bs == b * s
         assert v == self.n_vocab
         print("labels", labels.shape, labels.dtype)
-        labels = flow.hierarchical_parallel_cast(
-            labels, parallel_hierarchy=[2, 2], 
-            parallel_distribution=["S(0)", "S(0)"],
-            grad_mode="manual",
-            grad_parallel_hierarchy=[4],
-            grad_parallel_distribution=["S(0)"]
-        )
         with flow.scope.namespace("loss"):
             labels = flow.slice(labels, begin=(None, 1), size=(None, s - 1))
 
@@ -495,11 +410,4 @@ class GPT2(object):
 
             loss = flow.reshape(loss, (b, s))
             loss = flow.slice(loss, begin=(None, 0), size=(None, s - 1))
-            loss = flow.hierarchical_parallel_cast(
-                loss, parallel_hierarchy=[4], 
-                parallel_distribution=["S(0)"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "S(0)"]
-                )
             return flow.math.reduce_mean(loss)
