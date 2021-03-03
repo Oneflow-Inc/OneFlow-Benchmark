@@ -11,7 +11,7 @@ n_embd=768
 n_head=12
 n_layer=2
 seq_len=1024
-dropout_rate=0.1
+dropout_rate=0.0
 
 cmd=""
 #cmd+="gdb --args "
@@ -28,13 +28,14 @@ cmd+="--seq_len=$seq_len "
 cmd+="--embedding_dropout=$dropout_rate "
 cmd+="--hidden_dropout=$dropout_rate "
 cmd+="--attention_dropout=$dropout_rate "
-cmd+="--use_fp16=True "
+cmd+="--use_fp16=False "
 cmd+="--use_big_fc=False "
 cmd+="--checkpoint-activations "
 cmd+="--optimizer=sgd "
 cmd+="--parallel-loss "
 cmd+="--iter_num=110 "
-cmd+="--loss_print_every_n_iter=10 "
+cmd+="--make-vocab-size-divisible-by=0 "
+cmd+="--loss_print_every_n_iter=1 "
 cmd+="--metric-print-format=table "
 cmd+="--total_batch_size=$batch_size "
 cmd+="--gpu_num_per_node=$gpu_num_per_node "

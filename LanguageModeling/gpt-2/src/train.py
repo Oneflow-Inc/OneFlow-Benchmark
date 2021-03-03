@@ -35,17 +35,19 @@ def train(args):
     gpt2_trainer = make_gpt2_train_func(args)
     snapshot = None
     iteration = 0
-
-    if args.model_save_dir is not None:
-        snapshot = util.Snapshot(args.log_dir, args.model_save_dir)
-
-    if args.model_load_dir is not None:
-        print(f"Loading model from {args.model_load_dir}")
-        var_dict = flow.checkpoint.get(args.model_load_dir)
-        flow.load_variables(var_dict)
-        train_step_variable_name = f"System-Train-TrainStep-{gpt2_trainer.__name__}"
-        if train_step_variable_name in var_dict:
-            iteration = var_dict[train_step_variable_name].numpy().item()
+    check_point = flow.train.CheckPoint()
+    #check_point.load("/dataset/model_zoo/gpt2_small_of_models_4_regression/of_model")
+    check_point.load("model_save")
+    #if args.model_save_dir is not None:
+    #    snapshot = util.Snapshot(args.log_dir, args.model_save_dir)
+#
+    #if args.model_load_dir is not None:
+    #    print(f"Loading model from {args.model_load_dir}")
+    #    var_dict = flow.checkpoint.get(args.model_load_dir)
+    #    flow.load_variables(var_dict)
+    #    train_step_variable_name = f"System-Train-TrainStep-{gpt2_trainer.__name__}"
+    #    if train_step_variable_name in var_dict:
+    #        iteration = var_dict[train_step_variable_name].numpy().item()
 
     print("Loading dataset...")
     enc = get_encoder(args)
