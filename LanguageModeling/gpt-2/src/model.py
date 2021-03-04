@@ -364,6 +364,13 @@ class GPT2(object):
                 x = x + a
                 norm2 = norm_2d(x, parallel_hierarchy = [2, 2], parallel_distribution=["B", "B"], name="layernorm_2")
                 print("norm2 shape", norm2.shape)
+                norm2 = flow.hierarchical_parallel_cast(
+                    norm2, parallel_hierarchy=[2, 2], 
+                    parallel_distribution=["S(0)", "B"],
+                    grad_mode="manual",
+                    grad_parallel_hierarchy=[2, 2],
+                    grad_parallel_distribution=["S(0)", "B"]
+                    ) 
                 m = self.mlp(norm2)
                 x = x + m
 
@@ -449,13 +456,6 @@ class GPT2(object):
             assert h.shape[-1] == e * 4
             h = row_parallel_linear("c_proj", h, e, [2, 2])
             h = flow.nn.dropout(h, rate=self.hidden_dropout)
-            h = flow.hierarchical_parallel_cast(
-                x, parallel_hierarchy=[2, 2], 
-                parallel_distribution=["S(0)", "B"],
-                grad_mode="manual",
-                grad_parallel_hierarchy=[2, 2],
-                grad_parallel_distribution=["S(0)", "B"]
-            ) 
             h = flow.reshape(h, (self.batch_size, self.seq_len, self.n_embd))
             return h
 
