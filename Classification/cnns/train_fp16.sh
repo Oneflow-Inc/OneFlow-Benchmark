@@ -19,7 +19,7 @@ echo DATA_ROOT=$DATA_ROOT
 LOG_FOLDER=../logs
 mkdir -p $LOG_FOLDER
 LOGFILE=$LOG_FOLDER/resnet_training.log
-mem_file=$LOG_FOLDER/resent_fp16_b192_1ng8_50e.mem
+mem_file=$LOG_FOLDER/resnet_fp16_b192_1ng8_50e.mem
 
 export PYTHONUNBUFFERED=1
 echo PYTHONUNBUFFERED=$PYTHONUNBUFFERED
