@@ -99,7 +99,8 @@ def PretrainJob():
 def main():
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.log_dir(args.log_dir)
-
+    flow.config.enable_debug_mode(True)
+    
     InitNodes(args)
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
