@@ -21,7 +21,9 @@ mkdir -p $LOG_FOLDER
 LOGFILE=$LOG_FOLDER/resnet_training.log
 
 python3 of_cnn_train_val.py \
+     --train_data_dir=$DATA_ROOT/train \
      --train_data_part_num=256 \
+     --val_data_dir=$DATA_ROOT/validation \
      --val_data_part_num=256 \
      --num_nodes=1 \
      --gpu_num_per_node=8 \
