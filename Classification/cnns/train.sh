@@ -25,7 +25,7 @@ python3 of_cnn_train_val.py \
      --train_data_part_num=256 \
      --val_data_dir=$DATA_ROOT/validation \
      --val_data_part_num=256 \
-     --num_nodes=2 \
+     --num_nodes=1 \
      --gpu_num_per_node=8 \
      --optimizer="sgdwlars" \
      --momentum=0.9 \
