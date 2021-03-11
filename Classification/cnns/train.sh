@@ -32,9 +32,10 @@ python3 of_cnn_train_val.py \
      --label_smoothing=0.1 \
      --learning_rate=7.4 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=32 \
-     --val_batch_size_per_device=50 \
+     --batch_size_per_device=208 \
+     --val_batch_size_per_device=208 \
      --num_epoch=$NUM_EPOCH \
+     --lr_decay="polynomial" \
      --model="resnet50"
 
 echo "Writting log to ${LOGFILE}"
