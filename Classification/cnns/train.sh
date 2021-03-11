@@ -21,20 +21,18 @@ mkdir -p $LOG_FOLDER
 LOGFILE=$LOG_FOLDER/resnet_training.log
 
 python3 of_cnn_train_val.py \
-     --train_data_dir=$DATA_ROOT/train \
      --train_data_part_num=256 \
-     --val_data_dir=$DATA_ROOT/validation \
      --val_data_part_num=256 \
      --num_nodes=1 \
      --gpu_num_per_node=8 \
-     --optimizer="sgd" \
-     --momentum=0.875 \
+     --optimizer="sgdwlars" \
+     --momentum=0.9 \
      --label_smoothing=0.1 \
-     --learning_rate=1.024 \
+     --learning_rate=7.4 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=128 \
+     --batch_size_per_device=32 \
      --val_batch_size_per_device=50 \
      --num_epoch=$NUM_EPOCH \
-     --model="resnet50" 2>&1 | tee ${LOGFILE}
+     --model="resnet50"
 
 echo "Writting log to ${LOGFILE}"

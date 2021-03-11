@@ -97,7 +97,8 @@ def set_up_optimizer(loss, args):
     loss_scale_policy = None
     if args.use_fp16:
         loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
-    if args.optimizer=='sgd':
+    print(args.optimizer)
+    if args.optimizer == 'sgd':
         print("Optimizer:  SGD")
         flow.optimizer.SGD(lr_scheduler,
             momentum=args.momentum if args.momentum>0 else None,
@@ -129,6 +130,45 @@ def set_up_optimizer(loss, args):
             epsilon=args.epsilon,
             loss_scale_policy=loss_scale_policy
         ).minimize(loss)
+    elif args.optimizer=="sgdwlars":
+        print("Optimizer: SGDWLARS")
+
+        def GetLarsVariablesForCurrentJob() -> List[Text]:
+            sess = session_ctx.GetDefaultSession()
+            job_name = oneflow_api.JobBuildAndInferCtx_GetCurrentJobName()
+            all_vars = list(sess.job_name2var_name2var_blob_[job_name].keys())
+            return [var for var in all_vars if not (var.endwith("gamma")
+                                                    or var.endwith("beta")
+                                                    or var.endwith("bias"))]
+
+        def GetSGDWVariablesForCurrentJob() -> List[Text]:
+            sess = session_ctx.GetDefaultSession()
+            job_name = oneflow_api.JobBuildAndInferCtx_GetCurrentJobName()
+            all_vars = list(sess.job_name2var_name2var_blob_[job_name].keys())
+            return [var for var in all_vars if (var.endwith("gamma")
+                                                or var.endwith("beta")
+                                                or var.endwith("bias"))]
+
+        get_lars_vars = GetLarsVariablesForCurrentJob
+        get_sgdw_vars = GetSGDWVariablesForCurrentJob
+        weight_decay_vars = None
+        lars_optm = flow.optimizer.LARS(
+            lr_scheduler = lr_scheduler,
+            momentum_beta = args.momentum if args.momentum > 0 else None,
+            epsilon = 0.0,
+            lars_coefficient = 0.001,
+            weight_decay=1e-4,
+            weight_decay_includes=[".*weight", ".*fc.*bias"],
+            variables=GetLarsVariablesForCurrentJob,
+        )
+        sgd_with_mom_optm = flow.optimizer.SGDW(
+            lr_scheduler=lr_scheduler,
+            momentum_beta=args.momentum if args.momentum > 0 else None,
+            weight_decay=1e-4,
+            weight_decay_includes=[".*weight", ".*fc.*bias"],
+            variables=GetSGDWVariablesForCurrentJob,
+        )
+        flow.optimizer.CombinedOptimizer(lars_optm, sgd_with_mom_optm).minimize(loss)
 
 
 if __name__ == '__main__':
