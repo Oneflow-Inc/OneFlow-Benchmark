@@ -125,7 +125,7 @@ def main():
             TrainNet().async_get(metric.metric_cb(epoch, i))
 
         if args.val_data_dir:
-            metric = Metric(desc='validation', calculate_batches=num_val_steps, 
+            metric = Metric(desc='validation', calculate_batches=num_val_steps,
                             batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))

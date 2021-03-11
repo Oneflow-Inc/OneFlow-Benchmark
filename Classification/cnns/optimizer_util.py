@@ -16,10 +16,13 @@ limitations under the License.
 import oneflow as flow
 import math
 import pprint
+from typing import Optional, Union, Sequence, List, Text, Callable
+import oneflow_api
+import oneflow.python.framework.session_context as session_ctx
 
 def add_optimizer_args(parser):
     group = parser.add_argument_group('optimizer parameters',
-                                      'entire group applies only to optimizer parameters') 
+                                      'entire group applies only to optimizer parameters')
     group.add_argument("--optimizer", type=str, default="sgd", help="sgd, adam, rmsprop")
     group.add_argument("--learning_rate", type=float, default=0.256)
     group.add_argument("--wd", type=float, default=1.0/32768, help="weight decay")
@@ -45,7 +48,7 @@ def set_up_optimizer(loss, args):
 
     # set up warmup strategy
     warmup = flow.optimizer.warmup.linear(warmup_batches, 0) if warmup_batches > 0 else None
-   
+
     # set up grad_clipping
     grad_clipping = flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) if  args.gradient_clipping > 0.0  else None
 
@@ -53,46 +56,46 @@ def set_up_optimizer(loss, args):
     if args.lr_decay == 'cosine':
         # CosineScheduler
         lr_scheduler = flow.optimizer.CosineScheduler(
-            base_lr=args.learning_rate, 
-            steps = decay_batches, 
+            base_lr=args.learning_rate,
+            steps = decay_batches,
             warmup=warmup
         )
     elif args.lr_decay == 'step':
         # PiecewiseScalingScheduler
         lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
-            base_lr=args.learning_rate, 
-            boundaries=[30, 60, 80], 
-            scale=[0.1, 0.01, 0.001], 
+            base_lr=args.learning_rate,
+            boundaries=[30, 60, 80],
+            scale=[0.1, 0.01, 0.001],
             warmup=warmup
         )
     elif args.lr_decay == 'polynomial':
         # PolynomialSchduler
         lr_scheduler = flow.optimizer.PolynomialSchduler(
             base_lr=args.learning_rate,
-            steps=decay_batches, 
+            steps=decay_batches,
             end_learning_rate=0.00001,
             power=2.0,
             cycle=False,
-            warmup=warmup        
+            warmup=warmup
         )
     elif args.lr_decay == 'exponential':
         # ExponentialScheduler
         lr_scheduler = flow.optimizer.ExponentialScheduler(
             base_lr=args.learning_rate,
-            steps=exponential_decay_batches, 
+            steps=exponential_decay_batches,
             decay_rate=args.lr_decay_rate,
             staircase=False,
             warmup=warmup
         )
     else:
         lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
-            base_lr=args.learning_rate, 
-            boundaries=[args.num_epochs], 
-            scale=[1.0], 
+            base_lr=args.learning_rate,
+            boundaries=[args.num_epochs],
+            scale=[1.0],
             warmup=warmup
         )
 
-    
+
     # set up optimizer
     loss_scale_policy = None
     if args.use_fp16:
@@ -137,17 +140,17 @@ def set_up_optimizer(loss, args):
             sess = session_ctx.GetDefaultSession()
             job_name = oneflow_api.JobBuildAndInferCtx_GetCurrentJobName()
             all_vars = list(sess.job_name2var_name2var_blob_[job_name].keys())
-            return [var for var in all_vars if not (var.endwith("gamma")
-                                                    or var.endwith("beta")
-                                                    or var.endwith("bias"))]
+            return [var for var in all_vars if not (var.endswith("gamma")
+                                                    or var.endswith("beta")
+                                                    or var.endswith("bias"))]
 
         def GetSGDWVariablesForCurrentJob() -> List[Text]:
             sess = session_ctx.GetDefaultSession()
             job_name = oneflow_api.JobBuildAndInferCtx_GetCurrentJobName()
             all_vars = list(sess.job_name2var_name2var_blob_[job_name].keys())
-            return [var for var in all_vars if (var.endwith("gamma")
-                                                or var.endwith("beta")
-                                                or var.endwith("bias"))]
+            return [var for var in all_vars if (var.endswith("gamma")
+                                                or var.endswith("beta")
+                                                or var.endswith("bias"))]
 
         get_lars_vars = GetLarsVariablesForCurrentJob
         get_sgdw_vars = GetSGDWVariablesForCurrentJob
@@ -163,18 +166,20 @@ def set_up_optimizer(loss, args):
         )
         sgd_with_mom_optm = flow.optimizer.SGDW(
             lr_scheduler=lr_scheduler,
-            momentum_beta=args.momentum if args.momentum > 0 else None,
+            momentum=args.momentum if args.momentum > 0 else None,
             weight_decay=1e-4,
             weight_decay_includes=[".*weight", ".*fc.*bias"],
             variables=GetSGDWVariablesForCurrentJob,
         )
-        flow.optimizer.CombinedOptimizer(lars_optm, sgd_with_mom_optm).minimize(loss)
+        flow.optimizer.CombinedOptimizer([lars_optm, sgd_with_mom_optm]).minimize(loss)
+        print(lars_optm.Variables())
+        print(sgd_with_mom_optm.Variables())
 
 
 if __name__ == '__main__':
     import config as configs
     parser = configs.get_parser()
     args = parser.parse_args()
-    configs.print_args(args) 
+    configs.print_args(args)
 
-    
+
