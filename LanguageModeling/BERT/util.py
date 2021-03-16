@@ -142,7 +142,7 @@ class Metric(object):
 def CreateOptimizer(args):
     warmup_batches = int(args.iter_num * args.warmup_proportion)
     lr_warmup = flow.optimizer.warmup.linear(warmup_batches, 0)
-    lr_scheduler = flow.optimizer.PolynomialSchduler(args.learning_rate, args.iter_num, 0.0,
+    lr_scheduler = flow.optimizer.PolynomialScheduler(args.learning_rate, args.iter_num, 0.0,
                                                      warmup=lr_warmup)
     loss_scale_policy = None
     if args.use_fp16:

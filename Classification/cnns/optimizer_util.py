@@ -66,8 +66,8 @@ def set_up_optimizer(loss, args):
             warmup=warmup
         )
     elif args.lr_decay == 'polynomial':
-        # PolynomialSchduler
-        lr_scheduler = flow.optimizer.PolynomialSchduler(
+        # PolynomialScheduler
+        lr_scheduler = flow.optimizer.PolynomialScheduler(
             base_lr=args.learning_rate,
             steps=decay_batches, 
             end_learning_rate=0.00001,
