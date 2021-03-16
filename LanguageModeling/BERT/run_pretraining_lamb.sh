@@ -4,8 +4,8 @@ OUTPUT_DIR=/DATA/disk1/of_output
 DATA_DIR=/DATA/disk1/bert/wiki_seq_len_128
 
 
-BZ=16
-ITER_NUM=1000000
+BZ=48
+ITER_NUM=50000
 max_seq_length=128
 max_predictions_per_seq=20
 

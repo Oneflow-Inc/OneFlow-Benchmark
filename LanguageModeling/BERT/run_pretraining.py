@@ -39,8 +39,8 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
     ofrecord = flow.data.ofrecord_reader(data_dir,
                                          batch_size=batch_size,
                                          data_part_num=data_part_num,
-                                         random_shuffle = True,
-                                         shuffle_after_epoch=True)
+                                         random_shuffle = False,
+                                         shuffle_after_epoch=False)
     blob_confs = {}
     def _blob_conf(name, shape, dtype=flow.int32):
         blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
