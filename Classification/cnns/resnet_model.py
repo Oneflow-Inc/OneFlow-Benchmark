@@ -130,7 +130,6 @@ class ResnetBuilder(object):
             return flow.nn.relu(self._batch_norm(inputs, name+"_bn", last=last) + addend)
 
     def conv2d_affine(self, input, name, filters, kernel_size, strides):
-        # input data_format must be NCHW, cannot check now
         padding = "SAME" if strides > 1 or kernel_size > 1 else "VALID"
         output = self._conv2d(name, input, filters, kernel_size, strides, padding)
         return output
