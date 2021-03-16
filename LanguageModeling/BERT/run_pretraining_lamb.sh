@@ -36,8 +36,8 @@ python3 $BENCH_ROOT_DIR/run_pretraining.py \
   --max_position_embeddings=512 \
   --type_vocab_size=2 \
   --vocab_size=30522 \
-  --attention_probs_dropout_prob=0.1 \
-  --hidden_dropout_prob=0.1 \
+  --attention_probs_dropout_prob=0.0 \
+  --hidden_dropout_prob=0.0 \
   --hidden_size_per_head=64 \
   --data_part_num=64 \
   --data_dir=$DATA_DIR \
