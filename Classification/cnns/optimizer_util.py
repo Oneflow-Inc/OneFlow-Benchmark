@@ -126,7 +126,7 @@ def set_up_optimizer(loss, args):
             lars_coefficient=0.001,
             weight_decay=1e-4,
             weight_decay_includes=[".*weight", ".*fc.*bias"],
-        )
+        ).minimize(loss)
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
             print("Optimizer:  AdamW")
