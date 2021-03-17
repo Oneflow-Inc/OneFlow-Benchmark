@@ -154,7 +154,6 @@ def set_up_optimizer(loss, args):
         ).minimize(loss)
     elif args.optimizer=="sgdwlars":
         print("Optimizer: SGDWLARS")
-
         def GetLarsVariablesForCurrentJob() -> List[Text]:
             sess = session_ctx.GetDefaultSession()
             job_name = oneflow_api.JobBuildAndInferCtx_GetCurrentJobName()
