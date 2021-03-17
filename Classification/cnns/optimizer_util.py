@@ -110,7 +110,7 @@ def set_up_optimizer(loss, args):
         ).minimize(loss)
     elif args.optimizer == "sgdw":
         print("Optimizer: SGDW")
-        flow.optimizer.SGD(lr_scheduler,
+        flow.optimizer.SGDW(lr_scheduler,
            momentum=args.momentum if args.momentum > 0 else None,
            grad_clipping=grad_clipping,
            weight_decay = 1e-4,
