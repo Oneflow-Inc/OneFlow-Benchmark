@@ -108,6 +108,15 @@ def set_up_optimizer(loss, args):
             grad_clipping = grad_clipping,
             loss_scale_policy=loss_scale_policy
         ).minimize(loss)
+    else if args.optimizer == "sgdw"
+        print("Optimizer: SGDW")
+        flow.optimizer.SGD(lr_scheduler,
+           momentum=args.momentum if args.momentum > 0 else None,
+           grad_clipping=grad_clipping,
+           weight_decay = 1e-4,
+           weight_decay_includes = [".*weight", ".*fc.*bias"],
+           loss_scale_policy=loss_scale_policy,
+        ).minimize(loss)
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
             print("Optimizer:  AdamW")
@@ -152,9 +161,6 @@ def set_up_optimizer(loss, args):
                                                 or var.endswith("beta")
                                                 or var.endswith("bias"))]
 
-        get_lars_vars = GetLarsVariablesForCurrentJob
-        get_sgdw_vars = GetSGDWVariablesForCurrentJob
-        weight_decay_vars = None
         lars_optm = flow.optimizer.LARS(
             lr_scheduler = lr_scheduler,
             momentum_beta = args.momentum if args.momentum > 0 else None,
