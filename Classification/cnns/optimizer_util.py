@@ -74,7 +74,7 @@ def set_up_optimizer(loss, args):
             base_lr=args.learning_rate,
             steps=decay_batches,
             end_learning_rate=0.00001,
-            power=2.0,
+            power=1.0,
             cycle=False,
             warmup=warmup
         )

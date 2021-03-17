@@ -46,6 +46,6 @@ python3 of_cnn_train_val.py \
      --nccl_fusion_max_ops=24 \
      --gpu_image_decoder=True \
      --num_epoch=$NUM_EPOCH \
-     --model="resnet50" 2>&1 | tee ${LOGFILE}
+     --model="resnet50"
 
 echo "Writting log to ${LOGFILE}"

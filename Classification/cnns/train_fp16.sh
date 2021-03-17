@@ -33,11 +33,11 @@ python3 of_cnn_train_val.py \
      --num_nodes=1 \
      --gpu_num_per_node=8 \
      --optimizer="sgdwlars" \
-     --momentum=0.9 \
+     --momentum=0.875 \
      --label_smoothing=0.1 \
-     --learning_rate=7.4 \
+     --learning_rate=1.536 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=208 \
+     --batch_size_per_device=192 \
      --val_batch_size_per_device=50 \
      --use_fp16 \
      --channel_last=True \
@@ -46,6 +46,7 @@ python3 of_cnn_train_val.py \
      --fuse_bn_add_relu=True \
      --nccl_fusion_threshold_mb=16 \
      --nccl_fusion_max_ops=24 \
+     --gpu_image_decoder=True \
      --num_epoch=$NUM_EPOCH \
      --model="resnet50"
 
