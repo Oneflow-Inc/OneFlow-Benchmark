@@ -32,7 +32,7 @@ python3 of_cnn_train_val.py \
      --val_data_part_num=256 \
      --num_nodes=1 \
      --gpu_num_per_node=8 \
-     --optimizer="sgd" \
+     --optimizer="sgdw" \
      --momentum=0.875 \
      --label_smoothing=0.1 \
      --learning_rate=0.768 \

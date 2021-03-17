@@ -108,7 +108,7 @@ def set_up_optimizer(loss, args):
             grad_clipping = grad_clipping,
             loss_scale_policy=loss_scale_policy
         ).minimize(loss)
-    else if args.optimizer == "sgdw"
+    elif args.optimizer == "sgdw":
         print("Optimizer: SGDW")
         flow.optimizer.SGD(lr_scheduler,
            momentum=args.momentum if args.momentum > 0 else None,
