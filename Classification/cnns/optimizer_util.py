@@ -117,6 +117,16 @@ def set_up_optimizer(loss, args):
            weight_decay_includes = [".*weight", ".*fc.*bias"],
            loss_scale_policy=loss_scale_policy,
         ).minimize(loss)
+    elif args.optimizer == "lars":
+        print("Optimizer: LARS")
+        lars_optm = flow.optimizer.LARS(
+            lr_scheduler=lr_scheduler,
+            momentum_beta=args.momentum if args.momentum > 0 else None,
+            epsilon=0.0,
+            lars_coefficient=0.001,
+            weight_decay=1e-4,
+            weight_decay_includes=[".*weight", ".*fc.*bias"],
+        )
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
             print("Optimizer:  AdamW")
