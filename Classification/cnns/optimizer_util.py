@@ -27,10 +27,10 @@ def add_optimizer_args(parser):
     group.add_argument("--learning_rate", type=float, default=0.256)
     group.add_argument("--wd", type=float, default=1.0/32768, help="weight decay")
     group.add_argument("--momentum", type=float, default=0.875, help="momentum")
-    group.add_argument('--lr_decay', type=str, default='cosine', help='cosine, step, polynomial, exponential, None')
+    group.add_argument('--lr_decay', type=str, default='polynomial', help='cosine, step, polynomial, exponential, None')
     group.add_argument('--lr_decay_rate', type=float, default='0.94', help='exponential learning decay rate')
     group.add_argument('--lr_decay_epochs', type=int, default=2, help='exponential learning rate decay every n epochs')
-    group.add_argument('--warmup_epochs', type=int, default=5,
+    group.add_argument('--warmup_epochs', type=int, default=2,
                        help='the epochs to warmp-up lr to scaled large-batch value')
     group.add_argument('--decay_rate', type=float, default='0.9', help='decay rate of RMSProp')
     group.add_argument('--epsilon', type=float, default='1', help='epsilon')
@@ -73,8 +73,8 @@ def set_up_optimizer(loss, args):
         lr_scheduler = flow.optimizer.PolynomialSchduler(
             base_lr=args.learning_rate,
             steps=decay_batches,
-            end_learning_rate=0.00001,
-            power=1.0,
+            end_learning_rate=0.0001,
+            power=2.0,
             cycle=False,
             warmup=warmup
         )
@@ -124,8 +124,7 @@ def set_up_optimizer(loss, args):
             momentum_beta=args.momentum if args.momentum > 0 else None,
             epsilon=0.0,
             lars_coefficient=0.001,
-            weight_decay=1e-4,
-            weight_decay_includes=[".*weight", ".*fc.*bias"],
+            weight_decay=0.0,
         ).minimize(loss)
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
