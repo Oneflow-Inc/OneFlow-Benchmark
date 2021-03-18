@@ -121,7 +121,7 @@ def set_up_optimizer(loss, args):
         print("Optimizer: LARS")
         lars_optm = flow.optimizer.LARS(
             lr_scheduler=lr_scheduler,
-            momentum_beta=args.momentum if args.momentum > 0 else None,
+            momentum_beta=args.momentum,
             epsilon=0.0,
             lars_coefficient=0.001,
             weight_decay=0.0,
