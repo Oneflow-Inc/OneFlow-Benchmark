@@ -20,8 +20,7 @@ OneFlow-Benchmark下的cnn仓库目前已支持 **Alexnet** 、 **VGG16** 、 **
 
 - 安装OneFlow。 
 
-  - 直接通过pip安装：`pip install oneflow`  
-  - 安装轻量版：`pip install --find-links https://oneflow-inc.github.io/nightly oneflow`
+  - 安装：`python3 -m pip install --find-links https://release.oneflow.info oneflow_cu102 --user`
   - 源码编译等其他安装方式：参考[OneFlow项目主页](https://github.com/Oneflow-Inc/oneflow)
 
 - 克隆/下载[OneFlow-Benchmark](https://github.com/Oneflow-Inc/OneFlow-Benchmark)仓库。
