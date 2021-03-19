@@ -570,7 +570,9 @@ Class: tiger, Panthera tigris; score: 0.8112028241157532
 
 #### 如何生成 ONNX 模型
 
+
 **步骤一：指定模型路径**  
+
 
 首先指定待转换的OneFlow模型路径，然后指定转换后的ONNX模型存放路径，例如示例中：
 
@@ -598,7 +600,47 @@ onnx_model = oneflow_to_onnx(InferenceNet, flow_weights_path, onnx_model_dir, ex
 
 生成 ONNX 模型之后可以使用 ONNX Runtime 运行 ONNX 模型，以验证 OneFlow 模型和 ONNX 模型能够在相同的输入下产生相同的结果。相应的代码在 resnet\_to\_onnx.py 的 `check_equality`。
 
-#### 训练AlexNet
+
+## 训练 Res2Net50
+Res2Net源于论文：[Res2Net: A New Multi-scale Backbone Architecture](https://arxiv.org/pdf/1904.01169.pdf)，是基于ResNet网络改进的，多尺度的卷积神经网络，其和ResNet主要的不点在于 bottleneck处：
+
+<div align="center">
+    <img src="data/res2net.jpg" align='center'/>
+</div>
+
+此结构称为Res2Net块，可以将Res2Net块插入经典CNN网络如：ResNet，ResNeXt，BigLittleNet和DLA中以提高准确率。
+训练脚本如下：
+```shell
+#Please change $DATA_ROOT  to your own data root.
+python3 of_cnn_train_val.py \
+     --train_data_dir=$DATA_ROOT/train \
+     --train_data_part_num=256 \
+     --val_data_dir=$DATA_ROOT/validation \
+     --val_data_part_num=256 \
+     --num_nodes=1 \
+     --gpu_num_per_node=8 \
+     --optimizer="sgd" \
+     --momentum=0.875 \
+     --lr_decay="cosine" \
+     --label_smoothing=0.1 \
+     --learning_rate=0.512 \
+     --loss_print_every_n_iter=100 \
+     --batch_size_per_device=64 \
+     --val_batch_size_per_device=50 \
+     --use_fp16=True \
+     --channel_last=False \
+     --fuse_bn_relu=True \
+     --fuse_bn_add_relu=True \
+     --nccl_fusion_threshold_mb=32 \
+     --nccl_fusion_max_ops=48 \
+     --gpu_image_decoder=False \
+     --num_epoch=100  \
+     --model="res2net50"
+```
+
+我们使用了和ResNet50一致的训练参数，经过93epoch的训练后，Res2Net模型精度达到了：Top1 acc:77.852%，点此下载[模型](https://oneflow-public.oss-cn-beijing.aliyuncs.com/model_zoo/res2net50_of_best_model_val_top1_77852.zip)。
+
+## 训练AlexNet
 
 ```
 #Please change $DATA_ROOT this to your own data root.
@@ -624,7 +666,7 @@ python3 of_cnn_train_val.py \
 
 
 
-#### 训练 VGG-16
+## 训练 VGG-16
 ```
 #Please change $DATA_ROOT this to your own data root.
 python3 cnn_benchmark/of_cnn_train_val.py \
