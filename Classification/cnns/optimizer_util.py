@@ -176,7 +176,7 @@ def set_up_optimizer(loss, args):
         )
         flow.optimizer.CombinedOptimizer(
             [lars_optm, sgd_with_mom_optm],
-            loss_scale_policy=loss_scale_policy
+            loss_scale_policy=loss_scale_policy,
         ).minimize(loss * 8)
         print(lars_optm.Variables())
         print(sgd_with_mom_optm.Variables())
