@@ -25,7 +25,7 @@ def add_optimizer_args(parser):
                                       'entire group applies only to optimizer parameters')
     group.add_argument("--optimizer", type=str, default="sgd", help="sgd, adam, rmsprop")
     group.add_argument("--learning_rate", type=float, default=0.256)
-    group.add_argument("--wd", type=float, default=1.0/32768, help="weight decay")
+    group.add_argument("--wd", type=float, default=1e-4, help="weight decay")
     group.add_argument("--momentum", type=float, default=0.875, help="momentum")
     group.add_argument('--lr_decay', type=str, default='polynomial', help='cosine, step, polynomial, exponential, None')
     group.add_argument('--lr_decay_rate', type=float, default='0.94', help='exponential learning decay rate')
@@ -116,7 +116,7 @@ def set_up_optimizer(loss, args):
             grad_clipping=grad_clipping,
             epsilon=0.0,
             lars_coefficient=0.001,
-            weight_decay=0.0,
+            loss_scale_policy=loss_scale_policy,
         ).minimize(loss)
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
@@ -167,18 +167,17 @@ def set_up_optimizer(loss, args):
             momentum_beta = args.momentum if args.momentum > 0 else None,
             epsilon = 0.0,
             lars_coefficient = 0.001,
-            weight_decay=1e-4,
-            weight_decay_includes=[".*weight", ".*fc.*bias"],
             variables=GetLarsVariablesForCurrentJob,
         )
         sgd_with_mom_optm = flow.optimizer.SGDW(
             lr_scheduler=lr_scheduler,
             momentum=args.momentum if args.momentum > 0 else None,
-            weight_decay=1e-4,
-            weight_decay_includes=[".*weight", ".*fc.*bias"],
             variables=GetSGDWVariablesForCurrentJob,
         )
-        flow.optimizer.CombinedOptimizer([lars_optm, sgd_with_mom_optm]).minimize(loss * 8)
+        flow.optimizer.CombinedOptimizer(
+            [lars_optm, sgd_with_mom_optm],
+            loss_scale_policy=loss_scale_policy
+        ).minimize(loss * 8)
         print(lars_optm.Variables())
         print(sgd_with_mom_optm.Variables())
 
