@@ -27,6 +27,7 @@ import vgg_model
 import alexnet_model
 import inception_model
 import mobilenet_v2_model
+import ghostnet_model
 
 parser = configs.get_parser()
 args = parser.parse_args()
@@ -47,6 +48,7 @@ model_dict = {
     "inceptionv3": inception_model.inceptionv3,
     "mobilenetv2": mobilenet_v2_model.Mobilenet,
     "resnext50": resnext_model.resnext50,
+    "ghostnet": ghostnet_model.ghostnet,
 }
 
 
