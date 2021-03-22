@@ -73,8 +73,8 @@ def set_up_optimizer(loss, args):
         lr_scheduler = flow.optimizer.PolynomialSchduler(
             base_lr=args.learning_rate,
             steps=decay_batches,
-            end_learning_rate=0.00001,
-            power=1.0,
+            end_learning_rate=0.0001,
+            power=2.0,
             cycle=False,
             warmup=warmup
         )
@@ -108,20 +108,12 @@ def set_up_optimizer(loss, args):
             grad_clipping = grad_clipping,
             loss_scale_policy=loss_scale_policy
         ).minimize(loss)
-    elif args.optimizer == "sgdw":
-        print("Optimizer: SGDW")
-        flow.optimizer.SGDW(lr_scheduler,
-           momentum=args.momentum if args.momentum > 0 else None,
-           grad_clipping=grad_clipping,
-           weight_decay = 1e-4,
-           weight_decay_includes = [".*weight", ".*fc.*bias"],
-           loss_scale_policy=loss_scale_policy,
-        ).minimize(loss)
     elif args.optimizer == "lars":
         print("Optimizer: LARS")
         lars_optm = flow.optimizer.LARS(
             lr_scheduler=lr_scheduler,
             momentum_beta=args.momentum,
+            grad_clipping=grad_clipping,
             epsilon=0.0,
             lars_coefficient=0.001,
             weight_decay=0.0,
