@@ -178,7 +178,7 @@ def set_up_optimizer(loss, args):
             weight_decay_includes=[".*weight", ".*fc.*bias"],
             variables=GetSGDWVariablesForCurrentJob,
         )
-        flow.optimizer.CombinedOptimizer([lars_optm, sgd_with_mom_optm]).minimize(loss)
+        flow.optimizer.CombinedOptimizer([lars_optm, sgd_with_mom_optm]).minimize(loss * 8)
         print(lars_optm.Variables())
         print(sgd_with_mom_optm.Variables())
 
