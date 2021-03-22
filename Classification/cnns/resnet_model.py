@@ -24,7 +24,7 @@ BLOCK_FILTERS_INNER = [64, 128, 256, 512]
 class ResnetBuilder(object):
     def __init__(self, weight_regularizer, trainable=True, training=True, channel_last=False, fuse_bn_relu=True, fuse_bn_add_relu=True):
         self.data_format = "NHWC" if channel_last else "NCHW"
-        self.weight_initializer = flow.variance_scaling_initializer(2, 'fan_in', 'random_normal',
+        self.weight_initializer = flow.variance_scaling_initializer(2, 'fan_avg', 'random_normal',
                                                                     data_format=self.data_format)
         self.weight_regularizer = weight_regularizer
         self.trainable = trainable
