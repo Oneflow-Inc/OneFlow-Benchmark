@@ -75,8 +75,6 @@ class ResnetBuilder(object):
             training=self.training,
             gamma_initializer=initializer,
             moving_variance_initializer=initializer,
-            gamma_regularizer=self.weight_regularizer,
-            beta_regularizer=self.weight_regularizer,
             name=name,
         )
 
@@ -97,8 +95,6 @@ class ResnetBuilder(object):
                 training=self.training,
                 gamma_initializer=initializer,
                 moving_variance_initializer=initializer,
-                gamma_regularizer=self.weight_regularizer,
-                beta_regularizer=self.weight_regularizer,
                 name=name + "_bn_relu",
             )
         else:
@@ -122,8 +118,6 @@ class ResnetBuilder(object):
                 training=self.training,
                 gamma_initializer=initializer,
                 moving_variance_initializer=initializer,
-                gamma_regularizer=self.weight_regularizer,
-                beta_regularizer=self.weight_regularizer,
                 name=name+"_bn_add_relu",
             )
         else:
