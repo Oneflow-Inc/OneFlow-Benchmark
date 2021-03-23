@@ -60,7 +60,6 @@ class ResnetBuilder(object):
         return flow.nn.conv2d(input, weight, strides, padding, self.data_format, dilations, name=name)
 
     def _batch_norm(self, inputs, name=None, last=False):
-        initializer = flow.zeros_initializer() if last else flow.ones_initializer()
         axis = 1
         if self.data_format =="NHWC":
             axis = 3
@@ -73,14 +72,13 @@ class ResnetBuilder(object):
             scale=True,
             trainable=self.trainable,
             training=self.training,
-            gamma_initializer=initializer,
-            moving_variance_initializer=initializer,
+            gamma_initializer=flow.ones_initializer(),
+            moving_variance_initializer=flow.ones_initializer(),
             name=name,
         )
 
     def _batch_norm_relu(self, inputs, name=None, last=False):
         if self.fuse_bn_relu:
-            initializer = flow.zeros_initializer() if last else flow.ones_initializer()
             axis = 1
             if self.data_format =="NHWC":
                 axis = 3
@@ -93,8 +91,8 @@ class ResnetBuilder(object):
                 scale=True,
                 trainable=self.trainable,
                 training=self.training,
-                gamma_initializer=initializer,
-                moving_variance_initializer=initializer,
+                gamma_initializer=flow.ones_initializer(),
+                moving_variance_initializer=flow.ones_initializer(),
                 name=name + "_bn_relu",
             )
         else:
@@ -102,7 +100,6 @@ class ResnetBuilder(object):
 
     def _batch_norm_add_relu(self, inputs, addend, name=None, last=False):
         if self.fuse_bn_add_relu:
-            initializer = flow.zeros_initializer() if last else flow.ones_initializer()
             axis = 1
             if self.data_format =="NHWC":
                 axis = 3
@@ -116,8 +113,8 @@ class ResnetBuilder(object):
                 scale=True,
                 trainable=self.trainable,
                 training=self.training,
-                gamma_initializer=initializer,
-                moving_variance_initializer=initializer,
+                gamma_initializer=flow.ones_initializer(),
+                moving_variance_initializer=flow.ones_initializer(),
                 name=name+"_bn_add_relu",
             )
         else:
