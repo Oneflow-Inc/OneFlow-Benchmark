@@ -4,7 +4,7 @@ rm -rf ./output/snapshots/*
 if [ -n "$1" ]; then
     NUM_EPOCH=$1
 else
-    NUM_EPOCH=50
+    NUM_EPOCH=37
 fi
 echo NUM_EPOCH=$NUM_EPOCH
 

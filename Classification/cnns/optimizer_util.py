@@ -77,7 +77,6 @@ def set_up_optimizer(loss, args):
             power=2.0,
             cycle=False,
             warmup=warmup,
-            exclude_warmup=True,
         )
     elif args.lr_decay == 'exponential':
         # ExponentialScheduler
