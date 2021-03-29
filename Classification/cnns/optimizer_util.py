@@ -43,7 +43,7 @@ def set_up_optimizer(loss, args):
     batches_per_epoch = math.ceil(args.num_examples / train_batch_size)
     warmup_batches = batches_per_epoch * args.warmup_epochs
     num_train_batches = batches_per_epoch * args.num_epochs
-    decay_batches = num_train_batches
+    decay_batches = num_train_batches - warmup_batches
     exponential_decay_batches = batches_per_epoch * args.lr_decay_epochs
 
     # set up warmup strategy
