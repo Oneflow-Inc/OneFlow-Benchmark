@@ -36,7 +36,7 @@ total_device_num = args.num_nodes * args.gpu_num_per_node
 train_batch_size = total_device_num * args.batch_size_per_device
 val_batch_size = total_device_num * args.val_batch_size_per_device
 (C, H, W) = args.image_shape
-epoch_size = math.ceil(args.num_examples / train_batch_size)
+epoch_size = math.ceil(int(args.num_examples / args.num_nodes) / args.batch_size_per_device)
 num_val_steps = int(args.num_val_examples / val_batch_size)
 
 

@@ -40,10 +40,9 @@ def add_optimizer_args(parser):
 def set_up_optimizer(loss, args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     train_batch_size = total_device_num * args.batch_size_per_device
-    batches_per_epoch = math.ceil(args.num_examples / train_batch_size)
+    batches_per_epoch = math.ceil(int(args.num_examples / args.num_nodes) / args.batch_size_per_device)
     warmup_batches = batches_per_epoch * args.warmup_epochs
     num_train_batches = batches_per_epoch * args.num_epochs
-    decay_batches = num_train_batches - warmup_batches
     exponential_decay_batches = batches_per_epoch * args.lr_decay_epochs
 
     # set up warmup strategy
@@ -57,7 +56,7 @@ def set_up_optimizer(loss, args):
         # CosineScheduler
         lr_scheduler = flow.optimizer.CosineScheduler(
             base_lr=args.learning_rate,
-            steps = decay_batches,
+            steps = num_train_batches,
             warmup=warmup
         )
     elif args.lr_decay == 'step':
@@ -72,11 +71,12 @@ def set_up_optimizer(loss, args):
         # PolynomialSchduler
         lr_scheduler = flow.optimizer.PolynomialSchduler(
             base_lr=args.learning_rate,
-            steps=decay_batches,
+            steps=num_train_batches,
             end_learning_rate=0.0001,
             power=2.0,
             cycle=False,
             warmup=warmup,
+            exclude_warmup=True,
         )
     elif args.lr_decay == 'exponential':
         # ExponentialScheduler
@@ -107,16 +107,6 @@ def set_up_optimizer(loss, args):
             momentum=args.momentum if args.momentum>0 else None,
             grad_clipping = grad_clipping,
             loss_scale_policy=loss_scale_policy
-        ).minimize(loss)
-    elif args.optimizer == "lars":
-        print("Optimizer: LARS")
-        lars_optm = flow.optimizer.LARS(
-            lr_scheduler=lr_scheduler,
-            momentum_beta=args.momentum,
-            grad_clipping=grad_clipping,
-            epsilon=0.0,
-            lars_coefficient=0.001,
-            loss_scale_policy=loss_scale_policy,
         ).minimize(loss)
     elif args.optimizer=='adam':
         if args.wd > 0 and args.wd < 1.0 :
