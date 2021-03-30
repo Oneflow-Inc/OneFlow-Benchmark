@@ -204,7 +204,7 @@ def resnet50(images, args, trainable=True, training=True):
             units=1000,
             use_bias=True,
             kernel_initializer=flow.random_normal_initializer(0, 0.01),
-            bias_initializer=flow.random_normal_initializer(0, 0.01),
+            bias_initializer=flow.zeros_initializer(),
             kernel_regularizer=weight_regularizer,
             bias_regularizer=weight_regularizer,
             trainable=trainable,
