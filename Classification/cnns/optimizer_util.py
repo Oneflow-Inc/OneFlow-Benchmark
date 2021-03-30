@@ -39,8 +39,7 @@ def add_optimizer_args(parser):
 
 def set_up_optimizer(loss, args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
-    train_batch_size = total_device_num * args.batch_size_per_device
-    batches_per_epoch = math.ceil(int(args.num_examples / args.num_nodes) / args.batch_size_per_device)
+    batches_per_epoch = math.ceil(int(args.num_examples / total_device_num) / args.batch_size_per_device)
     warmup_batches = batches_per_epoch * args.warmup_epochs
     num_train_batches = batches_per_epoch * args.num_epochs
     exponential_decay_batches = batches_per_epoch * args.lr_decay_epochs
