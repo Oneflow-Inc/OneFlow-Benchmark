@@ -162,8 +162,6 @@ def set_up_optimizer(loss, args):
         )
         sgd_with_mom_optm = flow.optimizer.SGDW(
             lr_scheduler=lr_scheduler,
-            weight_decay=0.0001,
-            weight_decay_includes=[".*weight", ".*fc.*bias"],
             momentum=args.momentum if args.momentum > 0 else None,
             variables=GetSGDWVariablesForCurrentJob,
         )
