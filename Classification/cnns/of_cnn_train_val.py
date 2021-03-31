@@ -106,7 +106,7 @@ def InferenceNet():
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](images, args)
+    logits = model_dict[args.model](images, args, False, False)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs
