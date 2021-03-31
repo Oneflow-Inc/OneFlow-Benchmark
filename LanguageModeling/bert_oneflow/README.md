@@ -13,3 +13,10 @@ oneflow版本为：https://github.com/Oneflow-Inc/oneflow/tree/dev_bert_module_t
 ### test demo
 
 `bash test.sh`
+
+如果报错：`ModuleNotFoundError: No module named 'bert_pytorch'`
+
+需手动将bert_pytorch.zip解压并复制到site-packages下，如：
+
+`cp -r bert_pytorch ~/anaconda3/envs/oneflow/lib/python3.7/site-packages/`
+
