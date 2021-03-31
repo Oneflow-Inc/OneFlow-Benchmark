@@ -153,6 +153,8 @@ def set_up_optimizer(loss, args):
 
         lars_optm = flow.optimizer.LARS(
             lr_scheduler = lr_scheduler,
+            weight_decay=0.0001,
+            weight_decay_includes=[".*weight", ".*fc.*bias"],
             momentum_beta = args.momentum if args.momentum > 0 else None,
             epsilon = 0.0,
             lars_coefficient = 0.001,
@@ -160,6 +162,8 @@ def set_up_optimizer(loss, args):
         )
         sgd_with_mom_optm = flow.optimizer.SGDW(
             lr_scheduler=lr_scheduler,
+            weight_decay=0.0001,
+            weight_decay_includes=[".*weight", ".*fc.*bias"],
             momentum=args.momentum if args.momentum > 0 else None,
             variables=GetSGDWVariablesForCurrentJob,
         )
