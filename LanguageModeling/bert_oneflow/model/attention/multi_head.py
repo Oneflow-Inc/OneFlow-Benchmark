@@ -20,6 +20,7 @@ class MultiHeadedAttention(nn.Module):
         self.attention = Attention()
 
         self.dropout = nn.Dropout(p=dropout)
+        self.reshape = flow.builtin_op("reshape").Input("in").Output("out")
 
     def forward(self, query, key, value, mask=None):
         batch_size = query.size()[0] # 16
@@ -27,13 +28,12 @@ class MultiHeadedAttention(nn.Module):
         # query, key, value = [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
         #                      for l, x in zip(self.linear_layers, (query, key, value))]
 
-        # TODO: Tensor.view; Tensor.transpose  
+        # TODO: Tensor.transpose和nn.Linear多维下报错 (Tensor.view可用reshape替代)
         #query,key,value  shape >> flow.Size([16, 8, 20, 32]);
         query = flow.Tensor(16, 8, 20, 32)
         key = flow.Tensor(16, 8, 20, 32)
         value = flow.Tensor(16, 8, 20, 32)
 
-        print("mask.shape >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", mask.shape)
    
         # 2) Apply attention on all the projected vectors in batch.
         # x, attn = self.attention(query, key, value, mask, self.dropout)
@@ -42,7 +42,10 @@ class MultiHeadedAttention(nn.Module):
 
         # 3) "Concat" using a view and apply a final linear.
         # x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.h * self.d_k)
-        x = flow.Tensor(16, 20, 256)
-
-        return x
+        x = flow.tmp.transpose(x, perm=[0, 2, 1, 3])
+        ncount = x.nelemenet() // batch_size // (self.h * self.d_k)
+        self.reshape = self.reshape.Attr("shape", [batch_size, ncount, self.h * self.d_k]).Build()
+        x = self.reshape(x)[0] # shape >> flow.Tensor(16, 20, 256)
         # return self.output_linear(x)
+        return x
+

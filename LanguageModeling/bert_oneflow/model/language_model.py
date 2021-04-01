@@ -37,13 +37,11 @@ class NextSentencePrediction(nn.Module):
         """
         super().__init__()
         self.linear = nn.Linear(hidden, 2)
-        # self.softmax = nn.LogSoftmax(dim=-1)
-        self.softmax = flow.nn.Softmax(axis=-1)
-        self.Log = flow.Log()
+        self.softmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, x):
+        # TODO: Tensor切片行为和pytorch没有对齐
         # return self.softmax(self.linear(x[:, 0]))
-        # return self.Log(self.softmax(self.linear(x[:, 0])))
         return flow.Tensor(16,2)
 
 

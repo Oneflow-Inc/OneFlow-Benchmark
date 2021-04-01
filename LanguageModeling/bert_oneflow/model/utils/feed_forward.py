@@ -15,6 +15,6 @@ class PositionwiseFeedForward(nn.Module):
         self.activation = GELU()
 
     def forward(self, x):   # x.shape >> flow.Size([16, 20, 256])
-        # nn.Linear TODO: nn.Linear not support 3 or 4 dims tensor, it should be fixed by ouyangyu
+        # nn.Linear TODO: nn.Linear not support 3 or 4 dims tensor, to be fixed by ouyangyu
         return self.dropout(self.activation(x))
         # return self.w_2(self.dropout(self.activation(self.w_1(x))))

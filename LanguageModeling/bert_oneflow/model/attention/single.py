@@ -10,19 +10,16 @@ class Attention(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.matmul = flow.MatMul()
+        self.matmul = flow.tmp.MatMul()
  
     def forward(self, query, key, value, mask=None, dropout=None): # q k v shape >> flow.Size([16, 8, 20, 32])
-        # TODO: Tensor.masked_fill; flow.math.softmax; flow.matmul(已有,需要对齐行为,dim>2的多维情况下似乎存在问题)
+        # TODO: Tensor.masked_fill; flow.math.softmax; flow.matmul(dim>2的多维情况下报错)
         print("Enter Attention module >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  forward()")
 
         # scores = flow.matmul(query, key.transpose(-2, -1)) \
         #          / math.sqrt(query.size()[-1])
-        aa = flow.tmp.transpose(key, perm=[0, 1, 3, 2])
-        print("aa.shape >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", aa.shape)
-        bb = self.matmul(query, aa)
-        print("bb.shape >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", bb.shape)
-        scores = bb / math.sqrt(query.size()[-1])
+        x = flow.tmp.transpose(key, perm=[0, 1, 3, 2])
+        scores = self.matmul(query, x) / math.sqrt(query.size()[-1])
 
         if mask is not None:
             scores = scores.masked_fill(mask == 0, -1e9)
