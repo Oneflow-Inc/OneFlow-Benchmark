@@ -28,7 +28,7 @@ class MultiHeadedAttention(nn.Module):
         # query, key, value = [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
         #                      for l, x in zip(self.linear_layers, (query, key, value))]
 
-        # TODO: Tensor.transpose和nn.Linear多维下报错 (Tensor.view可用reshape替代)
+        # TODO:nn.Linear多维下报错 (Tensor.view可用reshape替代)
         #query,key,value  shape >> flow.Size([16, 8, 20, 32]);
         query = flow.Tensor(16, 8, 20, 32)
         key = flow.Tensor(16, 8, 20, 32)
