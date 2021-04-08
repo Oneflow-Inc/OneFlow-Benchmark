@@ -36,7 +36,7 @@ total_device_num = args.num_nodes * args.gpu_num_per_node
 train_batch_size = total_device_num * args.batch_size_per_device
 val_batch_size = total_device_num * args.val_batch_size_per_device
 (C, H, W) = args.image_shape
-epoch_size = math.ceil(args.num_examples / train_batch_size)
+epoch_size = math.ceil(int(args.num_examples / total_device_num) / args.batch_size_per_device)
 num_val_steps = int(args.num_val_examples / val_batch_size)
 
 
@@ -106,7 +106,7 @@ def InferenceNet():
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
 
-    logits = model_dict[args.model](images, args)
+    logits = model_dict[args.model](images, args, False, False)
     predictions = flow.nn.softmax(logits)
     outputs = {"predictions": predictions, "labels": labels}
     return outputs
@@ -125,7 +125,7 @@ def main():
             TrainNet().async_get(metric.metric_cb(epoch, i))
 
         if args.val_data_dir:
-            metric = Metric(desc='validation', calculate_batches=num_val_steps, 
+            metric = Metric(desc='validation', calculate_batches=num_val_steps,
                             batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
