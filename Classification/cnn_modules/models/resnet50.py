@@ -1,29 +1,8 @@
 import oneflow as flow
 import oneflow.nn as nn
-import oneflow.typing as tp
 
-import numpy as np
-import unittest
-import time
-from PIL import Image
-from typing import Union, Optional, Sequence, Tuple, List, Callable, Type, Any
-import torch
-from imagenet1000_clsidx_to_labels import clsidx_2_labels
+from typing import Union, Optional, Tuple, List, Callable, Type, Any
 
-
-class Add2(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self._op = (
-            flow.builtin_op("add_n")
-            .Input("in", 2)
-            .Output("out")
-            .Build()
-        )
-
-    def forward(self, l, r):
-        res = self._op(l, r)[0]
-        return res
 
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
@@ -65,10 +44,9 @@ class BasicBlock(nn.Module):
         self.bn2 = norm_layer(planes)
         self.downsample = downsample
         self.stride = stride
-        self.add2 = Add2()
 
-    def forward(self, x):
-        # identity = x
+    def forward(self, x: flow.Tensor) -> flow.Tensor:
+        identity = x
 
         out = self.conv1(x)
         out = self.bn1(out)
@@ -80,9 +58,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             identity = self.downsample(x)
 
-        # # TODO
-        # # out += identity
-        out = self.add2(out, identity)
+        out += identity
         out = self.relu(out)
 
         return out
@@ -116,9 +92,8 @@ class Bottleneck(nn.Module):
         self.relu = nn.ReLU()
         self.downsample = downsample
         self.stride = stride
-        self.add2 = Add2()
 
-    def forward(self, x):
+    def forward(self, x: flow.Tensor) -> flow.Tensor:
         identity = x
 
         out = self.conv1(x)
@@ -135,8 +110,7 @@ class Bottleneck(nn.Module):
         if self.downsample is not None:
             identity = self.downsample(x)
 
-        # out += identity
-        out = self.add2(out, identity)
+        out += identity
         out = self.relu(out)
 
         return out
@@ -184,25 +158,24 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
         self.avgpool = nn.AvgPool2d((7, 7))
-        self.flatten = nn.Flatten()
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
-        # for m in self.modules():
-        #     if isinstance(m, nn.Conv2d):
-        #         nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-        #     elif isinstance(m, nn.BatchNorm2d):
-        #         nn.init.constant_(m.weight, 1)
-        #         nn.init.constant_(m.bias, 0)
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
 
         # Zero-initialize the last BN in each residual branch,
         # so that the residual branch starts with zeros, and each residual block behaves like an identity.
         # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
-        # if zero_init_residual:
-        #     for m in self.modules():
-        #         if isinstance(m, Bottleneck):
-        #             nn.init.constant_(m.bn3.weight, 0)  # type: ignore[arg-type]
-        #         elif isinstance(m, BasicBlock):
-        #             nn.init.constant_(m.bn2.weight, 0)  # type: ignore[arg-type]
+        if zero_init_residual:
+            for m in self.modules():
+                if isinstance(m, Bottleneck):
+                    nn.init.constant_(m.bn3.weight, 0)  # type: ignore[arg-type]
+                elif isinstance(m, BasicBlock):
+                    nn.init.constant_(m.bn2.weight, 0)  # type: ignore[arg-type]
 
     def _make_layer(self, block: Type[Union[BasicBlock, Bottleneck]], planes: int, blocks: int,
                     stride: int = 1, dilate: bool = False) -> nn.Sequential:
@@ -241,7 +214,7 @@ class ResNet(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
-        x = self.flatten(x)
+        x = x.flatten(1)
         x = self.fc(x)
 
         return x
@@ -250,78 +223,13 @@ def _resnet(
     arch: str,
     block: Type[Union[BasicBlock, Bottleneck]],
     layers: List[int],
-    pretrained: bool,
-    progress: bool,
     **kwargs: Any
 ) -> ResNet:
     model = ResNet(block, layers, **kwargs)
     return model
 
-def resnet50(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> ResNet:
+def resnet50(**kwargs: Any) -> ResNet:
     r"""ResNet-5
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
     """
-    return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress,
-                   **kwargs)
-
-
-
-def load_image(image_path='data/tiger.jpg'):
-    rgb_mean = [123.68, 116.779, 103.939]
-    rgb_std = [58.393, 57.12, 57.375]
-    print(image_path)
-    im = Image.open(image_path)
-    im = im.resize((224, 224))
-    im = im.convert('RGB')  # 有的图像是单通道的，不加转换会报错
-    im = np.array(im).astype('float32')
-    im = (im - rgb_mean) / rgb_std
-    im = np.transpose(im, (2, 0, 1))
-    im = np.expand_dims(im, axis=0)
-    return np.ascontiguousarray(im, 'float32')
-
-
-flow.env.init()
-flow.enable_eager_execution()
-
-start_t = time.time()
-res50 = resnet50()
-dic = res50.state_dict()
-end_t = time.time()
-print('init time : {}'.format(end_t - start_t))
-
-start_t = time.time()
-# pytorch model download link: https://download.pytorch.org/models/resnet50-19c8e357.pth
-torch_params = torch.load("/home/ldpe2g/oneFlow/OtherProjects/resenet50-web/resnet50-19c8e357.pth")
-torch_keys = torch_params.keys()
-
-for k in dic.keys():
-    if k in torch_keys:
-        dic[k] = torch_params[k].detach().numpy()
-res50.load_state_dict(dic)
-end_t = time.time()
-print('load params time : {}'.format(end_t - start_t))
-
-start_t = time.time()
-image = load_image()
-image = flow.Tensor(image)
-predictions = res50(image)
-end_t = time.time()
-print('infer time : {}'.format(end_t - start_t))
-predictions = predictions.numpy()
-clsidx = np.argmax(predictions)
-print(np.max(predictions), clsidx_2_labels[clsidx])
-
-
-
-
-
-
-
-
-
-
-
-
+    return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], **kwargs)
