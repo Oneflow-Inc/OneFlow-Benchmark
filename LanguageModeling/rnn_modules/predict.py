@@ -9,11 +9,13 @@ flow.enable_eager_execution()
 
 dataset_path = "./data/names"
 n_categories = processDataset(dataset_path)
+print(letterToTensor('J'))
+print(lineToTensor('Jones').size())
+for i in range(10):
+    category, line, category_tensor, line_tensor = randomTrainingExample()
+    print('category =', category, '/ line =', line, line_tensor.shape)
 
-# print(findFiles('data/names/*.txt'))
-# print(unicodeToAscii('Ślusàrski'))
-# print(n_categories)
-
+    
 n_hidden = 128
 rnn = RNN(n_letters, n_hidden, n_categories)
 

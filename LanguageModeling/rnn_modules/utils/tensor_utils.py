@@ -1,6 +1,9 @@
 import oneflow as flow
 import oneflow_api
-from utils.dataset import all_letters, n_letters
+
+from utils.dataset import *
+
+import random
 
 # Find letter index from all_letters, e.g. "a" = 0
 def letterToIndex(letter):
@@ -29,6 +32,13 @@ def lineToTensor(line):
         tensor[li,letterToIndex(letter)] = 1
     return tensor
 
-# flow.enable_eager_execution()
-# print(letterToTensor('J'))
-# print(lineToTensor('Jones').size())
+def randomChoice(l):
+    return l[random.randint(0, len(l) - 1)]
+
+def randomTrainingExample():
+    category = randomChoice(all_categories)
+    line = randomChoice(category_lines[category])
+    # category_tensor = torch.tensor([all_categories.index(category)], dtype=torch.long)
+    category_tensor = flow.Tensor([all_categories.index(category)], dtype=flow.int64)
+    line_tensor = lineToTensor(line)
+    return category, line, category_tensor, line_tensor
