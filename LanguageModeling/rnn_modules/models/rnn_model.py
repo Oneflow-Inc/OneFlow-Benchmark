@@ -3,6 +3,8 @@ import oneflow.nn as nn
 import oneflow_api
 from typing import Optional, List, Tuple
 
+# TODO(Liang Depeng): oneflow's `CrossEntropyLoss` module call the `Build()` method
+#                     in `forward` which raise error when running the module multiply times. 
 class CrossEntropyLoss(flow.nn.Module):
     def __init__(
         self,
@@ -59,7 +61,7 @@ class RNN(nn.Module):
         self.i2o = nn.Linear(input_size + hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=1)
 
-        # NOTE(Liang Depeng): module support flow.cat 
+        # TODO(Liang Depeng): oneflow does not support `flow.cat` yet
         self.cat = (
             flow.builtin_op("concat")
                 .Input("in", 2)

@@ -14,7 +14,7 @@ flow.enable_eager_execution()
 def train(category_tensor, line_tensor, rnn, criterion, learning_rate):
     hidden = rnn.initHidden()
 
-    # NOTE(Liang Depeng): oneflow Module do not have `zero_grad` method
+    # TODO(Liang Depeng): oneflow Module does not have `zero_grad` method
     # rnn.zero_grad()
 
     for i in range(line_tensor.size()[0]):
@@ -22,15 +22,15 @@ def train(category_tensor, line_tensor, rnn, criterion, learning_rate):
 
     loss = criterion(output, category_tensor)
 
-    # NOTE(Liang Depeng): oneflow Tensor do not implement `backward` method yet
+    # TODO(Liang Depeng): oneflow Tensor does not implement `backward` method yet
     # loss.backward()
 
     # Add parameters' gradients to their values, multiplied by learning rate
-    # NOTE(Liang Depeng): oneflow Tensor do not support inplace `add_` yet
+    # TODO(Liang Depeng): oneflow Tensor does not support inplace `add_` yet
     # for p in rnn.parameters():
     #     p.data.add_(p.grad.data, alpha=-learning_rate)
 
-    # NOTE(Liang Depeng): oneflow Tensor do not have `item` method yet
+    # NOTE(Liang Depeng): oneflow Tensor does not have `item` method yet
     # return output, loss.item()
     return output.softmax(), loss.numpy()[0]
 
@@ -78,8 +78,10 @@ def topk_(matrix, K, axis=1):
     return topk_data_sort, topk_index_sort
 
 def categoryFromOutput(output):
-    # NOTE(Liang Depeng): oneflow do not support torch's `topk`
-    #                     operation which also return the index
+    # TODO(Liang Depeng): oneflow does not provide the same `topk`
+    #                     operation as pytorch, which also return the index.
+    #                     Using a numpy implementation instead.
+
     # top_n, top_i = output.topk(1)
     # category_i = top_i[0].item()
     top_n, top_i = topk_(output.numpy(), 1)
