@@ -12,12 +12,13 @@ bash predict.sh
 ### Prepare ofrecord
 
 ```bash
-wget 
+wget https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenette_ofrecord_224.tar.gz
+tar zxf imagenette_ofrecord_224.tar.gz
 ```
 
 ### Run Training script
 
 ```bash
-bash train.sh
+python3 train.py
 ```
 

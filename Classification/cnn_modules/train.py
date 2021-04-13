@@ -22,7 +22,7 @@ flow.enable_eager_execution(True)
 
 
 train_batch_size = 1
-train_record_reader = flow.nn.OfrecordReader("/home/ldpe2g/oneFlow/oneflowBenckmark/dataset/imagenette/ofrecord_224/val",
+train_record_reader = flow.nn.OfrecordReader("./ofrecord_224/val",
                         batch_size=train_batch_size,
                         data_part_num=1,
                         part_name_suffix_length=5,
