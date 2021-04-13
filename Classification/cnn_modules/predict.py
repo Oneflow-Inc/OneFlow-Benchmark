@@ -57,9 +57,9 @@ def main(args):
     image = load_image(args.image_path)
     image = flow.Tensor(image)
     predictions = res50_module(image).softmax()
+    predictions = predictions.numpy()
     end_t = time.time()
     print('infer time : {}'.format(end_t - start_t))
-    predictions = predictions.numpy()
     clsidx = np.argmax(predictions)
     print("predict prob: %f, class name: %s" % (np.max(predictions), clsidx_2_labels[clsidx]))
 
