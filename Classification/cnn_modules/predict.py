@@ -53,6 +53,8 @@ def main(args):
     end_t = time.time()
     print('load params time : {}'.format(end_t - start_t))
 
+    res50_module.eval()
+
     start_t = time.time()
     image = load_image(args.image_path)
     image = flow.Tensor(image)

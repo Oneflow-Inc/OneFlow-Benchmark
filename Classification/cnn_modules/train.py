@@ -1,16 +1,18 @@
 import oneflow as flow
 import oneflow_api
+from oneflow.python.framework.function_util import global_function_or_identity
 
 import numpy as np
 import cv2
 import time
 import argparse
 from PIL import Image
+
 import torch
 
+import models.pytorch_resnet50 as pytorch_resnet50
 from models.resnet50 import resnet50
 from utils.imagenet1000_clsidx_to_labels import clsidx_2_labels
-from oneflow.python.framework.function_util import global_function_or_identity
 
 def _parse_args():
     parser = argparse.ArgumentParser("flags for save style transform model")
@@ -22,7 +24,7 @@ def _parse_args():
     )
     return parser.parse_args()
 
-def load_image(image_path='data/tiger.jpg'):
+def load_image(image_path='data/fish.jpg'):
     rgb_mean = [123.68, 116.779, 103.939]
     rgb_std = [58.393, 57.12, 57.375]
     im = Image.open(image_path)
@@ -44,24 +46,25 @@ def main(args):
     end_t = time.time()
     print('init time : {}'.format(end_t - start_t))
 
-    # start_t = time.time()
-    # torch_params = torch.load(args.model_path)
-    # torch_keys = torch_params.keys()
+    start_t = time.time()
+    torch_params = torch.load(args.model_path)
+    torch_keys = torch_params.keys()
 
-    # for k in dic.keys():
-    #     if k in torch_keys:
-    #         dic[k] = torch_params[k].detach().numpy()
-    # res50_module.load_state_dict(dic)
-    # end_t = time.time()
-    # print('load params time : {}'.format(end_t - start_t))
+    for k in dic.keys():
+        if k in torch_keys:
+            dic[k] = torch_params[k].detach().numpy()
+    res50_module.load_state_dict(dic)
+    end_t = time.time()
+    print('load params time : {}'.format(end_t - start_t))
+
+    res50_module.eval()
 
     start_t = time.time()
     image = load_image(args.image_path)
     image = flow.Tensor(image)
 
-    label = flow.Tensor([1], dtype=flow.int32, requires_grad=False)
-
-    corss_entropy = flow.nn.CrossEntropyLoss()
+    # label = flow.Tensor([1], dtype=flow.int32, requires_grad=False)
+    # corss_entropy = flow.nn.CrossEntropyLoss()
     logits = res50_module(image)
     
     # TODO
@@ -73,12 +76,39 @@ def main(args):
     # logits.backward(grad)
 
     predictions = logits.softmax()
-    
-    predictions = predictions.numpy()
+    of_predictions = predictions.numpy()
     end_t = time.time()
     print('infer time : {}'.format(end_t - start_t))
-    clsidx = np.argmax(predictions)
-    print("loss: %f, predict prob: %f, class name: %s" % (loss.numpy(), np.max(predictions), clsidx_2_labels[clsidx]))
+    clsidx = np.argmax(of_predictions)
+    print("of predict prob: %f, class name: %s" % (np.max(of_predictions), clsidx_2_labels[clsidx]))
+    logits_of = logits.numpy()
+
+    # pytorch resnet50 infer
+    res50_module = pytorch_resnet50.resnet50()
+    start_t = time.time()
+    torch_params = torch.load("resnet50-19c8e357.pth")
+    res50_module.load_state_dict(torch_params)
+    end_t = time.time()
+    print('torch load params time : {}'.format(end_t - start_t))
+
+    res50_module.eval()
+    res50_module.to('cuda')
+
+    start_t = time.time()
+    image = load_image(args.image_path)
+    image = torch.from_numpy(image)
+    image = image.to('cuda')
+    logits = res50_module(image)
+    predictions = logits.softmax(-1)
+    torch_predictions = predictions.cpu().detach().numpy()
+    end_t = time.time()
+    clsidx = np.argmax(torch_predictions)
+    print("torch predict prob: %f, class name: %s" % (np.max(torch_predictions), clsidx_2_labels[clsidx]))
+
+    print(np.allclose(of_predictions, torch_predictions, atol=1e-5))
+    print(np.max(np.abs(logits_of - logits.cpu().detach().numpy())))
+    print(np.allclose(logits_of, logits.cpu().detach().numpy(), atol=1e-2))
+
 
 if __name__ == "__main__":
     args = _parse_args()
