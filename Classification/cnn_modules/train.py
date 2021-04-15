@@ -40,12 +40,13 @@ def main(args):
     flow.env.init()
     flow.enable_eager_execution()
 
+    
     start_t = time.time()
     res50_module = resnet50()
     dic = res50_module.state_dict()
-    # print(dic.keys())
     end_t = time.time()
     print('init time : {}'.format(end_t - start_t))
+
 
     start_t = time.time()
     torch_params = torch.load(args.model_path)
@@ -59,7 +60,12 @@ def main(args):
     end_t = time.time()
     print('load params time : {}'.format(end_t - start_t))
 
-    res50_module.eval()
+    learning_rate = 0.01
+    mom = 0.9
+    of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
+
+    # # set for eval mode
+    # res50_module.eval()
 
     start_t = time.time()
     image = load_image(args.image_path)
@@ -67,23 +73,26 @@ def main(args):
 
     # label = flow.Tensor([1], dtype=flow.int32, requires_grad=False)
     # corss_entropy = flow.nn.CrossEntropyLoss()
-    logits = res50_module(image)
-    
     # TODO
     # loss = corss_entropy(logits, label)
-    
-    # TODO
-    grad = flow.Tensor(1, 1000)
-    flow.nn.init.ones_(grad)
-    grad.determine()
-    @global_function_or_identity()
-    def job():
-        logits.backward(grad)
-    job()
+    bp_iters = 5
+    for i in range(bp_iters):
+        logits = res50_module(image)
+        grad = flow.Tensor(1, 1000)
+        flow.nn.init.ones_(grad)
+        grad.determine()
+        @global_function_or_identity()
+        def job():
+            logits.backward(grad)
+        job()
+
+        # for p in res50_module.parameters():
+        #     p[:] = p - learning_rate * p.grad
+
+        of_sgd.step()
+        of_sgd.zero_grad()
 
     of_in_grad = image.grad.numpy()
-    # print("grad:", image.grad.numpy(), res50_module.fc.bias.grad.numpy())
-
     predictions = logits.softmax()
     of_predictions = predictions.numpy()
     end_t = time.time()
@@ -92,27 +101,37 @@ def main(args):
     print("of predict prob: %f, class name: %s" % (np.max(of_predictions), clsidx_2_labels[clsidx]))
     logits_of = logits.numpy()
 
-    # pytorch resnet50 infer
+
+
+    # pytorch resnet50
     torch_res50_module = pytorch_resnet50.resnet50()
     start_t = time.time()
     torch_res50_module.load_state_dict(torch_params)
     end_t = time.time()
     print('torch load params time : {}'.format(end_t - start_t))
 
-    torch_res50_module.eval()
+    # set for eval mode
+    # torch_res50_module.eval()
     torch_res50_module.to('cuda')
+
+    torch_sgd = torch.optim.SGD(torch_res50_module.parameters(), lr=learning_rate, momentum=mom)
 
     start_t = time.time()
     image = load_image(args.image_path)
     image = torch.tensor(image)
     image = image.to('cuda')
     image.requires_grad = True
-    logits = torch_res50_module(image)
 
-    logits.backward(torch.ones_like(logits))
+    for i in range(bp_iters):
+        torch_sgd.zero_grad()
+        logits = torch_res50_module(image)
+        logits.backward(torch.ones_like(logits))
+        # for p in torch_res50_module.parameters():
+        #     p.data.add_(p.grad.data, alpha=-learning_rate)
+        torch_sgd.step()
+        
 
     torch_in_grad = image.grad.cpu().detach().numpy()
-    # print("grad:", image.grad, res50_module.fc.bias.grad)
 
     predictions = logits.softmax(-1)
     torch_predictions = predictions.cpu().detach().numpy()
@@ -121,23 +140,29 @@ def main(args):
     clsidx = np.argmax(torch_predictions)
     print("torch predict prob: %f, class name: %s" % (np.max(torch_predictions), clsidx_2_labels[clsidx]))
 
+
+
+    # check of and torch param and grad error
     print(np.allclose(of_predictions, torch_predictions, atol=1e-5))
     print(np.max(np.abs(logits_of - logits.cpu().detach().numpy())))
     print(np.allclose(logits_of, logits.cpu().detach().numpy(), atol=1e-2))
-    
     print(np.max(np.abs(torch_in_grad - of_in_grad)))
     print(np.allclose(torch_in_grad, of_in_grad, atol=1e-5))
 
     
     of_grads = {}
+    of_params = {}
     for k, v in res50_module.named_parameters():
         of_grads[k] = v.grad.numpy()
+        of_params[k] = v.numpy()
 
     for k, v in torch_res50_module.named_parameters():
         torch_grad = v.grad.cpu().detach().numpy()
+        torch_param = v.cpu().detach().numpy() 
         if np.allclose(of_grads[k], torch_grad, atol=1e-3) == False:
             print("of and torch grad not match, key: %s, max_error: %f" % (k, np.max(np.abs(of_grads[k] - torch_grad))))
-        
+        if np.allclose(of_params[k], torch_param, atol=1e-3) == False:
+            print("of and torch param not match, key: %s, max_error: %f" % (k, np.max(np.abs(of_params[k] - torch_param))))
 
 if __name__ == "__main__":
     args = _parse_args()
