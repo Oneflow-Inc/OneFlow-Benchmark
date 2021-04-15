@@ -43,6 +43,7 @@ def main(args):
     start_t = time.time()
     res50_module = resnet50()
     dic = res50_module.state_dict()
+    # print(dic.keys())
     end_t = time.time()
     print('init time : {}'.format(end_t - start_t))
 
@@ -53,6 +54,7 @@ def main(args):
     for k in dic.keys():
         if k in torch_keys:
             dic[k] = torch_params[k].detach().numpy()
+
     res50_module.load_state_dict(dic)
     end_t = time.time()
     print('load params time : {}'.format(end_t - start_t))
@@ -61,7 +63,7 @@ def main(args):
 
     start_t = time.time()
     image = load_image(args.image_path)
-    image = flow.Tensor(image)
+    image = flow.Tensor(image, placement=flow.placement("gpu", ["0:0"], None), is_consistent=True, requires_grad=True)
 
     # label = flow.Tensor([1], dtype=flow.int32, requires_grad=False)
     # corss_entropy = flow.nn.CrossEntropyLoss()
@@ -71,9 +73,16 @@ def main(args):
     # loss = corss_entropy(logits, label)
     
     # TODO
-    # grad = flow.Tensor(1, 1000)
-    # grad.determine()
-    # logits.backward(grad)
+    grad = flow.Tensor(1, 1000)
+    flow.nn.init.ones_(grad)
+    grad.determine()
+    @global_function_or_identity()
+    def job():
+        logits.backward(grad)
+    job()
+
+    of_in_grad = image.grad.numpy()
+    # print("grad:", image.grad.numpy(), res50_module.fc.bias.grad.numpy())
 
     predictions = logits.softmax()
     of_predictions = predictions.numpy()
@@ -84,31 +93,51 @@ def main(args):
     logits_of = logits.numpy()
 
     # pytorch resnet50 infer
-    res50_module = pytorch_resnet50.resnet50()
+    torch_res50_module = pytorch_resnet50.resnet50()
     start_t = time.time()
-    torch_params = torch.load("resnet50-19c8e357.pth")
-    res50_module.load_state_dict(torch_params)
+    torch_res50_module.load_state_dict(torch_params)
     end_t = time.time()
     print('torch load params time : {}'.format(end_t - start_t))
 
-    res50_module.eval()
-    res50_module.to('cuda')
+    torch_res50_module.eval()
+    torch_res50_module.to('cuda')
 
     start_t = time.time()
     image = load_image(args.image_path)
-    image = torch.from_numpy(image)
+    image = torch.tensor(image)
     image = image.to('cuda')
-    logits = res50_module(image)
+    image.requires_grad = True
+    logits = torch_res50_module(image)
+
+    logits.backward(torch.ones_like(logits))
+
+    torch_in_grad = image.grad.cpu().detach().numpy()
+    # print("grad:", image.grad, res50_module.fc.bias.grad)
+
     predictions = logits.softmax(-1)
     torch_predictions = predictions.cpu().detach().numpy()
     end_t = time.time()
+    print('infer time : {}'.format(end_t - start_t))
     clsidx = np.argmax(torch_predictions)
     print("torch predict prob: %f, class name: %s" % (np.max(torch_predictions), clsidx_2_labels[clsidx]))
 
     print(np.allclose(of_predictions, torch_predictions, atol=1e-5))
     print(np.max(np.abs(logits_of - logits.cpu().detach().numpy())))
     print(np.allclose(logits_of, logits.cpu().detach().numpy(), atol=1e-2))
+    
+    print(np.max(np.abs(torch_in_grad - of_in_grad)))
+    print(np.allclose(torch_in_grad, of_in_grad, atol=1e-5))
 
+    
+    of_grads = {}
+    for k, v in res50_module.named_parameters():
+        of_grads[k] = v.grad.numpy()
+
+    for k, v in torch_res50_module.named_parameters():
+        torch_grad = v.grad.cpu().detach().numpy()
+        if np.allclose(of_grads[k], torch_grad, atol=1e-3) == False:
+            print("of and torch grad not match, key: %s, max_error: %f" % (k, np.max(np.abs(of_grads[k] - torch_grad))))
+        
 
 if __name__ == "__main__":
     args = _parse_args()
