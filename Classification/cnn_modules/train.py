@@ -61,36 +61,38 @@ def main(args):
     print('load params time : {}'.format(end_t - start_t))
 
     learning_rate = 0.01
-    mom = 0.9
+    mom = 0
     of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
 
     # # set for eval mode
     # res50_module.eval()
 
     start_t = time.time()
-    image = load_image(args.image_path)
-    image = flow.Tensor(image, placement=flow.placement("gpu", ["0:0"], None), is_consistent=True, requires_grad=True)
+    image_nd = load_image(args.image_path)
+    image = flow.Tensor(image_nd, placement=flow.placement("gpu", ["0:0"], None), is_consistent=True, requires_grad=True)
 
-    # label = flow.Tensor([1], dtype=flow.int32, requires_grad=False)
-    # corss_entropy = flow.nn.CrossEntropyLoss()
-    # TODO
-    # loss = corss_entropy(logits, label)
-    bp_iters = 5
+    label_nd = np.array([1], dtype=np.int32) 
+    label = flow.Tensor(label_nd, dtype=flow.int32, requires_grad=False)
+    corss_entropy = flow.nn.CrossEntropyLoss()
+    
+    bp_iters = 1
     for i in range(bp_iters):
         logits = res50_module(image)
-        grad = flow.Tensor(1, 1000)
+        loss = corss_entropy(logits, label)
+        grad = flow.Tensor([1])
         flow.nn.init.ones_(grad)
         grad.determine()
+        print(grad.shape)
         @global_function_or_identity()
         def job():
-            logits.backward(grad)
+            loss.backward(grad)
         job()
 
         # for p in res50_module.parameters():
         #     p[:] = p - learning_rate * p.grad
 
-        of_sgd.step()
-        of_sgd.zero_grad()
+        # of_sgd.step()
+        # of_sgd.zero_grad()
 
     of_in_grad = image.grad.numpy()
     predictions = logits.softmax()
@@ -102,7 +104,7 @@ def main(args):
     logits_of = logits.numpy()
 
 
-
+    #####################################################################################################
     # pytorch resnet50
     torch_res50_module = pytorch_resnet50.resnet50()
     start_t = time.time()
@@ -117,18 +119,22 @@ def main(args):
     torch_sgd = torch.optim.SGD(torch_res50_module.parameters(), lr=learning_rate, momentum=mom)
 
     start_t = time.time()
-    image = load_image(args.image_path)
-    image = torch.tensor(image)
+    image = torch.tensor(image_nd)
     image = image.to('cuda')
     image.requires_grad = True
+    corss_entropy = torch.nn.CrossEntropyLoss()
+    corss_entropy.to('cuda')
+    label = torch.tensor(label_nd, dtype=torch.int32, requires_grad=False).to('cuda')
 
     for i in range(bp_iters):
-        torch_sgd.zero_grad()
         logits = torch_res50_module(image)
-        logits.backward(torch.ones_like(logits))
+        loss = corss_entropy(logits, label)
+        logits.backward(torch.ones_like(loss))
+        
         # for p in torch_res50_module.parameters():
         #     p.data.add_(p.grad.data, alpha=-learning_rate)
-        torch_sgd.step()
+        # torch_sgd.step()
+        # torch_sgd.zero_grad()
         
 
     torch_in_grad = image.grad.cpu().detach().numpy()
@@ -147,7 +153,7 @@ def main(args):
     print(np.max(np.abs(logits_of - logits.cpu().detach().numpy())))
     print(np.allclose(logits_of, logits.cpu().detach().numpy(), atol=1e-2))
     print(np.max(np.abs(torch_in_grad - of_in_grad)))
-    print(np.allclose(torch_in_grad, of_in_grad, atol=1e-5))
+    print(np.allclose(torch_in_grad, of_in_grad, atol=1e-4))
 
     
     of_grads = {}
@@ -158,10 +164,19 @@ def main(args):
 
     for k, v in torch_res50_module.named_parameters():
         torch_grad = v.grad.cpu().detach().numpy()
-        torch_param = v.cpu().detach().numpy() 
-        if np.allclose(of_grads[k], torch_grad, atol=1e-3) == False:
+        torch_param = v.cpu().detach().numpy()
+
+        if k == "fc.bias":
+            print("of grad:", of_grads[k][:20])
+            print("torch grad", torch_grad[:20])
+
+            print("of param:", of_params[k][:20])
+            print("torch param", torch_param[:20])
+
+
+        if np.allclose(of_grads[k], torch_grad, atol=1e-6) == False:
             print("of and torch grad not match, key: %s, max_error: %f" % (k, np.max(np.abs(of_grads[k] - torch_grad))))
-        if np.allclose(of_params[k], torch_param, atol=1e-3) == False:
+        if np.allclose(of_params[k], torch_param, atol=1e-6) == False:
             print("of and torch param not match, key: %s, max_error: %f" % (k, np.max(np.abs(of_params[k] - torch_param))))
 
 if __name__ == "__main__":
@@ -171,65 +186,6 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# train_batch_size = 1
-# train_record_reader = flow.nn.OfrecordReader("./ofrecord_224/train",
-#                         batch_size=train_batch_size,
-#                         data_part_num=1,
-#                         part_name_suffix_length=5,
-#                         random_shuffle=False,
-#                         shuffle_after_epoch=False)
-# record_label_decoder = flow.nn.OfrecordRawDecoder("class/label", shape=(), dtype=flow.int32)
-# color_space = 'RGB'
-# height = 224
-# width = 224
-# channels = 3
-# record_image_decoder = flow.nn.OfrecordRawDecoder("encoded", shape=(height, width, channels), dtype=flow.uint8)
-# flip = flow.nn.CoinFlip(batch_size=train_batch_size)
-# rgb_mean = [123.68, 116.779, 103.939]
-# rgb_std = [58.393, 57.12, 57.375]
-# crop_mirror_norm = flow.nn.CropMirrorNormalize(color_space=color_space, output_layout="NCHW",
-#                                             mean=rgb_mean, std=rgb_std, output_dtype=flow.float)
-# rng = flip()
-
-# images = []
-# for i in range(10):
-#     start = time.time()
-#     train_record = train_record_reader()
-#     label = record_label_decoder(train_record)
-#     image_raw_buffer = record_image_decoder(train_record)
-#     image = crop_mirror_norm(image_raw_buffer, rng)
-#     print(image.shape, time.time() - start)
-
-#     # recover images
-#     image_np = image.numpy()
-#     images.append(image_np.copy())
-#     image_np = np.squeeze(image_np)
-#     image_np = np.transpose(image_np, (1, 2, 0))
-#     image_np = image_np * rgb_std + rgb_mean
-#     image_np = cv2.cvtColor(np.float32(image_np), cv2.COLOR_RGB2BGR)
-#     image_np = image_np.astype(np.uint8)
-#     print(image_np.shape)
-#     cv2.imwrite("recover_image%d.jpg" % i, image_np)
-
-# for i in range(1, 10):
-#     print(np.allclose(images[0], images[i]))
 
 
 
