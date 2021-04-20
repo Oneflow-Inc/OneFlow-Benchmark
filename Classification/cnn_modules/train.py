@@ -57,9 +57,10 @@ def main(args):
 
     for k in dic.keys():
         if k in torch_keys:
-            dic[k] = torch_params[k].detach().numpy()
+            # dic[k] = torch_params[k].detach().numpy()
+            torch_params[k] = torch.from_numpy(dic[k].numpy()) 
 
-    res50_module.load_state_dict(dic)
+    # res50_module.load_state_dict(dic)
     end_t = time.time()
     print('load params time : {}'.format(end_t - start_t))
 
@@ -69,7 +70,6 @@ def main(args):
 
     # # set for eval mode
     # res50_module.eval()
-
     start_t = time.time()
     image_nd = load_image(args.image_path)
     image = flow.Tensor(image_nd, placement=flow.placement("gpu", ["0:0"], None), is_consistent=True, requires_grad=True)
@@ -80,23 +80,12 @@ def main(args):
     
     bp_iters = 10
     for i in range(bp_iters):
-        logits, pool, layer4, avg_pool = res50_module(image)
+        logits = res50_module(image)
         loss = corss_entropy(logits, label)
-        # grad = flow.Tensor(1)
-        # grad = flow.Tensor(1, 2048, 1, 1)
-        # grad = flow.Tensor(1, 1000)
-        # flow.nn.init.ones_(grad)
-        # grad.determine()
         @global_function_or_identity()
         def job():
-            # logits.backward(grad)
             loss.backward()
         job()
-
-        # for p in res50_module.parameters():
-            # p[:] = p - learning_rate * p.grad
-            # p[:] = p.grad
-
         of_sgd.step()
         of_sgd.zero_grad()
 
@@ -135,15 +124,9 @@ def main(args):
 
     for i in range(bp_iters):
         torch_sgd.zero_grad()
-        logits, pool, layer4, avg_pool = torch_res50_module(image)
+        logits = torch_res50_module(image)
         loss = corss_entropy(logits, label)
         loss.backward()
-        # logits.backward(torch.ones_like(logits))
-        
-        # for p in torch_res50_module.parameters():
-            # p.data.add_(p.grad.data, alpha=-learning_rate)
-            # p.data = p.grad.data
-
         torch_sgd.step()
         torch_sgd.zero_grad()
         

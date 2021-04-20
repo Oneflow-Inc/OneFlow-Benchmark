@@ -206,18 +206,18 @@ class ResNet(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        pool = self.maxpool(x)
+        x = self.maxpool(x)
 
-        x = self.layer1(pool)
+        x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
-        layer4 = self.layer4(x)
+        x = self.layer4(x)
 
-        avg_pool = self.avgpool(layer4)
-        x = avg_pool.flatten(1)
+        x = self.avgpool(x)
+        x = x.flatten(1)
         x = self.fc(x)
 
-        return x, pool, layer4, avg_pool
+        return x
 
 def _resnet(
     arch: str,
