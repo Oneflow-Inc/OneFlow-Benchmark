@@ -36,6 +36,9 @@ def load_image(image_path='data/fish.jpg'):
     im = np.expand_dims(im, axis=0)
     return np.ascontiguousarray(im, 'float32')
 
+def rmse(l, r):
+    return np.sqrt(np.mean(np.square(l - r)))
+
 def main(args):
     flow.env.init()
     flow.enable_eager_execution()
@@ -73,27 +76,31 @@ def main(args):
 
     label_nd = np.array([1], dtype=np.int32) 
     label = flow.Tensor(label_nd, dtype=flow.int32, requires_grad=False)
-    corss_entropy = flow.nn.CrossEntropyLoss()
+    corss_entropy = flow.nn.CrossEntropyLossV2()
     
-    bp_iters = 1
+    bp_iters = 10
     for i in range(bp_iters):
-        logits = res50_module(image)
+        logits, pool, layer4, avg_pool = res50_module(image)
         loss = corss_entropy(logits, label)
-        grad = flow.Tensor([1])
-        flow.nn.init.ones_(grad)
-        grad.determine()
-        print(grad.shape)
+        # grad = flow.Tensor(1)
+        # grad = flow.Tensor(1, 2048, 1, 1)
+        # grad = flow.Tensor(1, 1000)
+        # flow.nn.init.ones_(grad)
+        # grad.determine()
         @global_function_or_identity()
         def job():
-            loss.backward(grad)
+            # logits.backward(grad)
+            loss.backward()
         job()
 
         # for p in res50_module.parameters():
-        #     p[:] = p - learning_rate * p.grad
+            # p[:] = p - learning_rate * p.grad
+            # p[:] = p.grad
 
-        # of_sgd.step()
-        # of_sgd.zero_grad()
+        of_sgd.step()
+        of_sgd.zero_grad()
 
+    of_loss = loss.numpy()
     of_in_grad = image.grad.numpy()
     predictions = logits.softmax()
     of_predictions = predictions.numpy()
@@ -124,21 +131,24 @@ def main(args):
     image.requires_grad = True
     corss_entropy = torch.nn.CrossEntropyLoss()
     corss_entropy.to('cuda')
-    label = torch.tensor(label_nd, dtype=torch.int32, requires_grad=False).to('cuda')
+    label = torch.tensor(label_nd, dtype=torch.long, requires_grad=False).to('cuda')
 
     for i in range(bp_iters):
-        logits = torch_res50_module(image)
+        torch_sgd.zero_grad()
+        logits, pool, layer4, avg_pool = torch_res50_module(image)
         loss = corss_entropy(logits, label)
-        logits.backward(torch.ones_like(loss))
+        loss.backward()
+        # logits.backward(torch.ones_like(logits))
         
         # for p in torch_res50_module.parameters():
-        #     p.data.add_(p.grad.data, alpha=-learning_rate)
-        # torch_sgd.step()
-        # torch_sgd.zero_grad()
+            # p.data.add_(p.grad.data, alpha=-learning_rate)
+            # p.data = p.grad.data
+
+        torch_sgd.step()
+        torch_sgd.zero_grad()
         
-
+    torch_loss = loss.cpu().detach().numpy()
     torch_in_grad = image.grad.cpu().detach().numpy()
-
     predictions = logits.softmax(-1)
     torch_predictions = predictions.cpu().detach().numpy()
     end_t = time.time()
@@ -147,37 +157,35 @@ def main(args):
     print("torch predict prob: %f, class name: %s" % (np.max(torch_predictions), clsidx_2_labels[clsidx]))
 
 
-
     # check of and torch param and grad error
-    print(np.allclose(of_predictions, torch_predictions, atol=1e-5))
-    print(np.max(np.abs(logits_of - logits.cpu().detach().numpy())))
-    print(np.allclose(logits_of, logits.cpu().detach().numpy(), atol=1e-2))
-    print(np.max(np.abs(torch_in_grad - of_in_grad)))
-    print(np.allclose(torch_in_grad, of_in_grad, atol=1e-4))
+    print("logit rmse error: ", rmse(logits_of, logits.cpu().detach().numpy()))
+    print("prediction rmse error: ", rmse(of_predictions, torch_predictions))
+    print("loss rmse error: ", rmse(of_loss, torch_loss), of_loss, torch_loss)
+    print("input grad rmse error: ", rmse(torch_in_grad, of_in_grad))
 
-    
     of_grads = {}
     of_params = {}
     for k, v in res50_module.named_parameters():
-        of_grads[k] = v.grad.numpy()
+        of_grads[k] = v.grad.numpy() if v.grad is not None else np.random.rand(*v.numpy().shape)
         of_params[k] = v.numpy()
 
     for k, v in torch_res50_module.named_parameters():
-        torch_grad = v.grad.cpu().detach().numpy()
+        torch_grad = v.grad.cpu().detach().numpy() if v.grad is not None else np.random.rand(*v.shape)
         torch_param = v.cpu().detach().numpy()
 
-        if k == "fc.bias":
-            print("of grad:", of_grads[k][:20])
-            print("torch grad", torch_grad[:20])
+        if k == "fc.weight":
+            print("of grad:", of_grads[k].flatten()[:20])
+            print("torch grad", torch_grad.flatten()[:20])
 
-            print("of param:", of_params[k][:20])
-            print("torch param", torch_param[:20])
+            print("of param:", of_params[k].flatten()[:20])
+            print("torch param", torch_param.flatten()[:20])
 
 
         if np.allclose(of_grads[k], torch_grad, atol=1e-6) == False:
-            print("of and torch grad not match, key: %s, max_error: %f" % (k, np.max(np.abs(of_grads[k] - torch_grad))))
+            print("of and torch grad not match, key: %s, rmse_error: %f" % (k, rmse(of_grads[k], torch_grad)))
         if np.allclose(of_params[k], torch_param, atol=1e-6) == False:
-            print("of and torch param not match, key: %s, max_error: %f" % (k, np.max(np.abs(of_params[k] - torch_param))))
+            print("of and torch param not match, key: %s, rmse_error: %f" % (k, rmse(of_params[k], torch_param)))
+
 
 if __name__ == "__main__":
     args = _parse_args()

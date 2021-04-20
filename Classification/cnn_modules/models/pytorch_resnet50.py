@@ -232,18 +232,18 @@ class ResNet(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        x = self.maxpool(x)
+        pool = self.maxpool(x)
 
-        x = self.layer1(x)
+        x = self.layer1(pool)
         x = self.layer2(x)
         x = self.layer3(x)
-        x = self.layer4(x)
+        layer4 = self.layer4(x)
 
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
+        avg_pool = self.avgpool(layer4)
+        x = torch.flatten(avg_pool, 1)
         x = self.fc(x)
 
-        return x
+        return x, pool, layer4, avg_pool
 
     def forward(self, x: Tensor) -> Tensor:
         return self._forward_impl(x)
