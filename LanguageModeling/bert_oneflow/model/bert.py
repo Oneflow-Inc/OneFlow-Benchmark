@@ -34,20 +34,16 @@ class BERT(nn.Module):
         # multi-layers transformer blocks, deep network
         self.transformer_blocks = nn.ModuleList(
             [TransformerBlock(hidden, attn_heads, hidden * 4, dropout) for _ in range(n_layers)])
-
-        self.mask = flow.Tensor(np.random.randn(16, 1, 20, 20))
-
-        self.mask2 = None
-
-    def forward(self, x, segment_info):
+        
+    def forward(self, x, segment_info): # x.shape >> flow.Size([16, 20])
         print("Enter BERT module >>>>>>>>>>>>>>>>>>>>>>>>>> forward()...")
         # attention masking for padded token
-        # torch.ByteTensor([batch_size, 1, seq_len, seq_len)
+        
+        # TODO 缺op: Tensor.repeat; Tensor '>' 算符
         # mask = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1).unsqueeze(1)  # shape >> flow.Size([16, 1, 20, 20])
-
-        # TODO : Tensor.unsqueeze  Tensor.repeat
-        mask = self.mask
-
+        # mask = mask.repeat(1, 8, 1, 1) # shape >> flow.Size([16, 8, 20, 20])
+        mask = flow.Tensor(np.random.randn(16, 20, 20).astype(np.int8), dtype=flow.int).unsqueeze(1)
+        mask = flow.Tensor(np.random.randn(16, 8, 20, 20).astype(np.int8), dtype=flow.int)
 
         # embedding the indexed sequence to sequence of vectors
         x = self.embedding(x, segment_info)

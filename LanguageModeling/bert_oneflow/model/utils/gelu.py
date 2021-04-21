@@ -10,6 +10,6 @@ class GELU(nn.Module):
         super(GELU, self).__init__()
 
     def forward(self, x):
-        return x
-        # TODO: flow.tanh flow.pow
         # return 0.5 * x * (1 + flow.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * flow.pow(x, 3))))
+        xx = flow.Tensor([math.sqrt(2 / math.pi)])
+        return 0.5 * x * (1 + flow.tanh(xx) * (x + 0.044715 * flow.pow(x, 3)))

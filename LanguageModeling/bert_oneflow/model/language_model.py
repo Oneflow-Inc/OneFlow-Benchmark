@@ -1,6 +1,7 @@
 import oneflow as flow
 import oneflow.nn as nn
 from .bert import BERT
+import numpy as np
 
 
 class BERTLM(nn.Module):
@@ -40,9 +41,12 @@ class NextSentencePrediction(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, x):
-        # TODO: Tensor切片行为和pytorch没有对齐
+        # TODO: (daquexian)
+        # Tensor切片行为和pytorch没有对齐,正常切片后应该是flow.Size([16, 256])
+        # 此处为：flow.Size([16, 20, 256]) >> flow.Size([16, 1, 256])
+        x = flow.Tensor(16, 256)
+        return self.softmax(self.linear(x)) # flow.Size([16, 2])
         # return self.softmax(self.linear(x[:, 0]))
-        return flow.Tensor(16,2)
 
 
 class MaskedLanguageModel(nn.Module):
@@ -60,7 +64,8 @@ class MaskedLanguageModel(nn.Module):
         self.linear = nn.Linear(hidden, vocab_size)
         # self.softmax = nn.LogSoftmax(axis=-1)
         self.softmax = flow.nn.Softmax(axis=-1)
+        self.log = flow.Log()
 
     def forward(self, x):
         # return self.softmax(self.linear(x))
-        return flow.log(self.softmax(x))
+        return self.log(self.softmax(x))

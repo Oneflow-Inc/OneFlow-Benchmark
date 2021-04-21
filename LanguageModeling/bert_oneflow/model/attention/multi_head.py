@@ -28,7 +28,7 @@ class MultiHeadedAttention(nn.Module):
         # query, key, value = [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
         #                      for l, x in zip(self.linear_layers, (query, key, value))]
 
-        # TODO:nn.Linear多维下报错 (Tensor.view可用reshape替代)
+        # TODO:nn.Linear有bug (Tensor.view可暂用reshape+transpose绕过去)
         #query,key,value  shape >> flow.Size([16, 8, 20, 32]);
         query = flow.Tensor(16, 8, 20, 32)
         key = flow.Tensor(16, 8, 20, 32)
@@ -36,9 +36,9 @@ class MultiHeadedAttention(nn.Module):
 
    
         # 2) Apply attention on all the projected vectors in batch.
-        # x, attn = self.attention(query, key, value, mask, self.dropout)
-        x = flow.Tensor(16, 8, 20, 32)
-        attn = flow.Tensor(16, 8, 20, 20)
+        x, attn = self.attention(query, key, value, mask, self.dropout)
+        # x = flow.Tensor(16, 8, 20, 32)
+        # attn = flow.Tensor(16, 8, 20, 20)
 
         # 3) "Concat" using a view and apply a final linear.
         # x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.h * self.d_k)

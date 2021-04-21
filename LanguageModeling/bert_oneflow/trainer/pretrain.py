@@ -133,7 +133,7 @@ class BERTTrainer:
             #     self.optim_schedule.step_and_update_lr()
 
             # next sentence prediction accuracy
-            # TODO: Tensor.argmax Tensor.eq  Tensor.sum
+            # TODO: Tensor.argmax  Tensor.eq
             # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
             correct = 14
             avg_loss += loss
