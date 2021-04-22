@@ -133,9 +133,8 @@ class BERTTrainer:
             #     self.optim_schedule.step_and_update_lr()
 
             # next sentence prediction accuracy
-            # TODO: Tensor.argmax  Tensor.eq
             # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
-            correct = 14
+            correct = flow.sum(next_sent_output.argmax(1).eq(data["is_next"]))
             avg_loss += loss
             total_correct += correct
             total_element += data["is_next"].nelemenet()
@@ -144,7 +143,7 @@ class BERTTrainer:
                 "epoch": epoch,
                 "iter": i,
                 "avg_loss": (avg_loss / (i + 1)).numpy(),
-                "avg_acc": total_correct / total_element * 100,
+                "avg_acc": (total_correct / total_element * 100).numpy(),
                 "loss": loss.numpy()
             }
 
@@ -152,7 +151,7 @@ class BERTTrainer:
                 data_iter.write(str(post_fix))
             
             print("EP%d_%s, avg_loss=" % (epoch, str_code), avg_loss.numpy() / 1, "total_acc=",
-                total_correct * 100.0 / total_element)
+                (total_correct * 100.0 / total_element).numpy())
 
 
 
