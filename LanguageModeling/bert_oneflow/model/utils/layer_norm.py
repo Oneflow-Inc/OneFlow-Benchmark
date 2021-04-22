@@ -16,7 +16,6 @@ class LayerNorm(nn.Module):
         self.b_2 = m0(features)
 
     def forward(self, x): # x input/output >> shape flow.Size([16, 20, 256])
-        print("LayerNorm >> x.shape >>>>>>>>>>>>>", x.shape)
         mean = x.mean(2, keepdim=True)
         std = x.npstd(2)
         return self.a_2 * (x - mean) / (std + self.eps) + self.b_2
