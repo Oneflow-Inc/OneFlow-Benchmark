@@ -3,12 +3,12 @@ import oneflow.nn as nn
 
 import argparse
 import numpy as np
-from PIL import Image
 import time
 import torch
 
 from models.resnet50 import resnet50
 from utils.imagenet1000_clsidx_to_labels import clsidx_2_labels
+from utils.numpy_data_utils import load_image
 
 def _parse_args():
     parser = argparse.ArgumentParser("flags for save style transform model")
@@ -19,18 +19,6 @@ def _parse_args():
         "--image_path", type=str, default="", help="input image path"
     )
     return parser.parse_args()
-
-def load_image(image_path='data/tiger.jpg'):
-    rgb_mean = [123.68, 116.779, 103.939]
-    rgb_std = [58.393, 57.12, 57.375]
-    im = Image.open(image_path)
-    im = im.resize((224, 224))
-    im = im.convert('RGB')  # 有的图像是单通道的，不加转换会报错
-    im = np.array(im).astype('float32')
-    im = (im - rgb_mean) / rgb_std
-    im = np.transpose(im, (2, 0, 1))
-    im = np.expand_dims(im, axis=0)
-    return np.ascontiguousarray(im, 'float32')
 
 def main(args):
     flow.env.init()
