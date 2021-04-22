@@ -26,16 +26,16 @@ for i in range(bp_iters):
     ################################
     
     # NOTE(Liang Depeng): gpu memory leak
-    label = flow.Tensor(label_nd, dtype=flow.int32, requires_grad=False)
-    logits = res50_module(image)
+    # label = flow.Tensor(label_nd, dtype=flow.int32, requires_grad=False)
+    # logits = res50_module(image)
     
-    # uncomment following codes will solve the gpu memory leak
-    grad = flow.Tensor(batch, 1000)
-    grad.determine()
-    @global_function_or_identity()
-    def job():
-        logits.backward(grad)
-    job()
+    # # uncomment following codes will solve the gpu memory leak
+    # # grad = flow.Tensor(batch, 1000)
+    # # grad.determine()
+    # # @global_function_or_identity()
+    # # def job():
+    # #     logits.backward(grad)
+    # # job()
     #####################
 
 
