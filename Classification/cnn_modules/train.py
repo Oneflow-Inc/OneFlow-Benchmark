@@ -33,10 +33,9 @@ def main(args):
     flow.env.init()
     flow.enable_eager_execution()
 
-
     epoch = 1
-    batch_size = 8
-    val_batch_size = 8
+    batch_size = 12 # NOTE(Liang Depeng): when batch bigger than 12, for example 16 loss will increase
+    val_batch_size = 12
     learning_rate = 0.001
     mom = 0.9
     train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
@@ -66,6 +65,8 @@ def main(args):
     end_t = time.time()
     print('init time : {}'.format(end_t - start_t))
 
+    # flow.save(res50_module.state_dict(), "./save_model")
+
     start_t = time.time()
     torch_keys = torch_params.keys()
 
@@ -84,13 +85,13 @@ def main(args):
     of_losses = []
     torch_losses = []
 
-    for epoch in range(100):
+    for epoch in range(10000):
         train_data_loader.shuffle_data()
         res50_module.train()
         torch_res50_module.train()
 
         for b in range(len(train_data_loader)):
-        # for b in range(100):
+        # for b in range(5):
             image_nd, label_nd = train_data_loader[b]
             print("epoch % d iter: %d" % (epoch, b), image_nd.shape, label_nd.shape)
         
@@ -136,21 +137,13 @@ def main(args):
         correct_of = 0.0
         correct_torch = 0.0
         for b in range(len(val_data_loader)):
-        # for b in range(100):
+        # for b in range(5):
             image_nd, label_nd = val_data_loader[b]
             print("validation iter: %d" % b, image_nd.shape, label_nd.shape)
 
             start_t = time.time()
             image = flow.Tensor(image_nd)
             logits = res50_module(image)
-
-            grad = flow.Tensor(batch_size, 1000)
-            grad.determine()
-            @global_function_or_identity()
-            def job():
-                logits.backward(grad)
-            job()
-            of_sgd.zero_grad()
 
             predictions = logits.softmax()
             of_predictions = predictions.numpy()
