@@ -6,18 +6,8 @@ from typing import Optional, List, Tuple
 # TODO(Liang Depeng): oneflow's `CrossEntropyLoss` module call the `Build()` method
 #                     in `forward` which raise error when running the module multiply times. 
 class CrossEntropyLoss(flow.nn.Module):
-    def __init__(
-        self,
-        depth: int,
-        weight=None,
-        ignore_index: int = None,
-        reduction: str = "mean",
-    ) -> None:
+    def __init__(self, depth: int, reduction: str = "mean",) -> None:
         super().__init__()
-        if weight != None:
-            raise ValueError("Argument weight is not supported yet")
-        if ignore_index != None:
-            raise ValueError("Argument ignore_index is not supported yet")
         assert reduction in [
             "sum",
             "none",
@@ -31,25 +21,28 @@ class CrossEntropyLoss(flow.nn.Module):
             flow.builtin_op("sparse_softmax_cross_entropy")
             .Input("prediction")
             .Input("label")
+            .Attr("depth", depth)
             .Output("prob")
             .Output("out")
-            .Attr("depth", depth).Build()
+            .Build()
         )
 
-        if self.reduction == "mean":
-            self._reduce = flow.Mean()
-        elif self.reduction == "sum":
-            self._reduce = flow.Sum()
-        else:
-            self._reduce = None
+        self._sum_op = (
+            flow.builtin_op("reduce_sum")
+            .Input("input_tensor")
+            .Output("output_tensor")
+            .Attr("keepdims", False)
+            .Attr("axis", [0,])
+            .Build()
+        )
 
     def forward(self, input, target):
-        self._op = self._op
         prob, out = self._op(input, target)
-        if self._reduce != None:
-            return self._reduce(out)
-        else:
-            return out
+        sums = self._sum_op(out)[0]
+        reduce_count = 1
+        for dim in out.shape:
+            reduce_count *= dim
+        return flow.mul(sums, 1.0 / reduce_count)
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):

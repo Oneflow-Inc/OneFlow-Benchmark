@@ -24,7 +24,7 @@ input = lineToTensor('Albert')
 # NOTE(Liang Depeng): original torch implementation
 # hidden = torch.zeros(1, n_hidden)
 hidden = flow.Tensor(1, n_hidden, device=oneflow_api.device("cuda"))
-flow.nn.init.zeros_(hidden)
+flow.nn.init.ones_(hidden)
 print(input)
 print(input[0])
 output, next_hidden = rnn(input[0], hidden)

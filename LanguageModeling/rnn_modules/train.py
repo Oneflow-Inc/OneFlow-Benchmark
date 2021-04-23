@@ -23,7 +23,7 @@ def train(category_tensor, line_tensor, rnn, criterion, learning_rate):
     loss = criterion(output, category_tensor)
 
     # TODO(Liang Depeng): oneflow Tensor does not implement `backward` method yet
-    # loss.backward()
+    loss.backward()
 
     # Add parameters' gradients to their values, multiplied by learning rate
     # TODO(Liang Depeng): oneflow Tensor does not support inplace `add_` yet
