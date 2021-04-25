@@ -9,6 +9,14 @@ bash predict.sh
 
 ## Train on [imagenette](https://github.com/fastai/imagenette) Dataset
 
+
+### Download dataset
+
+```
+wget https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/imagenette2.tgz
+tar zxf imagenette2.tgz
+```
+
 ### Prepare ofrecord
 
 ```bash
