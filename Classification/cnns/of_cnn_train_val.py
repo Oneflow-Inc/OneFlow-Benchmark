@@ -118,6 +118,8 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
+    print(" {} iter per epoch...".format(epoch_size))
+
     for epoch in range(args.num_epochs):
         metric = Metric(desc='train', calculate_batches=args.loss_print_every_n_iter,
                         batch_size=train_batch_size, loss_key='loss')
