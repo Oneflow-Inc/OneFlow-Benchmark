@@ -134,7 +134,7 @@ class BERTTrainer:
 
             # next sentence prediction accuracy
             # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
-            correct = flow.sum(next_sent_output.argmax(1).eq(data["is_next"]))
+            correct = next_sent_output.argmax(1).eq(data["is_next"]).sum()
             avg_loss += loss
             total_correct += correct
             total_element += data["is_next"].nelemenet()

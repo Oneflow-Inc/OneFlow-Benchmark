@@ -62,10 +62,8 @@ class MaskedLanguageModel(nn.Module):
         """
         super().__init__()
         self.linear = nn.Linear(hidden, vocab_size)
-        # self.softmax = nn.LogSoftmax(axis=-1)
         self.softmax = flow.nn.Softmax(axis=-1)
-        self.log = flow.Log()
 
     def forward(self, x):
         # return self.softmax(self.linear(x))
-        return self.log(self.softmax(x))
+        return flow.log(self.softmax(x))

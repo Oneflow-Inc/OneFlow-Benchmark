@@ -13,7 +13,7 @@ class Attention(nn.Module):
         super().__init__()
         self.matmul = flow.nn.MatMul()
         self.softmax = flow.nn.Softmax(axis = -1)
-        self.masked_fill = flow.MaskedFill()
+        # self.masked_fill = flow.MaskedFill()
  
     def forward(self, query, key, value, mask=None, dropout=None): # q k v shape >> flow.Size([16, 8, 20, 32])
         # flow.matmul(dim>2的多维情况下和torch行为没对齐)
@@ -26,7 +26,8 @@ class Attention(nn.Module):
         if mask is not None:
             # scores = scores.masked_fill(mask == 0, -1e9)
             mask = flow.Tensor((mask.numpy() == 0).astype(np.int8), dtype=flow.int)
-            scores = self.masked_fill(scores, mask, -1e9)
+            scores = scores.masked_fill(mask, -1e9)
+            # scores = self.masked_fill(scores, mask, -1e9)
 
         p_attn = self.softmax(scores)
 

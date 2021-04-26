@@ -6,7 +6,7 @@ Oneflow-Module版BERT实现，origin form:https://github.com/codertimo/BERT-pyto
 
 ### requirements
 
-oneflow版本为：https://github.com/Oneflow-Inc/oneflow/tree/dev_autograd_module_merge_lyon_test
+oneflow版本为：https://github.com/Oneflow-Inc/oneflow/tree/dev_autograd_module_merge_lyon_test commit@1ee77197ceef631f982fcc19fb81e9d4ffc2f374
 
 同时，由于数据集加载部分的功能尚未对齐，需要依赖torch.utils.data.DataLoader，故需要依赖torch==0.4.1.post2
 
