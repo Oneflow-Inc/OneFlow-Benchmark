@@ -1,11 +1,11 @@
 #!/bin/bash
 export PYTHONUNBUFFERED=1
 model=${1:-gpt2-small}
-batch_size_per_device=${2:-1}
+batch_size_per_device=${2:-2}
 node_num=${3:-1}
-gpu_num_per_node=${4:-8}
+gpu_num_per_node=${4:-1}
 checkpoint_activations=${5:-"on"}
-enable_non_distributed_optimizer=${6:-"True"}
+zero_stage=${6:-2}
 dtype=${7:-"fp16"}
 iter_num=${8:-200}
 model_paraller_size=${9:-1}
@@ -17,7 +17,7 @@ if  [ ${model} = "gpt2-small" ];then
     n_embd=768
 elif  [ ${model} = "gpt2-medium" ];then
     echo "network : gpt2-medium"
-	n_layer=24
+    n_layer=24
     n_head=16
     n_embd=1024
 fi
@@ -32,13 +32,8 @@ echo "total_batch_size >>>> $total_batch_size"
 seq_len=1024
 dropout_rate=0.1
 
-if  [ ${enable_non_distributed_optimizer} = "True" ];then
-    flag=1
-else
-    flag=0
-fi
 
-output_dir=20210224-stage-${flag}-${model}-${checkpoint_activations}-checkpoint-activations/${node_num}n${gpu_num_per_node}g
+output_dir=20210501-test-stage-${zero_stage}-${model}-${checkpoint_activations}-checkpoint-activations/${node_num}n${gpu_num_per_node}g
 test_case=${model}_b${batch_size_per_device}_${dtype}_1
 mkdir -p $output_dir
 mem_file=$output_dir/$test_case.mem
@@ -80,10 +75,19 @@ else
     echo "checkpoint_activations off"
 fi
 
-if  [ ${enable_non_distributed_optimizer} = "True" ];then
+if [ ${zero_stage} = 1 ];then
     cmd+="--enable_non_distributed_optimizer=True "
+elif [ ${zero_stage} = 2 ];then
+    cmd+="--enable_non_distributed_optimizer=True "
+    cmd+="--nccl_use_compute_stream=True "
+elif [ ${zero_stage} = 3 ];then
+    cmd+="--enable_non_distributed_optimizer=True "
+    cmd+="--nccl_use_compute_stream=True "
+    cmd+="--disable_group_boxing_by_dst_parallel=True "
 else
     cmd+="--enable_non_distributed_optimizer=False "
+    cmd+="--nccl_use_compute_stream=False "
+    cmd+="--disable_group_boxing_by_dst_parallel=False "
 fi
 
 
@@ -100,6 +104,3 @@ echo
     date +%s.%N
     $cmd 2>&1 | tee ${log_file}
     date +%s.%N
-
-
-

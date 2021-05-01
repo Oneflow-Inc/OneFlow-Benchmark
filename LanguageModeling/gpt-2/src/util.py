@@ -29,9 +29,14 @@ def init_config(args):
     flow.config.collective_boxing.nccl_fusion_all_gather(True)
     flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
     # flow.config.enable_legacy_model_io(True)
-
-    flow.config.nccl_use_compute_stream(False)
-    flow.config.disable_group_boxing_by_dst_parallel(False)
+    if args.nccl_use_compute_stream:
+        flow.config.nccl_use_compute_stream(True)
+    else:
+        flow.config.nccl_use_compute_stream(False)
+    if args.disable_group_boxing_by_dst_parallel:
+        flow.config.disable_group_boxing_by_dst_parallel(True)
+    else:
+        flow.config.disable_group_boxing_by_dst_parallel(False)
 
 
 def make_func_config(args):

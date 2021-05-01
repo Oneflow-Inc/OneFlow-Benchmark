@@ -102,7 +102,13 @@ def get_parser(parser=None):
         "--use_fp16", type=str2bool, default=False, help="Whether to use use fp16"
     )
     parser.add_argument(
-        "--enable_non_distributed_optimizer", type=str2bool, default=False, help="Whether to use use non_distributed_optimizer"
+        "--enable_non_distributed_optimizer", type=str2bool, default=False, help="Whether to use distributed_optimizer optimization"
+    )
+    parser.add_argument(
+        "--nccl_use_compute_stream", type=str2bool, default=False, help="Whether to use compute stream optimization"
+    )
+    parser.add_argument(
+        "--disable_group_boxing_by_dst_parallel", type=str2bool, default=False, help="Whether disable group boxing"
     )
     parser.add_argument(
         "--checkpoint_activations",
