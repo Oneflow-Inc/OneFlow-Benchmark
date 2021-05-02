@@ -1,14 +1,15 @@
 #!/bin/bash
 export PYTHONUNBUFFERED=1
 model=${1:-gpt2-small}
-batch_size_per_device=${2:-2}
+batch_size_per_device=${2:-8}
 node_num=${3:-1}
 gpu_num_per_node=${4:-1}
 checkpoint_activations=${5:-"on"}
 zero_stage=${6:-2}
 dtype=${7:-"fp16"}
-iter_num=${8:-200}
-model_paraller_size=${9:-1}
+test_num=${8:-1}
+iter_num=${9:-200}
+model_paraller_size=${10:-1}
 
 if  [ ${model} = "gpt2-small" ];then
     echo "network : gpt2-small"
@@ -33,8 +34,8 @@ seq_len=1024
 dropout_rate=0.1
 
 
-output_dir=20210501-test-stage-${zero_stage}-${model}-${checkpoint_activations}-checkpoint-activations/${node_num}n${gpu_num_per_node}g
-test_case=${model}_b${batch_size_per_device}_${dtype}_1
+output_dir=20210502-test-stage-${zero_stage}-${model}-${checkpoint_activations}-checkpoint-activations/${node_num}n${gpu_num_per_node}g
+test_case=${model}_b${batch_size_per_device}_${dtype}_$test_num
 mkdir -p $output_dir
 mem_file=$output_dir/$test_case.mem
 log_file=$output_dir/$test_case.log
