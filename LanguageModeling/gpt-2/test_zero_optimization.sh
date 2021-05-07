@@ -28,13 +28,13 @@ gpt_root=$(dirname $script_path)
 dataset=$gpt_root/data/wiki_00
 cfg_dir=$gpt_root/models/117M
 
-total_batch_size=`expr ${batch_size_per_device} \* ${gpu_num_per_node}`
+total_batch_size=`expr ${batch_size_per_device} \* ${gpu_num_per_node} \* ${node_num}`
 echo "total_batch_size >>>> $total_batch_size"
 seq_len=1024
 dropout_rate=0.1
 
 
-output_dir=20210502-test-stage-${zero_stage}-${model}-${checkpoint_activations}-checkpoint-activations/${node_num}n${gpu_num_per_node}g
+output_dir=20210507-stage-${zero_stage}-${model}-${checkpoint_activations}-checkpoint-activations/${node_num}n${gpu_num_per_node}g
 test_case=${model}_b${batch_size_per_device}_${dtype}_$test_num
 mkdir -p $output_dir
 mem_file=$output_dir/$test_case.mem
@@ -45,7 +45,7 @@ python3 $gpt_root/tools/gpu_memory_usage.py -g=$gpu_num_per_node -n=1 >$mem_file
 cmd=""
 # cmd+="gdb --args "
 # cmd+="/opt/nvidia/nsight-systems-2020.5.1/bin/nsys profile -o $test_case "
-cmd+="python3 -m src.train "
+cmd+="/home/leinao/anaconda3/envs/oneflow-master/bin/python3 -m src.train "
 cmd+="--dataset=$dataset "
 cmd+="--cfg_dir=$cfg_dir "
 cmd+="--iter_num=$iter_num "

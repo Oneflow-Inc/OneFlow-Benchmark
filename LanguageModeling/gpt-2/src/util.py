@@ -28,7 +28,7 @@ def init_config(args):
     flow.config.collective_boxing.nccl_fusion_reduce_scatter(True)
     flow.config.collective_boxing.nccl_fusion_all_gather(True)
     flow.config.collective_boxing.nccl_enable_mixed_fusion(True)
-    # flow.config.enable_legacy_model_io(True)
+    flow.config.enable_legacy_model_io(True)
     if args.nccl_use_compute_stream:
         flow.config.nccl_use_compute_stream(True)
     else:

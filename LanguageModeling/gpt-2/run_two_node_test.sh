@@ -11,7 +11,7 @@ test_num=${6:-1}
 i=1
 while [ $i -le ${test_num} ]
 do
-    bash $current_dir/test_zero_optimization.sh $model $batch_size_per_device 4 8  $checkpoint_activations $zero_stage $dtype ${i}
+    bash $current_dir/test_zero_optimization.sh $model $batch_size_per_device 2 8  $checkpoint_activations $zero_stage $dtype ${i}
     echo " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Finished Test Case ${i}!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< "
     let i++
     sleep 20s
