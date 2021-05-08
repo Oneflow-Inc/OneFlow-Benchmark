@@ -1,0 +1,23 @@
+#! /bin/bash
+
+export ONEFLOW_GPT_NUM_NODES=1 
+export ONEFLOW_GPT_NUM_GPUS_PER_NODE=1 
+
+export ONEFLOW_GPT_SEQ_LENGTH=2048
+export ONEFLOW_GPT_HIDDEN_SIZE=768
+export ONEFLOW_GPT_NUM_ATTENTION_HEADS=12
+export ONEFLOW_GPT_NUM_LAYERS=12
+
+export ONEFLOW_GPT_MICRO_BATCH_SIZE=8
+export ONEFLOW_GPT_GLOBAL_BATCH_SIZE=8
+
+export ONEFLOW_GPT_TRAIN_ITERS=100
+export ONEFLOW_GPT_LOG_INTERVAL=10
+
+export ONEFLOW_GTP_PRETRAIN_WITH_CONTAINER=ON
+export ONEFLOW_GPT_SRC_DIR=$(dirname $(dirname $0))
+export ONEFLOW_DEV_IMAGE=oneflow-manylinux2014-cuda11.2:0.1
+export ONEFLOW_GPT_PYTHON_VERSION=3.7
+export ONEFLOW_WHEEL=$PWD/packages/oneflow-0.3.5+cu112.git.f4c28cccb-cp37-cp37m-manylinux2014_x86_64.whl
+
+source `dirname $0`/pretrain_gpt.sh

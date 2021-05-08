@@ -18,6 +18,7 @@ num_nodes=${ONEFLOW_GPT_NUM_NODES:-"1"}
 node_ips=${ONEFLOW_GPT_NODE_IPS:-"10.11.0.2,10.11.0.3,10.11.0.4,10.11.0.5"}
 
 train_iters=${ONEFLOW_GPT_TRAIN_ITERS:-"500000"}
+log_interval=${ONEFLOW_GPT_LOG_INTERVAL:-"100"}
 
 cmd=""
 
@@ -69,14 +70,36 @@ cmd+=" --vocab-size 50257"
 cmd+=" --split 949,50,1"
 cmd+=" --save model_save"
 cmd+=" --save-interval 10000"
-cmd+=" --log-interval 100"
+cmd+=" --log-interval ${log_interval}"
 cmd+=" --metric-print-format table"
 cmd+=" --checkpoint-activations"
 cmd+=" --multihead-attention-fusion"
 cmd+=" --fp16"
 
+if [[ ${num_nodes} -gt 1 ]]; then
+    cmd+=" --use-rdma"
+fi
+
 if [[ ! -z "${ONEFLOW_GTP_PROFILE_FILE}" ]]; then
     cmd+=" --profile-transformer-layer"
 fi
 
-${cmd}
+if [[ -z "${ONEFLOW_GTP_PRETRAIN_WITH_CONTAINER}" ]]; then
+    ${cmd}
+else
+    oneflow_gpt_src_dir=${ONEFLOW_GPT_SRC_DIR:-"$(dirname $(dirname $0))"}
+    oneflow_dev_image=${ONEFLOW_DEV_IMAGE:-"oneflow-manylinux2014-cuda11.2:0.1"}
+    python_version=${ONEFLOW_GPT_PYTHON_VERSION:-"3.7"}
+
+    if [[ -z "${ONEFLOW_WHEEL}" ]]; then
+        echo "ONEFLOW_WHEEL env var not set"
+        exit 1
+    fi
+
+    python3 ${oneflow_gpt_src_dir}/tools/launch_container.py \
+        --src ${oneflow_gpt_src_dir} \
+        --py ${python_version} \
+        --image ${oneflow_dev_image} \
+        --wheel ${ONEFLOW_WHEEL} \
+        --cmd "$cmd"
+fi
