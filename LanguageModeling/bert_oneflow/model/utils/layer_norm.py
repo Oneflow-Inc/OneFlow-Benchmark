@@ -18,5 +18,5 @@ class LayerNorm(nn.Module):
         # 此处应为std = x.std(dim=2, keepdim=True),但x.mean消费过一次后x.std会报错
         mean = x.mean(2, keepdim=True)
         x2 = flow.Tensor(np.random.randn(16, 20, 256))
-        std = x2.tmpstd(dim=2, keepdim=True)
+        std = x2.std(dim=2, keepdim=True)
         return self.a_2 * (x - mean) / (std + self.eps) + self.b_2

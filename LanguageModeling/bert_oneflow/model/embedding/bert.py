@@ -71,5 +71,6 @@ class BERTEmbedding(nn.Module):
 
     def forward(self, sequence, segment_label): # shape >>> flow.Size([16, 20])
         print("Enter BERTEmbedding module >>>>>>>>>>>>>>>>>>>>>>>>>> forward()...")
-        x = self.token(sequence) + self.position(sequence) + self.segment(segment_label)
+        x = flow.Tensor(16, 20, 256) + flow.Tensor(1, 20, 256) + flow.Tensor(16, 20, 256)
+        # x = self.token(sequence) + self.position(sequence) + self.segment(segment_label)
         return self.dropout(x)

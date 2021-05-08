@@ -64,7 +64,7 @@ class BERTTrainer:
 
         # Using Negative Log Likelihood Loss function for predicting the masked_token
         # self.criterion = nn.NLLLoss(ignore_index=0)
-        # TODO: 缺 nn.NLLLoss，暂用CrossEntropyLoss替代，不过多维下会报错
+        # TODO: nn.NLLLoss nn.CrossEntropyLoss多维下都会报错
         self.criterion = nn.CrossEntropyLoss()
 
         self.log_freq = log_freq
@@ -105,18 +105,21 @@ class BERTTrainer:
             if i > 0:
                 exit()
 
-            data["bert_input"] = flow.Tensor(np.random.randint(1, 200000, size=(16, 20)), dtype=flow.int)
+            data["bert_input"] = flow.Tensor(np.random.randint(1, 200000, size=(16, 20)), dtype=flow.float)
             data["segment_label"] = flow.Tensor(np.random.randint(1, 2, size=(16, 20)), dtype=flow.int)
-            data["is_next"] = flow.Tensor(np.random.randint(0, 1, 16), dtype=flow.int)
+            data["is_next"] = flow.Tensor(np.random.randint(0, 1, 16), dtype=flow.int32)
             data["bert_label"] = flow.Tensor(np.random.randint(0, 10, size=(16, 20)), dtype=flow.int)
 
             # 1. forward the next_sentence_prediction and masked_lm model
             next_sent_output, mask_lm_output = self.model.forward(data["bert_input"], data["segment_label"])
-            print("next_sent_output.shape >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", next_sent_output.shape)
             print("mask_lm_output.shape >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", mask_lm_output.shape)
+            next_sent_output = flow.Tensor(16, 2, dtype=flow.float32)
 
+            print("next_sent_output.shape >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", next_sent_output.shape)
+            print("next_sent_output >>>>>>>>>>>>>> dtype", next_sent_output.dtype)
             # 2-1. NLL(negative log likelihood) loss of is_next classification result
             next_loss = self.criterion(next_sent_output, data["is_next"])
+            print("finish >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> next_loss = self.criterion()")
 
 
             # 2-2. NLLLoss of predicting masked token word TODO: nn.CrossEntropyLoss 多维下报错
