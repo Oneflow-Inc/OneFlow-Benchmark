@@ -28,7 +28,7 @@ class MultiHeadedAttention(nn.Module):
         # query, key, value = [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
         #                      for l, x in zip(self.linear_layers, (query, key, value))]
 
-        # TODO:nn.Linear有bug (Tensor.view可暂用reshape+transpose绕过去)
+        # TODO: Tensor.view可暂用reshape+transpose绕过去)
         #query,key,value  shape >> flow.Size([16, 8, 20, 32]);
         query = flow.Tensor(16, 8, 20, 32)
         key = flow.Tensor(16, 8, 20, 32)
@@ -44,6 +44,6 @@ class MultiHeadedAttention(nn.Module):
         ncount = x.nelemenet() // batch_size // (self.h * self.d_k)
         self.reshape = self.reshape.Attr("shape", [batch_size, ncount, self.h * self.d_k]).Build()
         x = self.reshape(x)[0] # shape >> flow.Tensor(16, 20, 256)
-        # return self.output_linear(x)
+        # x = self.output_linear(x)
         return x
 
