@@ -16,19 +16,19 @@ class MultiHeadedAttention(nn.Module):
         self.d_k = d_model // h
         self.h = h
         self.linear_layers = nn.ModuleList([nn.Linear(d_model, d_model) for _ in range(3)])
-        self.output_linear = nn.Linear(d_model, d_model)
+        self.output_linear = nn.Linear(d_model, d_model, False)
         self.attention = Attention()
 
         self.dropout = nn.Dropout(p=dropout)
-        self.reshape = flow.builtin_op("reshape").Input("in").Output("out")
 
     def forward(self, query, key, value, mask=None):
         batch_size = query.size()[0] # 16
         # 1) Do all the linear projections in batch from d_model => h x d_k
-        # query, key, value = [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
+        # query, key, value = [l(x).reshape(shape=[batch_size, -1, self.h, self.d_k]).transpose(perm=(0, 2, 1, 3))
         #                      for l, x in zip(self.linear_layers, (query, key, value))]
 
-        # TODO: Tensor.view可暂用reshape+transpose绕过去)
+
+        # TODO: query, key, value；以及下面的res = self.output_linear(res)放开会报错
         #query,key,value  shape >> flow.Size([16, 8, 20, 32]);
         query = flow.Tensor(16, 8, 20, 32)
         key = flow.Tensor(16, 8, 20, 32)
@@ -39,11 +39,7 @@ class MultiHeadedAttention(nn.Module):
         x, attn = self.attention(query, key, value, mask, self.dropout)
 
         # 3) "Concat" using a view and apply a final linear.
-        # x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.h * self.d_k)
-        x = flow.tmp.transpose(x, perm=[0, 2, 1, 3])
-        ncount = x.nelemenet() // batch_size // (self.h * self.d_k)
-        self.reshape = self.reshape.Attr("shape", [batch_size, ncount, self.h * self.d_k]).Build()
-        x = self.reshape(x)[0] # shape >> flow.Tensor(16, 20, 256)
-        # x = self.output_linear(x)
-        return x
+        res = x.transpose(perm=(0, 2, 1, 3)).reshape(shape = [batch_size, -1, self.h * self.d_k])
+        # res = self.output_linear(res)
+        return res
 

@@ -11,8 +11,6 @@ class PositionalEmbedding(nn.Module):
 
     def __init__(self, d_model, max_len=512):
         super().__init__()
-        # self.sin = flow.Sin()
-        # self.cos = flow.Cos()
 
         # Compute the positional encodings once in log space.
         # pe = flow.zeros(max_len, d_model).float()

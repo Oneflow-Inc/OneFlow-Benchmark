@@ -42,7 +42,7 @@ class BERT(nn.Module):
         # mask = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1).unsqueeze(1)  # shape >> flow.Size([16, 1, 20, 20])
         # mask = mask.repeat(1, 8, 1, 1) # shape >> flow.Size([16, 8, 20, 20])
 
-        # TODO:Tensor.repeat 目前不支持flow.int类型的参数
+        # TODO:Tensor.repeat 目前不支持flow.int类型的参数(所以用cast转化成了float32类型)
         mask = (x > 0).unsqueeze(1).cast(flow.float32).repeat(sizes=(1, x.size()[1], 1)).unsqueeze(1).repeat(sizes=(1, 8, 1, 1))
     
         # embedding the indexed sequence to sequence of vectors
