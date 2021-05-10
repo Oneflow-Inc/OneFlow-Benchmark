@@ -31,7 +31,7 @@ def rmse(l, r):
 def main(args):
     flow.env.init()
     flow.enable_eager_execution()
-    batch_size = 16
+    batch_size = 8
     train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
     val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), batch_size)
 
@@ -62,62 +62,55 @@ def main(args):
 
     learning_rate = 0.01
     mom = 0.9
-    # of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
+    of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
 
     # # set for eval mode
     # res50_module.eval()
     start_t = time.time()
 
-    image = flow.Tensor(image_nd, dtype=flow.float32)
+    image = flow.Tensor(image_nd, dtype=flow.float32, requires_grad=True)
     label = flow.Tensor(label_nd, dtype=flow.int32)
     corss_entropy = flow.nn.CrossEntropyLoss(reduction="mean")
     
-    bp_iters = 10
+    bp_iters = 10000
     for_time = 0.0
     bp_time = 0.0
     update_time = 0.0
 
-    for i in range(10):
-        with flow.no_grad():
-            logits = res50_module(image)
-            loss = corss_entropy(logits, label)
+    # for i in range(10):
+    #     with flow.no_grad():
+    #         logits = res50_module(image)
+    #         loss = corss_entropy(logits, label)
 
     for i in range(bp_iters):
         s_t = time.time()
-        with flow.no_grad():
-            logits = res50_module(image)
-            loss = corss_entropy(logits, label)
+        logits = res50_module(image)
+        loss = corss_entropy(logits, label)
         for_time += time.time() - s_t
 
         s_t = time.time()
-        # @global_function_or_identity()
-        # def job():
-        #     loss.backward()
-        # job()
+        loss.backward()
         bp_time += time.time() - s_t
         
         s_t = time.time()
-        # @global_function_or_identity()
-        # def job2():
-        #     of_sgd.step()
-        #     of_sgd.zero_grad()
-        # job2()
+        of_sgd.step()
+        of_sgd.zero_grad()
         update_time += time.time() - s_t
 
     of_loss = loss.numpy()
-    # of_in_grad = image.grad.numpy()
-    # predictions = logits.softmax()
-    # of_predictions = predictions.numpy()
+    of_in_grad = image.grad.numpy()
+    predictions = logits.softmax()
+    of_predictions = predictions.numpy()
     end_t = time.time()
     print('infer time : {}'.format(end_t - start_t))
     print('fp time : {}'.format(for_time / bp_iters))
     print('bp time : {}'.format(bp_time / bp_iters))
     print('update time : {}'.format(update_time / bp_iters))
-    # # clsidxs = np.argmax(of_predictions, axis=1)
+    clsidxs = np.argmax(of_predictions, axis=1)
 
-    # for i in range(batch_size):
-    #     print("of predict prob: %f, class name: %s" % (np.max(of_predictions[i]), clsidx_2_labels[clsidxs[i]]))
-    # logits_of = logits.numpy()
+    for i in range(batch_size):
+        print("of predict prob: %f, class name: %s" % (np.max(of_predictions[i]), clsidx_2_labels[clsidxs[i]]))
+    logits_of = logits.numpy()
 
 
     #####################################################################################################
@@ -150,63 +143,61 @@ def main(args):
 
     for i in range(bp_iters):
         s_t = time.time()
-        with torch.no_grad():
-            logits = torch_res50_module(image)
-            loss = corss_entropy(logits, label)
+        logits = torch_res50_module(image)
+        loss = corss_entropy(logits, label)
         for_time += time.time() - s_t
 
         s_t = time.time()
-        # loss.backward()
+        loss.backward()
         bp_time += time.time() - s_t
 
         s_t = time.time()
-        # torch_sgd.step()
-        # torch_sgd.zero_grad()
+        torch_sgd.step()
+        torch_sgd.zero_grad()
         update_time += time.time() - s_t
         
     torch_loss = loss.cpu().detach().numpy()
-    # torch_in_grad = image.grad.cpu().detach().numpy()
-    # predictions = logits.softmax(-1)
-    # torch_predictions = predictions.cpu().detach().numpy()
+    torch_in_grad = image.grad.cpu().detach().numpy()
+    predictions = logits.softmax(-1)
+    torch_predictions = predictions.cpu().detach().numpy()
     end_t = time.time()
     print('infer time : {}'.format(end_t - start_t))
     print('fp time : {}'.format(for_time / bp_iters))
     print('bp time : {}'.format(bp_time / bp_iters))
     print('update time : {}'.format(update_time / bp_iters))
-    # clsidxs = np.argmax(torch_predictions, axis=1)
-    # for i in range(batch_size):
-    #     print("of predict prob: %f, class name: %s" % (np.max(torch_predictions[i]), clsidx_2_labels[clsidxs[i]]))
-    # print("torch predict prob: %f, class name: %s" % (np.max(torch_predictions), clsidx_2_labels[clsidx]))
+    clsidxs = np.argmax(torch_predictions, axis=1)
+    for i in range(batch_size):
+        print("of predict prob: %f, class name: %s" % (np.max(torch_predictions[i]), clsidx_2_labels[clsidxs[i]]))
 
 
     # check of and torch param and grad error
-    # print("logit rmse error: ", rmse(logits_of, logits.cpu().detach().numpy()))
-    # print("prediction rmse error: ", rmse(of_predictions, torch_predictions))
+    print("logit rmse error: ", rmse(logits_of, logits.cpu().detach().numpy()))
+    print("prediction rmse error: ", rmse(of_predictions, torch_predictions))
     print("loss rmse error: ", rmse(of_loss, torch_loss), of_loss, torch_loss)
-    # print("input grad rmse error: ", rmse(torch_in_grad, of_in_grad))
+    print("input grad rmse error: ", rmse(torch_in_grad, of_in_grad))
 
-    of_grads = {}
-    of_params = {}
-    for k, v in res50_module.named_parameters():
-        # of_grads[k] = v.grad.numpy() if v.grad is not None else np.random.rand(*v.numpy().shape)
-        of_params[k] = v.numpy()
+    # of_grads = {}
+    # of_params = {}
+    # for k, v in res50_module.named_parameters():
+    #     of_grads[k] = v.grad.numpy() if v.grad is not None else np.random.rand(*v.numpy().shape)
+    #     of_params[k] = v.numpy()
 
-    for k, v in torch_res50_module.named_parameters():
-        # torch_grad = v.grad.cpu().detach().numpy() if v.grad is not None else np.random.rand(*v.shape)
-        torch_param = v.cpu().detach().numpy()
+    # for k, v in torch_res50_module.named_parameters():
+    #     torch_grad = v.grad.cpu().detach().numpy() if v.grad is not None else np.random.rand(*v.shape)
+    #     torch_param = v.cpu().detach().numpy()
 
-        # if k == "fc.bias":
-        #     print("of grad:", of_grads[k].flatten()[:20])
-        #     print("torch grad", torch_grad.flatten()[:20])
+    #     if k == "fc.bias":
+    #         print("of grad:", of_grads[k].flatten()[:20])
+    #         print("torch grad", torch_grad.flatten()[:20])
 
-        #     print("of param:", of_params[k].flatten()[:20])
-        #     print("torch param", torch_param.flatten()[:20])
+    #         print("of param:", of_params[k].flatten()[:20])
+    #         print("torch param", torch_param.flatten()[:20])
 
 
-        # if np.allclose(of_grads[k], torch_grad, atol=1e-6) == False:
-        #     print("of and torch grad not match, key: %s, rmse_error: %f" % (k, rmse(of_grads[k], torch_grad)))
-        if np.allclose(of_params[k], torch_param, atol=1e-6) == False:
-            print("of and torch param not match, key: %s, rmse_error: %f" % (k, rmse(of_params[k], torch_param)))
+    #     if np.allclose(of_grads[k], torch_grad, atol=1e-6) == False:
+    #         print("of and torch grad not match, key: %s, rmse_error: %f" % (k, rmse(of_grads[k], torch_grad)))
+    #     if np.allclose(of_params[k], torch_param, atol=1e-6) == False:
+    #         print("of and torch param not match, key: %s, rmse_error: %f" % (k, rmse(of_params[k], torch_param)))
 
 
 if __name__ == "__main__":
