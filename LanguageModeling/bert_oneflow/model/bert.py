@@ -42,11 +42,8 @@ class BERT(nn.Module):
         # mask = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1).unsqueeze(1)  # shape >> flow.Size([16, 1, 20, 20])
         # mask = mask.repeat(1, 8, 1, 1) # shape >> flow.Size([16, 8, 20, 20])
 
-        # aaa = (x > 0).unsqueeze(1)
-        aaa = flow.Tensor(16, 1, 20, dtype=flow.float)
-        # TODO 1.Tensor > 0有问题，暂时替换为：x > flow.tmp.zeros(size = (16, 20), dtype=flow.float32)
-        # 2. Tensor.repeat 目前不支持flow.int类型的参数
-        mask = aaa.repeat(sizes=(1, x.size()[1], 1)).unsqueeze(1).repeat(sizes=(1, 8, 1, 1))
+        # TODO:Tensor.repeat 目前不支持flow.int类型的参数
+        mask = (x > 0).unsqueeze(1).cast(flow.float32).repeat(sizes=(1, x.size()[1], 1)).unsqueeze(1).repeat(sizes=(1, 8, 1, 1))
     
         # embedding the indexed sequence to sequence of vectors
         x = self.embedding(x, segment_info)
