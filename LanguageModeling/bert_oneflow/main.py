@@ -2,7 +2,7 @@ import argparse
 
 from torch.utils.data import DataLoader
 # from oneflow.utils.data import DataLoader
-import oneflow as flow
+import oneflow.experimental as flow
 from model import BERT
 from trainer import BERTTrainer
 from dataset import BERTDataset, WordVocab

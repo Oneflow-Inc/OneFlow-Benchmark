@@ -1,7 +1,6 @@
-import oneflow.nn as nn
-import oneflow as flow
+import oneflow.experimental.nn as nn
+import oneflow.experimental as flow
 import math
-import oneflow.nn as nn
 import numpy as np
 
 class Attention(nn.Module):
@@ -17,8 +16,8 @@ class Attention(nn.Module):
         # flow.matmul(dim>2的多维情况下和torch行为没对齐)
         # scores = flow.matmul(query, key.transpose(-2, -1)) \
         #          / math.sqrt(query.size()[-1])
-        x = flow.tmp.transpose(key, perm=[0, 1, 3, 2])
-        x = flow.tmp.matmul(query, x)
+        x = flow.transpose(key, perm=[0, 1, 3, 2])
+        x = flow.matmul(query, x)
         scores = x / math.sqrt(query.size()[3])
 
 
@@ -32,4 +31,4 @@ class Attention(nn.Module):
         if dropout is not None:
             p_attn = dropout(p_attn)
 
-        return flow.tmp.matmul(p_attn, value), p_attn
+        return flow.matmul(p_attn, value), p_attn

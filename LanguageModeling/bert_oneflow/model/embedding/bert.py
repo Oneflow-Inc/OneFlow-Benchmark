@@ -1,5 +1,5 @@
-import oneflow as flow
-import oneflow.nn as nn
+import oneflow.experimental as flow
+import oneflow.experimental.nn as nn
 import numpy as np
 
 
@@ -64,7 +64,7 @@ class BERTEmbedding(nn.Module):
         self.segment = SegmentEmbedding(embed_size=self.token.embedding_dim)       # shape >> flow.Size([16, 20, 256])
 
 
-        self.dropout = nn.Dropout(p=dropout)
+        self.dropout = flow.nn.Dropout(p=dropout)
         self.embed_size = embed_size
 
     def forward(self, sequence, segment_label): # shape >>> flow.Size([16, 20])

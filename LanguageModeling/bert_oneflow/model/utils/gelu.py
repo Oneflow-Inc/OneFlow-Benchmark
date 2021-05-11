@@ -1,5 +1,5 @@
-import oneflow.nn as nn
-import oneflow as flow
+import oneflow.experimental.nn as nn
+import oneflow.experimental as flow
 import math
 
 class GELU(nn.Module):

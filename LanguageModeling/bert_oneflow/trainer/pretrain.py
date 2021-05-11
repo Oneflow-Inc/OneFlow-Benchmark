@@ -1,6 +1,6 @@
 
-import oneflow as flow
-import oneflow.nn as nn
+import oneflow.experimental as flow
+import oneflow.experimental.nn as nn
 from oneflow.optimizer import Adam 
 # from flow.utils.data import DataLoader
 from torch.utils.data import DataLoader

@@ -1,9 +1,9 @@
-import oneflow.nn as nn
+import oneflow.experimental.nn as nn
 
 from .transformer import TransformerBlock
 from .embedding import BERTEmbedding
 import numpy as np
-import oneflow as flow
+import oneflow.experimental as flow
 
 
 class BERT(nn.Module):
