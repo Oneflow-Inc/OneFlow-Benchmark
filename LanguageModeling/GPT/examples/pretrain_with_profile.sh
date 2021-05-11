@@ -1,6 +1,5 @@
 #! /bin/bash
-
-set -ex
+# set -ex
 
 export ONEFLOW_GPT_SEQ_LENGTH=1024
 export ONEFLOW_GPT_NUM_LAYERS=12
@@ -15,4 +14,4 @@ export ONEFLOW_DEBUG_MODE=1
 export ONEFLOW_PROFILER_KERNEL_PROFILE_KERNEL_FORWARD_RANGE=1
 export ONEFLOW_GTP_PROFILE_FILE="117M_1n1d_bz8"
 
-source `dirname $0`/pretrain_gpt.sh
+source $(dirname $0)/pretrain.sh

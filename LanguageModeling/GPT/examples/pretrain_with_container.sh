@@ -1,6 +1,5 @@
 #! /bin/bash
-
-set -ex
+# set -ex
 
 export ONEFLOW_GPT_NUM_NODES=1 
 export ONEFLOW_GPT_NUM_GPUS_PER_NODE=1 
