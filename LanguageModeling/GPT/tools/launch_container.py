@@ -30,13 +30,13 @@ def launch_oneflow_gpt_container(
     extra_mount=None,
     py_ver="3.7",
     proxy=None,
+    interactive=True,
     name="oneflow_gpt",
 ):
     bash_script = f"""set -ex
 export PATH={py_bin_path(py_ver)}:$PATH
 python3 -m pip install {wheel}
 python3 -m pip install -e {src}
-python3 --version
 {cmd or 'bash'}
 """
 
@@ -48,8 +48,17 @@ python3 --version
     if extra_mount is not None:
         docker_args += f" -v {extra_mount}:{extra_mount}"
 
-    docker_cmd = "docker run -it --rm --privileged --network host --shm-size=8g"
-    docker_cmd += " --gpus all"
+    docker_cmd = "docker run"
+
+    if interactive:
+        docker_cmd += " -it"
+
+    docker_cmd += " --rm"
+    docker_cmd += " --runtime nvidia"
+    docker_cmd += " --privileged"
+    docker_cmd += " --network host"
+    docker_cmd += " --shm-size=8g"
+
     docker_cmd += docker_args
     docker_cmd += f" -v {src}:{src}"
     docker_cmd += f" -v {homepath('var-cache')}:/var/cache"
@@ -85,6 +94,7 @@ def parse_args():
     parser.add_argument("--extra-mount", type=str, default="/data", help="")
     parser.add_argument("--py", type=str, default="3.7", help="")
     parser.add_argument("--proxy", type=str, default=None, help="")
+    parser.add_argument("--no-interactive", action="store_false", dest="interactive", help="")
     return parser.parse_args()
 
 
@@ -98,4 +108,5 @@ if __name__ == "__main__":
         args.extra_mount,
         args.py,
         args.proxy,
+        args.interactive,
     )
