@@ -24,16 +24,15 @@ class MultiHeadedAttention(nn.Module):
     def forward(self, query, key, value, mask=None):
         batch_size = query.size()[0] # 16
         # 1) Do all the linear projections in batch from d_model => h x d_k
-        # query, key, value = [l(x).reshape(shape=[batch_size, -1, self.h, self.d_k]).transpose(perm=(0, 2, 1, 3))
-        #                      for l, x in zip(self.linear_layers, (query, key, value))]
+        query, key, value = [l(x).reshape(shape=[batch_size, -1, self.h, self.d_k]).transpose(perm=(0, 2, 1, 3))
+                             for l, x in zip(self.linear_layers, (query, key, value))]
 
 
-        # TODO: query, key, value；以及下面的res = self.output_linear(res)放开会报错
-        #query,key,value  shape >> flow.Size([16, 8, 20, 32]);
+        # TODO: ？？？query, key, value；以及下面的res = self.output_linear(res)放开就会报错
+        #query,key,value  shape >> flow.Size([16, 8, 20, 32])
         query = flow.Tensor(16, 8, 20, 32)
         key = flow.Tensor(16, 8, 20, 32)
         value = flow.Tensor(16, 8, 20, 32)
-
    
         # 2) Apply attention on all the projected vectors in batch.
         x, attn = self.attention(query, key, value, mask, self.dropout)
