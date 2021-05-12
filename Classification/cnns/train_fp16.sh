@@ -12,7 +12,7 @@ echo NUM_EPOCH=$NUM_EPOCH
 if [ -n "$2" ]; then
     DATA_ROOT=$2
 else
-    DATA_ROOT=/data/imagenet/ofrecord
+    DATA_ROOT=/DATA/disk1/ImageNet/ofrecord
 fi
 echo DATA_ROOT=$DATA_ROOT
 
@@ -31,23 +31,23 @@ python3 of_cnn_train_val.py \
      --val_data_dir=$DATA_ROOT/validation \
      --val_data_part_num=256 \
      --num_nodes=1 \
-     --gpu_num_per_node=8 \
+     --gpu_num_per_node=1 \
      --optimizer="sgdwlars" \
      --momentum=0.9 \
      --label_smoothing=0.1 \
      --learning_rate=7.4 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=208 \
-     --val_batch_size_per_device=50 \
+     --batch_size_per_device=96 \
+     --val_batch_size_per_device=100 \
      --use_fp16 \
      --channel_last=True \
-     --pad_output \
      --fuse_bn_relu=True \
      --fuse_bn_add_relu=True \
      --nccl_fusion_threshold_mb=16 \
      --nccl_fusion_max_ops=24 \
      --gpu_image_decoder=True \
      --num_epoch=$NUM_EPOCH \
-     --model="resnet50"
+     --model="resnet50" \
+      --model_load_dir="/home/xuefei/snapshot"
 
 echo "Writting log to ${LOGFILE}"
