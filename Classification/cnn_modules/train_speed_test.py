@@ -21,7 +21,7 @@ def _parse_args():
         "--image_path", type=str, default="./data/fish.jpg", help="input image path"
     )
     parser.add_argument(
-        "--dataset_path", type=str, default="./imagenette2", help="dataset path"
+        "--dataset_path", type=str, default="./imagenette", help="dataset path"
     )
     return parser.parse_args()
 
@@ -31,15 +31,17 @@ def rmse(l, r):
 def main(args):
     flow.env.init()
     flow.enable_eager_execution()
-    batch_size = 8
-    train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
-    val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), batch_size)
+    batch_size = 16
+    image_nd = np.ones((batch_size, 3, 224, 224), dtype=np.float32)
+    label_nd = np.array([e for e in range(batch_size)], dtype=np.int32)
+    # train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
+    # val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), batch_size)
 
-    print(len(train_data_loader), len(val_data_loader))
+    # print(len(train_data_loader), len(val_data_loader))
 
 
-    image_nd, label_nd = train_data_loader[0]
-    print(image_nd.shape, label_nd.shape)
+    # image_nd, label_nd = train_data_loader[0]
+    # print(image_nd.shape, label_nd.shape)
 
     start_t = time.time()
     res50_module = resnet50()
