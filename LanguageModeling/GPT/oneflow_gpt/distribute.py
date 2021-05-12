@@ -1,7 +1,7 @@
 import contextlib
 import oneflow as flow
 
-from .config import get_args
+from oneflow_gpt.config import get_args
 
 _DIST_UTIL = None
 

@@ -1,7 +1,7 @@
 import oneflow as flow
 
-from . import distribute
-from .config import get_args
+from oneflow_gpt import distribute
+from oneflow_gpt.config import get_args
 
 
 def get_train_val_test_num_samples(split, num_samples):

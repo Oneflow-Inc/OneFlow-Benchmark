@@ -2,8 +2,8 @@ import math
 import numpy as np
 import oneflow as flow
 
-from . import distribute
-from .config import get_args
+from oneflow_gpt import distribute
+from oneflow_gpt.config import get_args
 
 
 class GPTModel(object):

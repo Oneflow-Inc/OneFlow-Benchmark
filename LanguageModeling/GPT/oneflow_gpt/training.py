@@ -1,14 +1,21 @@
+import os
+import sys
+
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+)
+
 import numpy as np
 import oneflow as flow
 
-from .config import get_args
-from . import distribute
-from .data import GPTDataLoader, get_train_val_test_num_samples
-from .model import GPTModel, ParallelSparseSoftmaxCrossEntropyLoss
-from .optimizer import make_optimizer
-from .snapshot import Snapshot
-from .util import Metric
-from .third_party.data.gpt_dataset import build_train_valid_test_datasets
+from oneflow_gpt.config import get_args
+from oneflow_gpt import distribute
+from oneflow_gpt.data import GPTDataLoader, get_train_val_test_num_samples
+from oneflow_gpt.model import GPTModel, ParallelSparseSoftmaxCrossEntropyLoss
+from oneflow_gpt.optimizer import make_optimizer
+from oneflow_gpt.snapshot import Snapshot
+from oneflow_gpt.util import Metric
+from oneflow_gpt.third_party.data.gpt_dataset import build_train_valid_test_datasets
 
 
 def _init_env(args):

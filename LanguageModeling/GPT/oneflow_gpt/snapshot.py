@@ -2,7 +2,7 @@ import os
 import numpy as np
 import oneflow as flow
 
-from .config import get_args
+from oneflow_gpt.config import get_args
 
 
 # Warning: this impl rely on specified OneFlow version saving train step policy
