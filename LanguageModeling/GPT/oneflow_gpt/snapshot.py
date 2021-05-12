@@ -1,59 +1,103 @@
 import os
-import numpy as np
+import re
+import glob
+import operator
 import oneflow as flow
-
-from oneflow_gpt.config import get_args
-
-
-# Warning: this impl rely on specified OneFlow version saving train step policy
-def _load_saved_iter(load_dir, train_func_name):
-    iter = 0
-    train_step_path = f"{load_dir}/System-Train-TrainStep-{train_func_name}/out"
-    with open(train_step_path, "rb") as f:
-        iter = np.frombuffer(f.read(), dtype=np.int64).item()
-
-    return iter
 
 
 class Snapshot(object):
-    def __init__(self, train_func_name):
+    def __init__(
+        self,
+        load_dir=None,
+        save_dir=None,
+        save_interval=0,
+        total_iters=0,
+        save_last=False,
+        save_init=False,
+    ):
+        self.load_dir_ = load_dir
+        self.save_dir_ = save_dir
+        self.save_interval_ = save_interval
+        self.total_iters_ = total_iters
+        self.save_last_ = save_last
+        self.save_init_ = save_init
         self.checkpoint_ = flow.train.CheckPoint()
-        args = get_args()
-        if args.load is None:
-            self.checkpoint_.init()
-            self.iter_ = 0
-        else:
-            self.checkpoint_.load(args.load)
-            self.iter_ = _load_saved_iter(args.load, train_func_name)
 
-        self.save_dir_ = args.save
-        self.save_interval_ = args.save_interval or 0
-        self.save_last_ = args.save_last
-        self.train_iters_ = args.train_iters
+        if load_dir is None:
+            self.iter_ = 0
+            self.checkpoint_.init()
+        else:
+            self.iter_, snapshot_dir = self._find_max_iter_snapshot_from_load_dir()
+            if snapshot_dir is not None:
+                print(f"Loading model from {snapshot_dir}")
+                self.checkpoint_.load(snapshot_dir)
+
+        self._check_save_dir_snapshot_existence(self.iter_)
+
+    def _extract_iter_from_snapshot_dirname(self, s):
+        itr_str = re.findall(r"\d+", s)
+        itr = list(map(int, itr_str))
+        assert len(itr) > 0
+        return itr[0]
+
+    def _collect_snapshot2iter(self, basedir):
+        snapshot_dirs = glob.glob(f"{basedir}/iter*_snapshot")
+        snapshot2iter = dict()
+        for s_dir in snapshot_dirs:
+            assert os.path.isdir(s_dir)
+            s = os.path.basename(s_dir)
+            snapshot2iter[s_dir] = self._extract_iter_from_snapshot_dirname(s)
+        return snapshot2iter
+
+    def _check_save_dir_snapshot_existence(self, start_iter):
+        snapshot2iter = self._collect_snapshot2iter(self.save_dir_)
+        for s, i in snapshot2iter.items():
+            if self.save_init_ and i == 0:
+                raise ValueError(f"{s} already exist")
+
+            if self.save_last_ and i == self.total_iters_:
+                raise ValueError(f"{s} already exist")
+
+            if (
+                i > start_iter
+                and self.save_interval_ > 0
+                and (i - start_iter) % self.save_interval_ == 0
+                and i <= self.total_iters_
+            ):
+                raise ValueError(f"{s} already exist")
+
+    def _find_max_iter_snapshot_from_load_dir(self):
+        snapshot2iter = self._collect_snapshot2iter(self.load_dir_)
+        if len(snapshot2iter) == 0:
+            return 0, None
+
+        s, i = max(snapshot2iter.items(), key=operator.itemgetter(1))
+        return i, s
 
     @property
     def iter(self):
         return self.iter_
 
     def save(self, name):
-        assert self.save_dir_ is not None
+        if self.save_dir_ is None:
+            return
+
         save_path = os.path.join(self.save_dir_, name)
         if os.path.exists(save_path):
-            raise ValueError("snapshot path '{save_path}' already exist")
+            return
 
         os.makedirs(save_path)
         print(f"Saving model to {save_path}")
         self.checkpoint_.save(save_path)
 
     def step(self):
+        if self.iter_ == 0 and self.save_init_:
+            self.save("iter0_snapshot")
+
         self.iter_ += 1
 
-        if (
-            self.save_dir_ is not None
-            and self.save_interval_ > 0
-            and self.iter_ % self.save_interval_ == 0
-        ):
-            self.save(f"iter{iter}_snapshot")
+        if self.save_interval_ > 0 and self.iter_ % self.save_interval_ == 0:
+            self.save(f"iter{self.iter_}_snapshot")
 
-        if self.iter_ == self.train_iters_ and self.save_last_:
-            self.save("last_snapshot")
+        if self.iter_ == self.total_iters_ and self.save_last_:
+            self.save(f"iter{self.total_iters_}_snapshot")

@@ -1,8 +1,6 @@
+import os
 import time
 import numpy as np
-import os
-
-from collections import OrderedDict
 
 
 class _Timer(object):
@@ -34,8 +32,9 @@ class Metric(object):
     def __init__(
         self,
         print_steps,
+        start_step,
+        max_step,
         num_samples_per_batch,
-        max_samples,
         keys=None,
         print_format="normal",
         nvidia_smi_report_step=10,
@@ -50,29 +49,32 @@ class Metric(object):
         Returns:
         """
         self.print_steps_ = print_steps
-        self.num_samples_per_micro_batch_ = num_samples_per_batch
-        self.max_samples_ = max_samples
+        self.max_step_ = max_step
+        self.num_samples_per_batch_ = num_samples_per_batch
 
         self.nvidia_smi_report_step_ = nvidia_smi_report_step
         self.nvidia_smi_report_file_ = nvidia_smi_report_file
 
+        self.step_ = start_step
+        self.micro_batches_ = 0
+        self.samples_ = 0
+        self.throughput_ = 0.0
+        self.latency_ = 0.0
+        self.timestamp_ = 0.0
+
+        self.kv_store_ = dict()
         if keys is None:
             self.keys_ = []
         else:
             self.keys_ = list(keys)
 
-        self.stat_ = OrderedDict()
-        self.stat_["batches"] = 0
-        self.stat_["acc_batches"] = 0
-        self.stat_["micro_batches"] = 0
-        self.stat_["acc_micro_batches"] = 0
-        self.stat_["samples"] = 0
-        self.stat_["timestamp"] = 0.0
-        self.stat_["acc_elapsed_time"] = 0.0
-        self.stat_["throughput"] = 0.0
-        self.stat_["latency"] = 0.0
         for key in self.keys_:
-            self.stat_[key] = 0.0
+            self.kv_store_[key] = 0.0
+
+        # need reset after every print
+        self.acc_elapsed_time_ = 0.0
+        self.acc_micro_batches_ = 0
+        self.acc_samples_ = 0
 
         self.timer_ = _Timer()
         self.timer_.start()
@@ -87,20 +89,20 @@ class Metric(object):
 
     def step_print(self):
         record = (
-            f"batches={self.stat_['batches']},"
-            f"micro_batches={self.stat_['micro_batches']},"
-            f"samples={self.stat_['samples']},"
-            f"throughput={self.stat_['throughput']:.5f},"
-            f"latency={self.stat_['latency']:.5f},"
+            f"step={self.step_},"
+            f"micro_batches={self.micro_batches_},"
+            f"samples={self.samples_},"
+            f"throughput={self.throughput_:.5f},"
+            f"latency={self.latency_:.5f},"
         )
         for key in self.keys_:
-            record += f"{key}={self.stat_[key]:.5f},"
+            record += f"{key}={self.kv_store_[key]:.5f},"
 
         print(record)
 
     def step_print_by_table(self):
         title = (
-            f"| {'batches'.ljust(8)} "
+            f"| {'step'.ljust(8)} "
             f"| {'micro_batches'.ljust(15)} "
             f"| {'samples'.ljust(15)} "
             f"| {'throughput'.ljust(10)} "
@@ -109,17 +111,17 @@ class Metric(object):
         sep = f"| {'-' * 8} | {'-' * 15} | {'-' * 15} | {'-' * 10} | {'-' * 10} "
 
         record = (
-            f"| {self.stat_['batches']:<8d} "
-            f"| {self.stat_['micro_batches']:<15d} "
-            f"| {self.stat_['samples']:<15d} "
-            f"| {self.stat_['throughput']:<10.5f} "
-            f"| {self.stat_['latency']:<10.5f} "
+            f"| {self.step_:<8d} "
+            f"| {self.micro_batches_:<15d} "
+            f"| {self.samples_:<15d} "
+            f"| {self.throughput_:<10.5f} "
+            f"| {self.latency_:<10.5f} "
         )
 
         for key in self.keys_:
             title += f"| {key.ljust(10)} "
             sep += f"| {'-' * 10} "
-            record += f"| {self.stat_[key]:<10.5f} "
+            record += f"| {self.kv_store_[key]:<10.5f} "
 
         title += "|"
         sep += "|"
@@ -132,16 +134,11 @@ class Metric(object):
 
         print(record)
 
-    def step_stat(self):
-        self.stat_["acc_batches"] = 0
-        self.stat_["acc_micro_batches"] = 0
-        self.stat_["acc_elapsed_time"] = 0
-
     def metric_cb(self):
         def callback(outputs):
             elapsed_time = self.timer_.step()
-            self.stat_["timestamp"] = self.timer_.cur_step()
-            self.stat_["acc_elapsed_time"] += elapsed_time
+            self.timestamp_ = self.timer_.cur_step()
+            self.acc_elapsed_time_ += elapsed_time
 
             micro_batches = None
             for key in self.keys_:
@@ -151,43 +148,34 @@ class Metric(object):
                     micro_batches = output.shape[0]
                 else:
                     assert micro_batches == output.shape[0]
-                self.stat_[key] += output.sum()
+                self.kv_store_[key] += output.sum()
 
-            self.stat_["acc_batches"] += 1
-            self.stat_["acc_micro_batches"] += micro_batches
+            self.step_ += 1
+            self.acc_micro_batches_ += micro_batches
+            self.acc_samples_ += micro_batches * self.num_samples_per_batch_
 
-            self.stat_["batches"] += 1
-            self.stat_["micro_batches"] += micro_batches
-            self.stat_["samples"] += micro_batches * self.num_samples_per_micro_batch_
-
-            if self.stat_["batches"] == self.nvidia_smi_report_step_:
+            if self.step_ == self.nvidia_smi_report_step_:
                 cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
                 if self.nvidia_smi_report_file_ is not None:
                     cmd += f" -f {self.nvidia_smi_report_file_}"
                 os.system(cmd)
                 self.print_title_ = False
 
-            if (
-                self.stat_["batches"] % self.print_steps_ == 0
-                or self.stat_["samples"] == self.max_samples_
-            ):
-                num_samples = (
-                    self.stat_["acc_micro_batches"] * self.num_samples_per_micro_batch_
-                )
-                throughput = num_samples / self.stat_["acc_elapsed_time"]
-                self.stat_["throughput"] = throughput
-                latency = self.stat_["acc_elapsed_time"] / self.stat_["acc_batches"]
-                self.stat_["latency"] = latency
+            if self.step_ % self.print_steps_ == 0 or self.step_ == self.max_step_:
+                self.throughput_ = self.acc_samples_ / self.acc_elapsed_time_
+                self.latency_ = self.acc_elapsed_time_ / self.print_steps_
 
                 for key in self.keys_:
-                    value = self.stat_[key] / self.stat_["acc_micro_batches"]
-                    self.stat_[key] = value
+                    value = self.kv_store_[key] / self.acc_micro_batches_
+                    self.kv_store_[key] = value
+
+                self.micro_batches_ += self.acc_micro_batches_
+                self.samples_ += self.acc_samples_
 
                 self.print_fn_()
 
-                self.step_stat()
-
-            # metric_time = self.timer_.step()
-            # print("==>", metric_time)
+                self.acc_elapsed_time_ = 0.0
+                self.acc_micro_batches_ = 0
+                self.acc_samples_ = 0
 
         return callback

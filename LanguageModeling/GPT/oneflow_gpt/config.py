@@ -490,6 +490,12 @@ def _add_checkpointing_args(parser):
         default=False,
         help="save model snapshot for last iteration",
     )
+    group.add_argument(
+        "--save-init",
+        action="store_true",
+        default=False,
+        help="save model snapshot for inited",
+    )
 
     return parser
 

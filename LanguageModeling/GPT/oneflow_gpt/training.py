@@ -124,14 +124,24 @@ def train():
     _init_env(args)
     _init_config(args)
     trainer = _make_gpt_train_func(args)
-    snapshot = Snapshot(trainer.__name__)
+    snapshot = Snapshot(
+        load_dir=args.load,
+        save_dir=args.save,
+        save_interval=args.save_interval,
+        total_iters=args.train_iters,
+        save_last=args.save_last,
+        save_init=args.save_init,
+    )
 
     metric = Metric(
         print_steps=args.log_interval,
+        start_step=snapshot.iter,
+        max_step=args.train_iters,
         num_samples_per_batch=args.micro_batch_size * args.data_parallel_size,
-        max_samples=args.train_samples,
         keys=["loss"],
         print_format=args.metric_print_format,
+        nvidia_smi_report_step=10,
+        nvidia_smi_report_file=None,
     )
 
     if args.use_external_dataset:
