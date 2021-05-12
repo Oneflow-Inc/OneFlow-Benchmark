@@ -41,12 +41,9 @@ class NextSentencePrediction(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, x): # x.shape >> flow.Size([16, 20, 256])
-        # TODO: (daquexian)
-        # Tensor切片行为和pytorch没有对齐,正常切片后应该是flow.Size([16, 256]),此处为flow.Size([16, 1, 256])
-
+        # TODO: Tensor不支持切片：TypeError: 'Tensor' object is not subscriptable
         # return self.softmax(self.linear(x[:, 0]))
-        x = flow.Tensor(16, 256)
-        return self.softmax(self.linear(x))
+        return self.softmax(self.linear(flow.Tensor(16, 256)))
 
 
 class MaskedLanguageModel(nn.Module):

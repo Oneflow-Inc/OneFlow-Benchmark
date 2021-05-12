@@ -15,6 +15,7 @@ class PositionwiseFeedForward(nn.Module):
         self.activation = GELU()
 
     def forward(self, x):   # x.shape >> flow.Size([16, 20, 256])
-        return self.dropout(self.activation(x))
+        # TODO：此处放开self.w_1和self.w_2会报错
         # return self.w_2(self.dropout(self.activation(self.w_1(x))))
+        return self.dropout(self.activation(x))
     

@@ -102,6 +102,7 @@ class BERTTrainer:
 
 
         for i, data in data_iter:
+            # exit after 1 step/iter
             if i > 0:
                 exit()
 
