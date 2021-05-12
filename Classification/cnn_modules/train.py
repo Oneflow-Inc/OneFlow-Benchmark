@@ -21,7 +21,7 @@ def _parse_args():
         "--image_path", type=str, default="./data/fish.jpg", help="input image path"
     )
     parser.add_argument(
-        "--dataset_path", type=str, default="./imagenette2", help="dataset path"
+        "--dataset_path", type=str, default="./imagenette", help="dataset path"
     )
     return parser.parse_args()
 
@@ -37,10 +37,13 @@ def main(args):
     val_batch_size = 16
     learning_rate = 0.001
     mom = 0.9
-    train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
-    val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), val_batch_size)
 
-    print(len(train_data_loader), len(val_data_loader))
+    image_nd = np.ones((batch_size, 3, 224, 224), dtype=np.float32)
+    label_nd = np.array([e for e in range(batch_size)], dtype=np.int32)
+
+    # train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
+    # val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), val_batch_size)
+    # print(len(train_data_loader), len(val_data_loader))
 
     ###############################
     # pytorch init
@@ -85,13 +88,11 @@ def main(args):
     torch_losses = []
 
     for epoch in range(10000):
-        train_data_loader.shuffle_data()
         res50_module.train()
         torch_res50_module.train()
 
         # for b in range(len(train_data_loader)):
         for b in range(10):
-            image_nd, label_nd = train_data_loader[b]
             print("epoch % d iter: %d" % (epoch, b), image_nd.shape, label_nd.shape)
         
             # oneflow train 
