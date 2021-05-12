@@ -38,7 +38,7 @@ def _init_env(args):
 
 def _init_config(args):
     flow.config.gpu_device_num(args.num_gpus_per_node)
-    if args.tensor_model_parallel_size > 1:
+    if args.tensor_model_parallel_size * args.pipeline_model_parallel_size > 1:
         if hasattr(flow.config, "nccl_use_compute_stream"):
             flow.config.nccl_use_compute_stream(True)
         else:
