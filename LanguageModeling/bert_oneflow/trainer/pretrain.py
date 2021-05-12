@@ -63,12 +63,10 @@ class BERTTrainer:
         # self.optim_schedule = ScheduledOptim(self.optim, self.bert.hidden, n_warmup_steps=warmup_steps)
 
         # Using Negative Log Likelihood Loss function for predicting the masked_token
-        # self.criterion = nn.NLLLoss(ignore_index=0)
-        # TODO: nn.NLLLoss nn.CrossEntropyLoss多维下都会报错
+        # self.criterion = nn.NLLLoss(ignore_index=0) # NLLLoss module不支持ignore_index参数
         self.criterion = nn.CrossEntropyLoss()
 
         self.log_freq = log_freq
-
         # print("Total Parameters:", sum([p.nelement() for p in self.model.parameters()]))
 
     def train(self, epoch):
@@ -106,6 +104,8 @@ class BERTTrainer:
             if i > 0:
                 exit()
 
+            #     # 0. batch_data will be sent into the device(GPU or cpu)
+            #     data = {key: value.to(self.device) for key, value in data.items()}
             data["bert_input"] = flow.Tensor(np.random.randint(1, 200000, size=(16, 20)), dtype=flow.float)
             data["segment_label"] = flow.Tensor(np.random.randint(1, 2, size=(16, 20)), dtype=flow.int)
             data["is_next"] = flow.Tensor(np.random.randint(0, 1, 16), dtype=flow.int32)
@@ -113,28 +113,23 @@ class BERTTrainer:
 
             # 1. forward the next_sentence_prediction and masked_lm model
             next_sent_output, mask_lm_output = self.model.forward(data["bert_input"], data["segment_label"])
-            print("mask_lm_output.shape >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", mask_lm_output.shape)
-            next_sent_output = flow.Tensor(16, 2, dtype=flow.float32)
 
-            print("next_sent_output.shape >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", next_sent_output.shape)
-            print("next_sent_output >>>>>>>>>>>>>> dtype", next_sent_output.dtype)
             # 2-1. NLL(negative log likelihood) loss of is_next classification result
             next_loss = self.criterion(next_sent_output, data["is_next"])
-            print("finish >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> next_loss = self.criterion()")
 
-
-            # 2-2. NLLLoss of predicting masked token word TODO: nn.CrossEntropyLoss 多维下报错
-            # mask_loss = self.criterion(flow.tmp.transpose(mask_lm_output, perm=[0, 2, 1]), data["bert_label"])
+            # 2-2. NLLLoss of predicting masked token word 
+            # TODO: nn.CrossEntropyLoss/nn.NLLLoss 都报错
+            # mask_loss = self.criterion(mask_lm_output.transpose(perm=[0, 2, 1]), data["bert_label"])
             mask_loss = flow.Tensor([13.865])
 
             # 2-3. Adding next_loss and mask_loss : 3.4 Pre-training Procedure
             loss = next_loss + mask_loss
 
-            # # 3. backward and optimization only in train
-            # if train:
-            #     self.optim_schedule.zero_grad()
-            #     loss.backward()
-            #     self.optim_schedule.step_and_update_lr()
+            # 3. backward and optimization only in train
+            if train:
+                self.optim_schedule.zero_grad()
+                loss.backward()
+                self.optim_schedule.step_and_update_lr()
 
             # next sentence prediction accuracy
             # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
@@ -157,49 +152,6 @@ class BERTTrainer:
             print("EP%d_%s, avg_loss=" % (epoch, str_code), avg_loss.numpy() / 1, "total_acc=",
                 (total_correct * 100.0 / total_element).numpy())
 
-
-
-        # for i, data in data_iter:
-        #     # 0. batch_data will be sent into the device(GPU or cpu)
-        #     data = {key: value.to(self.device) for key, value in data.items()}
-
-        #     # 1. forward the next_sentence_prediction and masked_lm model
-        #     next_sent_output, mask_lm_output = self.model.forward(data["bert_input"], data["segment_label"])
-
-        #     # 2-1. NLL(negative log likelihood) loss of is_next classification result
-        #     next_loss = self.criterion(next_sent_output, data["is_next"])
-
-        #     # 2-2. NLLLoss of predicting masked token word
-        #     mask_loss = self.criterion(mask_lm_output.transpose(1, 2), data["bert_label"])
-
-        #     # 2-3. Adding next_loss and mask_loss : 3.4 Pre-training Procedure
-        #     loss = next_loss + mask_loss
-
-        #     # # 3. backward and optimization only in train
-        #     # if train:
-        #     #     self.optim_schedule.zero_grad()
-        #     #     loss.backward()
-        #     #     self.optim_schedule.step_and_update_lr()
-
-        #     # next sentence prediction accuracy
-        #     correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
-        #     avg_loss += loss.item()
-        #     total_correct += correct
-        #     total_element += data["is_next"].nelement()
-
-        #     post_fix = {
-        #         "epoch": epoch,
-        #         "iter": i,
-        #         "avg_loss": avg_loss / (i + 1),
-        #         "avg_acc": total_correct / total_element * 100,
-        #         "loss": loss.item()
-        #     }
-
-        #     if i % self.log_freq == 0:
-        #         data_iter.write(str(post_fix))
-
-        # print("EP%d_%s, avg_loss=" % (epoch, str_code), avg_loss / len(data_iter), "total_acc=",
-        #       total_correct * 100.0 / total_element)
 
     def save(self, epoch, file_path="output/bert_trained.model"):
         """
