@@ -90,6 +90,7 @@ else
     oneflow_gpt_src_dir=${ONEFLOW_GPT_SRC_DIR:-"$(dirname $(dirname $0))"}
     oneflow_dev_image=${ONEFLOW_DEV_IMAGE:-"oneflow-manylinux2014-cuda11.2:0.1"}
     python_version=${ONEFLOW_GPT_PYTHON_VERSION:-"3.7"}
+    oneflow_gpt_data_dir=${ONEFLOW_GPT_DATA_DIR:-"/data"}
 
     if [[ -z "${ONEFLOW_WHEEL}" ]]; then
         echo "ONEFLOW_WHEEL env var not set"
@@ -101,5 +102,6 @@ else
         --py ${python_version} \
         --image ${oneflow_dev_image} \
         --wheel ${ONEFLOW_WHEEL} \
+        --extra-mount ${oneflow_gpt_data_dir} \
         --cmd "$cmd"
 fi
