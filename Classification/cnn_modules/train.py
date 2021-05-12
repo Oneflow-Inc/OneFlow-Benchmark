@@ -90,7 +90,7 @@ def main(args):
         torch_res50_module.train()
 
         # for b in range(len(train_data_loader)):
-        for b in range(0):
+        for b in range(10):
             image_nd, label_nd = train_data_loader[b]
             print("epoch % d iter: %d" % (epoch, b), image_nd.shape, label_nd.shape)
         
@@ -129,38 +129,38 @@ def main(args):
         val_data_loader.shuffle_data()
         correct_of = 0.0
         correct_torch = 0.0
-        for b in range(len(val_data_loader)):
-        # for b in range(10):
+        # for b in range(len(val_data_loader)):
+        for b in range(0):
             image_nd, label_nd = val_data_loader[b]
             print("validation iter: %d" % b, image_nd.shape, label_nd.shape)
 
-            # start_t = time.time()
-            # image = flow.Tensor(image_nd)
-            # with flow.no_grad():
-            #     logits = res50_module(image)
-            #     predictions = logits.softmax()
-            # of_predictions = predictions.numpy()
-            # clsidxs = np.argmax(of_predictions, axis=1)
-
-            # for i in range(val_batch_size):
-            #     if clsidxs[i] == label_nd[i]:
-            #         correct_of += 1
-            # end_t = time.time()
-            # print("of predict time: %f, %d" % (end_t - start_t, correct_of))
-
-            # pytroch val
             start_t = time.time()
-            image = torch.from_numpy(image_nd).to('cuda')
-            with torch.no_grad():
-                logits = torch_res50_module(image)
-                predictions = logits.softmax(-1)
-            torch_predictions = predictions.cpu().detach().numpy()
-            clsidxs = np.argmax(torch_predictions, axis=1)
+            image = flow.Tensor(image_nd)
+            with flow.no_grad():
+                logits = res50_module(image)
+                predictions = logits.softmax()
+            of_predictions = predictions.numpy()
+            clsidxs = np.argmax(of_predictions, axis=1)
+
             for i in range(val_batch_size):
                 if clsidxs[i] == label_nd[i]:
-                    correct_torch += 1
+                    correct_of += 1
             end_t = time.time()
-            print("torch predict time: %f, %d" % (end_t - start_t, correct_torch))
+            print("of predict time: %f, %d" % (end_t - start_t, correct_of))
+
+            # pytroch val
+            # start_t = time.time()
+            # image = torch.from_numpy(image_nd).to('cuda')
+            # with torch.no_grad():
+            #     logits = torch_res50_module(image)
+            #     predictions = logits.softmax(-1)
+            # torch_predictions = predictions.cpu().detach().numpy()
+            # clsidxs = np.argmax(torch_predictions, axis=1)
+            # for i in range(val_batch_size):
+            #     if clsidxs[i] == label_nd[i]:
+            #         correct_torch += 1
+            # end_t = time.time()
+            # print("torch predict time: %f, %d" % (end_t - start_t, correct_torch))
 
         all_samples = len(val_data_loader) * batch_size
         print("epoch %d, oneflow top1 val acc: %f, torch top1 val acc: %f" % (epoch, correct_of / all_samples, correct_torch / all_samples))

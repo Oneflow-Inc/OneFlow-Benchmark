@@ -1,4 +1,4 @@
-import oneflow as flow
+import oneflow.experimental as flow
 from oneflow.python.framework.function_util import global_function_or_identity
 
 import numpy as np
@@ -71,8 +71,13 @@ def main(args):
     image = flow.Tensor(image_nd, dtype=flow.float32, requires_grad=True)
     label = flow.Tensor(label_nd, dtype=flow.int32)
     corss_entropy = flow.nn.CrossEntropyLoss(reduction="mean")
+
+    res50_module.to(flow.device('cuda'))
+    corss_entropy.to(flow.device('cuda'))
+    image = image.to(flow.device('cuda'))
+    label = label.to(flow.device('cuda'))
     
-    bp_iters = 10000
+    bp_iters = 10
     for_time = 0.0
     bp_time = 0.0
     update_time = 0.0
@@ -81,6 +86,7 @@ def main(args):
     #     with flow.no_grad():
     #         logits = res50_module(image)
     #         loss = corss_entropy(logits, label)
+
 
     for i in range(bp_iters):
         s_t = time.time()

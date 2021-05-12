@@ -1,4 +1,4 @@
-import oneflow as flow
+import oneflow.experimental as flow
 import numpy as np
 import cv2
 import time
@@ -12,8 +12,8 @@ train_record_reader = flow.nn.OfrecordReader("/home/ldpe2g/oneFlow/oneflowBenckm
                         batch_size=train_batch_size,
                         data_part_num=1,
                         part_name_suffix_length=5,
-                        random_shuffle=False,
-                        shuffle_after_epoch=False)
+                        random_shuffle=True,
+                        shuffle_after_epoch=True)
 record_label_decoder = flow.nn.OfrecordRawDecoder("class/label", shape=(), dtype=flow.int32)
 color_space = 'RGB'
 height = 224
@@ -28,16 +28,20 @@ rgb_mean = [123.68, 116.779, 103.939]
 rgb_std = [58.393, 57.12, 57.375]
 crop_mirror_norm = flow.nn.CropMirrorNormalize(color_space=color_space, output_layout="NCHW",
                                             mean=rgb_mean, std=rgb_std, output_dtype=flow.float)
-rng = flip()
+
+with flow.no_grad():
+    rng = flip()
 
 images = []
 for i in range(10):
+    print(i)
     start = time.time()
-    train_record = train_record_reader()
-    label = record_label_decoder(train_record)
-    image_raw_buffer = record_image_decoder(train_record)
-    image = resize(image_raw_buffer)
-    image = crop_mirror_norm(image, rng)
+    with flow.no_grad():
+        train_record = train_record_reader()
+        label = record_label_decoder(train_record)
+        image_raw_buffer = record_image_decoder(train_record)
+        image = resize(image_raw_buffer)
+        image = crop_mirror_norm(image, rng)
     print(image.shape, time.time() - start)
 
     # recover images
