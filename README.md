@@ -18,6 +18,9 @@ This repository provides OneFlow deep learning benchmark examples for CV, CTR an
 - [SQuAD for Question Answering](./LanguageModeling/BERT)
 - [CoLA and MRPC of GLUE](./LanguageModeling/BERT)
 
+## [GPT](./LanguageModeling/GPT) for Generative Pre-trained Transformer
+- [Generative Pre-trained Transformer](./LanguageModeling/GPT)
+
 ## OneFlow Benchmark Test Reports
 
 | Model | DType | XLA | Throughput | Speedup on 32 devices |
