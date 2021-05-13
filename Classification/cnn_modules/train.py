@@ -1,5 +1,4 @@
-import oneflow as flow
-from oneflow.python.framework.function_util import global_function_or_identity
+import oneflow.experimental as flow
 
 import numpy as np
 import time
@@ -21,7 +20,7 @@ def _parse_args():
         "--image_path", type=str, default="./data/fish.jpg", help="input image path"
     )
     parser.add_argument(
-        "--dataset_path", type=str, default="./imagenette", help="dataset path"
+        "--dataset_path", type=str, default="./imagenette2", help="dataset path"
     )
     return parser.parse_args()
 
@@ -38,12 +37,9 @@ def main(args):
     learning_rate = 0.001
     mom = 0.9
 
-    image_nd = np.ones((batch_size, 3, 224, 224), dtype=np.float32)
-    label_nd = np.array([e for e in range(batch_size)], dtype=np.int32)
-
-    # train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
-    # val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), val_batch_size)
-    # print(len(train_data_loader), len(val_data_loader))
+    train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
+    val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), val_batch_size)
+    print(len(train_data_loader), len(val_data_loader))
 
     ###############################
     # pytorch init
@@ -72,10 +68,11 @@ def main(args):
     start_t = time.time()
     torch_keys = torch_params.keys()
 
-    # for k in dic.keys():
-    #     if k in torch_keys:
-    #         dic[k] = torch_params[k].numpy()
-    # res50_module.load_state_dict(dic)
+    dic = res50_module.state_dict()
+    for k in dic.keys():
+        if k in torch_keys:
+            dic[k] = torch_params[k].numpy()
+    res50_module.load_state_dict(dic)
     end_t = time.time()
     print('load params time : {}'.format(end_t - start_t))
     of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
@@ -87,12 +84,13 @@ def main(args):
     of_losses = []
     torch_losses = []
 
-    for epoch in range(10000):
+    for epoch in range(1):
         res50_module.train()
         torch_res50_module.train()
 
         # for b in range(len(train_data_loader)):
-        for b in range(10):
+        for b in range(100):
+            image_nd, label_nd = train_data_loader[b]
             print("epoch % d iter: %d" % (epoch, b), image_nd.shape, label_nd.shape)
         
             # oneflow train 
@@ -110,18 +108,18 @@ def main(args):
             print('oneflow loss {}, train time : {}'.format(l, end_t - start_t))
 
             # pytroch train
-            # start_t = time.time()
-            # image = torch.from_numpy(image_nd).to('cuda')
-            # label = torch.tensor(label_nd, dtype=torch.long, requires_grad=False).to('cuda')
-            # logits = torch_res50_module(image)
-            # loss = corss_entropy(logits, label)
-            # loss.backward()
-            # torch_sgd.step()
-            # torch_sgd.zero_grad()
-            # end_t = time.time()
-            # l = loss.cpu().detach().numpy()
-            # torch_losses.append(l)
-            # print('pytorch loss {}, train time : {}'.format(l, end_t - start_t))
+            start_t = time.time()
+            image = torch.from_numpy(image_nd).to('cuda')
+            label = torch.tensor(label_nd, dtype=torch.long, requires_grad=False).to('cuda')
+            logits = torch_res50_module(image)
+            loss = corss_entropy(logits, label)
+            loss.backward()
+            torch_sgd.step()
+            torch_sgd.zero_grad()
+            end_t = time.time()
+            l = loss.cpu().detach().numpy()
+            torch_losses.append(l)
+            print('pytorch loss {}, train time : {}'.format(l, end_t - start_t))
         
         print("epoch %d done, start validation" % epoch)
 
