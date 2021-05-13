@@ -63,8 +63,9 @@ class BERTTrainer:
         # self.optim_schedule = ScheduledOptim(self.optim, self.bert.hidden, n_warmup_steps=warmup_steps)
 
         # Using Negative Log Likelihood Loss function for predicting the masked_token
-        # self.criterion = nn.NLLLoss(ignore_index=0) # NLLLoss module不支持ignore_index参数
-        self.criterion = nn.CrossEntropyLoss()
+        # self.criterion = nn.NLLLoss(ignore_index=0)
+        # TODO:用nn.NLLLoss()会Segmentation fault；且目前不支持ignore_index
+        self.criterion = nn.CrossEntropyLoss() 
 
         self.log_freq = log_freq
         # print("Total Parameters:", sum([p.nelement() for p in self.model.parameters()]))
@@ -118,9 +119,7 @@ class BERTTrainer:
             next_loss = self.criterion(next_sent_output, data["is_next"])
 
             # 2-2. NLLLoss of predicting masked token word 
-            # TODO: nn.CrossEntropyLoss/nn.NLLLoss 都报错
-            # mask_loss = self.criterion(mask_lm_output.transpose(perm=[0, 2, 1]), data["bert_label"])
-            mask_loss = flow.Tensor([13.865])
+            mask_loss = self.criterion(mask_lm_output.transpose(1, 2), data["bert_label"])
 
             # 2-3. Adding next_loss and mask_loss : 3.4 Pre-training Procedure
             loss = next_loss + mask_loss

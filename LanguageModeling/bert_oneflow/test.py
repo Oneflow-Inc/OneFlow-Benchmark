@@ -10,7 +10,6 @@ from dataset import BERTDataset, WordVocab
 import numpy as np
 
 # eager mode
-flow.env.init()
 flow.enable_eager_execution()
 
 def test():

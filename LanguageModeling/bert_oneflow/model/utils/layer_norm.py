@@ -17,6 +17,6 @@ class LayerNorm(nn.Module):
 
 
     def forward(self, x): # x input/output >> shape flow.Size([16, 20, 256])
-        mean = x.mean(2, keepdim=True)   # TODO: 原参数为x.mean(-1, keepdim=True)，需对齐torch
-        std = x.std(dim=2, keepdim=True) # 同上， 原参数为dim=-1，此处不支持，需对齐pytorch
+        mean = x.mean(-1, keepdim=True)
+        std = x.std(dim=-1, keepdim=True)
         return self.a_2 * (x - mean) / (std + self.eps) + self.b_2

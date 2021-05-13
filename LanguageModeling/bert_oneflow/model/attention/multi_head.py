@@ -39,7 +39,7 @@ class MultiHeadedAttention(nn.Module):
         x, attn = self.attention(query, key, value, mask, self.dropout)
 
         # 3) "Concat" using a view and apply a final linear.
-        res = x.transpose(perm=(0, 2, 1, 3)).reshape(shape = [batch_size, -1, self.h * self.d_k]) 
+        res = x.transpose(1, 2).reshape(shape = [batch_size, -1, self.h * self.d_k]) 
         # res = self.output_linear(res) # TODO: self.output_linear放开会报错
         return res
 
