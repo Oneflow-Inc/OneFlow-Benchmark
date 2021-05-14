@@ -62,10 +62,6 @@ def main(args):
     end_t = time.time()
     print('load params time : {}'.format(end_t - start_t))
 
-    learning_rate = 0.01
-    mom = 0.9
-    of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
-
     # # set for eval mode
     # res50_module.eval()
     start_t = time.time()
@@ -74,11 +70,15 @@ def main(args):
     label = flow.Tensor(label_nd, dtype=flow.int32)
     corss_entropy = flow.nn.CrossEntropyLoss(reduction="mean")
 
-    res50_module.to(flow.device('cuda'))
-    corss_entropy.to(flow.device('cuda'))
     image = image.to(flow.device('cuda'))
     label = label.to(flow.device('cuda'))
-    
+    res50_module.to(flow.device('cuda'))
+    corss_entropy.to(flow.device('cuda'))
+
+    learning_rate = 0.01
+    mom = 0.9
+    of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
+
     bp_iters = 10
     for_time = 0.0
     bp_time = 0.0
