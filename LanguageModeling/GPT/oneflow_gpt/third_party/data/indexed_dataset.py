@@ -17,7 +17,6 @@ import struct
 from itertools import accumulate
 
 import numpy as np
-# import torch
 
 
 def __best_fitting_dtype(vocab_size=None):
@@ -123,7 +122,6 @@ def create_doc_idx(sizes):
     return doc_idx
 
 
-# class IndexedDataset(torch.utils.data.Dataset):
 class IndexedDataset():
     """Loader for IndexedDataset"""
     _HDR_MAGIC = b'TNTIDX\x00\x00'
@@ -243,7 +241,6 @@ class IndexedCachedDataset(IndexedDataset):
             self.data_file.close()
             self.data_file = None
 
-    # @lru_cache(maxsize=8)
     def __getitem__(self, idx):
         if isinstance(idx, int):
             i = idx
@@ -332,7 +329,6 @@ def _warmup_mmap_file(path):
             pass
 
 
-# class MMapIndexedDataset(torch.utils.data.Dataset):
 class MMapIndexedDataset():
     class Index(object):
         _HDR_MAGIC = b'MMIDIDX\x00\x00'
@@ -478,7 +474,6 @@ class MMapIndexedDataset():
     def __len__(self):
         return len(self._index)
 
-    # @lru_cache(maxsize=8)
     def __getitem__(self, idx):
         if isinstance(idx, int):
             ptr, size = self._index[idx]

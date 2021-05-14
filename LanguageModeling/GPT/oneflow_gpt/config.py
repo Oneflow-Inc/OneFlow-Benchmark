@@ -81,6 +81,18 @@ def _check_model_size(args):
             f" number of attention heads {args.num_attention_heads}"
         )
 
+    if args.num_attention_heads % args.tensor_model_parallel_size != 0:
+        raise ValueError(
+            f"number of attention heads {args.num_attention_heads} must be divisible by"
+            f" tensor model parallel size {args.tensor_model_parallel_size}"
+        )
+
+    if args.num_layers % args.pipeline_model_parallel_size != 0:
+        raise ValueError(
+            f"number of layers {args.num_layers} must be divisible by"
+            f" pipeline model parallel size {args.pipeline_model_parallel_size}"
+        )
+
 
 def _check_parallel_size(args):
     if len(args.node_ips) < args.num_nodes:
