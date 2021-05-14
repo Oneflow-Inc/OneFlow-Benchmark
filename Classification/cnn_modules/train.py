@@ -75,9 +75,14 @@ def main(args):
     res50_module.load_state_dict(dic)
     end_t = time.time()
     print('load params time : {}'.format(end_t - start_t))
-    of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
 
     of_corss_entropy = flow.nn.CrossEntropyLoss()
+
+    res50_module.to(flow.device('cuda'))
+    of_corss_entropy.to(flow.device('cuda'))
+
+    of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
+
 
     ############################
 
@@ -97,6 +102,8 @@ def main(args):
             start_t = time.time()
             image = flow.Tensor(image_nd)
             label = flow.Tensor(label_nd, dtype=flow.int32, requires_grad=False)
+            image = image.to(flow.device('cuda'))
+            label = label.to(flow.device('cuda'))
             logits = res50_module(image)
             loss = of_corss_entropy(logits, label)
             loss.backward()
