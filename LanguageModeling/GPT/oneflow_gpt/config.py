@@ -404,7 +404,7 @@ def _add_training_args(parser):
     group.add_argument(
         "--metric-print-format",
         type=str,
-        default="normal",
+        default="table",
         choices=["normal", "table"],
         help="metric print format <normal|table>",
     )
