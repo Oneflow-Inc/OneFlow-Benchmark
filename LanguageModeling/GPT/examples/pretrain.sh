@@ -22,7 +22,7 @@ log_interval=${ONEFLOW_GPT_LOG_INTERVAL:-"100"}
 
 load_path=${ONEFLOW_GPT_LOAD_PATH:-"checkpoint"}
 save_path=${ONEFLOW_GPT_SAVE_PATH:-"checkpoint"}
-save_interval=${ONEFLOW_GPT_SAVE_INTERVAL:-"20000"}
+save_interval=${ONEFLOW_GPT_SAVE_INTERVAL:-"10000"}
 
 cmd=""
 
