@@ -50,6 +50,6 @@ python3 of_cnn_train_val.py \
      --gpu_image_decoder=True \
      --num_epoch=$NUM_EPOCH \
      --model="resnet50" \
-     --model_load_dir="/home/scxfjiang/repos/OneFlow-Benchmark/Classification/tools/mxnet/snapshot"
+     --model_load_dir="/home/scxfjiang/repos/OneFlow-Benchmark/Classification/tools/mxnet/trained_snapshot"
 
 python compare.py
