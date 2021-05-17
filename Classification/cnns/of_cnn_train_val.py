@@ -72,15 +72,8 @@ def label_smoothing(labels, classes, eta, dtype):
 
 
 @flow.global_function("train", get_train_config(args))
-def TrainNet(images: oft.Numpy.Placeholder((32, 224, 224, 4)), labels: oft.Numpy.Placeholder((32,), dtype=flow.int32)):
-    # if args.train_data_dir:
-    #     assert os.path.exists(args.train_data_dir)
-    #     print("Loading data from {}".format(args.train_data_dir))
-    #     (labels, images) = ofrecord_util.load_imagenet_for_training(args)
-    #
-    # else:
-    #     print("Loading synthetic data.")
-    #     (labels, images) = ofrecord_util.load_synthetic(args)
+def TrainNet(images: oft.Numpy.Placeholder((32, 224, 224, 4)),
+             labels: oft.Numpy.Placeholder((32,), dtype=flow.int32)):
     logits = model_dict[args.model](images, args)
     if args.label_smoothing > 0:
         one_hot_labels = label_smoothing(labels, args.num_classes, args.label_smoothing, logits.dtype)
@@ -124,8 +117,8 @@ def main():
         metric = Metric(desc='train', calculate_batches=args.loss_print_every_n_iter,
                         batch_size=train_batch_size, loss_key='loss')
 
-        images = np.load("/home/scxfjiang/Desktop/mx_images.npy")
-        labels = np.load("/home/scxfjiang/Desktop/mx_labels.npy")
+        images = np.load("/home/scxfjiang/Desktop/mx_blobs/mx_images.npy")
+        labels = np.load("/home/scxfjiang/Desktop/mx_blobs/mx_labels.npy")
         for i in range(epoch_size):
             TrainNet(images, labels).get()
             assert False

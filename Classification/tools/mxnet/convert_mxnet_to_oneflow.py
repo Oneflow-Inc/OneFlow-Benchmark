@@ -72,7 +72,7 @@ class ModelConverter:
         f = open(save_path, 'wb')
         f.write(model.tobytes())
         f.close()
-        # np.save(save_path, model)
+        np.save(save_path, model)
 
         # write meta
         meta_info = variable_meta_info_pb.VariableMetaInfo()
