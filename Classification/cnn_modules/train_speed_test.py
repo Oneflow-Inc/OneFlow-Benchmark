@@ -21,7 +21,7 @@ def _parse_args():
         "--image_path", type=str, default="./data/fish.jpg", help="input image path"
     )
     parser.add_argument(
-        "--dataset_path", type=str, default="./imagenette", help="dataset path"
+        "--dataset_path", type=str, default="./imagenette2", help="dataset path"
     )
     return parser.parse_args()
 
@@ -31,8 +31,8 @@ def rmse(l, r):
 def main(args):
     flow.env.init()
     flow.enable_eager_execution()
-    batch_size = 16
-    image_nd = np.ones((batch_size, 3, 224, 224), dtype=np.float32)
+    batch_size = 1
+    image_nd = np.random.rand(batch_size, 3, 224, 224).astype(np.float32)
     label_nd = np.array([e for e in range(batch_size)], dtype=np.int32)
     # train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
     # val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), batch_size)
@@ -50,27 +50,28 @@ def main(args):
     print('init time : {}'.format(end_t - start_t))
 
     start_t = time.time()
-    torch_params = torch.load(args.model_path)
-    torch_keys = torch_params.keys()
+    # torch_params = torch.load(args.model_path)
+    # torch_keys = torch_params.keys()
 
+    torch_params = {}
     for k in dic.keys():
-        if k in torch_keys:
+        # if k in torch_keys:
             # dic[k] = torch_params[k].detach().numpy()
-            torch_params[k] = torch.from_numpy(dic[k].numpy()) 
+        torch_params[k] = torch.from_numpy(dic[k].numpy()) 
 
     # res50_module.load_state_dict(dic)
     end_t = time.time()
     print('load params time : {}'.format(end_t - start_t))
 
     # # set for eval mode
-    # res50_module.eval()
+    res50_module.eval()
     start_t = time.time()
 
     image = flow.Tensor(image_nd, dtype=flow.float32, requires_grad=True)
     label = flow.Tensor(label_nd, dtype=flow.int32)
     corss_entropy = flow.nn.CrossEntropyLoss(reduction="mean")
 
-    image = image.to(flow.device('cuda'))
+    image_gpu = image.to(flow.device('cuda'))
     label = label.to(flow.device('cuda'))
     res50_module.to(flow.device('cuda'))
     corss_entropy.to(flow.device('cuda'))
@@ -79,20 +80,15 @@ def main(args):
     mom = 0.9
     of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
 
-    bp_iters = 10
+    bp_iters = 2
     for_time = 0.0
     bp_time = 0.0
     update_time = 0.0
 
-    # for i in range(10):
-    #     with flow.no_grad():
-    #         logits = res50_module(image)
-    #         loss = corss_entropy(logits, label)
-
-
     for i in range(bp_iters):
         s_t = time.time()
-        logits = res50_module(image)
+        # with flow.no_grad():
+        logits = res50_module(image_gpu)
         loss = corss_entropy(logits, label)
         for_time += time.time() - s_t
 
@@ -131,7 +127,7 @@ def main(args):
     print('torch load params time : {}'.format(end_t - start_t))
 
     # set for eval mode
-    # torch_res50_module.eval()
+    torch_res50_module.eval()
     torch_res50_module.to('cuda')
 
     torch_sgd = torch.optim.SGD(torch_res50_module.parameters(), lr=learning_rate, momentum=mom)
@@ -151,6 +147,7 @@ def main(args):
 
     for i in range(bp_iters):
         s_t = time.time()
+        # with torch.no_grad():
         logits = torch_res50_module(image)
         loss = corss_entropy(logits, label)
         for_time += time.time() - s_t
