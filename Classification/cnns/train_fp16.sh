@@ -41,8 +41,8 @@ python3 of_cnn_train_val.py \
      --loss_print_every_n_iter=100 \
      --batch_size_per_device=32 \
      --val_batch_size_per_device=50 \
-     --use_fp16 \
      --channel_last=True \
+     --use_fp16 \
      --fuse_bn_relu=True \
      --fuse_bn_add_relu=True \
      --nccl_fusion_threshold_mb=16 \
@@ -50,6 +50,6 @@ python3 of_cnn_train_val.py \
      --gpu_image_decoder=True \
      --num_epoch=$NUM_EPOCH \
      --model="resnet50" \
-     --model_load_dir="/home/scxfjiang/repos/OneFlow-Benchmark/Classification/tools/mxnet/trained_snapshot"
+     --model_load_dir="/home/scxfjiang/repos/OneFlow-Benchmark/Classification/tools/mxnet/initialized_snapshot"
 
 python compare.py
