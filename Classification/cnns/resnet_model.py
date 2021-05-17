@@ -21,7 +21,7 @@ import oneflow.typing as otp
 import os
 
 def SaveNumpy(name: str, blob: otp.Numpy):
-    save_dir = "saved_blob"
+    save_dir = "/home/scxfjiang/Desktop/of_blobs/"
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     def _Save(blob: otp.Numpy):
