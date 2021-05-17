@@ -27,6 +27,8 @@ import vgg_model
 import alexnet_model
 import inception_model
 import mobilenet_v2_model
+import oneflow.typing as oft
+import numpy as np
 
 parser = configs.get_parser()
 args = parser.parse_args()
@@ -70,15 +72,15 @@ def label_smoothing(labels, classes, eta, dtype):
 
 
 @flow.global_function("train", get_train_config(args))
-def TrainNet():
-    if args.train_data_dir:
-        assert os.path.exists(args.train_data_dir)
-        print("Loading data from {}".format(args.train_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_training(args)
-
-    else:
-        print("Loading synthetic data.")
-        (labels, images) = ofrecord_util.load_synthetic(args)
+def TrainNet(images: oft.Numpy.Placeholder((32, 224, 224, 4)), labels: oft.Numpy.Placeholder((32,), dtype=flow.int32)):
+    # if args.train_data_dir:
+    #     assert os.path.exists(args.train_data_dir)
+    #     print("Loading data from {}".format(args.train_data_dir))
+    #     (labels, images) = ofrecord_util.load_imagenet_for_training(args)
+    #
+    # else:
+    #     print("Loading synthetic data.")
+    #     (labels, images) = ofrecord_util.load_synthetic(args)
     logits = model_dict[args.model](images, args)
     if args.label_smoothing > 0:
         one_hot_labels = label_smoothing(labels, args.num_classes, args.label_smoothing, logits.dtype)
@@ -95,21 +97,21 @@ def TrainNet():
     return outputs
 
 
-@flow.global_function("predict", get_val_config(args))
-def InferenceNet():
-    if args.val_data_dir:
-        assert os.path.exists(args.val_data_dir)
-        print("Loading data from {}".format(args.val_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
-
-    else:
-        print("Loading synthetic data.")
-        (labels, images) = ofrecord_util.load_synthetic(args)
-
-    logits = model_dict[args.model](images, args, False, False)
-    predictions = flow.nn.softmax(logits)
-    outputs = {"predictions": predictions, "labels": labels}
-    return outputs
+# @flow.global_function("predict", get_val_config(args))
+# def InferenceNet():
+#     if args.val_data_dir:
+#         assert os.path.exists(args.val_data_dir)
+#         print("Loading data from {}".format(args.val_data_dir))
+#         (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
+#
+#     else:
+#         print("Loading synthetic data.")
+#         (labels, images) = ofrecord_util.load_synthetic(args)
+#
+#     logits = model_dict[args.model](images, args, False, False)
+#     predictions = flow.nn.softmax(logits)
+#     outputs = {"predictions": predictions, "labels": labels}
+#     return outputs
 
 
 def main():
@@ -121,15 +123,19 @@ def main():
     for epoch in range(args.num_epochs):
         metric = Metric(desc='train', calculate_batches=args.loss_print_every_n_iter,
                         batch_size=train_batch_size, loss_key='loss')
-        for i in range(epoch_size):
-            TrainNet().async_get(metric.metric_cb(epoch, i))
 
-        if args.val_data_dir:
-            metric = Metric(desc='validation', calculate_batches=num_val_steps,
-                            batch_size=val_batch_size)
-            for i in range(num_val_steps):
-                InferenceNet().async_get(metric.metric_cb(epoch, i))
-        snapshot.save('epoch_{}'.format(epoch))
+        images = np.load("/home/scxfjiang/Desktop/mx_images.npy")
+        labels = np.load("/home/scxfjiang/Desktop/mx_labels.npy")
+        for i in range(epoch_size):
+            TrainNet(images, labels).get()
+            assert False
+
+        # if args.val_data_dir:
+        #     metric = Metric(desc='validation', calculate_batches=num_val_steps,
+        #                     batch_size=val_batch_size)
+        #     for i in range(num_val_steps):
+        #         InferenceNet().async_get(metric.metric_cb(epoch, i))
+        # snapshot.save('epoch_{}'.format(epoch))
 
 
 if __name__ == "__main__":

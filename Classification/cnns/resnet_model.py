@@ -16,6 +16,19 @@ limitations under the License.
 
 import oneflow as flow
 
+import numpy as np
+import oneflow.typing as otp
+import os
+
+def SaveNumpy(name: str, blob: otp.Numpy):
+    save_dir = "saved_blob"
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+    def _Save(blob: otp.Numpy):
+        np.save(os.path.join(save_dir, name), blob)
+
+    return _Save
+
 BLOCK_COUNTS = [3, 4, 6, 3]
 BLOCK_FILTERS = [256, 512, 1024, 2048]
 BLOCK_FILTERS_INNER = [64, 128, 256, 512]
@@ -56,6 +69,8 @@ class ResnetBuilder(object):
             model_name="weight",
             trainable=self.trainable,
         )
+
+        flow.watch_diff(weight, SaveNumpy(name + "-weight_diff", weight))
 
         return flow.nn.conv2d(input, weight, strides, padding, self.data_format, dilations, name=name)
 
@@ -182,6 +197,7 @@ class ResnetBuilder(object):
 
     def resnet_stem(self, input):
         conv1 = self._conv2d("conv1", input, 64, 7, 2)
+        flow.watch(conv1, SaveNumpy("conv0_out", conv1))
         conv1_bn = self._batch_norm_relu(conv1, "conv1")
         pool1 = flow.nn.max_pool2d(
             conv1_bn, ksize=3, strides=2, padding="SAME", data_format=self.data_format, name="pool1",
@@ -216,5 +232,6 @@ def resnet50(images, args, trainable=True, training=True):
             trainable=trainable,
             name="fc1001",
         )
+        flow.watch(fc1001, SaveNumpy("fc1001", fc1001))
     return fc1001
 

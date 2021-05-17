@@ -4,7 +4,6 @@ import argparse
 import pickle as pkl
 
 import oneflow.core.framework.variable_meta_info_pb2 as variable_meta_info_pb
-import oneflow_api
 import oneflow as flow
 import google.protobuf.text_format as text_format
 
@@ -78,7 +77,7 @@ class ModelConverter:
         # write meta
         meta_info = variable_meta_info_pb.VariableMetaInfo()
         meta_info.shape.dim[:] = model.shape
-        meta_info.data_type = oneflow_api.deprecated.GetProtoDtype4OfDtype(flow.float32)
+        meta_info.data_type = flow._oneflow_internal.deprecated.GetProtoDtype4OfDtype(flow.float32)
         f = open(os.path.join(dir_name, "meta"), "wb")
         f.write(text_format.MessageToBytes(meta_info))
         f.close()

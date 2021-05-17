@@ -17,7 +17,6 @@ import oneflow as flow
 import math
 import pprint
 from typing import Optional, Union, Sequence, List, Text, Callable
-import oneflow_api
 import oneflow.python.framework.session_context as session_ctx
 
 def add_optimizer_args(parser):
@@ -97,8 +96,8 @@ def set_up_optimizer(loss, args):
 
     # set up optimizer
     loss_scale_policy = None
-    if args.use_fp16:
-        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
+    # if args.use_fp16:
+    #     loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
     print(args.optimizer)
     if args.optimizer == 'sgd':
         print("Optimizer:  SGD")
@@ -131,13 +130,13 @@ def set_up_optimizer(loss, args):
             decay_rate=args.decay_rate,
             epsilon=args.epsilon,
             loss_scale_policy=loss_scale_policy
-        ).minimize(loss)
+        ).minimize(loss * 8)
     elif args.optimizer=="sgdwlars":
         print("Optimizer: SGDWLARS")
 
         def GetLarsVariablesForCurrentJob() -> List[Text]:
             sess = session_ctx.GetDefaultSession()
-            job_name = oneflow_api.JobBuildAndInferCtx_GetCurrentJobName()
+            job_name = flow._oneflow_internal.JobBuildAndInferCtx_GetCurrentJobName()
             all_vars = list(sess.job_name2var_name2var_blob_[job_name].keys())
             return [var for var in all_vars if not (var.endswith("gamma")
                                                     or var.endswith("beta")
@@ -145,7 +144,7 @@ def set_up_optimizer(loss, args):
 
         def GetSGDWVariablesForCurrentJob() -> List[Text]:
             sess = session_ctx.GetDefaultSession()
-            job_name = oneflow_api.JobBuildAndInferCtx_GetCurrentJobName()
+            job_name = flow._oneflow_internal.JobBuildAndInferCtx_GetCurrentJobName()
             all_vars = list(sess.job_name2var_name2var_blob_[job_name].keys())
             return [var for var in all_vars if (var.endswith("gamma")
                                                 or var.endswith("beta")
@@ -167,7 +166,7 @@ def set_up_optimizer(loss, args):
         flow.optimizer.CombinedOptimizer(
             [lars_optm, sgd_with_mom_optm],
             loss_scale_policy=loss_scale_policy,
-        ).minimize(loss * 8)
+        ).minimize(loss)
         print(lars_optm.Variables())
         print(sgd_with_mom_optm.Variables())
 
