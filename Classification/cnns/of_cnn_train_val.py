@@ -81,9 +81,9 @@ def TrainNet(images: oft.Numpy.Placeholder((32, 224, 224, 4)),
     else:
         loss = flow.nn.sparse_softmax_cross_entropy_with_logits(labels, logits, name="softmax_loss")
 
-    loss = flow.math.reduce_mean(loss)
+    print_loss = flow.math.reduce_mean(loss)
     predictions = flow.nn.softmax(logits)
-    outputs = {"loss": loss, "predictions": predictions, "labels": labels}
+    outputs = {"loss": print_loss, "predictions": predictions, "labels": labels}
 
     # set up warmup,learning rate and optimizer
     optimizer_util.set_up_optimizer(loss, args)

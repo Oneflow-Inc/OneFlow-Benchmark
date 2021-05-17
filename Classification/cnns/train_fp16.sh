@@ -52,4 +52,4 @@ python3 of_cnn_train_val.py \
      --model="resnet50" \
      --model_load_dir="/home/scxfjiang/repos/OneFlow-Benchmark/Classification/tools/mxnet/snapshot"
 
-echo "Writting log to ${LOGFILE}"
+python compare.py
