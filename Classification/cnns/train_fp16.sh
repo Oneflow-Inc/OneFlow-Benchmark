@@ -25,6 +25,8 @@ echo PYTHONUNBUFFERED=$PYTHONUNBUFFERED
 export NCCL_LAUNCH_MODE=PARALLEL
 echo NCCL_LAUNCH_MODE=$NCCL_LAUNCH_MODE
 
+python3 fetch_mx_blobs.py
+
 python3 of_cnn_train_val.py \
      --train_data_dir=$DATA_ROOT/train \
      --train_data_part_num=256 \
