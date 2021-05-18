@@ -21,7 +21,16 @@ import oneflow.typing as otp
 import os
 
 def SaveNumpy(name: str, blob: otp.Numpy):
-    save_dir = "/home/scxfjiang/Desktop/of_blobs/"
+    save_dir = "/home/scxfjiang/Desktop/of_blobs"
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+    def _Save(blob: otp.Numpy):
+        np.save(os.path.join(save_dir, name), blob)
+
+    return _Save
+
+def SaveGradNumpy(name: str, blob: otp.Numpy):
+    save_dir = "/home/scxfjiang/Desktop/of_blobs/grad"
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     def _Save(blob: otp.Numpy):
@@ -70,7 +79,7 @@ class ResnetBuilder(object):
             trainable=self.trainable,
         )
 
-        flow.watch_diff(weight, SaveNumpy(name + "-weight_diff", weight))
+        flow.watch_diff(weight, SaveGradNumpy(name + "-weight_diff", weight))
 
         return flow.nn.conv2d(input, weight, strides, padding, self.data_format, dilations, name=name)
 
