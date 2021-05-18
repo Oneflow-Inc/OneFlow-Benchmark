@@ -49,5 +49,5 @@ class BERT(nn.Module):
         # running over multiple transformer blocks
         for transformer in self.transformer_blocks:
             x = transformer.forward(x, mask)
-
+        print("Finish BERT module >>>>>>>>>>>>>>>>>>>>>>>>>> forward()...")
         return x
