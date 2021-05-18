@@ -17,10 +17,7 @@ def _parse_args():
         "--model_path", type=str, default="./resnet50-19c8e357.pth", help="model path"
     )
     parser.add_argument(
-        "--image_path", type=str, default="./data/fish.jpg", help="input image path"
-    )
-    parser.add_argument(
-        "--dataset_path", type=str, default="./imagenette2", help="dataset path"
+        "--dataset_path", type=str, default="./ofrecord", help="dataset path"
     )
     return parser.parse_args()
 
@@ -30,16 +27,53 @@ def rmse(l, r):
 def main(args):
     flow.env.init()
     flow.enable_eager_execution()
+    flow.InitEagerGlobalSession()
+
+    #############################################
+    train_batch_size = 16
+    val_batch_size = 16
+    channel_last = False
+    output_layout = "NHWC" if channel_last else "NCHW"
+    train_record_reader = flow.nn.OfrecordReader(os.path.join(args.dataset_path, "train"),
+                            batch_size=train_batch_size,
+                            data_part_num=1,
+                            part_name_suffix_length=5,
+                            random_shuffle=True,
+                            shuffle_after_epoch=True)
+    record_label_decoder = flow.nn.OfrecordRawDecoder("class/label", shape=(), dtype=flow.int32)
+    color_space = 'RGB'
+    height = 224
+    width = 224
+    channels = 3
+    record_image_decoder = flow.nn.OFRecordImageDecoderRandomCrop("encoded", color_space=color_space)
+    resize = flow.nn.image.Resize(target_size=[height, width])
+
+    flip = flow.nn.CoinFlip(batch_size=train_batch_size)
+    rgb_mean = [123.68, 116.779, 103.939]
+    rgb_std = [58.393, 57.12, 57.375]
+    crop_mirror_norm = flow.nn.CropMirrorNormalize(color_space=color_space, output_layout=output_layout,
+                                                mean=rgb_mean, std=rgb_std, output_dtype=flow.float)
+
+    val_record_reader = flow.nn.OfrecordReader(os.path.join(args.dataset_path, "val"),
+                                            batch_size=val_batch_size,
+                                            data_part_num=1,
+                                            part_name_suffix_length=5,
+                                            shuffle_after_epoch=False)
+    val_record_image_decoder = flow.nn.OFRecordImageDecoder("encoded", color_space=color_space)
+    val_resize = flow.nn.image.Resize(resize_side="shorter", keep_aspect_ratio=True, target_size=256)
+    val_crop_mirror_normal = flow.nn.CropMirrorNormalize(color_space=color_space, output_layout=output_layout,
+                                                        crop_h=height, crop_w=width, crop_pos_y=0.5, crop_pos_x=0.5,
+                                                        mean=rgb_mean, std=rgb_std, output_dtype=flow.float)
+
+    train_set_size = 9469
+    val_set_size = 3925
+    train_loop = train_set_size // train_batch_size
+    val_loop = val_set_size // val_batch_size
+    ###################################################
 
     epochs = 1000
-    batch_size = 16 # NOTE(Liang Depeng): when batch bigger than 12, for example 16 loss will increase
-    val_batch_size = 16
     learning_rate = 0.001
     mom = 0.9
-
-    train_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "train"), batch_size)
-    val_data_loader = NumpyDataLoader(os.path.join(args.dataset_path, "val"), val_batch_size)
-    print(len(train_data_loader), len(val_data_loader))
 
     ###############################
     # pytorch init
@@ -88,20 +122,25 @@ def main(args):
     of_losses = []
     torch_losses = []
 
+    all_samples = val_loop * val_batch_size
+
     for epoch in range(epochs):
         res50_module.train()
         torch_res50_module.train()
-        train_data_loader.shuffle_data()
 
-        for b in range(len(train_data_loader)):
-        # for b in range(10):
-            image_nd, label_nd = train_data_loader[b]
-            print("epoch % d iter: %d" % (epoch, b), image_nd.shape, label_nd.shape)
+        for b in range(train_loop):
+        # for b in range(100):
+            print("epoch %d train iter %d" % (epoch, b))
+            with flow.no_grad():
+                train_record = train_record_reader()
+                label = record_label_decoder(train_record)
+                image_raw_buffer = record_image_decoder(train_record)
+                image = resize(image_raw_buffer)
+                rng = flip()
+                image = crop_mirror_norm(image, rng)
         
             # oneflow train 
             start_t = time.time()
-            image = flow.Tensor(image_nd)
-            label = flow.Tensor(label_nd, dtype=flow.int32, requires_grad=False)
             image = image.to(flow.device('cuda'))
             label = label.to(flow.device('cuda'))
             logits = res50_module(image)
@@ -116,8 +155,8 @@ def main(args):
 
             # pytroch train
             start_t = time.time()
-            image = torch.from_numpy(image_nd).to('cuda')
-            label = torch.tensor(label_nd, dtype=torch.long, requires_grad=False).to('cuda')
+            image = torch.from_numpy(image.numpy()).to('cuda')
+            label = torch.tensor(label.numpy(), dtype=torch.long, requires_grad=False).to('cuda')
             logits = torch_res50_module(image)
             loss = corss_entropy(logits, label)
             loss.backward()
@@ -132,22 +171,27 @@ def main(args):
 
         res50_module.eval()
         torch_res50_module.eval()
-        val_data_loader.shuffle_data()
         correct_of = 0.0
         correct_torch = 0.0
-        for b in range(len(val_data_loader)):
+        for b in range(val_loop):
         # for b in range(0):
-            image_nd, label_nd = val_data_loader[b]
-            print("validation iter: %d" % b, image_nd.shape, label_nd.shape)
+            print("epoch %d val iter %d" % (epoch, b))
+            with flow.no_grad():
+                val_record = val_record_reader()
+                label = record_label_decoder(val_record)
+                image_raw_buffer = val_record_image_decoder(val_record)
+                image = val_resize(image_raw_buffer)
+                image = val_crop_mirror_normal(image)
 
             start_t = time.time()
-            image = flow.Tensor(image_nd).to(flow.device('cuda'))
+            image = image.to(flow.device('cuda'))
             with flow.no_grad():
                 logits = res50_module(image)
                 predictions = logits.softmax()
             of_predictions = predictions.numpy()
             clsidxs = np.argmax(of_predictions, axis=1)
 
+            label_nd = label.numpy()
             for i in range(val_batch_size):
                 if clsidxs[i] == label_nd[i]:
                     correct_of += 1
@@ -156,7 +200,7 @@ def main(args):
 
             # pytroch val
             start_t = time.time()
-            image = torch.from_numpy(image_nd).to('cuda')
+            image = torch.from_numpy(image.numpy()).to('cuda')
             with torch.no_grad():
                 logits = torch_res50_module(image)
                 predictions = logits.softmax(-1)
@@ -168,7 +212,6 @@ def main(args):
             end_t = time.time()
             print("torch predict time: %f, %d" % (end_t - start_t, correct_torch))
 
-        all_samples = len(val_data_loader) * batch_size
         print("epoch %d, oneflow top1 val acc: %f, torch top1 val acc: %f" % (epoch, correct_of / all_samples, correct_torch / all_samples))
 
     writer = open("of_losses.txt", "w")

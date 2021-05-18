@@ -80,7 +80,7 @@ def main(args):
     mom = 0.9
     of_sgd = flow.optim.SGD(res50_module.parameters(), lr=learning_rate, momentum=mom)
 
-    bp_iters = 2
+    bp_iters = 10
     for_time = 0.0
     bp_time = 0.0
     update_time = 0.0
