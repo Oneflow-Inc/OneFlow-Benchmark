@@ -12,3 +12,6 @@ os.system("scp vs004:/home/xfjiang/log/mx_labels.npy /home/scxfjiang/Desktop/mx_
 os.system("scp vs004:/home/xfjiang/log/conv0_out.npy /home/scxfjiang/Desktop/mx_blobs/")
 os.system("scp vs004:/home/xfjiang/log/fc1_out.npy /home/scxfjiang/Desktop/mx_blobs/")
 os.system("scp -r vs004:/home/xfjiang/log/grad /home/scxfjiang/Desktop/mx_blobs/")
+
+os.system("scp vs004:/home/xfjiang/log/updated_arg_params /home/scxfjiang/Desktop/mx_blobs")
+os.system("scp vs004:/home/xfjiang/log/updated_aux_params /home/scxfjiang/Desktop/mx_blobs")
