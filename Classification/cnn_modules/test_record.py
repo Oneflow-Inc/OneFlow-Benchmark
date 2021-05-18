@@ -34,16 +34,16 @@ crop_mirror_norm = flow.nn.CropMirrorNormalize(color_space=color_space, output_l
 with flow.no_grad():
     rng = flip()
 
-val_record_reader = flow.nn.OfrecordReader("/home/ldpe2g/oneFlow/oneflowBenckmark/dataset/imagenette/ofrecord/val",
-                                          batch_size=batch_size,
-                                          data_part_num=1,
-                                          part_name_suffix_length=5,
-                                          shuffle_after_epoch=False)
-val_record_image_decoder = flow.nn.OFRecordImageDecoder("encoded", color_space=color_space)
-val_resize = flow.nn.image.Resize(resize_side="shorter", keep_aspect_ratio=True, target_size=256)
-val_crop_mirror_normal = flow.nn.CropMirrorNormalize(color_space=color_space, output_layout=output_layout,
-                                                    crop_h=height, crop_w=width, crop_pos_y=0.5, crop_pos_x=0.5,
-                                                    mean=rgb_mean, std=rgb_std, output_dtype=flow.float)
+# val_record_reader = flow.nn.OfrecordReader("/home/ldpe2g/oneFlow/oneflowBenckmark/dataset/imagenette/ofrecord/val",
+#                                           batch_size=batch_size,
+#                                           data_part_num=1,
+#                                           part_name_suffix_length=5,
+#                                           shuffle_after_epoch=False)
+# val_record_image_decoder = flow.nn.OFRecordImageDecoder("encoded", color_space=color_space)
+# val_resize = flow.nn.image.Resize(resize_side="shorter", keep_aspect_ratio=True, target_size=256)
+# val_crop_mirror_normal = flow.nn.CropMirrorNormalize(color_space=color_space, output_layout=output_layout,
+#                                                     crop_h=height, crop_w=width, crop_pos_y=0.5, crop_pos_x=0.5,
+#                                                     mean=rgb_mean, std=rgb_std, output_dtype=flow.float)
 
 train_set_size = 9469
 val_set_size = 3925
@@ -51,16 +51,16 @@ train_loop = train_set_size // batch_size
 val_loop = val_set_size // batch_size
 
 # train
-for i in range(train_loop):
+for i in range(1000000000000000000000):
     print(i)
     start = time.time()
     with flow.no_grad():
         train_record = train_record_reader()
         label = record_label_decoder(train_record)
         image_raw_buffer = record_image_decoder(train_record)
-        image = resize(image_raw_buffer)
-        image = crop_mirror_norm(image, rng)
-    print(image.shape, time.time() - start)
+        # image = resize(image_raw_buffer)
+        # image = crop_mirror_norm(image, rng)
+    # print(image.shape, time.time() - start)
 
     # recover images
     # image_np = image.numpy()
@@ -73,16 +73,16 @@ for i in range(train_loop):
     # cv2.imwrite("recover_image%d.jpg" % i, image_np)
 
 # validation
-for i in range(val_loop):
-    print(i)
-    start = time.time()
-    with flow.no_grad():
-        val_record = val_record_reader()
-        label = record_label_decoder(val_record)
-        image_raw_buffer = val_record_image_decoder(val_record)
-        image = val_resize(image_raw_buffer)
-        image = val_crop_mirror_normal(image)
-    print(image.shape, time.time() - start)
+# for i in range(val_loop):
+#     print(i)
+#     start = time.time()
+#     with flow.no_grad():
+#         val_record = val_record_reader()
+#         label = record_label_decoder(val_record)
+#         image_raw_buffer = val_record_image_decoder(val_record)
+#         image = val_resize(image_raw_buffer)
+#         image = val_crop_mirror_normal(image)
+#     print(image.shape, time.time() - start)
 
     # # recover images
     # image_np = image.numpy()
