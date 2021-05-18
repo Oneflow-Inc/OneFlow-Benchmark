@@ -25,7 +25,7 @@ docker load -i oneflow-manylinux2014-cuda11.2-0.1.tar.gz
 
 ## 数据预处理
 
-训练数据需要预处理。目前OneFlow数据预处理的过程和使用脚本与[Megatron-LM GPT](https://github.com/NVIDIA/Megatron-LM#data-preprocessing)一致。
+训练数据需要预处理。目前 OneFlow 数据预处理的过程和使用脚本参考 [Megatron-LM GPT](https://github.com/NVIDIA/Megatron-LM#data-preprocessing)。
 
 首先，将训练数据json格式保存，json的每行包含一个文本样本，数据放在`text`字段中，例如：
 ```
