@@ -60,8 +60,7 @@ python3 tools/preprocess_data.py \
 
 进一步的命令行参数在源文件[`preprocess_data.py`](https://github.com/NVIDIA/Megatron-LM/blob/main/tools/preprocess_data.py)中描述。
 
-词表文件 [gpt2-vocab.json](https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-vocab.json) 和 
-分词 merge 文件 [gpt2-merges.txt](https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-merges.txt) 文件可以直接下载。
+词表文件 [gpt2-vocab.json](https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-vocab.json) 和 BPE 分词所需 merge 文件 [gpt2-merges.txt](https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-merges.txt) 可以直接下载。
 
 我们测试使用的语料文件 openwebtext.json 是下载 [openwebtext.tar.xz](https://drive.google.com/drive/folders/1IaD_SIIB-K3Sij_-JjWoPy_UrWqQRdjx) 后，然后通过工具转换而来。由于文件过大，暂不提供下载地址。
 
