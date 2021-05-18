@@ -75,7 +75,7 @@ preprocess_data.py 的结果我们提供了直接下载的方式 [gpt_sample_dat
 bash example/pretrain_345M.sh
 ```
 
-这个脚本启动一个在单 GPU 上的拥有 345M 大小参数的 GPT 模型预训练任务。如果用户尝鲜的 GPU 的显存比较小，也可以尝试使用更小参数的模型版本 `pretrain_117M.sh`。
+这个脚本启动一个在单 GPU 上的拥有 345M 大小参数的 GPT 模型预训练任务。如果用户测试所使用的的 GPU 的显存比较小，也可以尝试使用更小参数的模型版本 `pretrain_117M.sh`。
 
 用户如果想调整某些参数，也可以手动调用 [training.py](https://github.com/Oneflow-Inc/OneFlow-Benchmark/blob/master/LanguageModeling/GPT/oneflow_gpt/training.py):
 
