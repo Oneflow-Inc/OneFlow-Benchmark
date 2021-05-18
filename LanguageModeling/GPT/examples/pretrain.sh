@@ -20,9 +20,11 @@ node_ips=${ONEFLOW_GPT_NODE_IPS:-"10.11.0.2,10.11.0.3,10.11.0.4,10.11.0.5"}
 train_iters=${ONEFLOW_GPT_TRAIN_ITERS:-"500000"}
 log_interval=${ONEFLOW_GPT_LOG_INTERVAL:-"100"}
 
+init_loss_scale=${ONEFLOW_GPT_INIT_LOSS_SCALE:-"4294967296"}
+
 load_path=${ONEFLOW_GPT_LOAD_PATH:-"checkpoint"}
 save_path=${ONEFLOW_GPT_SAVE_PATH:-"checkpoint"}
-save_interval=${ONEFLOW_GPT_SAVE_INTERVAL:-"20000"}
+save_interval=${ONEFLOW_GPT_SAVE_INTERVAL:-"10000"}
 
 cmd=""
 
@@ -60,23 +62,23 @@ cmd+=" --num-gpus-per-node ${num_gpus_per_node}"
 cmd+=" --num-nodes ${num_nodes}"
 cmd+=" --node-ips ${node_ips}"
 cmd+=" --train-iters ${train_iters}"
+cmd+=" --dataset ${dataset}"
+cmd+=" --seq-length ${seq_length}"
+cmd+=" --vocab-size 50257"
+cmd+=" --split 949,50,1"
 cmd+=" --learning-rate 0.00015"
 cmd+=" --min-lr 1.0e-5"
 cmd+=" --lr-decay-style cosine"
 cmd+=" --lr-decay-iters 320000"
 cmd+=" --lr-warmup-fraction 0.01"
 cmd+=" --optimizer adamw"
+cmd+=" --initial-loss-scale ${init_loss_scale}"
 cmd+=" --weight-decay 1e-2"
 cmd+=" --clip-grad 1.0"
-cmd+=" --dataset ${dataset}"
-cmd+=" --seq-length ${seq_length}"
-cmd+=" --vocab-size 50257"
-cmd+=" --split 949,50,1"
 cmd+=" --load ${load_path}"
 cmd+=" --save ${save_path}"
 cmd+=" --save-interval ${save_interval}"
 cmd+=" --log-interval ${log_interval}"
-cmd+=" --metric-print-format table"
 cmd+=" --checkpoint-activations"
 cmd+=" --multihead-attention-fusion"
 cmd+=" --fp16"
