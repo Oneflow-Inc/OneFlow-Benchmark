@@ -29,25 +29,8 @@ parser.add_argument("--data_dir", type=str, default=None)
 parser.add_argument("--data_part_num", type=int, default=32, help="data part number in dataset")
 parser.add_argument("--iter_num", type=int, default=1144000, help="total iterations to run")
 parser.add_argument("--batch_size_per_device", type=int, default=64)
-parser.add_argument("--debug", type=int, default=0)
-parser.add_argument("--data_load_random", type=int, default=1)
-parser.add_argument("--model_load", type=str, default=None)
-
-
 args = parser.parse_args()
 configs.print_args(args)
-
-
-if  args.debug == 1:
-    flow.config.enable_debug_mode(True)
-    print('Enable Debug !!!!!!!')
-
-if  args.data_load_random == 1:
-    random_tmp=True
-    print('Enable random loading of data !!!!!!!')
-else:
-    random_tmp=False
-    print('Disable random loading of data !!!!!!!')
 
 batch_size = args.num_nodes * args.gpu_num_per_node * args.batch_size_per_device
 
@@ -56,8 +39,8 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
     ofrecord = flow.data.ofrecord_reader(data_dir,
                                          batch_size=batch_size,
                                          data_part_num=data_part_num,
-                                         random_shuffle = random_tmp,
-                                         shuffle_after_epoch=random_tmp)
+                                         random_shuffle = True,
+                                         shuffle_after_epoch=True)
     blob_confs = {}
     def _blob_conf(name, shape, dtype=flow.int32):
         blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
@@ -121,11 +104,6 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
 
-
-    if args.model_load != None:
-        flow.load_variables(flow.checkpoint.get(args.model_load))
-
-    print('num_accumulation_steps:', args.num_accumulation_steps)
     metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, 
                     batch_size=batch_size * args.num_accumulation_steps, keys=['total_loss', 'mlm_loss', 'nsp_loss'])
     for step in range(args.iter_num):
