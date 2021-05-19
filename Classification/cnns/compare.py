@@ -12,7 +12,7 @@ def compare(x, y, x_name=None, y_name=None):
     x[np.where(np.abs(x) <= 1e-6)] = 1e-6
 
     print("max abs diff: {}".format(np.max(np.abs(x - y))))
-    print("mean abs diff: {}".format(np.mean(x - y)))
+    print("mean diff: {}".format(np.mean(x - y)))
     print("max relative diff: {}".format(np.max(np.abs((x - y) / x))))
     print("mean relative diff: {}".format(np.mean(np.abs((x - y) / x))))
     print("\n\n")
