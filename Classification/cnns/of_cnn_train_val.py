@@ -121,6 +121,7 @@ def main():
         labels = np.load("/home/scxfjiang/Desktop/mx_blobs/mx_labels.npy")
         for i in range(epoch_size):
             TrainNet(images, labels).get()
+            snapshot.save('updated_params')
             assert False
 
         # if args.val_data_dir:

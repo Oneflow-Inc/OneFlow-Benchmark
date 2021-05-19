@@ -26,7 +26,7 @@ def add_optimizer_args(parser):
     group.add_argument("--learning_rate", type=float, default=0.256)
     group.add_argument("--wd", type=float, default=1e-4, help="weight decay")
     group.add_argument("--momentum", type=float, default=0.875, help="momentum")
-    group.add_argument('--lr_decay', type=str, default='polynomial', help='cosine, step, polynomial, exponential, None')
+    group.add_argument('--lr_decay', type=str, default='step', help='cosine, step, polynomial, exponential, None')
     group.add_argument('--lr_decay_rate', type=float, default='0.94', help='exponential learning decay rate')
     group.add_argument('--lr_decay_epochs', type=int, default=2, help='exponential learning rate decay every n epochs')
     group.add_argument('--warmup_epochs', type=int, default=2,
@@ -60,10 +60,9 @@ def set_up_optimizer(loss, args):
     elif args.lr_decay == 'step':
         # PiecewiseScalingScheduler
         lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
-            base_lr=args.learning_rate,
+            base_lr=1.0,
             boundaries=[30, 60, 80],
-            scale=[0.1, 0.01, 0.001],
-            warmup=warmup
+            scale=[1.0, 1.0, 1.0],
         )
     elif args.lr_decay == 'polynomial':
         # PolynomialSchduler

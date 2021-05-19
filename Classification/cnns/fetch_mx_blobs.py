@@ -15,3 +15,6 @@ os.system("scp -r vs004:/home/xfjiang/log/grad /home/scxfjiang/Desktop/mx_blobs/
 
 os.system("scp vs004:/home/xfjiang/log/updated_arg_params /home/scxfjiang/Desktop/mx_blobs")
 os.system("scp vs004:/home/xfjiang/log/updated_aux_params /home/scxfjiang/Desktop/mx_blobs")
+
+os.system("mv /home/scxfjiang/Desktop/mx_blobs/grad/stage1_unit1_bn1sc_beta_grad.npy /home/scxfjiang/Desktop/mx_blobs/grad/stage1_unit1_bn_sc_beta_grad.npy")
+os.system("mv /home/scxfjiang/Desktop/mx_blobs/grad/stage1_unit1_bn1sc_gamma_grad.npy /home/scxfjiang/Desktop/mx_blobs/grad/stage1_unit1_bn_sc_gamma_grad.npy")
