@@ -137,7 +137,7 @@ class Metric(object):
                 for key in self.keys:
                     value = self.metric_dict[key] / self.metric_dict['n_' + key]
                     self.update_and_save(key, value, step, **kwargs)
-                print(', '.join(('{}: {}' if type(v) is int else '{}: {:.3f}').format(k, v) \
+                print(', '.join(('{}: {}' if type(v) is int else '{}: {}').format(k, v) \
                                 for k, v in self.metric_dict.items()), time.time())
                 self._clear()
 
