@@ -184,5 +184,35 @@ bash examples/distribute_pretrain_4n8d_2x4x4_512_2304x24.sh
 # 模型评估和下游任务 (Evaluation and Tasks)
 
 ## LAMBADA Cloze Accuracy
+  进行下游任务前需要提前下载好下游任务数据集[LAMBADA dataset](https://github.com/cybertronai/bflm/blob/master/lambada_test.jsonl).同时需要下载词表文件 [gpt2-vocab.json](https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-vocab.json) 和 BPE 分词所需 merge 文件 [gpt2-merges.txt](https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-merges.txt)。
 
-[WIP]
+- ### 执行下游任务
+  - `VALID_DATA=/path/to/lambada_test.json`，指定下游任务数据集路径
+  - `VOCAB_FILE=/path/to/gpt2-vocab.json`，指定词表文件路径
+  - `MERGE_FILE=/path/to/gpt2-merges.txt`，指定上述中的merge文件路径
+  - `CHECKPOINT_PATH=/path/to/model`，指定训练好的模型路径
+  - `dropout_rate=0.0`，执行下游任务时，此`dropout`指需为0
+
+> 注：执行下游任务时，`lambada_cloze_accuracy.sh`中的`hidden_size`、`num_attn_heads`、`num_layers`、`seq_length`等参数需要和训练的模型参数一致。即如果训练模型时使用的基础参数为`hidden_size=768,num_attn_heads=12,num_layers=12,seq_length=1024`，那么执行下游任务时也需要使用同样的参数。
+
+  ```
+    bash examples/lambada_cloze_accuracy.sh
+  ```
+
+- ### 示例
+  使用上述[数据预处理](#数据预处理)中得到的数据集训练[500000轮](https://oneflow-public.oss-cn-beijing.aliyuncs.com/GPT/OneFlow/of_1n8g_dp8_gbz64_mbsz8_g8_e768_h12_l12_model/iter500000_snapshot.tar.gz)，得到的模型来执行下游任务，会输出如下内容：
+  ```
+    validation results on LAMBADA | number correct: 1.3450E+03 | total examples: 5.1520E+03 | avg accuracy: 2.6106E-01
+    done :-)
+  ```
+
+- 模型参数：
+  ```
+    COMMON_TASK_ARGS="--num-layers 12 \
+                    --hidden-size 768 \
+                    --num-attention-heads 12 \
+                    --seq-length 1024 \
+                    --max-position-embeddings 1024 \
+                    --fp16 \
+                    --vocab-file $VOCAB_FILE"
+  ```
