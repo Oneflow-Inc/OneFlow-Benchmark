@@ -53,7 +53,7 @@ model_dict = {
 
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
-#flow.config.enable_debug_mode(True)
+flow.config.enable_debug_mode(True)
 
 if args.use_fp16 and args.num_nodes * args.gpu_num_per_node > 1:
     flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
