@@ -41,9 +41,10 @@ class NextSentencePrediction(nn.Module):
         self.softmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, x): # x.shape >> flow.Size([16, 20, 256])
-        # TODO: Tensor不支持切片：TypeError: 'Tensor' object is not subscriptable
-        # return self.softmax(self.linear(x[:, 0]))
-        return self.softmax(self.linear(flow.Tensor(16, 256)))
+        # return self.softmax(self.linear(x[:, 0])
+        # TODO: 1.LocalTensor无法直接切片，需要构造flow.Tensor；2.切片行为未对齐，需reshape
+        # TypeError: 'oneflow._oneflow_internal.LocalTensor' object is not subscriptable
+        return self.softmax(self.linear(flow.Tensor(x)[:, 0].reshape(shape=(x.shape[0], x.shape[-1]))))
 
 
 class MaskedLanguageModel(nn.Module):
