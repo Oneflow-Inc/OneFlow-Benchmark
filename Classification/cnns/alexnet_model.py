@@ -78,7 +78,7 @@ def conv2d_layer(
     return output
 
 
-def alexnet(images, args, need_transpose=False, training=True):
+def alexnet(images, args, need_transpose=False, trainable=True):
     data_format = "NHWC" if args.channel_last else "NCHW"
 
     conv1 = conv2d_layer(
@@ -113,6 +113,7 @@ def alexnet(images, args, need_transpose=False, training=True):
         bias_initializer=_get_bias_initializer(),
         kernel_regularizer=_get_regularizer(),
         bias_regularizer=_get_regularizer(),
+        trainable=trainable,
         name="fc1",
     )
 
@@ -127,6 +128,7 @@ def alexnet(images, args, need_transpose=False, training=True):
         bias_initializer=_get_bias_initializer(),
         kernel_regularizer=_get_regularizer(),
         bias_regularizer=_get_regularizer(),
+        trainable=trainable,
         name="fc2",
     )
 
@@ -140,6 +142,7 @@ def alexnet(images, args, need_transpose=False, training=True):
         kernel_initializer=_get_kernel_initializer(),
         kernel_regularizer=_get_regularizer(),
         bias_initializer=False,
+        trainable=trainable,
         name="fc3",
     )
 

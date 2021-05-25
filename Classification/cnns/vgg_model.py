@@ -16,7 +16,7 @@ limitations under the License.
 
 import oneflow as flow
 
-def _batch_norm(inputs, name=None, trainable=True, data_format="NCHW"):
+def _batch_norm(inputs, name=None, trainable=True, training=True, data_format="NCHW"):
     axis = 1 if  data_format=="NCHW" else 3
     return flow.layers.batch_normalization(
         inputs=inputs,
@@ -26,6 +26,7 @@ def _batch_norm(inputs, name=None, trainable=True, data_format="NCHW"):
         center=True,
         scale=True,
         trainable=trainable,
+        training=training,
         name=name,
     )
 
@@ -48,7 +49,8 @@ def conv2d_layer(
 
     weight_regularizer=_get_regularizer(), # weight_decay
     bias_regularizer=_get_regularizer(),
-
+    trainable=True,
+    training=True,
     bn=True,
 ): 
     weight_shape =  (filters, input.shape[1], kernel_size, kernel_size) if data_format=="NCHW"  else  (filters, kernel_size, kernel_size, input.shape[3])
@@ -73,7 +75,7 @@ def conv2d_layer(
     if activation is not None:
         if activation == "Relu":
             if bn:
-                output = _batch_norm(output, name + "_bn", True, data_format)
+                output = _batch_norm(output, name + "_bn", trainable=trainable, training=training, data_format=data_format)
                 output = flow.nn.relu(output)
             else:
                 output = flow.nn.relu(output)
@@ -83,7 +85,7 @@ def conv2d_layer(
     return output
 
 
-def _conv_block(in_blob, index, filters, conv_times, data_format="NCHW"):
+def _conv_block(in_blob, index, filters, conv_times, data_format="NCHW", trainable=True, training=True):
     conv_block = []
     conv_block.insert(0, in_blob)
     weight_initializer = flow.variance_scaling_initializer(2, 'fan_out', 'random_normal', data_format=data_format)
@@ -96,6 +98,8 @@ def _conv_block(in_blob, index, filters, conv_times, data_format="NCHW"):
             strides=1,
             data_format=data_format,
             weight_initializer=weight_initializer,
+            trainable=trainable,
+            training=training,
             bn=True,
         )
 
@@ -107,19 +111,19 @@ def _conv_block(in_blob, index, filters, conv_times, data_format="NCHW"):
 def vgg16bn(images, args, trainable=True, training=True):
     data_format="NHWC" if args.channel_last else "NCHW"
     
-    conv1 = _conv_block(images, 0, 64, 2, data_format)
+    conv1 = _conv_block(images, 0, 64, 2, data_format, trainable=trainable, training=training)
     pool1 = flow.nn.max_pool2d(conv1[-1], 2, 2, "VALID", data_format, name="pool1")
     
-    conv2 = _conv_block(pool1, 2, 128, 2, data_format)
+    conv2 = _conv_block(pool1, 2, 128, 2, data_format, trainable=trainable, training=training)
     pool2 = flow.nn.max_pool2d(conv2[-1], 2, 2, "VALID", data_format, name="pool2")
 
-    conv3 = _conv_block(pool2, 4, 256, 3, data_format)
+    conv3 = _conv_block(pool2, 4, 256, 3, data_format, trainable=trainable, training=training)
     pool3 = flow.nn.max_pool2d(conv3[-1], 2, 2, "VALID", data_format, name="pool3")
 
-    conv4 = _conv_block(pool3, 7, 512, 3, data_format)
+    conv4 = _conv_block(pool3, 7, 512, 3, data_format, trainable=trainable, training=training)
     pool4 = flow.nn.max_pool2d(conv4[-1], 2, 2, "VALID", data_format, name="pool4")
 
-    conv5 = _conv_block(pool4, 10, 512, 3, data_format)
+    conv5 = _conv_block(pool4, 10, 512, 3, data_format, trainable=trainable, training=training)
     pool5 = flow.nn.max_pool2d(conv5[-1], 2, 2, "VALID", data_format, name="pool5")
 
     def _get_kernel_initializer():
