@@ -78,7 +78,8 @@ def conv2d_layer(
     return output
 
 
-def alexnet(images, args, need_transpose=False, trainable=True):
+
+def alexnet(images, args, trainable=True):
     data_format = "NHWC" if args.channel_last else "NCHW"
 
     conv1 = conv2d_layer(
