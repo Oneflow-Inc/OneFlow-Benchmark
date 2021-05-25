@@ -57,7 +57,7 @@ def load_image(image_path='test_img/ILSVRC2012_val_00020287.JPEG'):
 
 @flow.global_function("predict", flow.function_config())
 def InferenceNet(images: tp.Numpy.Placeholder((1, 3, 224, 224), dtype=flow.float)) -> tp.Numpy:
-    logits = model_dict[args.model](images, args, training=False)
+    logits = model_dict[args.model](images, args)
     predictions = flow.nn.softmax(logits)
     return predictions
 

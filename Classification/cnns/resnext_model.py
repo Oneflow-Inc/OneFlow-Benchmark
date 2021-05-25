@@ -62,7 +62,7 @@ def _conv2d(
         kernel_initializer=_get_initializer("weight"),
         bias_initializer=_get_initializer("bias"),
         kernel_regularizer=_get_regularizer("weight"), bias_regularizer=_get_regularizer("bias"),
-        trainable=True, name=name, weight_name=name+"-weight",
+        trainable=trainable, name=name, weight_name=name+"-weight",
         bias_name=name+"-bias")
 
 def conv3x3(in_tensor, filters, strides=1, groups=1, trainable=True, name=""):
