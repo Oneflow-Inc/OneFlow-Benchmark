@@ -36,7 +36,7 @@ def _get_initializer(model_name):
         return flow.random_normal_initializer(0, 0.01)
 
 
-def _batch_norm(inputs, axis, momentum, epsilon, center=True, scale=True, trainable=True, name=None):
+def _batch_norm(inputs, axis, momentum, epsilon, center=True, scale=True, trainable=True, training=True, name=None):
     return flow.layers.batch_normalization(
         inputs=inputs,
         axis=axis,
@@ -49,6 +49,7 @@ def _batch_norm(inputs, axis, momentum, epsilon, center=True, scale=True, traina
         beta_regularizer = _get_regularizer("beta"),
         gamma_regularizer = _get_regularizer("gamma"),
         trainable=trainable,
+        training=training,
         name=name
     )
 
@@ -57,13 +58,13 @@ def _relu6(data, prefix):
     return flow.clip_by_value(data,0,6,name='%s-relu6'%prefix)
 
 
-def mobilenet_unit(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, data_format="NCHW", if_act=True, use_bias=False, prefix=''):
+def mobilenet_unit(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, data_format="NCHW", if_act=True, use_bias=False, trainable=True, training=True, prefix=''):
     conv = flow.layers.conv2d(inputs=data, filters=num_filter, kernel_size=kernel, strides=stride, 
             padding=pad, data_format=data_format, dilation_rate=1, groups=num_group, activation=None, 
             use_bias=use_bias, kernel_initializer=_get_initializer("weight"), 
             bias_initializer=_get_initializer("bias"), kernel_regularizer=_get_regularizer("weight"), 
             bias_regularizer=_get_regularizer("bias"), name=prefix)
-    bn = _batch_norm(conv, axis=1, momentum=0.9, epsilon=1e-5, name='%s-BatchNorm'%prefix)
+    bn = _batch_norm(conv, axis=1, momentum=0.9, epsilon=1e-5, trainable=trainable, training=training, name='%s-BatchNorm'%prefix)
     if if_act:
         act = _relu6(bn, prefix)
         return act
@@ -74,7 +75,7 @@ def shortcut(data_in, data_residual, prefix):
     out = flow.math.add(data_in,data_residual)
     return out
 
-def inverted_residual_unit(data, num_in_filter, num_filter, ifshortcut, stride, kernel, pad, expansion_factor, prefix, data_format="NCHW", has_expand = 1):
+def inverted_residual_unit(data, num_in_filter, num_filter, ifshortcut, stride, kernel, pad, expansion_factor, prefix, trainable=True, training=True, data_format="NCHW", has_expand = 1):
     num_expfilter = int(round(num_in_filter*expansion_factor))
     if has_expand:
         channel_expand = mobilenet_unit(
@@ -86,6 +87,8 @@ def inverted_residual_unit(data, num_in_filter, num_filter, ifshortcut, stride, 
             num_group=1,
             data_format=data_format,
             if_act=True,
+            trainable=trainable,
+            training=training,
             prefix='%s-expand'%prefix,
         )
     else:
@@ -99,6 +102,8 @@ def inverted_residual_unit(data, num_in_filter, num_filter, ifshortcut, stride, 
         num_group=num_expfilter,
         data_format=data_format,
         if_act=True,
+        trainable=trainable,
+        training=training,
         prefix='%s-depthwise'%prefix,
     )
     linear_out = mobilenet_unit(
@@ -110,7 +115,9 @@ def inverted_residual_unit(data, num_in_filter, num_filter, ifshortcut, stride, 
         num_group=1,
         data_format=data_format,
         if_act=False,
-        prefix='%s-project'%prefix
+        trainable=trainable,
+        training=training,
+        prefix='%s-project'%prefix,
     )
 
     if ifshortcut:
@@ -151,10 +158,12 @@ MNETV2_CONFIGS_MAP = {
 }
 
 class MobileNetV2(object):
-    def __init__(self, data_wh, multiplier, **kargs):
+    def __init__(self, data_wh, multiplier, trainable=True, training=True, **kargs):
         super(MobileNetV2, self).__init__()
         self.data_wh=data_wh
         self.multiplier=multiplier
+        self.trainable = trainable
+        self.training = training
         if self.data_wh in MNETV2_CONFIGS_MAP:
             self.config_map=MNETV2_CONFIGS_MAP[self.data_wh]
         else:
@@ -172,6 +181,8 @@ class MobileNetV2(object):
             pad="same",
             data_format=data_format,
             if_act=True,
+            trainable=self.trainable,
+            training=self.training,
             prefix= prefix+'-Conv'
         )
 
@@ -190,6 +201,8 @@ class MobileNetV2(object):
                     pad="same",
                     expansion_factor=t,
                     prefix= prefix+'-expanded_conv',
+                    trainable=self.trainable,
+                    training=self.training,
                     data_format=data_format,
                     has_expand=0
                 )
@@ -204,8 +217,10 @@ class MobileNetV2(object):
                     kernel=(3,3),
                     pad="same",
                     expansion_factor=t,
+                    prefix= prefix+'-expanded_conv_%d'%i,
+                    trainable=self.trainable,
+                    training=self.training,
                     data_format=data_format,
-                    prefix= prefix+'-expanded_conv_%d'%i
                 )
                 in_c = int(round(c*self.multiplier))
         last_fm = mobilenet_unit(
@@ -216,6 +231,8 @@ class MobileNetV2(object):
             pad="valid",
             data_format=data_format,
             if_act=True,
+            trainable=self.trainable,
+            training=self.training,
             prefix=prefix+'-Conv_1'
         )
         # global average pooling
@@ -231,6 +248,7 @@ class MobileNetV2(object):
             bias_initializer=_get_initializer("bias"),
             kernel_regularizer=_get_regularizer("dense_weight"),
             bias_regularizer=_get_regularizer("bias"),
+            trainable=self.trainable,
             name=prefix+'-fc',
         )
         return fc
@@ -240,8 +258,8 @@ class MobileNetV2(object):
         return sym
 
 def Mobilenet(input_data, args, trainable=True, training=True, num_classes=1000, multiplier=1.0, prefix = ""):
-    assert   args.channel_last==False, "Mobilenet does not support channel_last mode, set channel_last=False will be right!"
-    data_format="NHWC" if args.channel_last else "NCHW"
-    mobilenetgen = MobileNetV2((224,224), multiplier=multiplier)
+    assert args.channel_last==False, "Mobilenet does not support channel_last mode, set channel_last=False will be right!"
+    data_format="NCHW"
+    mobilenetgen = MobileNetV2((224,224), multiplier=multiplier, trainable=trainable, training=training)
     out = mobilenetgen(input_data, data_format=data_format, class_num=num_classes, prefix = "MobilenetV2")
     return out
