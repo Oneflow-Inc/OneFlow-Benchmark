@@ -43,20 +43,22 @@ model_dict = {
 }
 
 
-def load_image(image_path='test_img/ILSVRC2012_val_00020287.JPEG'):
+def load_image(image_path="test_img/ILSVRC2012_val_00020287.JPEG"):
     print(image_path)
     im = Image.open(image_path)
     im = im.resize((224, 224))
-    im = im.convert('RGB')  # 有的图像是单通道的，不加转换会报错
-    im = np.array(im).astype('float32')
+    im = im.convert("RGB")  # 有的图像是单通道的，不加转换会报错
+    im = np.array(im).astype("float32")
     im = (im - args.rgb_mean) / args.rgb_std
     im = np.transpose(im, (2, 0, 1))
     im = np.expand_dims(im, axis=0)
-    return np.ascontiguousarray(im, 'float32')
+    return np.ascontiguousarray(im, "float32")
 
 
 @flow.global_function("predict", flow.function_config())
-def InferenceNet(images: tp.Numpy.Placeholder((1, 3, 224, 224), dtype=flow.float)) -> tp.Numpy:
+def InferenceNet(
+    images: tp.Numpy.Placeholder((1, 3, 224, 224), dtype=flow.float)
+) -> tp.Numpy:
     logits = model_dict[args.model](images, args)
     predictions = flow.nn.softmax(logits)
     return predictions

@@ -20,6 +20,7 @@ import math
 import numpy as np
 
 import config as configs
+
 parser = configs.get_parser()
 args = parser.parse_args()
 configs.print_args(args)
@@ -51,7 +52,7 @@ model_dict = {
 
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
-#flow.config.enable_debug_mode(True)
+# flow.config.enable_debug_mode(True)
 @flow.global_function("predict", get_val_config(args))
 def InferenceNet():
     assert os.path.exists(args.val_data_dir)
@@ -66,16 +67,17 @@ def InferenceNet():
 
 def main():
     InitNodes(args)
-    assert args.model_load_dir, 'Must have model load dir!'
+    assert args.model_load_dir, "Must have model load dir!"
 
     flow.env.log_dir(args.log_dir)
     # snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
     print("Restoring model from {}.".format(args.model_load_dir))
     checkpoint = flow.train.CheckPoint()
     checkpoint.load(args.model_load_dir)
-    metric = Metric(desc='validation', calculate_batches=num_val_steps, 
-                    batch_size=val_batch_size)
-    
+    metric = Metric(
+        desc="validation", calculate_batches=num_val_steps, batch_size=val_batch_size
+    )
+
     for i in range(args.num_epochs):
         for j in range(num_val_steps):
             InferenceNet().async_get(metric.metric_cb(0, j))

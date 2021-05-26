@@ -16,14 +16,20 @@ limitations under the License.
 
 import oneflow as flow
 
+
 def _get_kernel_initializer():
-    return flow.variance_scaling_initializer(distribution="random_normal", data_format="NCHW")
+    return flow.variance_scaling_initializer(
+        distribution="random_normal", data_format="NCHW"
+    )
+
 
 def _get_regularizer():
     return flow.regularizers.l2(0.00005)
 
+
 def _get_bias_initializer():
     return flow.zeros_initializer()
+
 
 def conv2d_layer(
     name,
@@ -88,38 +94,43 @@ def conv2d_layer_with_bn(
     data_format="NCHW",
     dilation_rate=1,
     activation="Relu",
-    use_bias=True,    
+    use_bias=True,
     weight_initializer=_get_kernel_initializer(),
     bias_initializer=_get_bias_initializer(),
     weight_regularizer=_get_regularizer(),
     bias_regularizer=_get_regularizer(),
     use_bn=True,
 ):
-    output = conv2d_layer(name=name,
-                          input=input,
-                          filters=filters,
-                          kernel_size=kernel_size,
-                          strides=strides,
-                          padding=padding,
-                          data_format=data_format,
-                          dilation_rate=dilation_rate,
-                          activation=activation,
-                          use_bias=use_bias,
-                          weight_initializer=weight_initializer,
-                          bias_initializer=bias_initializer,
-                          weight_regularizer=weight_regularizer,
-                          bias_regularizer=bias_regularizer)
+    output = conv2d_layer(
+        name=name,
+        input=input,
+        filters=filters,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        data_format=data_format,
+        dilation_rate=dilation_rate,
+        activation=activation,
+        use_bias=use_bias,
+        weight_initializer=weight_initializer,
+        bias_initializer=bias_initializer,
+        weight_regularizer=weight_regularizer,
+        bias_regularizer=bias_regularizer,
+    )
 
     if use_bn:
-        output = flow.layers.batch_normalization(inputs=output,
-                                                 axis=1,
-                                                 momentum=0.997,
-                                                 epsilon=1.001e-5,
-                                                 center=True,
-                                                 scale=True,
-                                                 trainable=True,
-                                                 name=name + "_bn")
+        output = flow.layers.batch_normalization(
+            inputs=output,
+            axis=1,
+            momentum=0.997,
+            epsilon=1.001e-5,
+            center=True,
+            scale=True,
+            trainable=True,
+            name=name + "_bn",
+        )
     return output
+
 
 def InceptionA(in_blob, index):
     with flow.scope.namespace("mixed_{}".format(index)):
@@ -462,7 +473,7 @@ def InceptionE(in_blob, index, pooltype):
                 values=inceptionE_2_bn, axis=1, name="concat"
             )
         with flow.scope.namespace("branch_pool"):
-            if pooltype == 'avg':
+            if pooltype == "avg":
                 branch_pool_1 = flow.nn.avg_pool2d(
                     in_blob,
                     ksize=3,
@@ -471,7 +482,7 @@ def InceptionE(in_blob, index, pooltype):
                     data_format="NCHW",
                     name="pool",
                 )
-            elif pooltype == 'max':
+            elif pooltype == "max":
                 branch_pool_1 = flow.nn.max_pool2d(
                     in_blob,
                     ksize=3,
@@ -495,15 +506,14 @@ def InceptionE(in_blob, index, pooltype):
         inceptionE_total_bn.append(concat_branch3x3dbl)
         inceptionE_total_bn.append(branch_pool_2)
 
-        concat_total = flow.concat(
-            values=inceptionE_total_bn, axis=1, name="concat")
+        concat_total = flow.concat(values=inceptionE_total_bn, axis=1, name="concat")
 
     return concat_total
 
 
 def inceptionv3(images, trainable=True, channel_last=False):
     if channel_last:
-    # if channel_last=True, then change mode from 'nchw' to 'nhwc'
+        # if channel_last=True, then change mode from 'nchw' to 'nhwc'
         images = flow.transpose(images, name="transpose", perm=[0, 2, 3, 1])
     with flow.scope.namespace("InceptionV3"):
         # conv0: 299 x 299 x 3
@@ -546,11 +556,16 @@ def inceptionv3(images, trainable=True, channel_last=False):
         mixed_8 = InceptionD(mixed_7, 8)
 
         # mixed_9 ~ mixed_10
-        mixed_9 = InceptionE(mixed_8, 9, 'avg')
-        mixed_10 = InceptionE(mixed_9, 10, 'max')
+        mixed_9 = InceptionE(mixed_8, 9, "avg")
+        mixed_10 = InceptionE(mixed_9, 10, "max")
 
         pool3 = flow.nn.avg_pool2d(
-            mixed_10, ksize=8, strides=1, padding="VALID", data_format="NCHW", name="pool3"
+            mixed_10,
+            ksize=8,
+            strides=1,
+            padding="VALID",
+            data_format="NCHW",
+            name="pool3",
         )
 
         # TODO: Need to transpose weight when converting model from TF to OF if
