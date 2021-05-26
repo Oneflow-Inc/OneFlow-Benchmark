@@ -27,7 +27,7 @@ def InitNodes(args):
         assert args.num_nodes <= len(args.node_ips)
         flow.env.ctrl_port(args.ctrl_port)
         nodes = []
-        for ip in args.node_ips[:args.num_nodes]:
+        for ip in args.node_ips[: args.num_nodes]:
             addr_dict = {}
             addr_dict["addr"] = ip
             nodes.append(addr_dict)
@@ -45,11 +45,13 @@ class Snapshot(object):
             self._check_point.load(model_load_dir)
         else:
             self._check_point.init()
-            self.save('initial_model')
+            self.save("initial_model")
             print("Init model on demand.")
 
     def save(self, name):
-        snapshot_save_path = os.path.join(self._model_save_dir, "snapshot_{}".format(name))
+        snapshot_save_path = os.path.join(
+            self._model_save_dir, "snapshot_{}".format(name)
+        )
         if not os.path.exists(snapshot_save_path):
             os.makedirs(snapshot_save_path)
         print("Saving model to {}.".format(snapshot_save_path))
@@ -85,8 +87,16 @@ def match_top_k(predictions, labels, top_k=1):
 
 
 class Metric(object):
-    def __init__(self, desc='train', calculate_batches=-1, batch_size=256, top_k=5, 
-                 prediction_key='predictions', label_key='labels', loss_key=None):
+    def __init__(
+        self,
+        desc="train",
+        calculate_batches=-1,
+        batch_size=256,
+        top_k=5,
+        prediction_key="predictions",
+        label_key="labels",
+        loss_key=None,
+    ):
         self.desc = desc
         self.calculate_batches = calculate_batches
         self.top_k = top_k
@@ -96,7 +106,9 @@ class Metric(object):
         if loss_key:
             self.fmt = "{}: epoch {}, iter {}, loss: {:.6f}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
         else:
-            self.fmt = "{}: epoch {}, iter {}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
+            self.fmt = (
+                "{}: epoch {}, iter {}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
+            )
 
         self.timer = StopWatch()
         self.timer.start()
@@ -109,13 +121,16 @@ class Metric(object):
 
     def metric_cb(self, epoch, step):
         def callback(outputs):
-            if step == 0: self._clear()
+            if step == 0:
+                self._clear()
             if self.prediction_key:
-                num_matched, num_samples = match_top_k(outputs[self.prediction_key],
-                                                       outputs[self.label_key])
+                num_matched, num_samples = match_top_k(
+                    outputs[self.prediction_key], outputs[self.label_key]
+                )
                 self.top_1_num_matched += num_matched
-                num_matched, _ = match_top_k(outputs[self.prediction_key],
-                                             outputs[self.label_key], self.top_k)
+                num_matched, _ = match_top_k(
+                    outputs[self.prediction_key], outputs[self.label_key], self.top_k
+                )
                 self.top_k_num_matched += num_matched
             else:
                 num_samples = outputs[self.label_key].shape[0]
@@ -133,14 +148,31 @@ class Metric(object):
 
                 if self.loss_key:
                     loss = outputs[self.loss_key].mean()
-                    print(self.fmt.format(self.desc, epoch, step + 1, loss, top_1_accuracy,
-                                          top_k_accuracy, throughput), time.time())
+                    print(
+                        self.fmt.format(
+                            self.desc,
+                            epoch,
+                            step + 1,
+                            loss,
+                            top_1_accuracy,
+                            top_k_accuracy,
+                            throughput,
+                        ),
+                        time.time(),
+                    )
                 else:
-                    print(self.fmt.format(self.desc, epoch, step + 1, top_1_accuracy,
-                                          top_k_accuracy, throughput), time.time())
+                    print(
+                        self.fmt.format(
+                            self.desc,
+                            epoch,
+                            step + 1,
+                            top_1_accuracy,
+                            top_k_accuracy,
+                            throughput,
+                        ),
+                        time.time(),
+                    )
 
                 self._clear()
 
         return callback
-
-

@@ -16,14 +16,20 @@ limitations under the License.
 
 import oneflow as flow
 
+
 def _get_kernel_initializer(data_format="NCHW"):
-    return flow.variance_scaling_initializer(distribution="random_normal", data_format=data_format)
+    return flow.variance_scaling_initializer(
+        distribution="random_normal", data_format=data_format
+    )
+
 
 def _get_regularizer():
     return flow.regularizers.l2(0.00005)
 
+
 def _get_bias_initializer():
     return flow.zeros_initializer()
+
 
 def conv2d_layer(
     name,
@@ -48,7 +54,11 @@ def conv2d_layer(
         kernel_size_2 = kernel_size[1]
 
     weight_initializer = _get_kernel_initializer(data_format)
-    weight_shape =  (filters, input.shape[1], kernel_size_1, kernel_size_2) if data_format=="NCHW"  else  (filters, kernel_size_1, kernel_size_2, input.shape[3])
+    weight_shape = (
+        (filters, input.shape[1], kernel_size_1, kernel_size_2)
+        if data_format == "NCHW"
+        else (filters, kernel_size_1, kernel_size_2, input.shape[3])
+    )
     weight = flow.get_variable(
         name + "-weight",
         shape=weight_shape,
@@ -78,18 +88,24 @@ def conv2d_layer(
     return output
 
 
-
 def alexnet(images, args, trainable=True):
     data_format = "NHWC" if args.channel_last else "NCHW"
 
     conv1 = conv2d_layer(
-        "conv1", images, filters=64, kernel_size=11, strides=4, padding="VALID",
-         data_format=data_format
+        "conv1",
+        images,
+        filters=64,
+        kernel_size=11,
+        strides=4,
+        padding="VALID",
+        data_format=data_format,
     )
 
     pool1 = flow.nn.avg_pool2d(conv1, 3, 2, "VALID", data_format, name="pool1")
 
-    conv2 = conv2d_layer("conv2", pool1, filters=192, kernel_size=5, data_format=data_format)
+    conv2 = conv2d_layer(
+        "conv2", pool1, filters=192, kernel_size=5, data_format=data_format
+    )
 
     pool2 = flow.nn.avg_pool2d(conv2, 3, 2, "VALID", data_format, name="pool2")
 
@@ -109,7 +125,7 @@ def alexnet(images, args, trainable=True):
         units=4096,
         activation=flow.nn.relu,
         use_bias=True,
-        #kernel_initializer=flow.random_uniform_initializer(),
+        # kernel_initializer=flow.random_uniform_initializer(),
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
         kernel_regularizer=_get_regularizer(),
@@ -124,7 +140,7 @@ def alexnet(images, args, trainable=True):
         inputs=dropout1,
         units=4096,
         activation=flow.nn.relu,
-        use_bias=True,        
+        use_bias=True,
         kernel_initializer=_get_kernel_initializer(),
         bias_initializer=_get_bias_initializer(),
         kernel_regularizer=_get_regularizer(),
