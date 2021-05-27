@@ -21,6 +21,7 @@ from collections import OrderedDict
 import pandas as pd
 from datetime import datetime
 import oneflow as flow
+import subprocess
 
 
 def InitNodes(args):
@@ -118,6 +119,9 @@ class Metric(object):
         def callback(outputs):
             if step == 0: self._clear()
 
+            if step == 1:
+                print(subprocess.check_output("nvidia-smi --query-gpu=memory.used --format=csv ", shell=True))
+
             for key in self.keys:
                 self.metric_dict[key] += outputs[key].sum()
                 self.metric_dict['n_' + key] += outputs[key].size
@@ -133,7 +137,7 @@ class Metric(object):
                 for key in self.keys:
                     value = self.metric_dict[key] / self.metric_dict['n_' + key]
                     self.update_and_save(key, value, step, **kwargs)
-                print(', '.join(('{}: {}' if type(v) is int else '{}: {:.3f}').format(k, v) \
+                print(', '.join(('{}: {}' if type(v) is int else '{}: {}').format(k, v) \
                                 for k, v in self.metric_dict.items()), time.time())
                 self._clear()
 
