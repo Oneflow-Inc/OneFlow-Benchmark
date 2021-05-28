@@ -86,7 +86,7 @@ if __name__ == "__main__":
     args = get_args(extra_args_provider=get_tasks_args)
 
     if args.task in ["LAMBADA"]:
-        from zeroshot_gpt2.evaluate import main
+        from zeroshot_gpt.evaluate import main
     else:
         raise NotImplementedError("Task {} is not implemented.".format(args.task))
 

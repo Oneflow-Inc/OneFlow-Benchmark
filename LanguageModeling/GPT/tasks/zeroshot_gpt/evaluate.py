@@ -11,7 +11,6 @@ from oneflow_gpt import util
 from .datasets import build_dataset
 import numpy as np
 import oneflow as flow
-from tasks.tokenizer import build_tokenizer
 
 
 def _init_env(args):
@@ -73,7 +72,7 @@ def _make_func_config(args):
     return func_cfg
 
 
-def make_gpt_train_func(args):
+def make_gpt_eval_func(args):
     @flow.global_function("predict", _make_func_config(args))
     def gpt_func(
         x: flow.typing.Numpy.Placeholder(
@@ -88,7 +87,6 @@ def make_gpt_train_func(args):
 
 def process_batch(args, batch):
     """Process batch and produce inputs for the model."""
-    # tokenizer = build_tokenizer(args)
 
     loss_mask = batch["pad_mask"]
     tokens_ = batch["text"]
@@ -192,7 +190,7 @@ def main(args):
     # Set up model and load checkpoint.
     _init_env(args)
     _init_config(args)
-    gpt_trainer = make_gpt_train_func(args)
+    gpt_trainer = make_gpt_eval_func(args)
     check_point = flow.train.CheckPoint()
 
     assert args.load is not None

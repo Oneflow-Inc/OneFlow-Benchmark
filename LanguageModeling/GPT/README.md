@@ -198,6 +198,13 @@ bash examples/distribute_pretrain_4n8d_2x4x4_512_2304x24.sh
   ```
     bash examples/lambada_cloze_accuracy.sh
   ```
+  - 其中模型参数：
+    ```
+    cmd+="--num-layers 12 "
+    cmd+="--hidden-size 768 "
+    cmd+="--num-attention-heads 12 "
+    cmd+="--seq-length 1024 "
+    ```
 
 - ### 示例
   使用上述[数据预处理](#数据预处理)中得到的数据集训练[500000轮](https://oneflow-public.oss-cn-beijing.aliyuncs.com/GPT/OneFlow/of_1n8g_dp8_gbz64_mbsz8_g8_e768_h12_l12_model/iter500000_snapshot.tar.gz)，得到的模型来执行下游任务，会输出如下内容：
@@ -206,13 +213,3 @@ bash examples/distribute_pretrain_4n8d_2x4x4_512_2304x24.sh
     done :-)
   ```
 
-- 模型参数：
-  ```
-    COMMON_TASK_ARGS="--num-layers 12 \
-                    --hidden-size 768 \
-                    --num-attention-heads 12 \
-                    --seq-length 1024 \
-                    --max-position-embeddings 1024 \
-                    --fp16 \
-                    --vocab-file $VOCAB_FILE"
-  ```

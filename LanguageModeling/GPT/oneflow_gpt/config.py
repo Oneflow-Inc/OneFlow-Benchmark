@@ -183,7 +183,7 @@ def _check_batch_size(args):
 
 def _check_train_iters(args):
     if args.train_iters is None and args.train_samples is None:
-        raise ValueError("train_iters and train_samples must be set either")
+        return
 
     if args.train_iters is None:
         if args.train_samples % args.global_batch_size != 0:

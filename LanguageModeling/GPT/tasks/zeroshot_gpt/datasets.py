@@ -1,7 +1,7 @@
 import json
 import math
 import numpy as np
-from tasks.tokenizer import build_tokenizer
+from tokenizer.tokenizer import build_tokenizer
 
 
 def build_dataset(args):
