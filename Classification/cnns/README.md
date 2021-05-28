@@ -680,3 +680,5 @@ python3 of_cnn_train_val.py \
 经过100个epochs的训练后，oneflow模型在验证集上的top1准确率和top5准确率分别为74.19％和91.46％；在训练集上的top1准确率和top5准确率分别为81.19％和93.15％。目前训练结果和主流benchmark在top1
 准确率上相差约为1.6%，我们会在后续调整数据预处理方式，并进一步调整训练参数，以达到预期效果。
 
+## `trainable`和`training`
+本目录支持的CNN相关模型支持`trainable`或`training`参数，其中`trainable`用于控制模型的参数是否需要进行更新，比如在MaskRCNN训练时，如果选择`resent50`作为backbone，通过设置`trainable=False`来锁定`resent50`中的模型参数不被更新；`training`参数只影响有`batch normlization`的网络，确切来说是影响了`batch normlization`的`moving_mean`和`moving_variance`，如果还是前面的MaskRCNN训练场景，如果不希望`moving_mean`和`moving_variance`也被更新，需要将`training`设为`False`。
