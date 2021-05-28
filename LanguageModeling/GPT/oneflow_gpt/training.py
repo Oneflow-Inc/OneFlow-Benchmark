@@ -158,6 +158,9 @@ def train():
             skip_warmup=0,
         )
 
+    if args.train_iters is None and args.train_samples is None:
+        raise ValueError("train_iters and train_samples must be set either")
+
     print("Training...")
     try:
         batch_size = args.micro_batch_size * args.num_accumulation_steps
