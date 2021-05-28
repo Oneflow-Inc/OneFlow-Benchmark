@@ -17,22 +17,50 @@ import oneflow as flow
 import math
 import pprint
 
+
 def add_optimizer_args(parser):
-    group = parser.add_argument_group('optimizer parameters',
-                                      'entire group applies only to optimizer parameters') 
-    group.add_argument("--optimizer", type=str, default="sgd", help="sgd, adam, rmsprop")
+    group = parser.add_argument_group(
+        "optimizer parameters", "entire group applies only to optimizer parameters"
+    )
+    group.add_argument(
+        "--optimizer", type=str, default="sgd", help="sgd, adam, rmsprop"
+    )
     group.add_argument("--learning_rate", type=float, default=0.256)
-    group.add_argument("--wd", type=float, default=1.0/32768, help="weight decay")
+    group.add_argument("--wd", type=float, default=1.0 / 32768, help="weight decay")
     group.add_argument("--momentum", type=float, default=0.875, help="momentum")
-    group.add_argument('--lr_decay', type=str, default='cosine', help='cosine, step, polynomial, exponential, None')
-    group.add_argument('--lr_decay_rate', type=float, default='0.94', help='exponential learning decay rate')
-    group.add_argument('--lr_decay_epochs', type=int, default=2, help='exponential learning rate decay every n epochs')
-    group.add_argument('--warmup_epochs', type=int, default=5,
-                       help='the epochs to warmp-up lr to scaled large-batch value')
-    group.add_argument('--decay_rate', type=float, default='0.9', help='decay rate of RMSProp')
-    group.add_argument('--epsilon', type=float, default='1', help='epsilon')
-    group.add_argument('--gradient_clipping', type=float, default=0.0, help='gradient clipping')
+    group.add_argument(
+        "--lr_decay",
+        type=str,
+        default="cosine",
+        help="cosine, step, polynomial, exponential, None",
+    )
+    group.add_argument(
+        "--lr_decay_rate",
+        type=float,
+        default="0.94",
+        help="exponential learning decay rate",
+    )
+    group.add_argument(
+        "--lr_decay_epochs",
+        type=int,
+        default=2,
+        help="exponential learning rate decay every n epochs",
+    )
+    group.add_argument(
+        "--warmup_epochs",
+        type=int,
+        default=5,
+        help="the epochs to warmp-up lr to scaled large-batch value",
+    )
+    group.add_argument(
+        "--decay_rate", type=float, default="0.9", help="decay rate of RMSProp"
+    )
+    group.add_argument("--epsilon", type=float, default="1", help="epsilon")
+    group.add_argument(
+        "--gradient_clipping", type=float, default=0.0, help="gradient clipping"
+    )
     return parser
+
 
 def set_up_optimizer(loss, args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
@@ -44,97 +72,104 @@ def set_up_optimizer(loss, args):
     exponential_decay_batches = batches_per_epoch * args.lr_decay_epochs
 
     # set up warmup strategy
-    warmup = flow.optimizer.warmup.linear(warmup_batches, 0) if warmup_batches > 0 else None
-   
-    # set up grad_clipping
-    grad_clipping = flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping) if  args.gradient_clipping > 0.0  else None
+    warmup = (
+        flow.optimizer.warmup.linear(warmup_batches, 0) if warmup_batches > 0 else None
+    )
 
-   # set up learning rate scheduler
-    if args.lr_decay == 'cosine':
+    # set up grad_clipping
+    grad_clipping = (
+        flow.optimizer.grad_clipping.by_global_norm(args.gradient_clipping)
+        if args.gradient_clipping > 0.0
+        else None
+    )
+
+    # set up learning rate scheduler
+    if args.lr_decay == "cosine":
         # CosineScheduler
         lr_scheduler = flow.optimizer.CosineScheduler(
-            base_lr=args.learning_rate, 
-            steps = decay_batches, 
-            warmup=warmup
+            base_lr=args.learning_rate, steps=decay_batches, warmup=warmup
         )
-    elif args.lr_decay == 'step':
+    elif args.lr_decay == "step":
         # PiecewiseScalingScheduler
         lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
-            base_lr=args.learning_rate, 
-            boundaries=[30, 60, 80], 
-            scale=[0.1, 0.01, 0.001], 
-            warmup=warmup
+            base_lr=args.learning_rate,
+            boundaries=[30, 60, 80],
+            scale=[0.1, 0.01, 0.001],
+            warmup=warmup,
         )
-    elif args.lr_decay == 'polynomial':
+    elif args.lr_decay == "polynomial":
         # PolynomialSchduler
         lr_scheduler = flow.optimizer.PolynomialSchduler(
             base_lr=args.learning_rate,
-            steps=decay_batches, 
+            steps=decay_batches,
             end_learning_rate=0.00001,
             power=1.0,
             cycle=False,
-            warmup=warmup        
+            warmup=warmup,
         )
-    elif args.lr_decay == 'exponential':
+    elif args.lr_decay == "exponential":
         # ExponentialScheduler
         lr_scheduler = flow.optimizer.ExponentialScheduler(
             base_lr=args.learning_rate,
-            steps=exponential_decay_batches, 
+            steps=exponential_decay_batches,
             decay_rate=args.lr_decay_rate,
             staircase=False,
-            warmup=warmup
+            warmup=warmup,
         )
     else:
         lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
-            base_lr=args.learning_rate, 
-            boundaries=[args.num_epochs], 
-            scale=[1.0], 
-            warmup=warmup
+            base_lr=args.learning_rate,
+            boundaries=[args.num_epochs],
+            scale=[1.0],
+            warmup=warmup,
         )
 
-    
     # set up optimizer
     loss_scale_policy = None
     if args.use_fp16:
-        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
-    if args.optimizer=='sgd':
+        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(
+            increment_period=2000
+        )
+    if args.optimizer == "sgd":
         print("Optimizer:  SGD")
-        flow.optimizer.SGD(lr_scheduler,
-            momentum=args.momentum if args.momentum>0 else None,
-            grad_clipping = grad_clipping,
-            loss_scale_policy=loss_scale_policy
+        flow.optimizer.SGD(
+            lr_scheduler,
+            momentum=args.momentum if args.momentum > 0 else None,
+            grad_clipping=grad_clipping,
+            loss_scale_policy=loss_scale_policy,
         ).minimize(loss)
-    elif args.optimizer=='adam':
-        if args.wd > 0 and args.wd < 1.0 :
+    elif args.optimizer == "adam":
+        if args.wd > 0 and args.wd < 1.0:
             print("Optimizer:  AdamW")
             flow.optimizer.AdamW(
-                lr_scheduler = lr_scheduler,
-                weight_decay = args.wd,
-                weight_decay_excludes='_bn-',
-                grad_clipping = grad_clipping,
+                lr_scheduler=lr_scheduler,
+                weight_decay=args.wd,
+                weight_decay_excludes="_bn-",
+                grad_clipping=grad_clipping,
                 epsilon=args.epsilon,
-                loss_scale_policy=loss_scale_policy
+                loss_scale_policy=loss_scale_policy,
             ).minimize(loss)
         else:
             print("Optimizer:  Adam")
-            flow.optimizer.Adam(lr_scheduler=lr_scheduler,
+            flow.optimizer.Adam(
+                lr_scheduler=lr_scheduler,
                 grad_clipping=grad_clipping,
                 epsilon=args.epsilon,
-                loss_scale_policy=loss_scale_policy
+                loss_scale_policy=loss_scale_policy,
             ).minimize(loss)
-    elif args.optimizer=='rmsprop':
+    elif args.optimizer == "rmsprop":
         print("Optimizer:  RMSProp")
-        flow.optimizer.RMSProp(lr_scheduler=lr_scheduler,
+        flow.optimizer.RMSProp(
+            lr_scheduler=lr_scheduler,
             decay_rate=args.decay_rate,
             epsilon=args.epsilon,
-            loss_scale_policy=loss_scale_policy
+            loss_scale_policy=loss_scale_policy,
         ).minimize(loss)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import config as configs
+
     parser = configs.get_parser()
     args = parser.parse_args()
-    configs.print_args(args) 
-
-    
+    configs.print_args(args)
