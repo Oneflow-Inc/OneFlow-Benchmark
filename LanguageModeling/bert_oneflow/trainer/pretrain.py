@@ -135,7 +135,7 @@ class BERTTrainer:
             correct = next_sent_output.argmax(1).eq(data["is_next"]).sum()
             avg_loss += loss
             total_correct += correct
-            total_element += data["is_next"].nelemenet()
+            total_element += data["is_next"].nelement()
 
             post_fix = {
                 "epoch": epoch,
