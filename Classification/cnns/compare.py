@@ -10,7 +10,7 @@ def compare(x, y, x_name=None, y_name=None, csv_path=None, blob_name=None):
     else:
         print("****** compare ******")
 
-    x[np.where(np.abs(x) <= 1e-8)] = 1e-8
+    x[np.where(np.abs(x) <= 1e-6)] = 1e-6
 
     max_abs_diff = np.max(np.abs(x - y))
     mean_abs_diff = np.mean(np.abs(x - y))
