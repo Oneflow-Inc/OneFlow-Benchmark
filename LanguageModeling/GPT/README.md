@@ -200,10 +200,10 @@ bash examples/distribute_pretrain_4n8d_2x4x4_512_2304x24.sh
   ```
   - 其中模型参数：
     ```
-    cmd+="--num-layers 12 "
-    cmd+="--hidden-size 768 "
-    cmd+="--num-attention-heads 12 "
-    cmd+="--seq-length 1024 "
+    hidden_size=768
+    num_attn_heads=12
+    num_layers=12
+    seq_length=1024
     ```
 
 - ### 示例

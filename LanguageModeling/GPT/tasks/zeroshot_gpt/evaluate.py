@@ -190,7 +190,7 @@ def main(args):
     # Set up model and load checkpoint.
     _init_env(args)
     _init_config(args)
-    gpt_trainer = make_gpt_eval_func(args)
+    gpt_eval = make_gpt_eval_func(args)
     check_point = flow.train.CheckPoint()
 
     assert args.load is not None
@@ -198,6 +198,6 @@ def main(args):
 
     dataset = build_dataset(args)
     # Run evaluation.
-    evaluate_and_print_results(args, dataset, gpt_trainer, eval_metric)
+    evaluate_and_print_results(args, dataset, gpt_eval, eval_metric)
 
     print("done :-)")
