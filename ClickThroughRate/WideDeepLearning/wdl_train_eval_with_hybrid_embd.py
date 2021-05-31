@@ -176,35 +176,7 @@ def _embedding(name, ids, embedding_size, vocab_size, split_axis=0):
     return embedding
 
 
-# def _wide_embedding(wide_sparse_fields):
-#     wide_sparse_fields = flow.parallel_cast(wide_sparse_fields, distribute=flow.distribute.broadcast())
-#     wide_embedding_table = flow.get_variable(
-#         name='wide_embedding',
-#         shape=(FLAGS.wide_vocab_size, 1),
-#         initializer=flow.random_uniform_initializer(minval=-0.05, maxval=0.05),
-#         distribute=flow.distribute.split(0),
-#     )
-#     wide_embedding = flow.gather(params=wide_embedding_table, indices=wide_sparse_fields)
-#     wide_embedding = flow.reshape(wide_embedding, shape=(-1, wide_embedding.shape[-1] * wide_embedding.shape[-2]))
-#     return wide_embedding
-
-# def _deep_embedding(deep_sparse_fields):
-#     deep_sparse_fields = flow.parallel_cast(deep_sparse_fields, distribute=flow.distribute.broadcast())
-#     deep_embedding_table = flow.get_variable(
-#         name='deep_embedding',
-#         shape=(FLAGS.deep_vocab_size, FLAGS.deep_embedding_vec_size),
-#         initializer=flow.random_uniform_initializer(minval=-0.05, maxval=0.05),
-#         distribute=flow.distribute.split(1),
-#     )
-#     deep_embedding = flow.gather(params=deep_embedding_table, indices=deep_sparse_fields)
-#     deep_embedding = flow.parallel_cast(deep_embedding, distribute=flow.distribute.split(0),
-#                                         gradient_distribute=flow.distribute.split(2))
-#     deep_embedding = flow.reshape(deep_embedding, shape=(-1, deep_embedding.shape[-1] * deep_embedding.shape[-2]))
-#     return deep_embedding
-
-
 def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
-    # wide_embedding = _wide_embedding(wide_sparse_fields)
     wide_embedding = _embedding('wide_embedding', wide_sparse_fields, 1, FLAGS.wide_vocab_size)
     # wide_embedding = _hybrid_embedding('wide_embedding', wide_sparse_fields, 1, FLAGS.wide_vocab_size, 
     #                                    FLAGS.hf_wide_vocab_size)
@@ -212,7 +184,6 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
     wide_scores = flow.parallel_cast(wide_scores, distribute=flow.distribute.split(0),
                                      gradient_distribute=flow.distribute.broadcast())
 
-    # deep_embedding = _deep_embedding(deep_sparse_fields)
     # deep_embedding = _embedding('deep_embedding', deep_sparse_fields, FLAGS.deep_embedding_vec_size, 
     #                             FLAGS.deep_vocab_size, split_axis=1)
     deep_embedding = _hybrid_embedding('deep_embedding', deep_sparse_fields, FLAGS.deep_embedding_vec_size,
@@ -267,7 +238,15 @@ def CreateOptimizer(args):
 def _get_train_conf():
     train_conf = flow.FunctionConfig()
     train_conf.default_data_type(flow.float)
-    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
+    indexed_slices_ops = [
+        'wide_embedding', 
+        'deep_embedding', 
+        'hf_wide_embedding', 
+        'hf_deep_embedding',
+        'lf_wide_embedding', 
+        'lf_deep_embedding',
+    ]
+    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=indexed_slices_ops)))
     return train_conf
 
 
