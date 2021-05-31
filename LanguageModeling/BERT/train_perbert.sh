@@ -10,13 +10,23 @@ OPTIMIZER=${5-adam}
 #GPU
 GPUS_PER_NODE=${6:-8}
 #
-ITER_NUM=${7:-100}
+NNODES=${7:-1}
 #
-PRINT_ITER=${8:-1}
-#
-NODE_RANK=${9:-0}
+MASTER=${8:-0}
+
+PYTHON=${9:-python}
 
 LOG_FOLDER=./log/
+
+PRINT_ITER=1
+ITER_NUM=100
+
+NODE_IPS='10.10.0.2','10.10.0.3','10.10.0.4','10.10.0.5'
+
+# INIT_MODEL=/opt/initial_model 
+INIT_MODEL=/data/bert/initial_model/
+#DATA_DIR=/data/bert_dataset
+DATA_DIR=/data/bert/wiki_seq_len_128/
 
 ##########################################################################################################
 #                                           FP
@@ -57,7 +67,6 @@ _${DEBUG_NAME}.log
 
 MODEL_DIR=./snapshots/
 # DATA_DIR=/DATA/disk1/bert/wiki_seq_len_128/
-DATA_DIR=/data/bert_dataset
 
 MEM_FILE=$LOG_FOLDER/memory.log
 
@@ -76,10 +85,14 @@ NVPROF=baseline-report_${NODE_RANK}
 # -n 0.5 \
 
 
+export NCCL_BUG=INFO
+
 #nsys profile --stats=true -o ${NVPROF}  \
-python3 run_pretraining.py \
+
+$PYTHON run_pretraining.py \
   --gpu_num_per_node=${GPUS_PER_NODE} \
-  --num_nodes=1 \
+  --num_nodes=${NNODES} \
+  --node_ips=$NODE_IPS \
   --learning_rate=1e-4 \
   --warmup_proportion=0.01 \
   --weight_decay_rate=0.01 \
@@ -105,7 +118,7 @@ python3 run_pretraining.py \
   --model_save_dir=./snapshots \
   --debug=${DEBUG_MODE} \
   --data_load_random=0 \
-  --model_load=/opt/initial_model \
+  --model_load=${INIT_MODEL} \
   ${FP_CMD} \
   --optimizer_type=${OPTIMIZER} \
   2>&1 | tee ${LOGFILE} 
@@ -118,12 +131,12 @@ QDREP=$LOG_FOLDER/bert_pretraining_${GPUS_PER_NODE}gpu_${BATCH_SIZE}bs_${ITER_NU
 # mv $NVPROF.sqlite $SQLITE
 # mv $NVPROF.qdrep  $QDREP
 
-json_file=${LOG_FOLDER}out.json
-python tools/analysis.py \
-  --log_file=$LOGFILE \
-  --mem_file=$MEM_FILE \
-  --out_file=$json_file \
-  --gpu_num=$GPUS_PER_NODE 
+if [ "$MASTER" = 1 ]; then
+  json_file=${LOG_FOLDER}out.json
+  python tools/analysis.py \
+    --log_file=$LOGFILE \
+    --mem_file=$MEM_FILE \
+    --out_file=$json_file \
+    --gpu_num=$GPUS_PER_NODE 
 
-# --use_fp16 \
-
+fi
