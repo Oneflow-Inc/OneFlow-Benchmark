@@ -30,7 +30,7 @@ class MultiHeadedAttention(nn.Module):
 
         # 1) Do all the linear projections in batch from d_model => h x d_k
         # TODO: query, key, value放开会报错
-        # query, key, value = [l(x).reshape(shape=[batch_size, -1, self.h, self.d_k]).transpose(perm=(0, 2, 1, 3))
+        # query, key, value = [l(x).reshape(shape=[batch_size, -1, self.h, self.d_k]).permute(0, 2, 1, 3)
         #                      for l, x in zip(self.linear_layers, (query, key, value))]
         # # query,key,value  shape >> flow.Size([16, 8, 20, 32])
 
