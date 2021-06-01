@@ -177,9 +177,9 @@ def _embedding(name, ids, embedding_size, vocab_size, split_axis=0):
 
 
 def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
-    wide_embedding = _embedding('wide_embedding', wide_sparse_fields, 1, FLAGS.wide_vocab_size)
-    # wide_embedding = _hybrid_embedding('wide_embedding', wide_sparse_fields, 1, FLAGS.wide_vocab_size, 
-    #                                    FLAGS.hf_wide_vocab_size)
+    # wide_embedding = _embedding('wide_embedding', wide_sparse_fields, 1, FLAGS.wide_vocab_size)
+    wide_embedding = _hybrid_embedding('wide_embedding', wide_sparse_fields, 1, FLAGS.wide_vocab_size, 
+                                       FLAGS.hf_wide_vocab_size)
     wide_scores = flow.math.reduce_sum(wide_embedding, axis=[1], keepdims=True)
     wide_scores = flow.parallel_cast(wide_scores, distribute=flow.distribute.split(0),
                                      gradient_distribute=flow.distribute.broadcast())
