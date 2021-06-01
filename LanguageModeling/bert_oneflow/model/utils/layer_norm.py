@@ -11,7 +11,7 @@ class LayerNorm(nn.Module):
         self.eps = eps
         self.a_2 = flow.ones(features, dtype=flow.float32)
         self.b_2 = flow.zeros(features, dtype=flow.float32)
-        # TODO: nn.Parameter 放开会报错
+        # TODO: nn.Parameter 放开会报错AttributeError: 'oneflow._oneflow_internal.LocalTensor' object has no attribute 'is_determined'
         # self.a_2 = nn.Parameter(flow.ones(features, dtype=flow.float32))
         # self.b_2 = nn.Parameter(flow.zeros(features, dtype=flow.float32))
 

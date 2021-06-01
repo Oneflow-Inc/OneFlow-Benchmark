@@ -12,10 +12,8 @@ class PositionwiseFeedForward(nn.Module):
         self.w_1 = nn.Linear(d_model, d_ff)
         self.w_2 = nn.Linear(d_ff, d_model)
         self.dropout = nn.Dropout(dropout)
-        self.activation = GELU()
+        self.activation = nn.GELU() # NOTE: torch原实现为调用GELU()、此处直接用已有module代替
 
     def forward(self, x):   # x.shape >> flow.Size([16, 20, 256])
-        # TODO：此处放开self.w_1和self.w_2会报错
-        # return self.w_2(self.dropout(self.activation(self.w_1(x))))
-        return self.dropout(self.activation(x))
+        return self.w_2(self.dropout(self.activation(self.w_1(x))))
     

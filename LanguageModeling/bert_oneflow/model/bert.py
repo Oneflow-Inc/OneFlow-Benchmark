@@ -39,7 +39,7 @@ class BERT(nn.Module):
         print("Enter BERT module >>>>>>>>>>>>>>>>>>>>>>>>>> forward()...")
         # attention masking for padded token
         
-        # TODO:Tensor.repeat 目前不支持flow.int类型的参数(所以用cast转化成了float32类型)
+        # NOTE:Tensor.repeat 目前不支持flow.int类型的参数(所以用cast转化成了float32类型)
         mask = (x > 0).unsqueeze(1).cast(flow.float32).repeat(sizes=(1, x.shape[1], 1)).unsqueeze(1).repeat(sizes=(1, 8, 1, 1))
     
         # embedding the indexed sequence to sequence of vectors

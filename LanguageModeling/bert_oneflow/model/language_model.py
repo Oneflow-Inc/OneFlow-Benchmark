@@ -42,7 +42,7 @@ class NextSentencePrediction(nn.Module):
 
     def forward(self, x): # x.shape >> flow.Size([16, 20, 256])
         # return self.softmax(self.linear(x[:, 0])
-        # TODO: 切片行为未对齐，需reshape
+        # NOTE: 切片行为未对齐，需reshape
         return self.softmax(self.linear(x[:, 0].reshape(shape=(x.shape[0], x.shape[-1]))))
 
 

@@ -40,7 +40,6 @@ class MultiHeadedAttention(nn.Module):
 
         # 3) "Concat" using a view and apply a final linear.
         res = x.transpose(1, 2).reshape(shape = [batch_size, -1, self.h * self.d_k])
-        # res = self.output_linear(res) # TODO: self.output_linear放开会报backward相关错误
-        res = flow.Tensor(16, 20, 256)
+        res = self.output_linear(res)
         return res
 
