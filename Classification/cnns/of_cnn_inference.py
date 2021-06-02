@@ -67,9 +67,7 @@ def InferenceNet(
 def main():
     flow.env.log_dir(args.log_dir)
     assert os.path.isdir(args.model_load_dir)
-    check_point = flow.train.CheckPoint()
-    check_point.load(args.model_load_dir)
-
+    flow.load_variables(flow.checkpoint.get(args.model_load_dir))
     image = load_image(args.image_path)
     predictions = InferenceNet(image)
     clsidx = predictions.argmax()

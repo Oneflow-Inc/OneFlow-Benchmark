@@ -72,8 +72,7 @@ def main():
     flow.env.log_dir(args.log_dir)
     # snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
     print("Restoring model from {}.".format(args.model_load_dir))
-    checkpoint = flow.train.CheckPoint()
-    checkpoint.load(args.model_load_dir)
+    flow.load_variables(flow.checkpoint.get(args.model_load_dir))
     metric = Metric(
         desc="validation", calculate_batches=num_val_steps, batch_size=val_batch_size
     )
