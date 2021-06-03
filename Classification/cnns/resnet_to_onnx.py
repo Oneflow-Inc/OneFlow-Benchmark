@@ -121,8 +121,7 @@ if __name__ == "__main__":
     flow_weights_path = "resnet_v15_of_best_model_val_top1_77318"
     onnx_model_dir = "onnx/model"
 
-    check_point = flow.train.CheckPoint()
-    check_point.load(flow_weights_path)
+    flow.load_variables(flow.checkpoint.get(flow_weights_path))
 
     # conver oneflow to onnx
     onnx_model = oneflow_to_onnx(
