@@ -1,6 +1,7 @@
 import oneflow.experimental as flow
 import oneflow.experimental.nn as nn
 import numpy as np
+import math
 
 
 class TokenEmbedding(nn.Embedding):
@@ -13,25 +14,18 @@ class PositionalEmbedding(nn.Module):
         super().__init__()
 
         # Compute the positional encodings once in log space.
-        # pe = flow.zeros(max_len, d_model).float()
-        pe = flow.Tensor(np.zeros((max_len, d_model)))
-        # position = flow.arange(0, max_len).float().unsqueeze(1)
-        a = np.arange(0, max_len, dtype=np.float32).astype(np.float32)
-        position = flow.Tensor(np.expand_dims(a, 1))
-        # div_term = (flow.arange(0, d_model, 2).float() * -(flow.math.log(10000.0) / d_model)).exp()
-        b = np.exp((np.log(10000.0) / d_model))
-        c = np.arange(0, d_model, 2).astype(np.float32)
-        div_term = flow.Tensor(b * c)
+        pe = flow.zeros(size=(max_len, d_model))
+        # pe.require_grad = False
+        # TODO:AttributeError: 'oneflow._oneflow_internal.LocalTensor' object has no attribute 'require_grad'
 
+        position = flow.arange(0, max_len, dtype=flow.float).unsqueeze(1)
+        div_term = (flow.arange(0, d_model, 2, dtype=flow.float)* -(math.log(10000.0) / d_model)).exp()
 
-        pe = pe.numpy()
-        pe[:, 0::2] = flow.sin(position * div_term).numpy()
-        pe[:, 1::2] = flow.cos(position * div_term).numpy()
+        pe[:, 0::2] = flow.sin(position * div_term)
+        pe[:, 1::2] = flow.cos(position * div_term)
 
-        # pe = pe.unsqueeze(0)
-        pe = np.expand_dims(pe, 0)
-        pe = flow.Tensor(pe)
-        self.register_buffer('pe', pe)
+        pe = pe.unsqueeze(0)
+        self.register_buffer('pe', flow.Tensor(pe))
 
     def forward(self, x):
         return self.pe[:, :x.size()[1]]
@@ -68,7 +62,7 @@ class BERTEmbedding(nn.Module):
         self.embed_size = embed_size
 
     def forward(self, sequence, segment_label): # shape >>> flow.Size([16, 20])
-        print("Enter BERTEmbedding module >>>>>>>>>>>>>>>>>>>>>>>>>> forward()...")
+        # TODO: bug here
         x = flow.Tensor(16, 20, 256) + flow.Tensor(1, 20, 256) + flow.Tensor(16, 20, 256)
         # x = self.token(sequence) + self.position(sequence) + self.segment(segment_label)
         return self.dropout(x)

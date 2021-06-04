@@ -36,7 +36,6 @@ class BERT(nn.Module):
             [TransformerBlock(hidden, attn_heads, hidden * 4, dropout) for _ in range(n_layers)])
         
     def forward(self, x, segment_info): # x.shape >> flow.Size([16, 20])
-        print("Enter BERT module >>>>>>>>>>>>>>>>>>>>>>>>>> forward()...")
         # attention masking for padded token
         
         # NOTE:Tensor.repeat 目前不支持flow.int类型的参数(所以用cast转化成了float32类型)
@@ -45,9 +44,7 @@ class BERT(nn.Module):
         # embedding the indexed sequence to sequence of vectors
         x = self.embedding(x, segment_info)
 
-        print("Enter TransformerBlock module >>>>>>>>>>>>>>>>>>>>>>>>>> for loop...")
         # running over multiple transformer blocks
         for transformer in self.transformer_blocks:
             x = transformer.forward(x, mask)
-        print("Finish BERT module >>>>>>>>>>>>>>>>>>>>>>>>>> forward()...")
         return x

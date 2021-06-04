@@ -1,7 +1,6 @@
 
 import oneflow.experimental as flow
 import oneflow.experimental.nn as nn
-from oneflow.optimizer import Adam 
 # from flow.utils.data import DataLoader
 from torch.utils.data import DataLoader
 
@@ -40,14 +39,15 @@ class BERTTrainer:
         """
 
         # Setup cuda device for BERT training, argument -c, --cuda should be true
-        # cuda_condition = torch.cuda.is_available() and with_cuda
-        # self.device = torch.device("cuda:0" if cuda_condition else "cpu")
+        # cuda_condition = flow.cuda.is_available() and with_cuda
+        # self.device = flow.device("cuda:0" if cuda_condition else "cpu")
+        self.device = flow.device("cpu")
 
         # This BERT model will be saved every epoch
         self.bert = bert
         # Initialize the BERT Language Model, with BERT model
-        # self.model = BERTLM(bert, vocab_size).to(self.device)
-        self.model = BERTLM(bert, vocab_size)
+        self.model = BERTLM(bert, vocab_size).to(device=self.device)
+        #self.model = BERTLM(bert, vocab_size)
 
         # # Distributed GPU training if CUDA can detect more than 1 GPU
         # if with_cuda and torch.cuda.device_count() > 1:
@@ -59,8 +59,8 @@ class BERTTrainer:
         self.test_data = test_dataloader
 
         # # Setting the Adam optimizer with hyper-param
-        # self.optim = Adam(self.model.parameters(), lr=lr, betas=betas, weight_decay=weight_decay)
-        # self.optim_schedule = ScheduledOptim(self.optim, self.bert.hidden, n_warmup_steps=warmup_steps)
+        self.optim = flow.optim.Adam(self.model.parameters(), lr=lr, betas=betas, weight_decay=weight_decay)
+        self.optim_schedule = ScheduledOptim(self.optim, self.bert.hidden, n_warmup_steps=warmup_steps)
 
         # Using Negative Log Likelihood Loss function for predicting the masked_token
         # self.criterion = nn.NLLLoss(ignore_index=0)
@@ -100,16 +100,13 @@ class BERTTrainer:
 
 
         for i, data in data_iter:
-            # exit after 1 step/iter
-            if i > 0:
-                exit()
-
+            for key, value in data.items():
+                if key == "bert_input":
+                    data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.float)
+                else:
+                    data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.int)
             #     # 0. batch_data will be sent into the device(GPU or cpu)
-            #     data = {key: value.to(self.device) for key, value in data.items()}
-            data["bert_input"] = flow.Tensor(np.random.randint(1, 200000, size=(16, 20)), dtype=flow.float)
-            data["segment_label"] = flow.Tensor(np.random.randint(1, 2, size=(16, 20)), dtype=flow.int)
-            data["is_next"] = flow.Tensor(np.random.randint(0, 1, 16), dtype=flow.int32)
-            data["bert_label"] = flow.Tensor(np.random.randint(0, 10, size=(16, 20)), dtype=flow.int)
+            data = {key: value.to(device=self.device) for key, value in data.items()}
 
             # 1. forward the next_sentence_prediction and masked_lm model
             next_sent_output, mask_lm_output = self.model.forward(data["bert_input"], data["segment_label"])
@@ -131,7 +128,7 @@ class BERTTrainer:
 
             # next sentence prediction accuracy
             # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
-            correct = next_sent_output.argmax(1).eq(data["is_next"]).sum()
+            correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum()
             avg_loss += loss
             total_correct += correct
             total_element += data["is_next"].nelement()

@@ -10,13 +10,14 @@ oneflow版本直接用master分支上的oneflow即可：https://github.com/Onefl
 
 同时，由于数据集加载部分的功能尚未对齐，需要依赖torch.utils.data.DataLoader，故需要依赖torch==0.4.1.post2
 
-### test demo
-
-`bash test.sh`
-
-如果报错：`ModuleNotFoundError: No module named 'bert_pytorch'`
-
 需手动将bert_pytorch.zip解压并复制到site-packages下，如：
 
 `cp -r bert_pytorch ~/anaconda3/envs/oneflow/lib/python3.7/site-packages/`
+
+### demo
+
+
+- train: `bash train.sh`
+- test: `bash test.sh`
+
 

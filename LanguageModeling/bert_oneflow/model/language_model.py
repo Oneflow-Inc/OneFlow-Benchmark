@@ -22,7 +22,6 @@ class BERTLM(nn.Module):
         self.mask_lm = MaskedLanguageModel(self.bert.hidden, vocab_size)
 
     def forward(self, x, segment_label):
-        print("\nEnter BERTLM module >>>>>>>>>>>>>>>>>>>>>>>>>> forward()...")
         x = self.bert(x, segment_label)
         return self.next_sentence(x), self.mask_lm(x)
 
