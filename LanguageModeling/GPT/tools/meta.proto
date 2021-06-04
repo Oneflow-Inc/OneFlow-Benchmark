@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+message Shape {
+    repeated int32 dim = 1;
+}
+
+enum DataType {
+    kInvalidDataType = 0;
+    kChar = 1;
+    kFloat = 2;
+    kDouble = 3;
+    kInt8 = 4;
+    kInt32 = 5;
+    kInt64 = 6;
+    kUInt8 = 7;
+    kOFRecord = 8;
+    kFloat16 = 9;
+    kTensorBuffer = 10;
+}
+
+message Meta {
+    required Shape shape = 1;
+    required DataType data_type = 2 [default = kFloat16];
+}
