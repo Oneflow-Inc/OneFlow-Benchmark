@@ -123,6 +123,7 @@ def _data_loader_onerec(data_dir, batch_size, shuffle):
     files = glob.glob(os.path.join(data_dir, '*.onerec'))
     readdata = flow.data.onerec_reader(files=files, batch_size=batch_size, random_shuffle=shuffle,
                                        verify_example=False,
+                                       shuffle_mode="batch",
                                        shuffle_buffer_size=64,
                                        shuffle_after_epoch=shuffle)
 
