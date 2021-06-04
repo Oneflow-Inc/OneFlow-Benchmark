@@ -13,7 +13,7 @@ def get_args():
     parser.add_argument(
         "--py_model_dir",
         type=str,
-        default="/home/oyy/iter_0500000/mp_rank_00/model_optim_rng.pt",
+        default="/path/to/iter_0500000/mp_rank_00/model_optim_rng.pt",
         help="Path the PyTorch checkpoint file path.",
     )
     parser.add_argument(
