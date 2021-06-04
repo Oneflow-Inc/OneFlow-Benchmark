@@ -64,8 +64,7 @@ class BERTTrainer:
 
         # Using Negative Log Likelihood Loss function for predicting the masked_token
         # self.criterion = nn.NLLLoss(ignore_index=0)
-        # TODO:用nn.NLLLoss()会Segmentation fault；且目前不支持ignore_index
-        self.criterion = nn.CrossEntropyLoss() 
+        self.criterion = nn.NLLLoss()
 
         self.log_freq = log_freq
         # print("Total Parameters:", sum([p.nelement() for p in self.model.parameters()]))
