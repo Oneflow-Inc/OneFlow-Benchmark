@@ -62,7 +62,6 @@ class BERTEmbedding(nn.Module):
         self.embed_size = embed_size
 
     def forward(self, sequence, segment_label): # shape >>> flow.Size([16, 20])
-        # TODO: bug here
-        x = flow.Tensor(16, 20, 256) + flow.Tensor(1, 20, 256) + flow.Tensor(16, 20, 256)
-        # x = self.token(sequence) + self.position(sequence) + self.segment(segment_label)
+        sequence = sequence.to(dtype=flow.int)
+        x = self.segment(segment_label) + self.token(sequence) + self.position(sequence)
         return self.dropout(x)
