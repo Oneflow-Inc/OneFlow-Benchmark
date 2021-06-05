@@ -9,11 +9,8 @@ class LayerNorm(nn.Module):
     def __init__(self, features, eps=1e-6):
         super(LayerNorm, self).__init__()
         self.eps = eps
-        self.a_2 = flow.ones(features, dtype=flow.float32)
-        self.b_2 = flow.zeros(features, dtype=flow.float32)
-        # TODO: nn.Parameter 放开会报错AttributeError: 'oneflow._oneflow_internal.LocalTensor' object has no attribute 'is_determined'
-        # self.a_2 = nn.Parameter(flow.ones(features, dtype=flow.float32))
-        # self.b_2 = nn.Parameter(flow.zeros(features, dtype=flow.float32))
+        self.a_2 = nn.Parameter(flow.Tensor(flow.ones(features, dtype=flow.float32)))
+        self.b_2 = nn.Parameter(flow.Tensor(flow.zeros(features, dtype=flow.float32)))
 
 
     def forward(self, x): # x input/output >> shape flow.Size([16, 20, 256])
