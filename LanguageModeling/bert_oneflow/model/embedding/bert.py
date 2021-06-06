@@ -26,7 +26,7 @@ class PositionalEmbedding(nn.Module):
         self.register_buffer('pe', flow.Tensor(pe))
 
     def forward(self, x):
-        return self.pe[:, :x.size()[1]]
+        return self.pe[:, :x.size(1)]
 
 
 class SegmentEmbedding(nn.Embedding):

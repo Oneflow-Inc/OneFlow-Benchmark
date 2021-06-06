@@ -1,6 +1,5 @@
 import oneflow.experimental.nn as nn
 import oneflow.experimental as flow
-import numpy as np
 
 
 class LayerNorm(nn.Module):

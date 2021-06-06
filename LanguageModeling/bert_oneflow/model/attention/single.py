@@ -13,13 +13,8 @@ class Attention(nn.Module):
         self.softmax = flow.nn.Softmax(dim = -1)
  
     def forward(self, query, key, value, mask=None, dropout=None): # q k v shape >> flow.Size([16, 8, 20, 32])
-        # flow.matmul(dim>2的多维情况下和torch行为没对齐)
-        # scores = flow.matmul(query, key.transpose(-2, -1)) \
-        #          / math.sqrt(query.size()[-1])
-        # x = flow.transpose(key, perm=[0, 1, 3, 2])
         x = flow.matmul(query, key.transpose(-2, -1))
-        scores = x / math.sqrt(query.size()[3])
-
+        scores = x / math.sqrt(query.size(-1))
 
         if mask is not None:
             # scores = scores.masked_fill(mask == 0, -1e9)

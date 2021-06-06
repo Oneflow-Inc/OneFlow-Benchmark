@@ -3,7 +3,7 @@ import tqdm
 from collections import Counter
 
 
-class TorchVocab(object):
+class FlowVocab(object):
     """Defines a vocabulary object that will be used to numericalize a field.
     Attributes:
         freqs: A collections.Counter object holding the frequencies of tokens
@@ -89,7 +89,7 @@ class TorchVocab(object):
                 self.stoi[w] = len(self.itos) - 1
 
 
-class Vocab(TorchVocab):
+class Vocab(FlowVocab):
     def __init__(self, counter, max_size=None, min_freq=1):
         self.pad_index = 0
         self.unk_index = 1

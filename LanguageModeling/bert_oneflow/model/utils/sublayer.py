@@ -1,5 +1,4 @@
 import oneflow.experimental.nn as nn
-import oneflow.experimental as flow
 from .layer_norm import LayerNorm
 
 
