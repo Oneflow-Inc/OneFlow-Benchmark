@@ -31,5 +31,10 @@ class ScheduledOptim():
         self.n_current_steps += 1
         lr = self.init_lr * self._get_lr_scale()
 
-        for param_group in self._optimizer.param_groups:
-            param_group['lr'] = lr
+        # NOTE: pytorch style api:
+        # for param_group in self._optimizer.param_groups:
+        #     param_group['lr'] = lr
+        
+        for param_group in self._optimizer._param_groups:
+            param_group.options["lr"] = lr
+            # param_group['lr'] = lr

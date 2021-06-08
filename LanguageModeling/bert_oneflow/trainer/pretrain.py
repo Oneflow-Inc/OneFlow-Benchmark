@@ -109,11 +109,6 @@ class BERTTrainer:
             #     # 0. batch_data will be sent into the device(GPU or cpu)
             data = {key: value.to(device=self.device) for key, value in data.items()}
 
-            # data["bert_input"].shape >>>>>>>>>>>>>>>>>>>>>> flow.Size([16, 20])
-            # data["segment_label"].shape >>>>>>>>>>>>>>>>>>>>>> flow.Size([16, 20])
-            # data["is_next"].shape >>>>>>>>>>>>>>>>>>>>>> flow.Size([16])
-            # data["bert_label"].shape >>>>>>>>>>>>>>>>>>>>>> flow.Size([16, 20])
-
             # 1. forward the next_sentence_prediction and masked_lm model
             next_sent_output, mask_lm_output = self.model.forward(data["bert_input"], data["segment_label"])
 
@@ -134,24 +129,24 @@ class BERTTrainer:
 
             # next sentence prediction accuracy
             # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
-            correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum()
-            avg_loss += loss
+            correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().numpy()
+            avg_loss += loss.numpy()
             total_correct += correct
             total_element += data["is_next"].nelement()
 
             post_fix = {
                 "epoch": epoch,
                 "iter": i,
-                "avg_loss": (avg_loss / (i + 1)).numpy(),
-                "avg_acc": (total_correct / total_element * 100).numpy(),
+                "avg_loss": avg_loss / (i + 1),
+                "avg_acc": total_correct / total_element * 100,
                 "loss": loss.numpy()
             }
 
             if i % self.log_freq == 0:
                 data_iter.write(str(post_fix))
             
-            print("EP%d_%s, avg_loss=" % (epoch, str_code), avg_loss.numpy() / 1, "total_acc=",
-                (total_correct * 100.0 / total_element).numpy())
+            print("EP%d_%s, avg_loss=" % (epoch, str_code), avg_loss / len(data_iter), "total_acc=",
+                total_correct * 100.0 / total_element)
 
 
     def save(self, epoch, file_path="output/bert_trained.model"):
