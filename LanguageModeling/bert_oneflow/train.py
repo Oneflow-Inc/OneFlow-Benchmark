@@ -10,7 +10,7 @@ from dataset import BERTDataset, WordVocab
 # eager mode
 flow.enable_eager_execution()
 
-def train():
+def main():
 
     parser = argparse.ArgumentParser()
 
@@ -67,6 +67,12 @@ def train():
 
     print("Trainer build finished!")
     print("Training Start......")
-    trainer.train(args.epochs)
+    for epoch in range(args.epochs):
+        trainer.train(epoch)
+        # print("Saving model...")
+        # trainer.save(epoch, args.output_path)
+        if test_data_loader is not None:
+            print("Running testing...")
+            trainer.test(epoch)
 
-train()
+main()

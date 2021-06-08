@@ -40,14 +40,13 @@ class BERTTrainer:
 
         # Setup cuda device for BERT training, argument -c, --cuda should be true
         # cuda_condition = flow.cuda.is_available() and with_cuda
-        cuda_condition=True
+        cuda_condition=with_cuda
         self.device = flow.device("cuda:0" if cuda_condition else "cpu")
 
         # This BERT model will be saved every epoch
         self.bert = bert
         # Initialize the BERT Language Model, with BERT model
         self.model = BERTLM(bert, vocab_size).to(device=self.device)
-        #self.model = BERTLM(bert, vocab_size)
 
         # # Distributed GPU training if CUDA can detect more than 1 GPU
         # if with_cuda and flow.cuda.device_count() > 1:
@@ -129,8 +128,8 @@ class BERTTrainer:
 
             # next sentence prediction accuracy
             # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
-            correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().numpy()
-            avg_loss += loss.numpy()
+            correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().numpy().item()
+            avg_loss += loss.numpy().item()
             total_correct += correct
             total_element += data["is_next"].nelement()
 
@@ -139,14 +138,16 @@ class BERTTrainer:
                 "iter": i,
                 "avg_loss": avg_loss / (i + 1),
                 "avg_acc": total_correct / total_element * 100,
-                "loss": loss.numpy()
+                "loss": loss.numpy().item()
             }
 
             if i % self.log_freq == 0:
                 data_iter.write(str(post_fix))
-            
-            print("EP%d_%s, avg_loss=" % (epoch, str_code), avg_loss / len(data_iter), "total_acc=",
-                total_correct * 100.0 / total_element)
+        
+        print("total_correct >>>>>>>>>>>>>> ", total_correct)
+        print("total_element >>>>>>>>>>>>>> ", total_element)
+        print("EP%d_%s, avg_loss=" % (epoch, str_code), avg_loss / len(data_iter), "total_acc=",
+            total_correct * 100.0 / total_element)
 
 
     def save(self, epoch, file_path="output/bert_trained.model"):
