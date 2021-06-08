@@ -65,6 +65,7 @@ class BERTTrainer:
         # Using Negative Log Likelihood Loss function for predicting the masked_token
         # self.criterion = nn.NLLLoss(ignore_index=0)
         self.criterion = nn.NLLLoss()
+        self.criterion = self.criterion.to(self.device)
 
         self.log_freq = log_freq
         # print("Total Parameters:", sum([p.nelement() for p in self.model.parameters()]))
@@ -107,6 +108,11 @@ class BERTTrainer:
                     data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.int)
             #     # 0. batch_data will be sent into the device(GPU or cpu)
             data = {key: value.to(device=self.device) for key, value in data.items()}
+
+            # data["bert_input"].shape >>>>>>>>>>>>>>>>>>>>>> flow.Size([16, 20])
+            # data["segment_label"].shape >>>>>>>>>>>>>>>>>>>>>> flow.Size([16, 20])
+            # data["is_next"].shape >>>>>>>>>>>>>>>>>>>>>> flow.Size([16])
+            # data["bert_label"].shape >>>>>>>>>>>>>>>>>>>>>> flow.Size([16, 20])
 
             # 1. forward the next_sentence_prediction and masked_lm model
             next_sent_output, mask_lm_output = self.model.forward(data["bert_input"], data["segment_label"])

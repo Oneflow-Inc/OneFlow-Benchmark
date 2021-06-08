@@ -59,7 +59,7 @@ class BERTEmbedding(nn.Module):
         self.dropout = flow.nn.Dropout(p=dropout)
         self.embed_size = embed_size
 
-    def forward(self, sequence, segment_label): # shape >>> flow.Size([16, 20])
+    def forward(self, sequence, segment_label): # sequence/segment_label .shape >>> flow.Size([16, 20])
         sequence = sequence.to(dtype=flow.int)
         x = self.segment(segment_label) + self.token(sequence) + self.position(sequence)
         return self.dropout(x)
