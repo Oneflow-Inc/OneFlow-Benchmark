@@ -10,5 +10,5 @@ class GELU(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        tmp = flow.Tensor([math.sqrt(2 / math.pi)])
+        tmp = flow.Tensor([math.sqrt(2 / math.pi)], device=x.device)
         return 0.5 * x * (1 + flow.tanh(tmp) * (x + 0.044715 * x.pow(3.0)))

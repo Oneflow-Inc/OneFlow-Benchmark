@@ -40,8 +40,8 @@ class BERTTrainer:
 
         # Setup cuda device for BERT training, argument -c, --cuda should be true
         # cuda_condition = flow.cuda.is_available() and with_cuda
-        # self.device = flow.device("cuda:0" if cuda_condition else "cpu")
-        self.device = flow.device("cpu")
+        cuda_condition=True
+        self.device = flow.device("cuda:0" if cuda_condition else "cpu")
 
         # This BERT model will be saved every epoch
         self.bert = bert
@@ -50,8 +50,8 @@ class BERTTrainer:
         #self.model = BERTLM(bert, vocab_size)
 
         # # Distributed GPU training if CUDA can detect more than 1 GPU
-        # if with_cuda and torch.cuda.device_count() > 1:
-        #     print("Using %d GPUS for BERT" % torch.cuda.device_count())
+        # if with_cuda and flow.cuda.device_count() > 1:
+        #     print("Using %d GPUS for BERT" % flow.cuda.device_count())
         #     self.model = nn.DataParallel(self.model, device_ids=cuda_devices)
 
         # Setting the train and test data loader
@@ -68,7 +68,7 @@ class BERTTrainer:
         self.criterion = self.criterion.to(self.device)
 
         self.log_freq = log_freq
-        # print("Total Parameters:", sum([p.nelement() for p in self.model.parameters()]))
+        print("Total Parameters:", sum([p.nelement() for p in self.model.parameters()]))
 
     def train(self, epoch):
         self.iteration(epoch, self.train_data)
@@ -103,9 +103,9 @@ class BERTTrainer:
         for i, data in data_iter:
             for key, value in data.items():
                 if key == "bert_input":
-                    data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.float)
+                    data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.float, device=self.device)
                 else:
-                    data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.int)
+                    data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.int, device=self.device)
             #     # 0. batch_data will be sent into the device(GPU or cpu)
             data = {key: value.to(device=self.device) for key, value in data.items()}
 

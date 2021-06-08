@@ -18,7 +18,7 @@ class Attention(nn.Module):
 
         if mask is not None:
             # scores = scores.masked_fill(mask == 0, -1e9)
-            mask = flow.Tensor((mask.numpy() == 0).astype(np.int8), dtype=flow.int)
+            mask = flow.Tensor((mask.numpy() == 0).astype(np.int8), dtype=flow.int, device=scores.device)
             scores = scores.masked_fill(mask, -1e9)
 
         p_attn = self.softmax(scores)
