@@ -4,15 +4,15 @@ import argparse
 _GLOBAL_ARGS = None
 
 
-def get_args():
+def get_args(extra_args_provider=None):
     global _GLOBAL_ARGS
     if _GLOBAL_ARGS is None:
-        _GLOBAL_ARGS = parse_args()
+        _GLOBAL_ARGS = parse_args(extra_args_provider)
 
     return _GLOBAL_ARGS
 
 
-def parse_args(ignore_unknown_args=False):
+def parse_args(extra_args_provider=None, ignore_unknown_args=False):
     """Parse all arguments."""
     parser = argparse.ArgumentParser(
         description="OneFlow GPT Arguments", allow_abbrev=False
@@ -28,6 +28,10 @@ def parse_args(ignore_unknown_args=False):
     parser = _add_validation_args(parser)
     parser = _add_data_args(parser)
     parser = _add_misc_args(parser)
+
+    # Custom arguments.
+    if extra_args_provider is not None:
+        parser = extra_args_provider(parser)
 
     if ignore_unknown_args:
         args, _ = parser.parse_known_args()
@@ -79,6 +83,18 @@ def _check_model_size(args):
         raise ValueError(
             f"hidden size {args.hidden_size} must be divisible by"
             f" number of attention heads {args.num_attention_heads}"
+        )
+
+    if args.num_attention_heads % args.tensor_model_parallel_size != 0:
+        raise ValueError(
+            f"number of attention heads {args.num_attention_heads} must be divisible by"
+            f" tensor model parallel size {args.tensor_model_parallel_size}"
+        )
+
+    if args.num_layers % args.pipeline_model_parallel_size != 0:
+        raise ValueError(
+            f"number of layers {args.num_layers} must be divisible by"
+            f" pipeline model parallel size {args.pipeline_model_parallel_size}"
         )
 
 
@@ -167,7 +183,7 @@ def _check_batch_size(args):
 
 def _check_train_iters(args):
     if args.train_iters is None and args.train_samples is None:
-        raise ValueError("train_iters and train_samples must be set either")
+        return
 
     if args.train_iters is None:
         if args.train_samples % args.global_batch_size != 0:
@@ -392,7 +408,7 @@ def _add_training_args(parser):
     group.add_argument(
         "--metric-print-format",
         type=str,
-        default="normal",
+        default="table",
         choices=["normal", "table"],
         help="metric print format <normal|table>",
     )

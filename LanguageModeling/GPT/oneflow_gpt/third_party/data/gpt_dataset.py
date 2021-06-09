@@ -20,8 +20,7 @@ import time
 
 import numpy as np
 
-# from third_party.data.dataset_utils import get_train_valid_test_split_
-from .indexed_dataset import make_dataset as make_indexed_dataset
+from oneflow_gpt.third_party.data.indexed_dataset import make_dataset as make_indexed_dataset
 
 # copy from dataset_utils.py
 def get_train_valid_test_split_(splits_string, size):

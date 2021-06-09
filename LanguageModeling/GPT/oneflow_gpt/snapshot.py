@@ -23,14 +23,12 @@ class Snapshot(object):
         self.save_init_ = save_init
         self.checkpoint_ = flow.train.CheckPoint()
 
-        if load_dir is None:
-            self.iter_ = 0
+        self.iter_, snapshot_dir = self._find_max_iter_snapshot_from_load_dir()
+        if snapshot_dir is None:
             self.checkpoint_.init()
         else:
-            self.iter_, snapshot_dir = self._find_max_iter_snapshot_from_load_dir()
-            if snapshot_dir is not None:
-                print(f"Loading model from {snapshot_dir}")
-                self.checkpoint_.load(snapshot_dir)
+            print(f"Loading model from {snapshot_dir}")
+            self.checkpoint_.load(snapshot_dir)
 
         self._check_save_dir_snapshot_existence(self.iter_)
 
@@ -67,6 +65,9 @@ class Snapshot(object):
                 raise ValueError(f"{s} already exist")
 
     def _find_max_iter_snapshot_from_load_dir(self):
+        if self.load_dir_ is None:
+            return 0, None
+
         snapshot2iter = self._collect_snapshot2iter(self.load_dir_)
         if len(snapshot2iter) == 0:
             return 0, None
