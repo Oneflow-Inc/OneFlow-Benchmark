@@ -26,6 +26,12 @@ def str_list(x):
     return x.split(',')
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_format', type=str, default='ofrecord', help='ofrecord or onerec')
+parser.add_argument(
+    "--use_single_dataloader_thread",
+    action="store_true",
+    help="use single dataloader threads per node or not."
+)
+parser.add_argument('--num_dataloader_thread_per_gpu', type=int, default=2)
 parser.add_argument('--train_data_dir', type=str, default='')
 parser.add_argument('--train_data_part_num', type=int, default=1)
 parser.add_argument('--train_part_name_suffix_length', type=int, default=-1)
@@ -133,7 +139,7 @@ def _data_loader_onerec(data_dir, batch_size, shuffle):
     deep_sparse_fields = _blob_decoder("deep_sparse_fields", (FLAGS.num_deep_sparse_fields,))
     return [labels, dense_fields, wide_sparse_fields, deep_sparse_fields]
 
-    
+
 def _hybrid_embedding(name, ids, embedding_size, vocab_size, hf_vocab_size):
     b, s = ids.shape
     ids = flow.flatten(ids)
