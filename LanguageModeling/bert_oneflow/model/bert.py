@@ -38,8 +38,7 @@ class BERT(nn.Module):
     def forward(self, x, segment_info): # x.shape >> flow.Size([16, 20])
         # attention masking for padded token
         
-        # NOTE:Tensor.repeat 目前不支持flow.int类型的参数(所以用cast转化成了float32类型)
-        mask = (x > 0).unsqueeze(1).cast(flow.float32).repeat(sizes=(1, x.shape[1], 1)).unsqueeze(1).repeat(sizes=(1, 8, 1, 1))
+        mask = (x > 0).unsqueeze(1).repeat(sizes=(1, x.shape[1], 1)).unsqueeze(1).repeat(sizes=(1, 8, 1, 1))
     
         # embedding the indexed sequence to sequence of vectors
         x = self.embedding(x, segment_info)
