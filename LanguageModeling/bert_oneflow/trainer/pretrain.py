@@ -44,9 +44,9 @@ class BERTTrainer:
         self.device = flow.device("cuda:0" if cuda_condition else "cpu")
 
         # This BERT model will be saved every epoch
-        self.bert = bert
+        self.bert = bert.to(self.device)
         # Initialize the BERT Language Model, with BERT model
-        self.model = BERTLM(bert, vocab_size).to(device=self.device)
+        self.model = BERTLM(bert, vocab_size).to(self.device)
 
         # # Distributed GPU training if CUDA can detect more than 1 GPU
         # if with_cuda and flow.cuda.device_count() > 1:
@@ -122,9 +122,11 @@ class BERTTrainer:
 
             # 3. backward and optimization only in train
             if train:
-                self.optim_schedule.zero_grad()
                 loss.backward()
                 self.optim_schedule.step_and_update_lr()
+                self.optim_schedule.zero_grad()
+
+            flow.save(self.bert.state_dict(), "checkpoints/bert_%d_loss_%f" % (i, loss.numpy().item()))
 
             # next sentence prediction accuracy
             # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
@@ -150,7 +152,7 @@ class BERTTrainer:
             total_correct * 100.0 / total_element)
 
 
-    def save(self, epoch, file_path="output/bert_trained.model"):
+    def save(self, epoch, file_path="checkpoints"):
         """
         Saving the current BERT model on file_path
 
@@ -159,7 +161,6 @@ class BERTTrainer:
         :return: final_output_path
         """
         output_path = file_path + ".ep%d" % epoch
-        flow.save(self.bert.cpu(), output_path)
-        self.bert.to(self.device)
+        flow.save(self.bert.state_dict(), output_path)
         print("EP:%d Model Saved on:" % epoch, output_path)
         return output_path
