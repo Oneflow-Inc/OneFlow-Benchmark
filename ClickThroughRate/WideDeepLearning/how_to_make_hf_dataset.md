@@ -36,7 +36,7 @@ import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler, MinMaxScaler
 import org.apache.spark.ml.linalg._
 
 import java.nio.file.{Files, Paths}
-val tmp_dir = "/DATA/disk1/xuan/wdl_tmp"
+val tmp_dir = "/path/to/wdl_tmp"
 Files.createDirectories(Paths.get(tmp_dir))
 ```
 
@@ -52,7 +52,7 @@ Files.createDirectories(Paths.get(tmp_dir))
 
 ```scala
 // load input file
-var input = spark.read.options(Map("delimiter"->"\t")).csv("file:///DATA/disk1/xuan/train.shuf.bak")
+var input = spark.read.options(Map("delimiter"->"\t")).csv("file:///path/to/train.shuf")
 
 // rename columns [label, I1,...,I13, C1,...,C26]
 val NUM_INTEGER_COLUMNS = 13
@@ -199,7 +199,7 @@ Time: 10 mins
 这一段要处理26个列，内存消耗极大（170G），速度到不是最慢的。如果数据集更大，或可采用每次合一列的方式。前面的`dense_fields`也可以采用这种方式，列为`TODO`吧。
 
 ```scala
-val tmp_dir = "/DATA/disk1/xuan/wdl_tmp"
+val tmp_dir = "/path/to/wdl_tmp"
 val features_dir = tmp_dir ++ "/filled_features"
 val features = spark.read.parquet(features_dir)
 
@@ -263,7 +263,7 @@ df.write.mode("overwrite").parquet(parquet_dir)
 ## Step6 写入ofrecord
 
 ```scala
-val tmp_dir = "/DATA/disk1/xuan/wdl_tmp"
+val tmp_dir = "/path/to/wdl_tmp"
 import org.oneflow.spark.functions._
 val parquet_dir = tmp_dir ++ "/parquet_all"
 val df = spark.read.parquet(parquet_dir)
