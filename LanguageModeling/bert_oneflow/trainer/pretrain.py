@@ -101,10 +101,7 @@ class BERTTrainer:
 
         for i, data in data_iter:
             for key, value in data.items():
-                if key == "bert_input":
-                    data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.float, device=self.device)
-                else:
-                    data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.int, device=self.device)
+                data[str(key)] = flow.Tensor(value.numpy(), dtype=flow.int64, device=self.device)
             #     # 0. batch_data will be sent into the device(GPU or cpu)
             data = {key: value.to(device=self.device) for key, value in data.items()}
 
@@ -129,7 +126,6 @@ class BERTTrainer:
             flow.save(self.bert.state_dict(), "checkpoints/bert_%d_loss_%f" % (i, loss.numpy().item()))
 
             # next sentence prediction accuracy
-            # correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().item()
             correct = next_sent_output.argmax(dim=-1).eq(data["is_next"]).sum().numpy().item()
             avg_loss += loss.numpy().item()
             total_correct += correct
@@ -145,9 +141,7 @@ class BERTTrainer:
 
             if i % self.log_freq == 0:
                 data_iter.write(str(post_fix))
-        
-        print("total_correct >>>>>>>>>>>>>> ", total_correct)
-        print("total_element >>>>>>>>>>>>>> ", total_element)
+
         print("EP%d_%s, avg_loss=" % (epoch, str_code), avg_loss / len(data_iter), "total_acc=",
             total_correct * 100.0 / total_element)
 
