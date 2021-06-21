@@ -19,7 +19,7 @@ PYTHON=${9:-python}
 LOG_FOLDER=./log/
 
 PRINT_ITER=1
-ITER_NUM=100
+ITER_NUM=130
 
 NODE_IPS='10.10.0.2','10.10.0.3','10.10.0.4','10.10.0.5'
 
@@ -66,7 +66,6 @@ LOGFILE=$LOG_FOLDER/bert_pretraining_${FP_NAME}_${GPUS_PER_NODE}gpu_${BATCH_SIZE
 _${DEBUG_NAME}.log
 
 MODEL_DIR=./snapshots/
-# DATA_DIR=/DATA/disk1/bert/wiki_seq_len_128/
 
 MEM_FILE=$LOG_FOLDER/memory.log
 
@@ -85,7 +84,9 @@ NVPROF=baseline-report_${NODE_RANK}
 # -n 0.5 \
 
 
-export NCCL_BUG=INFO
+export NCCL_DEBUG=INFO
+export PYTHONUNBUFFERED=1
+
 
 #nsys profile --stats=true -o ${NVPROF}  \
 

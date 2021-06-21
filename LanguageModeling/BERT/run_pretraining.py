@@ -117,6 +117,9 @@ def main():
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.log_dir(args.log_dir)
 
+    flow.config.enable_legacy_model_io()
+    flow.config.enable_model_io_v2(True)
+    
     InitNodes(args)
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
