@@ -1,0 +1,14 @@
+[local]
+localhost ansible_connection=local
+[of]
+of11 ansible_host=192.168.1.11
+of12 ansible_host=192.168.1.12
+of13 ansible_host=192.168.1.13
+of14 ansible_host=192.168.1.14
+of15 ansible_host=192.168.1.15
+of16 ansible_host=192.168.1.16
+[ln]
+vs002 ansible_host=10.11.0.2
+vs003 ansible_host=10.11.0.3
+vs004 ansible_host=10.11.0.4
+vs005 ansible_host=10.11.0.5
