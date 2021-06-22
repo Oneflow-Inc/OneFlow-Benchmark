@@ -5,7 +5,7 @@ DATA_DIR=/DATA/disk1/bert/wiki_seq_len_128
 
 
 BZ=48
-ITER_NUM=1000000
+ITER_NUM=50000
 max_seq_length=128
 max_predictions_per_seq=20
 
@@ -17,11 +17,11 @@ rm -rf core.*
 export PYTHONUNBUFFERED=1
 export ONEFLOW_DEBUG_MODE=True
 export GLOG_v=3
-export CUDA_VISIBLE_DEVICES=6
+
 python3 $BENCH_ROOT_DIR/run_pretraining.py \
-  --gpu_num_per_node=1 \
+  --gpu_num_per_node=8 \
   --num_nodes=1 \
-  --learning_rate=1.25e-5 \
+  --learning_rate=1e-4 \
   --warmup_proportion=0.01 \
   --weight_decay_rate=0.01 \
   --batch_size_per_device=${BZ} \
@@ -32,12 +32,11 @@ python3 $BENCH_ROOT_DIR/run_pretraining.py \
   --max_predictions_per_seq=20 \
   --num_hidden_layers=12 \
   --num_attention_heads=12 \
-  --num_accumulation_steps=1 \
   --max_position_embeddings=512 \
   --type_vocab_size=2 \
   --vocab_size=30522 \
-  --attention_probs_dropout_prob=0.1 \
-  --hidden_dropout_prob=0.1 \
+  --attention_probs_dropout_prob=0.0 \
+  --hidden_dropout_prob=0.0 \
   --hidden_size_per_head=64 \
   --data_part_num=64 \
   --data_dir=$DATA_DIR \

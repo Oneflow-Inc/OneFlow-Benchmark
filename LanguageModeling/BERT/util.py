@@ -151,7 +151,7 @@ def CreateOptimizer(args):
     loss_scale_policy = None
     if args.use_fp16:
         loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
-    
+
     if args.optimizer_type == "lamb":
         return flow.optimizer.LAMB(lr_scheduler, beta1=0.9, beta2=0.999, epsilon=1e-6, weight_decay=args.weight_decay_rate,
                                 weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],

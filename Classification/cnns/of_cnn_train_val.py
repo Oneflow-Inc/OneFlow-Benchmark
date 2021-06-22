@@ -51,7 +51,7 @@ model_dict = {
 
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
-#flow.config.enable_debug_mode(True)
+flow.config.enable_debug_mode(True)
 
 if args.use_fp16 and args.num_nodes * args.gpu_num_per_node > 1:
     flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
@@ -129,7 +129,8 @@ def main():
                             batch_size=val_batch_size)
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
-        snapshot.save('epoch_{}'.format(epoch))
+        if (epoch+1) % 10 == 0:
+            snapshot.save('epoch_{}'.format(epoch))
 
 
 if __name__ == "__main__":

@@ -63,6 +63,9 @@ def get_parser(parser=None):
     parser.add_argument("--optimizer_type", type=str, default="adam",
                         help="Optimizer used for training - LAMB or ADAM")
 
+    parser.add_argument("--optimizer_type", type=str, default="adam",
+                        help="Optimizer used for training - LAMB or ADAM")
+
     # log and resore/save
     parser.add_argument("--loss_print_every_n_iter", type=int, default=10, required=False,
         help="print loss every n iteration")

@@ -33,33 +33,6 @@ def add_ofrecord_args(parser):
     return parser
 
 
-def load_imagenet(args, batch_size, data_dir, data_part_num, codec):
-    image_blob_conf = flow.data.BlobConf(
-        "encoded",
-        shape=(args.image_size, args.image_size, 3),
-        dtype=flow.float,
-        codec=codec,
-        preprocessors=[flow.data.NormByChannelPreprocessor(args.rgb_mean[::-1],
-                                                           args.rgb_std[::-1])],
-        # preprocessors=[flow.data.NormByChannelPreprocessor(args.rgb_mean, args.rgb_std)], #bgr2rgb
-    )
-
-    label_blob_conf = flow.data.BlobConf(
-        "class/label", shape=(), dtype=flow.int32, codec=flow.data.RawCodec()
-    )
-
-    return flow.data.decode_ofrecord(
-        data_dir,
-        (label_blob_conf, image_blob_conf),
-        batch_size=batch_size,
-        data_part_num=data_part_num,
-        part_name_suffix_length=5,
-        #shuffle = True,
-        # buffer_size=32768,
-        name="decode",
-    )
-
-
 def load_synthetic(args):
     total_device_num = args.num_nodes * args.gpu_num_per_node
     batch_size = total_device_num * args.batch_size_per_device
