@@ -22,6 +22,8 @@ from typing import Callable, Text
 
 import numpy as np
 import oneflow as flow
+import oneflow_onnx
+from oneflow_onnx.oneflow2onnx.util import convert_to_onnx_and_check
 import oneflow.typing as tp
 import onnx
 import onnxruntime as ort
@@ -94,13 +96,7 @@ def oneflow_to_onnx(
     onnx_model_path = os.path.join(
         onnx_model_dir, os.path.basename(flow_weights_path) + ".onnx"
     )
-    flow.onnx.export(
-        job_func,
-        flow_weights_path,
-        onnx_model_path,
-        opset=11,
-        external_data=external_data,
-    )
+    convert_to_onnx_and_check(job_func, flow_weight_dir=flow_weights_path, onnx_model_path=onnx_model_path, opset=11, external_data=external_data)
     print("Convert to onnx success! >> ", onnx_model_path)
     return onnx.load_model(onnx_model_path)
 
@@ -120,6 +116,8 @@ if __name__ == "__main__":
     # set up your model path
     flow_weights_path = "resnet_v15_of_best_model_val_top1_77318"
     onnx_model_dir = "onnx/model"
+    
+    flow.train.CheckPoint().init()
 
     flow.load_variables(flow.checkpoint.get(flow_weights_path))
 

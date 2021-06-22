@@ -1,0 +1,15 @@
+machine_id2thrd_ids {
+  key: 0
+  value {
+    thrd_id: 524288
+    thrd_id: 524289
+    thrd_id: 524290
+    thrd_id: 524291
+    thrd_id: 524353
+    thrd_id: 524354
+    thrd_id: 524355
+    thrd_id: 1048576
+    thrd_id: 1048577
+    thrd_id: 1048578
+  }
+}
