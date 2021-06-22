@@ -36,7 +36,7 @@ multi_machine()
     # param 5  
     IS_F32=$5
 
-    declare -a host_list=("10.10.0.2" "10.10.0.3" "10.10.0.4" "10.10.0.5")
+    declare -a host_list=("10.11.0.2" "10.11.0.3" "11.10.0.4" "10.11.0.5")
 
     if [ $NUM_NODES -gt ${#host_list[@]} ]
     then

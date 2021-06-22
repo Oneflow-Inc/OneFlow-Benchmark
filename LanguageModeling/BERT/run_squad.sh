@@ -1,4 +1,4 @@
-BENCH_ROOT_DIR=/home/oyy/workspace/OneFlow-Benchmark/LanguageModeling/BERT
+BENCH_ROOT_DIR=/path/to/
 # pretrained model dir
 PRETRAINED_MODEL=/DATA/disk1/of_output/uncased_L-12_H-768_A-12_oneflow
 

@@ -21,9 +21,8 @@ LOG_FOLDER=./log/
 PRINT_ITER=1
 ITER_NUM=130
 
-NODE_IPS='10.10.0.2','10.10.0.3','10.10.0.4','10.10.0.5'
+NODE_IPS='10.11.0.2','10.11.0.3','10.11.0.4','10.11.0.5'
 
-# INIT_MODEL=/opt/initial_model 
 INIT_MODEL=/data/bert/initial_model/
 #DATA_DIR=/data/bert_dataset
 DATA_DIR=/data/bert/wiki_seq_len_128/
