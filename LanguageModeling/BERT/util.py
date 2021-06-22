@@ -40,14 +40,12 @@ def InitNodes(args):
 class Snapshot(object):
     def __init__(self, model_save_dir, model_load_dir):
         self._model_save_dir = model_save_dir
-        self._check_point = flow.train.CheckPoint()
         if model_load_dir:
             assert os.path.isdir(model_load_dir)
             print("Restoring model from {}.".format(model_load_dir))
-            self._check_point.load(model_load_dir)
+            flow.load_variables(flow.checkpoint.get(model_load_dir))
         else:
-            self._check_point.init()
-            self.save('initial_model')
+            flow.checkpoint.save('initial_model')
             print("Init model on demand.")
 
     def save(self, name):
@@ -55,7 +53,7 @@ class Snapshot(object):
         if not os.path.exists(snapshot_save_path):
             os.makedirs(snapshot_save_path)
         print("Saving model to {}.".format(snapshot_save_path))
-        self._check_point.save(snapshot_save_path)
+        flow.checkpoint.save(snapshot_save_path)
 
 
 class StopWatch(object):
@@ -146,7 +144,7 @@ class Metric(object):
 def CreateOptimizer(args):
     warmup_batches = int(args.iter_num * args.warmup_proportion)
     lr_warmup = flow.optimizer.warmup.linear(warmup_batches, 0)
-    lr_scheduler = flow.optimizer.PolynomialSchduler(args.learning_rate, args.iter_num, 0.0,
+    lr_scheduler = flow.optimizer.PolynomialScheduler(args.learning_rate, args.iter_num, 0.0,
                                                      warmup=lr_warmup)
     loss_scale_policy = None
     if args.use_fp16:

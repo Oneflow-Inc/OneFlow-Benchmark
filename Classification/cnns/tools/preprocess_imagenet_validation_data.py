@@ -58,14 +58,16 @@ import sys
 from six.moves import xrange
 
 
-if __name__ == '__main__':
-  if len(sys.argv) < 2:
-    print('Invalid usage\n'
-          'usage: preprocess_imagenet_validation_data.py '
-          '<validation data dir>')
-    sys.exit(-1)
-  data_dir = sys.argv[1]
-  validation_labels_file = "imagenet_2012_validation_synset_labels.txt"
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(
+            "Invalid usage\n"
+            "usage: preprocess_imagenet_validation_data.py "
+            "<validation data dir>"
+        )
+        sys.exit(-1)
+    data_dir = sys.argv[1]
+    validation_labels_file = "imagenet_2012_validation_synset_labels.txt"
 
 # Read in the 50000 synsets associated with the validation data set.
 labels = [l.strip() for l in open(validation_labels_file).readlines()]
@@ -73,26 +75,25 @@ unique_labels = set(labels)
 
 # Make all sub-directories in the validation data dir.
 for label in unique_labels:
-  labeled_data_dir = os.path.join(data_dir, label)
-  if not os.path.exists(labeled_data_dir):
-    os.makedirs(labeled_data_dir)
+    labeled_data_dir = os.path.join(data_dir, label)
+    if not os.path.exists(labeled_data_dir):
+        os.makedirs(labeled_data_dir)
 
 # Move all of the image to the appropriate sub-directory.
 for i in xrange(len(labels)):
-  basename = 'ILSVRC2012_val_000%.5d.JPEG' % (i + 1)
-  original_filename = os.path.join(data_dir, basename)
-  if not os.path.exists(original_filename):
-    continue
-  print('Get image: ', original_filename)
-  new_filename = os.path.join(data_dir, labels[i], basename)
-  os.rename(original_filename, new_filename)
+    basename = "ILSVRC2012_val_000%.5d.JPEG" % (i + 1)
+    original_filename = os.path.join(data_dir, basename)
+    if not os.path.exists(original_filename):
+        continue
+    print("Get image: ", original_filename)
+    new_filename = os.path.join(data_dir, labels[i], basename)
+    os.rename(original_filename, new_filename)
 
 
 # Delete all empty dir
 for label in unique_labels:
-  labeled_data_dir = os.path.join(data_dir, label)
-  if not os.path.exists(labeled_data_dir):
-    continue
-  if not os.listdir(labeled_data_dir):
-    os.rmdir(labeled_data_dir)
-
+    labeled_data_dir = os.path.join(data_dir, label)
+    if not os.path.exists(labeled_data_dir):
+        continue
+    if not os.listdir(labeled_data_dir):
+        os.rmdir(labeled_data_dir)
