@@ -7,13 +7,15 @@ CMP_OLD=$3
 # PYTHON_WHL=oneflow-0.3.5+cu112.git.325160b-cp38-cp38-linux_x86_64.whl
 # CMP_OLD=325160bcfb786b166b063e669aea345fadee2da7
 
+BERT_OSSDIR=oss://oneflow-staging/branch/master/bert/
+DOWN_FILE="wget https://oneflow-staging.oss-cn-beijing.aliyuncs.com/branch/master/bert/${CMP_OLD}/out.tar.gz"
+# DOWN_FILE="ossutil64 cp ${BERT_OSSDIR}$CMP_OLD/out.tar.gz .; "
 ENABLE_FP32=0
 GPU_NUM_PER_NODE=8
 BSZ=64
 
-BERT_OSSDIR=oss://oneflow-staging/branch/master/bert/
 PORT=57520
-# PYTHON="/home/guoluqiang/miniconda3/envs/of/bin/python"
+
 PYTHON="python3.8"
 DOCKER_USER=root
 
@@ -133,11 +135,11 @@ done
 for host in "${hosts[@]}" 
 do
     ssh -p $PORT $DOCKER_USER@$host " rm -rf ~/oneflow_temp ; mkdir -p ~/oneflow_temp"
-    # scp -P $PORT -r $PYTHON_WHL  $DOCKER_USER@$host:~/oneflow_temp/
     scp -P $PORT -r $BENCH_ROOT  $DOCKER_USER@$host:~/oneflow_temp/
     echo "tesst--->"
-    # ssh -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/; \
-    #    $PYTHON -m pip install $PYTHON_WHL; "
+    scp -P $PORT -r $PYTHON_WHL  $DOCKER_USER@$host:~/oneflow_temp/
+    ssh -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/; \
+       $PYTHON -m pip install $PYTHON_WHL; "
 
     ssh -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/OneFlow-Benchmark/LanguageModeling/BERT; \
                                     mkdir -p pic; rm -rf pic/*; mkdir -p out; rm -rf out/* "
@@ -148,9 +150,10 @@ done
 #_______________________________________________________________________________________________
 host=${hosts[0]}
 ssh -p $PORT $DOCKER_USER@$host "cd ~; rm -rf ~/out; \
-                                ossutil64 cp ${BERT_OSSDIR}$CMP_OLD/out.tar.gz .; \
+                                ${DOWN_FILE}; \
                                 tar xvf out.tar.gz; \
                                 cp -rf ~/out ~/oneflow_temp/OneFlow-Benchmark/LanguageModeling/BERT/old;"
+
 
 #######################################################################################
 #                                2   run   single
@@ -197,6 +200,7 @@ else
         "single_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_accumulation_lamb_debug" \
         $PYTHON "--f32=0"
     echo "BERT USE_FP16"
+
 fi
 
 
