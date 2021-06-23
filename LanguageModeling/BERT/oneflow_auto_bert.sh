@@ -57,11 +57,11 @@ multi_machine()
     do
     echo "start training on ${host}"
 
-    echo -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/OneFlow-Benchmark/LanguageModeling/BERT; \
-        nohup $RUN_CMD 0 $PYTHON  >/dev/null 2>&1 &" 
+        echo -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/OneFlow-Benchmark/LanguageModeling/BERT; \
+            nohup $RUN_CMD 0 $PYTHON  >/dev/null 2>&1 &" 
 
-    ssh -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/OneFlow-Benchmark/LanguageModeling/BERT; \
-        nohup $RUN_CMD 0 $PYTHON  >/dev/null 2>&1 &"   
+        ssh -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/OneFlow-Benchmark/LanguageModeling/BERT; \
+            nohup $RUN_CMD 0 $PYTHON  >/dev/null 2>&1 &"   
 
     done
 
@@ -136,10 +136,10 @@ for host in "${hosts[@]}"
 do
     ssh -p $PORT $DOCKER_USER@$host " rm -rf ~/oneflow_temp ; mkdir -p ~/oneflow_temp"
     scp -P $PORT -r $BENCH_ROOT  $DOCKER_USER@$host:~/oneflow_temp/
-    echo "tesst--->"
-    scp -P $PORT -r $PYTHON_WHL  $DOCKER_USER@$host:~/oneflow_temp/
-    ssh -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/; \
-       $PYTHON -m pip install $PYTHON_WHL; "
+    echo "test--->"
+    # scp -P $PORT -r $PYTHON_WHL  $DOCKER_USER@$host:~/oneflow_temp/
+    # ssh -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/; \
+    #    $PYTHON -m pip install $PYTHON_WHL; "
 
     ssh -p $PORT $DOCKER_USER@$host "cd ~/oneflow_temp/OneFlow-Benchmark/LanguageModeling/BERT; \
                                     mkdir -p pic; rm -rf pic/*; mkdir -p out; rm -rf out/* "
@@ -159,105 +159,36 @@ ssh -p $PORT $DOCKER_USER@$host "cd ~; rm -rf ~/out; \
 #                                2   run   single
 ########################################################################################
 
-NUM_NODES=1
-
-
 if [ "$ENABLE_FP32" = 1 ];then
-    
-    #                                f32  adam debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 0 1 ${BSZ} 1 adam ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "single_bert_f32_pretraining_8gpu_${BSZ}bs_130iter_adam_debug" \
-        $PYTHON "--f32=1"
-    #                                f32  lamb debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 0 1 ${BSZ} 1 lamb ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "single_bert_f32_pretraining_8gpu_${BSZ}bs_100iter_lamb_debug" \
-        $PYTHON "--f32=1"
-    #                                f32 accumulation adam debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 0 1 ${BSZ} 2 adam ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "single_bert_f32_pretraining_8gpu_${BSZ}bs_100iter_accumulation_debug" \
-        $PYTHON "--f32=1"
-    #                                f32 accumulation lamb debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 0 1 ${BSZ} 2 lamb ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "single_bert_f32_pretraining_8gpu_${BSZ}bs_100iter_accumulation_lamb_debug" \
-        $PYTHON "--f32=1"
-    echo "BERT USE_FP32"
+    float_types=(0 1)
 else
-    #                                f16  adam debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 1 1 ${BSZ} 1 adam ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "single_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_debug" \
-        $PYTHON "--f32=0"
-    #                                f16  lamb debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 1 1 ${BSZ} 1 lamb ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "single_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_lamb_debug" \
-        $PYTHON "--f32=0"
-
-    #                                f16 accumulation adam debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 1 1 ${BSZ} 2 adam ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "single_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_accumulation_debug" \
-        $PYTHON "--f32=0"
-    #                                f16 accumulation lamb
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 1 1 ${BSZ} 2 lamb ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "single_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_accumulation_lamb_debug" \
-        $PYTHON "--f32=0"
-    echo "BERT USE_FP16"
-
+    float_types=(0 )
 fi
+num_nodes=(1 4)
+optimizers=(adam lamb)
+accumulations=(1 2)
+FLOAT_STR=(f16 f32)
+NUM_NODE_STR=(null single multi multi multi)
 
 
 
+for ftype in ${float_types[@]}
+do
+    for num_node in ${num_nodes[@]}
+    do
+        for optimizer in ${optimizers[@]}
+        do
+            for accumulation in ${accumulations[@]}
+            do
+                name=${NUM_NODE_STR[$num_node]}_bert_${FLOAT_STR[$ftype]}_pretraining_
+                multi_machine ${num_node} "sh train_perbert.sh 1 1 ${BSZ} 1 ${optimizer} ${GPU_NUM_PER_NODE} $num_node " \
+                "${name}${GPU_NUM_PER_NODE}gpu_${BSZ}bs_accumulation-${accumulation}_${optimizer}_debug" \
+                $PYTHON "--f32=${ftype}"
+            done #end accumulations
+        done  #end optimizer
+    done #end num_node
+done #float_types
 
-#____________________________________________________________________________________________________
-
-
-
-# #######################################################################################
-# #                              2   run multi-machine
-# ########################################################################################
-NUM_NODES=4
-
-
-if [ "$ENABLE_FP32" = 1 ];then
-    
-    #                                f32  adam debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 0 1 ${BSZ} 1 adam ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "multi_bert_f32_pretraining_8gpu_${BSZ}bs_130iter_adam_debug" \
-        $PYTHON "--f32=1"
-    #                                f32  lamb debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 0 1 ${BSZ} 1 lamb ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "multi_bert_f32_pretraining_8gpu_${BSZ}bs_100iter_lamb_debug" \
-        $PYTHON "--f32=1"
-    #                                f32 accumulation adam debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 0 1 ${BSZ} 2 adam ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "multi_bert_f32_pretraining_8gpu_${BSZ}bs_100iter_accumulation_debug" \
-        $PYTHON "--f32=1"
-    #                                f32 accumulation lamb debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 0 1 ${BSZ} 2 lamb ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "multi_bert_f32_pretraining_8gpu_${BSZ}bs_100iter_accumulation_lamb_debug" \
-        $PYTHON "--f32=1"
-
-    echo "BERT USE_FP32"
-else
-    #                                f16  adam debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 1 1 ${BSZ} 1 adam ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "multi_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_debug" \
-        $PYTHON "--f32=0"
-    #                                f16  lamb debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 1 1 ${BSZ} 1 lamb ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "multi_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_lamb_debug" \
-        $PYTHON "--f32=0"
-    #                                f16 accumulation adam debug
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 1 1 ${BSZ} 2 adam ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "multi_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_accumulation_debug" \
-        $PYTHON "--f32=0"
-    #                                f16 accumulation lamb
-    multi_machine ${NUM_NODES} "sh train_perbert.sh 1 1 ${BSZ} 2 lamb ${GPU_NUM_PER_NODE} $NUM_NODES " \
-        "multi_bert_f16_pretraining_8gpu_${BSZ}bs_100iter_accumulation_lamb_debug" \
-        $PYTHON "--f32=0"
-    echo "BERT USE_FP16"
-fi
-
-
-# __________________________________________________________________________________________
 
 host=${hosts[0]}
 echo "start tar on ${host}"
