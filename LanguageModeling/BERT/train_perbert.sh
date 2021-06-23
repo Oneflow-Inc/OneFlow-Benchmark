@@ -57,10 +57,6 @@ fi
 #bert_f32_pretraining_8gpu_64bs_100iter_lamb_debug
 mkdir -p $LOG_FOLDER
 
-# OUTFILE=bert_pretraining_${FP_NAME}_${GPUS_PER_NODE}gpu_${BATCH_SIZE}bs_${ITER_NUM}iter_${OPTIMIZER}\
-# _${DEBUG_NAME}
-# mkdir -p $OUTFILE
-
 LOGFILE=$LOG_FOLDER/bert_pretraining_${FP_NAME}_${GPUS_PER_NODE}gpu_${BATCH_SIZE}bs_${ITER_NUM}iter_${OPTIMIZER}\
 _${DEBUG_NAME}.log
 
@@ -71,17 +67,11 @@ MEM_FILE=$LOG_FOLDER/memory.log
 echo LOGFILE=$LOGFILE
 echo DATA_DIR=$DATA_DIR
 
-#${NNODES}n${GPUS_PER_NODE}g_dp${D_P}_mp${M_P}_pp${P_P}_mbs${MICRO_BATCH_SIZE}_gbs${GLOABAL_BATCH_SIZE}_pretrain_${NODE_RANK}.log
 rm -rf ${MODEL_DIR}/*
 rm -rf ${LOG_FOLDER}/*
 
 NVPROF=baseline-report_${NODE_RANK}
 #-o ${NVPROF} 
-
-
-# -g $GPUS_PER_NODE \
-# -n 0.5 \
-
 
 export NCCL_DEBUG=INFO
 export PYTHONUNBUFFERED=1
@@ -118,7 +108,7 @@ $PYTHON run_pretraining.py \
   --model_save_dir=./snapshots \
   --debug=${DEBUG_MODE} \
   --data_load_random=0 \
-  --model_load=${INIT_MODEL} \
+  --model_load_dir=${INIT_MODEL} \
   ${FP_CMD} \
   --optimizer_type=${OPTIMIZER} \
   2>&1 | tee ${LOGFILE} 

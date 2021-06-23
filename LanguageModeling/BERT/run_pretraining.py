@@ -31,8 +31,6 @@ parser.add_argument("--iter_num", type=int, default=1144000, help="total iterati
 parser.add_argument("--batch_size_per_device", type=int, default=64)
 parser.add_argument("--debug", type=int, default=0)
 parser.add_argument("--data_load_random", type=int, default=1)
-parser.add_argument("--model_load", type=str, default=None)
-
 
 args = parser.parse_args()
 configs.print_args(args)
@@ -124,10 +122,6 @@ def main():
     InitNodes(args)
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
-
-
-    if args.model_load != None:
-        flow.load_variables(flow.checkpoint.get(args.model_load))
 
     print('num_accumulation_steps:', args.num_accumulation_steps)
     metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, 
