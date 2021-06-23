@@ -1,12 +1,9 @@
 """
 Copyright 2020 The OneFlow Authors. All rights reserved.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +26,7 @@ import onnxruntime as ort
 from resnet_model import resnet50
 import config as configs
 from imagenet1000_clsidx_to_labels import clsidx_2_labels
+from oneflow_onnx.oneflow2onnx.util import export_onnx_model
 
 parser = configs.get_parser()
 args = parser.parse_args()
@@ -92,12 +90,12 @@ def oneflow_to_onnx(
     assert os.path.exists(flow_weights_path) and os.path.isdir(onnx_model_dir)
 
     onnx_model_path = os.path.join(
-        onnx_model_dir, os.path.basename(flow_weights_path) + ".onnx"
+        onnx_model_dir, "model.onnx"
     )
-    flow.onnx.export(
+    export_onnx_model(
         job_func,
-        flow_weights_path,
-        onnx_model_path,
+        flow_weight_dir=flow_weights_path,
+        onnx_model_path=onnx_model_dir,
         opset=11,
         external_data=external_data,
     )

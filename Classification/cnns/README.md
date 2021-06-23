@@ -586,9 +586,9 @@ onnx_model_dir = 'onnx/model'
 
 **步骤三：调用 flow.onnx.export 方法**
 
-接下来代码中会调用`oneflow_to_onnx()`方法，此方法包含了核心的模型转换方法： `flow.onnx.export()` 
+接下来代码中会调用`oneflow_to_onnx()`方法，此方法包含了核心的模型转换方法： `oneflow_onnx.oneflow2onnx.util.export_onnx_model()`，更多OneFlow和ONNX模型转换相关的问题请看: [oneflow_convert_tools介绍](https://docs.oneflow.org/extended_topics/oneflow_convert_tools.html)
 
- **flow.onnx.export** 将从 OneFlow 网络得到 ONNX 模型，它的第一个参数是上文所说的专用于推理的 job function，第二个参数是OneFlow模型路径，第三个参数是（转换后）ONNX模型的存放路径
+ **oneflow_to_onnx** 将从 OneFlow 网络得到 ONNX 模型，它的第一个参数是上文所说的专用于推理的 job function，第二个参数是OneFlow模型路径，第三个参数是（转换后）ONNX模型的存放路径
 
 ```python
 onnx_model = oneflow_to_onnx(InferenceNet, flow_weights_path, onnx_model_dir, external_data=False)
