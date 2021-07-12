@@ -2,6 +2,8 @@
 ## Introduction
 This repository provides OneFlow deep learning benchmark examples for CV, CTR and NLP, and more models are on the way and will be provided here when ready.
 
+The code of this repository is synchronized with the master branch of oneflow by default. Please install **nightly** oneflow.
+
 ## [Convolutional Networks](./Classification/cnns) for Computer Vision Classification
 - [ResNet-50](./Classification/cnns)
 - [ResNeXt-50-32*4d](./Classification/cnns)
