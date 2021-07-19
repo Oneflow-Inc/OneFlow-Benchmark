@@ -10,7 +10,7 @@ from oneflow_gpt.model import GPTModel, ParallelSparseSoftmaxCrossEntropyLoss
 from oneflow_gpt import util
 from .datasets import build_dataset
 import numpy as np
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 
 def _init_env(args):

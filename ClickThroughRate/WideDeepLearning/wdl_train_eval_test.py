@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import argparse
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 import datetime
 import os
 import glob

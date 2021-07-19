@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 # ref : https://arxiv.org/pdf/1801.04381.pdf
 # ref : https://github.com/liangfu/mxnet-mobilenet-v2/blob/master/symbols/mobilenetv2.py

@@ -13,8 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import oneflow as flow
-import oneflow.core.common.data_type_pb2 as data_type_util
+import oneflow.compatible.single_client as flow
 import oneflow.core.operator.op_conf_pb2 as op_conf_util
 import math
 

@@ -18,7 +18,7 @@ import os
 import math
 import numpy as np
 
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 from classifier import GlueBERT
 from util import Snapshot, InitNodes, Metric, CreateOptimizer, GetFunctionConfig

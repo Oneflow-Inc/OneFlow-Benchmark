@@ -21,7 +21,7 @@ from datetime import datetime
 
 import config as configs
 from config import str2bool
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 from squad import SQuAD
 from util import Snapshot, InitNodes, Metric, CreateOptimizer, GetFunctionConfig

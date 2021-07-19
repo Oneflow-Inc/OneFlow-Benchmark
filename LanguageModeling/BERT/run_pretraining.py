@@ -19,7 +19,7 @@ import argparse
 from datetime import datetime
 
 import config as configs
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 from pretrain import PreTrain
 from util import Snapshot, InitNodes, Metric, CreateOptimizer, GetFunctionConfig

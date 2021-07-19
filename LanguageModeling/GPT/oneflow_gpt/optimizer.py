@@ -1,4 +1,4 @@
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 
 def get_lr_scheduler(args):

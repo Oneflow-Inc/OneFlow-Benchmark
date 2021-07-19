@@ -1,4 +1,4 @@
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 from oneflow_gpt import distribute
 from oneflow_gpt.config import get_args

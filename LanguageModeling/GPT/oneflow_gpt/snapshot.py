@@ -2,7 +2,7 @@ import os
 import re
 import glob
 import operator
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 
 class Snapshot(object):
