@@ -28,7 +28,7 @@ configs.print_args(args)
 from util import Snapshot, InitNodes, Metric
 import ofrecord_util
 from job_function_util import get_train_config, get_val_config
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 import vgg_model
 import resnet_model
 import resnext_model

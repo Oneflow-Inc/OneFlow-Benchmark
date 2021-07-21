@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 import bert as bert_util
-import oneflow.core.operator.op_conf_pb2 as op_conf_util
+import oneflow.compatible.single_client.core.operator.op_conf_pb2 as op_conf_util
 
 
 def PreTrain(

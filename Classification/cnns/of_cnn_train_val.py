@@ -15,7 +15,7 @@ limitations under the License.
 """
 import os
 import math
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 import ofrecord_util
 import optimizer_util
 import config as configs

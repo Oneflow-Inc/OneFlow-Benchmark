@@ -20,7 +20,7 @@ import numpy as np
 from collections import OrderedDict
 import pandas as pd
 from datetime import datetime
-import oneflow as flow
+import oneflow.compatible.single_client as flow
 
 
 def InitNodes(args):
