@@ -1,5 +1,5 @@
 rm -rf core.*
-rm -rf ./output ./initial_model ./logs ./log
+rm -rf ./output ./initial_model 
 
 # bash args_train.sh ${NUM_NODES} ${NUM_GPUS_PER_NODE} ${BATCH_SIZE} ${USE_FP16} ${NUM_EPOCH} ${LOSS_PRINT_ITER} ${TRAIN_DATA_PATH} ${VAL_DATA_PATH} ${PYTHON_BIN} ${NODE_IPS} ${NSYS_BIN}
 
@@ -18,7 +18,7 @@ NSYS_BIN=${11:-""}
 
 
 TRAN_MODEL="resnet50"
-LOG_FOLDER=./logs/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
+LOG_FOLDER=./output/logs/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
 mkdir -p $LOG_FOLDER
 LOG_FILENAME=$LOG_FOLDER/${TRAN_MODEL}_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_b${BATCH_SIZE}_FP16${USE_FP16}_training.log
 

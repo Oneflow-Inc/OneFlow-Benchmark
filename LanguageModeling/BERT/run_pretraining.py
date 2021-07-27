@@ -17,6 +17,7 @@ limitations under the License.
 import os
 import argparse
 from datetime import datetime
+import time
 
 import config as configs
 import oneflow as flow
@@ -97,6 +98,7 @@ def PretrainJob():
 
 
 def main():
+    start_time = time.time()
     flow.config.gpu_device_num(args.gpu_num_per_node)
     flow.env.log_dir(args.log_dir)
 
@@ -115,6 +117,8 @@ def main():
     if args.save_last_snapshot:
         snapshot.save("last_snapshot")
 
+    print("End time: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
+    print("Total time: {}s".format(str(time.time()-start_time)))
 
 if __name__ == "__main__":
     main()
