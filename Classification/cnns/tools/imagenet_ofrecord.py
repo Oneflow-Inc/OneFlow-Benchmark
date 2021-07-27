@@ -104,7 +104,7 @@ import glob
 import numpy as np
 import six
 import cv2
-import import oneflow.core.record.record_pb2 as of_record
+import oneflow.core.record.record_pb2 as of_record
 import struct
 
 """

@@ -25,7 +25,7 @@ args = parser.parse_args()
 configs.print_args(args)
 
 import oneflow.compatible.single_client as flow
-import import oneflow.typing as tp
+import oneflow.compatible.single_client.typing as tp
 from imagenet1000_clsidx_to_labels import clsidx_2_labels
 
 import resnet_model

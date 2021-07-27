@@ -19,7 +19,7 @@ from typing import Callable, Text
 
 import numpy as np
 import oneflow.compatible.single_client as flow
-import import oneflow.typing as tp
+import oneflow.compatible.single_client.typing as tp
 import onnx
 import onnxruntime as ort
 
