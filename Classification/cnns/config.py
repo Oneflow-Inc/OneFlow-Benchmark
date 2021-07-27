@@ -92,7 +92,7 @@ def get_parser(parser=None):
         "--model_load_dir", type=str, default=None, help="model load directory if need"
     )
     parser.add_argument("--batch_size_per_device", type=int, default=64)
-    parser.add_argument("--val_batch_size_per_device", type=int, default=8)
+    parser.add_argument("--val_batch_size_per_device", type=int, default=50)
 
     parser.add_argument(
         "--nccl_fusion_threshold_mb",

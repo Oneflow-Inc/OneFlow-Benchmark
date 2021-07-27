@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import os
+from datetime import datetime
+import time
 import math
 import oneflow as flow
 import ofrecord_util
@@ -127,6 +129,8 @@ def InferenceNet():
 
 
 def main():
+    print("Start time: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
+    start_time = time.time()
     InitNodes(args)
     flow.env.log_dir(args.log_dir)
 
@@ -153,6 +157,9 @@ def main():
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
         snapshot.save("epoch_{}".format(epoch))
+    
+    print("End time: {}".format(str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))))
+    print("Total time: {}s".format(str(time.time()-start_time)))
 
 
 if __name__ == "__main__":
