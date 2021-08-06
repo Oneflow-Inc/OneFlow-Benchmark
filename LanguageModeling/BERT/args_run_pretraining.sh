@@ -6,34 +6,40 @@ rm -rf ./output/* initial_model
 NUM_NODES=${1:-1}
 NUM_GPUS_PER_NODE=${2:-8}
 BSZ_PER_DEVICE=${3:-48}
-USE_FP16=${4:-True}
+USE_FP16=${4:-true}
 ITER_NUM=${5:-300}
 LOSS_PRINT_ITER=${6:-10}
-DATA_DIR=${7:-""} 
+DATA_DIR=${7:-""}
 # leinao:/data/bert/wiki_seq_len_128
 # jinshan: /DATA/disk1/bert/wiki_seq_len_128
-DATA_PART_NUM=${8:-64} 
+DATA_PART_NUM=${8:-64}
 SEQ_LENGHT=${9:-128} # large:512
 NUM_HIDDEN_LAYERS=${10:-12} # large:24
 NUM_ATTENTION_HEADS=${11:-12} # large: 16
 PYTHON_BIN=${12:-"python3"}
 NODE_IPS=${13:-"10.11.0.2,10.11.0.3,10.11.0.4,10.11.0.5"}
-DEBUG_AND_NCCL=${14:-False}
+DEBUG_AND_NCCL=${14:-false}
 NSYS_BIN=${15:-""}
+ITER_N=${16:-1}
 
-LOG_FOLDER=./output/logs/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
+
+LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
 mkdir -p $LOG_FOLDER
-LOG_FILENAME=$LOG_FOLDER/bert_${NUM_NODES}n_${NUM_GPUS_PER_NODE}g_sq${SEQ_LENGHT}_nhl${NUM_HIDDEN_LAYERS}_nah${NUM_ATTENTION_HEADS}_bsz${BSZ_PER_DEVICE}.log
+LOG_FILENAME=$LOG_FOLDER/bert_${NUM_NODES}n_${NUM_GPUS_PER_NODE}g_sq${SEQ_LENGHT}_nhl${NUM_HIDDEN_LAYERS}_nah${NUM_ATTENTION_HEADS}_bsz${BSZ_PER_DEVICE}_iter${ITER_N}.log
 
 export PYTHONUNBUFFERED=1
 export GLOG_v=3
 
 echo DEBUG_AND_NCCL=$DEBUG_AND_NCCL
-if [ $DEBUG_AND_NCCL ]; then
+if $DEBUG_AND_NCCL; then
     export ONEFLOW_DEBUG_MODE=1
     echo ONEFLOW_DEBUG_MODE=$ONEFLOW_DEBUG_MODE
     export NCCL_DEBUG=INFO
     echo NCCL_DEBUG=$NCCL_DEBUG
+fi
+
+if [ $NUM_GPUS_PER_NODE -eq 1 ]; then
+  export CUDA_VISIBLE_DEVICES=$(($ITER_N-1))
 fi
 
 CMD=""
@@ -53,11 +59,11 @@ CMD+="--batch_size_per_device=${BSZ_PER_DEVICE} "
 CMD+="--iter_num=${ITER_NUM} "
 CMD+="--loss_print_every_n_iter=${LOSS_PRINT_ITER} "
 CMD+="--seq_length=${SEQ_LENGHT} "
-if [ $USE_FP16 ]; then
+if $USE_FP16; then
     echo USE_FP16=$USE_FP16
     CMD+="--use_fp16 "
 fi
-CMD+="--max_predictions_per_seq=80 "
+CMD+="--max_predictions_per_seq=20 "
 CMD+="--num_hidden_layers=${NUM_HIDDEN_LAYERS} "
 CMD+="--num_attention_heads=${NUM_ATTENTION_HEADS} "
 CMD+="--max_position_embeddings=512 "
@@ -77,3 +83,8 @@ echo "Rum cmd ${CMD}"
 $CMD 2>&1 | tee ${LOG_FILENAME}
 
 echo "Writting log to ${LOG_FILENAME}"
+
+if [ ! -d "./test_result" ]; then
+  mkdir ./test_result
+fi
+cp -r $LOG_FOLDER ./test_result/

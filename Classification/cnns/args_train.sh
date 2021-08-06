@@ -1,33 +1,39 @@
 rm -rf core.*
-rm -rf ./output ./initial_model 
+rm -rf ./output ./initial_model
 
-# bash args_train.sh ${NUM_NODES} ${NUM_GPUS_PER_NODE} ${BATCH_SIZE} ${USE_FP16} ${NUM_EPOCH} ${LOSS_PRINT_ITER} ${TRAIN_DATA_PATH} ${VAL_DATA_PATH} ${PYTHON_BIN} ${NODE_IPS} ${NSYS_BIN}
+
+# bash args_train.sh ${NUM_NODES} ${NUM_GPUS_PER_NODE} ${BATCH_SIZE} ${USE_FP16} ${NUM_EPOCH} ${LOSS_PRINT_ITER} ${TRAIN_DATA_PATH} ${VAL_DATA_PATH} ${PYTHON_BIN} ${NODE_IPS} ${DEBUG_AND_NCCL} ${NSYS_BIN} ${ITER_NUM}
 
 NUM_NODES=${1:-1}
 NUM_GPUS_PER_NODE=${2:-8}
 BATCH_SIZE=${3:-192}
-USE_FP16=${4:-True}
+USE_FP16=${4:-true}
 NUM_EPOCH=${5:-2}
 LOSS_PRINT_ITER=${6:-10}
 TRAIN_DATA_PATH=${7:-""}
 VAL_DATA_PATH=${8:-""}
 PYTHON_BIN=${9:-"python3"}
 NODE_IPS=${10:-"10.11.0.2,10.11.0.3,10.11.0.4,10.11.0.5"}
-DEBUG_AND_NCCL=${11:-False}
-NSYS_BIN=${11:-""}
+DEBUG_AND_NCCL=${11:-false}
+NSYS_BIN=${12:-""}
+ITER_NUM=${13:-1}
+
+if [ $NUM_GPUS_PER_NODE -eq 1 ]; then
+  export CUDA_VISIBLE_DEVICES=$(($ITER_NUM-1))
+fi
 
 
 TRAN_MODEL="resnet50"
-LOG_FOLDER=./output/logs/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
+LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
 mkdir -p $LOG_FOLDER
-LOG_FILENAME=$LOG_FOLDER/${TRAN_MODEL}_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_b${BATCH_SIZE}_FP16${USE_FP16}_training.log
+LOG_FILENAME=$LOG_FOLDER/${TRAN_MODEL}_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_b${BATCH_SIZE}_FP16${USE_FP16}_training_iter${ITER_NUM}.log
 
 export PYTHONUNBUFFERED=1
 echo PYTHONUNBUFFERED=$PYTHONUNBUFFERED
 export NCCL_LAUNCH_MODE=PARALLEL
 echo NCCL_LAUNCH_MODE=$NCCL_LAUNCH_MODE
 echo DEBUG_AND_NCCL=$DEBUG_AND_NCCL
-if [ $DEBUG_AND_NCCL ]; then
+if $DEBUG_AND_NCCL; then
     export ONEFLOW_DEBUG_MODE=1
     echo ONEFLOW_DEBUG_MODE=$ONEFLOW_DEBUG_MODE
     export NCCL_DEBUG=INFO
@@ -62,7 +68,7 @@ CMD+="--learning_rate=${LEARNING_RATE} "
 CMD+="--loss_print_every_n_iter=${LOSS_PRINT_ITER} "
 
 CMD+="--channel_last=False "
-if [ $USE_FP16 ]; then
+if $USE_FP16; then
     echo USE_FP16=$USE_FP16
     CMD+="--use_fp16 --pad_output --channel_last=True "
 fi
@@ -81,3 +87,8 @@ echo "Rum cmd ${CMD}"
 $CMD 2>&1 | tee ${LOG_FILENAME}
 
 echo "Writting log to ${LOG_FILENAME}"
+
+if [ ! -d "./test_result" ]; then
+  mkdir ./test_result
+fi
+cp -r $LOG_FOLDER ./test_result/
