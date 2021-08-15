@@ -25,7 +25,8 @@ for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
 	sh train_prebert.sh 0 1 64 1 adam 8 1 1
-    cp -rf log/ log_f32_${i}
+    mkdir log_f32_${i}
+    cp -rf log/bert* log_f32_${i}
 done
 
 file_op out/bert_f32_pretraining_8gpu_64bs_debug
@@ -156,15 +157,8 @@ $PYTHON tools/result_analysis.py  --f32=0 \
     --cmp2_file=out/bert_f16_pretraining_8gpu_64bs_accumulation_lamb_debug/log_f16_1/bert.json \
     --out=pic/bert_f16_pretraining_8gpu_64bs_accumulation_lamb_debug.png
 # ##############################################################################
-#                             tar
+#                             
 # ##############################################################################
 
-tar  -zcvf out.tar.gz  out
-
 $PYTHON  tools/stitching_pic.py --dir=pic --out_file=./pic/all.png
-# rm -rf out
-###############################################################################
-#                              upload
-###############################################################################
-
 

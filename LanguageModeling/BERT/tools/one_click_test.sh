@@ -11,21 +11,17 @@ pip install $CMP_NEW
 
 echo ${CMP_NEW}
 echo ${CMP_OLD}
-echo $(pwd)
 ####################################################################
 #                           
 ####################################################################
 cd OneFlow-Benchmark/LanguageModeling/BERT
-echo $(pwd)
 
 wget ${BERT_OSSDIR}${CMP_OLD}/${LOGFILE}
 
-echo $(pwd)
 tar xvf ${LOGFILE}
 rm -rf old
 mv out old
 
-echo $(pwd)
 bash train_prebert_list.sh
 
 ####################################################################
