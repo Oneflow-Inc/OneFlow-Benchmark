@@ -1,5 +1,7 @@
 NUM=${1:-1}
 
+PYTHON=python3.8
+
 file_op() 
 {
     mkdir -p $1
@@ -28,7 +30,7 @@ done
 
 file_op out/bert_f32_pretraining_8gpu_64bs_debug
 
-python tools/result_analysis.py  --f32=1 \
+$PYTHON tools/result_analysis.py  --f32=1 \
     --cmp1_file=old/bert_f32_pretraining_8gpu_64bs_debug/log_f32_1/out.json \
     --cmp2_file=out/bert_f32_pretraining_8gpu_64bs_debug/log_f32_1/out.json \
     --out=pic/bert_f32_pretraining_8gpu_64bs_debug.png
@@ -45,7 +47,7 @@ done
 
 file_op  out/bert_f32_pretraining_8gpu_64bs_lamb_debug
 
-python tools/result_analysis.py  --f32=1 \
+$PYTHON tools/result_analysis.py  --f32=1 \
     --cmp1_file=old/bert_f32_pretraining_8gpu_64bs_lamb_debug/log_f32_1/out.json \
     --cmp2_file=out/bert_f32_pretraining_8gpu_64bs_lamb_debug/log_f32_1/out.json \
     --out=pic/bert_f32_pretraining_8gpu_64bs_lamb_debug.png
@@ -61,7 +63,7 @@ do
 done
 file_op  out/bert_f16_pretraining_8gpu_64bs_debug
 
-python tools/result_analysis.py  --f32=0 \
+$PYTHON tools/result_analysis.py  --f32=0 \
     --cmp1_file=old/bert_f16_pretraining_8gpu_64bs_debug/log_f16_1/out.json \
     --cmp2_file=out/bert_f16_pretraining_8gpu_64bs_debug/log_f16_1/out.json \
     --out=pic/bert_f16_pretraining_8gpu_64bs_debug.png
@@ -78,7 +80,7 @@ done
 
 file_op  out/bert_f16_pretraining_8gpu_64bs_lamb_debug
 
-python tools/result_analysis.py  --f32=0 \
+$PYTHON tools/result_analysis.py  --f32=0 \
     --cmp1_file=old/bert_f16_pretraining_8gpu_64bs_lamb_debug/log_f16_1/out.json \
     --cmp2_file=out/bert_f16_pretraining_8gpu_64bs_lamb_debug/log_f16_1/out.json \
     --out=pic/bert_f16_pretraining_8gpu_64bs_lamb_debug.png
@@ -96,7 +98,7 @@ done
 
 file_op out/bert_f32_pretraining_8gpu_64bs_accumulation_debug
 
-python tools/result_analysis.py  --f32=1 \
+$PYTHON tools/result_analysis.py  --f32=1 \
     --cmp1_file=old/bert_f32_pretraining_8gpu_64bs_accumulation_debug/log_f32_1/out.json \
     --cmp2_file=out/bert_f32_pretraining_8gpu_64bs_accumulation_debug/log_f32_1/out.json \
     --out=pic/bert_f32_pretraining_8gpu_64bs_accumulation_debug.png
@@ -114,7 +116,7 @@ done
 
 file_op out/bert_f32_pretraining_8gpu_64bs_accumulation_lamb_debug
 
-python tools/result_analysis.py  --f32=1 \
+$PYTHON tools/result_analysis.py  --f32=1 \
     --cmp1_file=old/bert_f32_pretraining_8gpu_64bs_accumulation_lamb_debug/log_f32_1/out.json \
     --cmp2_file=out/bert_f32_pretraining_8gpu_64bs_accumulation_lamb_debug/log_f32_1/out.json \
     --out=pic/bert_f32_pretraining_8gpu_64bs_accumulation_lamb_debug.png
@@ -132,7 +134,7 @@ done
 
 file_op out/bert_f16_pretraining_8gpu_64bs_accumulation_debug
 
-python tools/result_analysis.py  --f32=0 \
+$PYTHON tools/result_analysis.py  --f32=0 \
     --cmp1_file=old/bert_f16_pretraining_8gpu_64bs_accumulation_debug/log_f16_1/out.json \
     --cmp2_file=out/bert_f16_pretraining_8gpu_64bs_accumulation_debug/log_f16_1/out.json \
     --out=pic/bert_f16_pretraining_8gpu_64bs_accumulation_debug.png
@@ -149,7 +151,7 @@ done
 
 file_op out/bert_f16_pretraining_8gpu_64bs_accumulation_lamb_debug
 
-python tools/result_analysis.py  --f32=0 \
+$PYTHON tools/result_analysis.py  --f32=0 \
     --cmp1_file=old/bert_f16_pretraining_8gpu_64bs_accumulation_lamb_debug/log_f16_1/out.json \
     --cmp2_file=out/bert_f16_pretraining_8gpu_64bs_accumulation_lamb_debug/log_f16_1/out.json \
     --out=pic/bert_f16_pretraining_8gpu_64bs_accumulation_lamb_debug.png
@@ -159,7 +161,7 @@ python tools/result_analysis.py  --f32=0 \
 
 tar  -zcvf out.tar.gz  out
 
-python  tools/stitching_pic.py --dir=pic --out_file=./pic/all.png
+$PYTHON  tools/stitching_pic.py --dir=pic --out_file=./pic/all.png
 # rm -rf out
 ###############################################################################
 #                              upload
