@@ -13,9 +13,10 @@ pip install $CMP_NEW
 ####################################################################
 #                           
 ####################################################################
-
-
-cd /root/OneFlow-Benchmark/LanguageModeling/BERT
+git clone https://github.com/Oneflow-Inc/OneFlow-Benchmark.git
+cd OneFlow-Benchmark
+git checkout dev_1node_bert_auto_test
+cd LanguageModeling/BERT
 
 ossutil64 cp ${BERT_OSSDIR}$CMP_OLD/out.tar.gz .
 
@@ -29,11 +30,11 @@ bash train_perbert_list.sh
 ####################################################################
 #                       
 ####################################################################
-ossutil64 rm -rf  ${BERT_OSSDIR}$CMP_NEW/*
-ossutil64 mkdir ${BERT_OSSDIR}$CMP_NEW/
+# ossutil64 rm -rf  ${BERT_OSSDIR}$CMP_NEW/*
+# ossutil64 mkdir ${BERT_OSSDIR}$CMP_NEW/
 
 
-ossutil64 cp out.tar.gz ${BERT_OSSDIR}$CMP_NEW/
-ossutil64 cp -rf pic ${BERT_OSSDIR}$CMP_NEW/
+# ossutil64 cp out.tar.gz ${BERT_OSSDIR}$CMP_NEW/
+# ossutil64 cp -rf pic ${BERT_OSSDIR}$CMP_NEW/
 
 echo "success"
