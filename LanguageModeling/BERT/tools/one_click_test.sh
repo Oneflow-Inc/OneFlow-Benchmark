@@ -6,26 +6,27 @@ BERT_OSSDIR=oss://oneflow-public/BERT/
 #                               
 ####################################################################
 
+pip install $CMP_NEW
+
 echo ${CMP_NEW}
 echo ${CMP_OLD}
-
-pip install $CMP_NEW
+echo $(pwd)
 ####################################################################
 #                           
 ####################################################################
-git clone https://github.com/Oneflow-Inc/OneFlow-Benchmark.git
-cd OneFlow-Benchmark
-git checkout dev_1node_bert_auto_test
-cd LanguageModeling/BERT
+cd OneFlow-Benchmark/LanguageModeling/BERT
+echo $(pwd)
 
 ossutil64 cp ${BERT_OSSDIR}$CMP_OLD/out.tar.gz .
 
+echo $(pwd)
 tar xvf out.tar.gz
 rm -rf old
 mv out old
 rm out.tar.gz
 
-bash train_perbert_list.sh
+echo $(pwd)
+bash train_prebert_list.sh
 
 ####################################################################
 #                       
