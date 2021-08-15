@@ -122,7 +122,7 @@ QDREP=$LOG_FOLDER/bert_pretraining_${GPUS_PER_NODE}gpu_${BATCH_SIZE}bs_${ITER_NU
 # mv $NVPROF.qdrep  $QDREP
 
 if [ "$MASTER" = 1 ]; then
-  json_file=${LOG_FOLDER}out.json
+  json_file=${LOG_FOLDER}bert.json
   python tools/analysis.py \
     --log_file=$LOGFILE \
     --mem_file=$MEM_FILE \
