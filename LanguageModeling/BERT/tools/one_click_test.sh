@@ -1,7 +1,8 @@
 CMP_NEW=${1:-python_whl}
 CMP_OLD=${2:-325160bcfb786b166b063e669aea345fadee2da7}
 
-BERT_OSSDIR=oss://oneflow-public/BERT/
+BERT_OSSDIR=https://oneflow-public.oss-cn-beijing.aliyuncs.com/BERT/
+LOGFILE=1n_out.tar.gz
 ####################################################################
 #                               
 ####################################################################
@@ -17,13 +18,12 @@ echo $(pwd)
 cd OneFlow-Benchmark/LanguageModeling/BERT
 echo $(pwd)
 
-ossutil64 cp ${BERT_OSSDIR}$CMP_OLD/out.tar.gz .
+wget ${BERT_OSSDIR}${CMP_OLD}/${LOGFILE}
 
 echo $(pwd)
-tar xvf out.tar.gz
+tar xvf ${LOGFILE}
 rm -rf old
 mv out old
-rm out.tar.gz
 
 echo $(pwd)
 bash train_prebert_list.sh
