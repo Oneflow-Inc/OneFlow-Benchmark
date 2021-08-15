@@ -14,7 +14,7 @@ NNODES=${7:-1}
 #
 MASTER=${8:-0}
 
-PYTHON=${9:-python}
+PYTHON=${9:-python3.8}
 
 LOG_FOLDER=./log/
 
