@@ -24,7 +24,7 @@ rm -rf pic/*
 for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
-	sh train_prebert.sh 0 1 64 1 adam
+	sh train_prebert.sh 0 1 64 1 adam 8 1 1
     cp -rf log/ log_f32_${i}
 done
 
@@ -41,7 +41,7 @@ $PYTHON tools/result_analysis.py  --f32=1 \
 for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
-	sh train_prebert.sh 0 1 64 1 lamb
+	sh train_prebert.sh 0 1 64 1 lamb 8 1 1
     cp -rf log/ log_f32_${i}
 done
 
@@ -58,7 +58,7 @@ $PYTHON tools/result_analysis.py  --f32=1 \
 for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
-	sh train_prebert.sh 1 1 64 1 adam
+	sh train_prebert.sh 1 1 64 1 adam 8 1 1
     cp -rf log/ log_f16_${i}
 done
 file_op  out/bert_f16_pretraining_8gpu_64bs_debug
@@ -74,7 +74,7 @@ $PYTHON tools/result_analysis.py  --f32=0 \
 for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
-    sh train_prebert.sh 1 1 64 1 lamb
+    sh train_prebert.sh 1 1 64 1 lamb 8 1 1
     cp -rf log/ log_f16_${i}
 done
 
@@ -91,7 +91,7 @@ $PYTHON tools/result_analysis.py  --f32=0 \
 for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
-    sh train_prebert.sh 0 1 32 2 adam
+    sh train_prebert.sh 0 1 32 2 adam 8 1 1
     cp -rf log/ log_f32_${i}
 
 done
@@ -110,7 +110,7 @@ $PYTHON tools/result_analysis.py  --f32=1 \
 for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
-    sh train_prebert.sh 0 1 32 2 lamb
+    sh train_prebert.sh 0 1 32 2 lamb 8 1 1
     cp -rf log/ log_f32_${i}
 done
 
@@ -128,7 +128,7 @@ $PYTHON tools/result_analysis.py  --f32=1 \
 for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
-    sh train_prebert.sh 1 1 32 2 adam
+    sh train_prebert.sh 1 1 32 2 adam 8 1 1
     cp -rf log/ log_f16_${i}
 done
 
@@ -145,7 +145,7 @@ $PYTHON tools/result_analysis.py  --f32=0 \
 for (( i = 1; i <= ${NUM}; i++ ))
 do
     echo $i
-    sh train_prebert.sh 1 1 32 2 lamb
+    sh train_prebert.sh 1 1 32 2 lamb 8 1 1
     cp -rf log/ log_f16_${i}
 done
 
