@@ -43,7 +43,7 @@ class Snapshot(object):
             print("Restoring model from {}.".format(model_load_dir))
             flow.load_variables(flow.checkpoint.get(model_load_dir))
         else:
-            flow.checkpoint.save("initial_model")
+            # flow.checkpoint.save("initial_model")
             print("Init model on demand.")
 
     def save(self, name):
