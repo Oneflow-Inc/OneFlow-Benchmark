@@ -71,6 +71,7 @@ def get_parser(parser=None):
     parser.add_argument(
         "--use_xla", type=str2bool, nargs="?", const=True, help="Whether to use use xla"
     )
+
     parser.add_argument(
         "--channel_last",
         type=str2bool,
@@ -94,6 +95,9 @@ def get_parser(parser=None):
     parser.add_argument("--batch_size_per_device", type=int, default=64)
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
+    parser.add_argument(
+        "--use_rdma", type=str2bool, nargs="?", const=True, help="Use rdma.",
+    )
     parser.add_argument(
         "--nccl_fusion_threshold_mb",
         type=int,

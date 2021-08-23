@@ -64,6 +64,8 @@ if args.nccl_fusion_threshold_mb:
 if args.nccl_fusion_max_ops:
     flow.config.collective_boxing.nccl_fusion_max_ops(args.nccl_fusion_max_ops)
 
+if args.num_nodes > 1 and args.use_rdma:
+    flow.config.use_rdma(True)
 
 def label_smoothing(labels, classes, eta, dtype):
     assert classes > 0

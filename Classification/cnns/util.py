@@ -94,6 +94,7 @@ class Metric(object):
         prediction_key="predictions",
         label_key="labels",
         loss_key=None,
+        nvidia_smi_report_step=10,
     ):
         self.desc = desc
         self.calculate_batches = calculate_batches
@@ -101,6 +102,7 @@ class Metric(object):
         self.prediction_key = prediction_key
         self.label_key = label_key
         self.loss_key = loss_key
+        self.nvidia_smi_report_step = nvidia_smi_report_step
         if loss_key:
             self.fmt = "{}: epoch {}, iter {}, loss: {:.6f}, top_1: {:.6f}, top_k: {:.6f}, samples/s: {:.3f}"
         else:
@@ -121,6 +123,10 @@ class Metric(object):
         def callback(outputs):
             if step == 0:
                 self._clear()
+            if self.loss_key and epoch == 0 and step == self.nvidia_smi_report_step:
+                cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
+                os.system(cmd)
+
             if self.prediction_key:
                 num_matched, num_samples = match_top_k(
                     outputs[self.prediction_key], outputs[self.label_key]
