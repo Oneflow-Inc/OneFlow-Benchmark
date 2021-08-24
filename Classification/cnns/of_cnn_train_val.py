@@ -21,7 +21,8 @@ import optimizer_util
 import config as configs
 from util import Snapshot, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
-import resnet_model
+# import resnet_model
+import resnet_rename as resnet_model
 import resnext_model
 import vgg_model
 import alexnet_model
