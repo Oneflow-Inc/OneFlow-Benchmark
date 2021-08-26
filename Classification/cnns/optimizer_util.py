@@ -116,6 +116,11 @@ def set_up_optimizer(loss, args):
             staircase=False,
             warmup=warmup,
         )
+    elif args.lr_decay == "none":
+        lr_scheduler = flow.optimizer.PiecewiseConstantScheduler(
+            boundaries=[],
+            values=[args.learning_rate],
+        )
     else:
         lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
             base_lr=args.learning_rate,
@@ -134,7 +139,7 @@ def set_up_optimizer(loss, args):
         print("Optimizer:  SGD")
         flow.optimizer.SGD(
             lr_scheduler,
-            momentum=args.momentum if args.momentum > 0 else None,
+            momentum=args.momentum if args.momentum > 0 else 0.0,
             grad_clipping=grad_clipping,
             loss_scale_policy=loss_scale_policy,
         ).minimize(loss)

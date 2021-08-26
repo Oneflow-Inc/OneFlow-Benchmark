@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import oneflow.compatible.single_client as flow
+from util import build_watch_cb, build_watch_diff_cb
 
 BLOCK_COUNTS = [3, 4, 6, 3]
 BLOCK_FILTERS = [256, 512, 1024, 2048]
@@ -58,6 +59,9 @@ class ResnetBuilder(object):
             model_name="weight",
             trainable=self.trainable,
         )
+        if 'conv1' ==  name:
+            flow.watch(weight, build_watch_cb('conv1_weight'))
+            flow.watch_diff(weight, build_watch_diff_cb('conv1_weight_grad'))
 
         return flow.nn.conv2d(
             input,
