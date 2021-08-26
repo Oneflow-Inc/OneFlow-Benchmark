@@ -96,56 +96,55 @@ class ResnetBuilder(object):
         )
 
     def _batch_norm_relu(self, inputs, name=None, last=False):
-        # if self.fuse_bn_relu:
-        #     initializer = flow.zeros_initializer() if last else flow.ones_initializer()
-        #     axis = 1
-        #     if self.data_format == "NHWC":
-        #         axis = 3
-        #     return flow.layers.batch_normalization_relu(
-        #         inputs=inputs,
-        #         axis=axis,
-        #         momentum=0.9,
-        #         epsilon=1e-5,
-        #         center=True,
-        #         scale=True,
-        #         trainable=self.trainable,
-        #         training=self.training,
-        #         gamma_initializer=initializer,
-        #         moving_variance_initializer=initializer,
-        #         gamma_regularizer=self.weight_regularizer,
-        #         beta_regularizer=self.weight_regularizer,
-        #         name=name + "_bn_relu",
-        #     )
-        # else:
-            # return flow.nn.relu(self._batch_norm(inputs, name + "_bn", last=last))
-        return flow.nn.relu(self._batch_norm(inputs, name, last=last))
+        if self.fuse_bn_relu:
+            initializer = flow.zeros_initializer() if last else flow.ones_initializer()
+            axis = 1
+            if self.data_format == "NHWC":
+                axis = 3
+            return flow.layers.batch_normalization_relu(
+                inputs=inputs,
+                axis=axis,
+                momentum=0.9,
+                epsilon=1e-5,
+                center=True,
+                scale=True,
+                trainable=self.trainable,
+                training=self.training,
+                gamma_initializer=initializer,
+                moving_variance_initializer=initializer,
+                gamma_regularizer=self.weight_regularizer,
+                beta_regularizer=self.weight_regularizer,
+                name=name + "_bn_relu",
+            )
+        else:
+            return flow.nn.relu(self._batch_norm(inputs, name, last=last))
 
     def _batch_norm_add_relu(self, inputs, addend, name=None, last=False):
-        # if self.fuse_bn_add_relu:
-        #     initializer = flow.zeros_initializer() if last else flow.ones_initializer()
-        #     axis = 1
-        #     if self.data_format == "NHWC":
-        #         axis = 3
-        #     return flow.layers.batch_normalization_add_relu(
-        #         inputs=inputs,
-        #         addend=addend,
-        #         axis=axis,
-        #         momentum=0.9,
-        #         epsilon=1e-5,
-        #         center=True,
-        #         scale=True,
-        #         trainable=self.trainable,
-        #         training=self.training,
-        #         gamma_initializer=initializer,
-        #         moving_variance_initializer=initializer,
-        #         gamma_regularizer=self.weight_regularizer,
-        #         beta_regularizer=self.weight_regularizer,
-        #         name=name + "_bn_add_relu",
-        #     )
-        # else:
-        return flow.nn.relu(
-            self._batch_norm(inputs, name, last=last) + addend
-        )
+        if self.fuse_bn_add_relu:
+            initializer = flow.zeros_initializer() if last else flow.ones_initializer()
+            axis = 1
+            if self.data_format == "NHWC":
+                axis = 3
+            return flow.layers.batch_normalization_add_relu(
+                inputs=inputs,
+                addend=addend,
+                axis=axis,
+                momentum=0.9,
+                epsilon=1e-5,
+                center=True,
+                scale=True,
+                trainable=self.trainable,
+                training=self.training,
+                gamma_initializer=initializer,
+                moving_variance_initializer=initializer,
+                gamma_regularizer=self.weight_regularizer,
+                beta_regularizer=self.weight_regularizer,
+                name=name + "_bn_add_relu",
+            )
+        else:
+            return flow.nn.relu(
+                self._batch_norm(inputs, name, last=last) + addend
+            )
 
     def conv2d_affine(self, input, name, filters, kernel_size, strides):
         padding = "SAME" if strides > 1 or kernel_size > 1 else "VALID"
@@ -231,12 +230,12 @@ def resnet50(images, args, trainable=True, training=True):
         args.fuse_bn_add_relu,
     )
 
-    # if args.pad_output:
-    #     if args.channel_last:
-    #         paddings = ((0, 0), (0, 0), (0, 0), (0, 1))
-    #     else:
-    #         paddings = ((0, 0), (0, 1), (0, 0), (0, 0))
-    #     images = flow.pad(images, paddings=paddings)
+    if args.pad_output:
+        if args.channel_last:
+            paddings = ((0, 0), (0, 0), (0, 0), (0, 1))
+        else:
+            paddings = ((0, 0), (0, 1), (0, 0), (0, 0))
+        images = flow.pad(images, paddings=paddings)
     # with flow.scope.namespace("resnet50"):
     stem = builder.resnet_stem(images)
     body = builder.resnet_conv_x_body(stem)

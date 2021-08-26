@@ -43,14 +43,14 @@ python3 of_cnn_train_val.py \
      --batch_size_per_device=64 \
      --val_batch_size_per_device=64 \
      --channel_last=False \
-     --pad_output \
-     --fuse_bn_relu=True \
-     --fuse_bn_add_relu=True \
+     --fuse_bn_relu=False \
+     --fuse_bn_add_relu=False \
      --nccl_fusion_threshold_mb=16 \
      --nccl_fusion_max_ops=24 \
      --gpu_image_decoder=True \
      --num_epoch=$NUM_EPOCH \
      --model="resnet50" 2>&1 | tee ${LOGFILE}
      # --use_fp16 \
+     #--pad_output \
 
 echo "Writting log to ${LOGFILE}"
