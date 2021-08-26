@@ -32,7 +32,7 @@ python3 of_cnn_train_val.py \
      --label_smoothing=0.1 \
      --learning_rate=1.024 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=32 \
+     --batch_size_per_device=128 \
      --val_batch_size_per_device=50 \
      --num_epoch=$NUM_EPOCH \
      --model="resnet50" 2>&1 | tee ${LOGFILE}
