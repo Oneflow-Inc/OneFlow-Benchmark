@@ -21,8 +21,7 @@ import optimizer_util
 import config as configs
 from util import Snapshot, InitNodes, Metric
 from job_function_util import get_train_config, get_val_config
-# import resnet_model
-import resnet_rename as resnet_model
+import resnet_model
 import resnext_model
 import vgg_model
 import alexnet_model
@@ -151,9 +150,9 @@ def main():
         for i in range(epoch_size):
             # TrainNet().async_get(metric.metric_cb(epoch, i))
             a = TrainNet().get()
-            snapshot.save("epoch_{}_iter{}".format(epoch, i))
-            print(a['loss'].numpy())
-            if i>=1:
+            # snapshot.save("epoch_{}_iter{}".format(epoch, i))
+            print('loss:', a['loss'].numpy())
+            if i>=100:
                 break
         break
 
