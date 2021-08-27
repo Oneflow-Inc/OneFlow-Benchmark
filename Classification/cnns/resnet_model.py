@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import oneflow.compatible.single_client as flow
+from util import build_watch_cb, build_watch_diff_cb
 
 BLOCK_COUNTS = [3, 4, 6, 3]
 BLOCK_FILTERS = [256, 512, 1024, 2048]
@@ -50,7 +51,7 @@ class ResnetBuilder(object):
         else:
             shape = (filters, input.shape[1], kernel_size, kernel_size)
         weight = flow.get_variable(
-            name + "-weight",
+            name + ".weight",
             shape=shape,
             dtype=input.dtype,
             initializer=self.weight_initializer,
@@ -58,6 +59,9 @@ class ResnetBuilder(object):
             model_name="weight",
             trainable=self.trainable,
         )
+        if 'conv1' ==  name:
+            flow.watch(weight, build_watch_cb('conv1_weight'))
+            flow.watch_diff(weight, build_watch_diff_cb('conv1_weight_grad'))
 
         return flow.nn.conv2d(
             input,
@@ -113,7 +117,7 @@ class ResnetBuilder(object):
                 name=name + "_bn_relu",
             )
         else:
-            return flow.nn.relu(self._batch_norm(inputs, name + "_bn", last=last))
+            return flow.nn.relu(self._batch_norm(inputs, name, last=last))
 
     def _batch_norm_add_relu(self, inputs, addend, name=None, last=False):
         if self.fuse_bn_add_relu:
@@ -139,7 +143,7 @@ class ResnetBuilder(object):
             )
         else:
             return flow.nn.relu(
-                self._batch_norm(inputs, name + "_bn", last=last) + addend
+                self._batch_norm(inputs, name, last=last) + addend
             )
 
     def conv2d_affine(self, input, name, filters, kernel_size, strides):
@@ -150,21 +154,21 @@ class ResnetBuilder(object):
     def bottleneck_transformation(
         self, input, block_name, filters, filters_inner, strides
     ):
-        a = self.conv2d_affine(input, block_name + "_branch2a", filters_inner, 1, 1)
-        a = self._batch_norm_relu(a, block_name + "_branch2a")
+        a = self.conv2d_affine(input, block_name + ".conv1", filters_inner, 1, 1)
+        a = self._batch_norm_relu(a, block_name + ".bn1")
 
-        b = self.conv2d_affine(a, block_name + "_branch2b", filters_inner, 3, strides)
-        b = self._batch_norm_relu(b, block_name + "_branch2b")
+        b = self.conv2d_affine(a, block_name + ".conv2", filters_inner, 3, strides)
+        b = self._batch_norm_relu(b, block_name + ".bn2")
 
-        c = self.conv2d_affine(b, block_name + "_branch2c", filters, 1, 1)
+        c = self.conv2d_affine(b, block_name + ".conv3", filters, 1, 1)
         return c
 
     def residual_block(self, input, block_name, filters, filters_inner, strides_init):
-        if strides_init != 1 or block_name == "res2_0":
+        if strides_init != 1 or block_name == "layer1.0":
             shortcut = self.conv2d_affine(
-                input, block_name + "_branch1", filters, 1, strides_init
+                input, block_name + ".downsample.0", filters, 1, strides_init
             )
-            shortcut = self._batch_norm(shortcut, block_name + "_branch1_bn")
+            shortcut = self._batch_norm(shortcut, block_name + ".downsample.1")
         else:
             shortcut = input
 
@@ -172,7 +176,7 @@ class ResnetBuilder(object):
             input, block_name, filters, filters_inner, strides_init,
         )
         return self._batch_norm_add_relu(
-            bottleneck, shortcut, block_name + "_branch2c", last=True
+            bottleneck, shortcut, block_name + ".bn3", last=True
         )
 
     def residual_stage(
@@ -180,7 +184,7 @@ class ResnetBuilder(object):
     ):
         output = input
         for i in range(counts):
-            block_name = "%s_%d" % (stage_name, i)
+            block_name = "%s.%d" % (stage_name, i)
             output = self.residual_block(
                 output, block_name, filters, filters_inner, stride_init if i == 0 else 1
             )
@@ -192,7 +196,7 @@ class ResnetBuilder(object):
         for i, (counts, filters, filters_inner) in enumerate(
             zip(BLOCK_COUNTS, BLOCK_FILTERS, BLOCK_FILTERS_INNER)
         ):
-            stage_name = "res%d" % (i + 2)
+            stage_name = "layer%d" % (i + 1)
             output = self.residual_stage(
                 output, stage_name, counts, filters, filters_inner, 1 if i == 0 else 2
             )
@@ -201,7 +205,7 @@ class ResnetBuilder(object):
 
     def resnet_stem(self, input):
         conv1 = self._conv2d("conv1", input, 64, 7, 2)
-        conv1_bn = self._batch_norm_relu(conv1, "conv1")
+        conv1_bn = self._batch_norm_relu(conv1, "bn1")
         pool1 = flow.nn.max_pool2d(
             conv1_bn,
             ksize=3,
@@ -232,28 +236,29 @@ def resnet50(images, args, trainable=True, training=True):
         else:
             paddings = ((0, 0), (0, 1), (0, 0), (0, 0))
         images = flow.pad(images, paddings=paddings)
-    with flow.scope.namespace("Resnet"):
-        stem = builder.resnet_stem(images)
-        body = builder.resnet_conv_x_body(stem)
-        pool5 = flow.nn.avg_pool2d(
-            body,
-            ksize=7,
-            strides=1,
-            padding="VALID",
-            data_format=builder.data_format,
-            name="pool5",
-        )
-        fc1001 = flow.layers.dense(
-            flow.reshape(pool5, (pool5.shape[0], -1)),
-            units=1000,
-            use_bias=True,
-            kernel_initializer=flow.variance_scaling_initializer(
-                2, "fan_in", "random_normal"
-            ),
-            bias_initializer=flow.zeros_initializer(),
-            kernel_regularizer=weight_regularizer,
-            bias_regularizer=weight_regularizer,
-            trainable=trainable,
-            name="fc1001",
-        )
+    # with flow.scope.namespace("resnet50"):
+    stem = builder.resnet_stem(images)
+    body = builder.resnet_conv_x_body(stem)
+    pool5 = flow.nn.avg_pool2d(
+        body,
+        ksize=7,
+        strides=1,
+        padding="VALID",
+        data_format=builder.data_format,
+        name="avgpool",
+    )
+    fc1001 = flow.layers.dense(
+        flow.reshape(pool5, (pool5.shape[0], -1)),
+        units=1000,
+        use_bias=True,
+        kernel_initializer=flow.variance_scaling_initializer(
+            2, "fan_in", "random_normal"
+        ),
+        bias_initializer=flow.zeros_initializer(),
+        kernel_regularizer=weight_regularizer,
+        bias_regularizer=weight_regularizer,
+        trainable=trainable,
+        name="fc",
+    )
     return fc1001
+
