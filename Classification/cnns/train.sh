@@ -12,7 +12,7 @@ echo NUM_EPOCH=$NUM_EPOCH
 if [ -n "$2" ]; then
     DATA_ROOT=$2
 else
-    DATA_ROOT=/dataset/ImageNet/ofrecord
+    DATA_ROOT=/data/imagenet/ofrecord
 fi
 echo DATA_ROOT=$DATA_ROOT
 
