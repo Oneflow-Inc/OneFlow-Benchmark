@@ -19,7 +19,6 @@ echo DATA_ROOT=$DATA_ROOT
 LOG_FOLDER=../logs
 mkdir -p $LOG_FOLDER
 LOGFILE=$LOG_FOLDER/resnet_training.log
-export PYTHONUNBUFFERED=1
 
 python3 of_cnn_train_val.py \
      --train_data_dir=$DATA_ROOT/train \
