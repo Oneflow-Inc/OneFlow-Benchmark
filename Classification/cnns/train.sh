@@ -37,6 +37,5 @@ python3 of_cnn_train_val.py \
      --val_batch_size_per_device=50 \
      --num_epoch=$NUM_EPOCH \
      --model="resnet50" 2>&1 | tee ${LOGFILE}
-     #--model="resnet50" 2>&1 | tee ${LOGFILE}
 
 echo "Writting log to ${LOGFILE}"
