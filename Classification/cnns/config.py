@@ -83,7 +83,7 @@ def get_parser(parser=None):
         "--pad_output",
         type=str2bool,
         nargs="?",
-        const=True,
+        const=False,
         help="Whether to pad the output to number of image channels to 4.",
     )
 

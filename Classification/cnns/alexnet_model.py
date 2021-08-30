@@ -60,7 +60,7 @@ def conv2d_layer(
         else (filters, kernel_size_1, kernel_size_2, input.shape[3])
     )
     weight = flow.get_variable(
-        name + "-weight",
+        name + ".weight",
         shape=weight_shape,
         dtype=input.dtype,
         initializer=weight_initializer,
@@ -71,7 +71,7 @@ def conv2d_layer(
     )
     if use_bias:
         bias = flow.get_variable(
-            name + "-bias",
+            name + ".bias",
             shape=(filters,),
             dtype=input.dtype,
             initializer=bias_initializer,
@@ -92,7 +92,7 @@ def alexnet(images, args, trainable=True):
     data_format = "NHWC" if args.channel_last else "NCHW"
 
     conv1 = conv2d_layer(
-        "conv1",
+        "features.0",
         images,
         filters=64,
         kernel_size=11,
@@ -104,22 +104,24 @@ def alexnet(images, args, trainable=True):
     pool1 = flow.nn.avg_pool2d(conv1, 3, 2, "VALID", data_format, name="pool1")
 
     conv2 = conv2d_layer(
-        "conv2", pool1, filters=192, kernel_size=5, data_format=data_format
+        "features.3", pool1, filters=192, kernel_size=5, data_format=data_format
     )
 
     pool2 = flow.nn.avg_pool2d(conv2, 3, 2, "VALID", data_format, name="pool2")
 
-    conv3 = conv2d_layer("conv3", pool2, filters=384, data_format=data_format)
+    conv3 = conv2d_layer("features.6", pool2, filters=384, data_format=data_format)
 
-    conv4 = conv2d_layer("conv4", conv3, filters=384, data_format=data_format)
+    conv4 = conv2d_layer("features.8", conv3, filters=384, data_format=data_format)
 
-    conv5 = conv2d_layer("conv5", conv4, filters=256, data_format=data_format)
+    conv5 = conv2d_layer("features.10", conv4, filters=256, data_format=data_format)
 
     pool5 = flow.nn.avg_pool2d(conv5, 3, 2, "VALID", data_format, name="pool5")
 
     if len(pool5.shape) > 2:
         pool5 = flow.reshape(pool5, shape=(pool5.shape[0], -1))
-
+    print("###############")
+    print(pool5.shape)
+    print("###############")
     fc1 = flow.layers.dense(
         inputs=pool5,
         units=4096,
@@ -131,13 +133,13 @@ def alexnet(images, args, trainable=True):
         kernel_regularizer=_get_regularizer(),
         bias_regularizer=_get_regularizer(),
         trainable=trainable,
-        name="fc1",
+        name="classifier.0",
     )
 
-    dropout1 = flow.nn.dropout(fc1, rate=0.5)
+    # dropout1 = flow.nn.dropout(fc1, rate=0.5)
 
     fc2 = flow.layers.dense(
-        inputs=dropout1,
+        inputs=fc1,
         units=4096,
         activation=flow.nn.relu,
         use_bias=True,
@@ -146,21 +148,21 @@ def alexnet(images, args, trainable=True):
         kernel_regularizer=_get_regularizer(),
         bias_regularizer=_get_regularizer(),
         trainable=trainable,
-        name="fc2",
+        name="classifier.2",
     )
 
-    dropout2 = flow.nn.dropout(fc2, rate=0.5)
+    # dropout2 = flow.nn.dropout(fc2, rate=0.5)
 
     fc3 = flow.layers.dense(
-        inputs=dropout2,
-        units=1000,
+        inputs=fc2,
+        units=args.num_classes,
         activation=None,
         use_bias=False,
         kernel_initializer=_get_kernel_initializer(),
         kernel_regularizer=_get_regularizer(),
         bias_initializer=False,
         trainable=trainable,
-        name="fc3",
+        name="classifier.4",
     )
 
     return fc3
