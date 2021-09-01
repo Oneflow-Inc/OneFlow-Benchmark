@@ -45,4 +45,3 @@ python3 $BENCH_ROOT_DIR/run_pretraining.py \
   --log_dir=${of_log_dir} \
   --model_save_every_n_iter=50000 \
   --model_save_dir=${of_log_dir}
-  
