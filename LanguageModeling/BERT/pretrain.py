@@ -59,7 +59,7 @@ def PreTrain(
         initializer_range=initializer_range,
     )
 
-    (lm_loss, _, _) = _AddMaskedLanguageModelLoss(
+    (lm_loss, _, mlm_logit_prob) = _AddMaskedLanguageModelLoss(
         input_blob=backbone.sequence_output(),
         output_weights_blob=backbone.embedding_table(),
         positions_blob=masked_lm_positions_blob,
@@ -75,7 +75,7 @@ def PreTrain(
     pooled_output = PooledOutput(
         backbone.sequence_output(), hidden_size, initializer_range
     )
-    (ns_loss, _, _) = _AddNextSentenceOutput(
+    (ns_loss, _, ns_logit_prob) = _AddNextSentenceOutput(
         input_blob=pooled_output,
         label_blob=next_sentence_label_blob,
         hidden_size=hidden_size,
@@ -85,7 +85,7 @@ def PreTrain(
         lm_loss = flow.math.reduce_mean(lm_loss)
         ns_loss = flow.math.reduce_mean(ns_loss)
         total_loss = lm_loss + ns_loss
-    return total_loss, lm_loss, ns_loss
+    return total_loss, lm_loss, ns_loss, mlm_logit_prob, ns_logit_prob
 
 
 def PooledOutput(sequence_output, hidden_size, initializer_range):
@@ -104,11 +104,11 @@ def PooledOutput(sequence_output, hidden_size, initializer_range):
 
 
 def _AddMaskedLanguageModelLoss(
-    input_blob,
-    output_weights_blob,
-    positions_blob,
-    label_id_blob,
-    label_weight_blob,
+    input_blob, # sequence_output
+    output_weights_blob, # embedding_table
+    positions_blob, # masked_lm_position
+    label_id_blob, # masked_lm_ids
+    label_weight_blob, # masked_lm_weights
     seq_length,
     hidden_size,
     vocab_size,
@@ -148,6 +148,8 @@ def _AddMaskedLanguageModelLoss(
         )
         logit_blob = flow.matmul(input_blob, output_weights_blob, transpose_b=True)
         logit_blob = flow.nn.bias_add(logit_blob, output_bias)
+        # logit_blob == prediction_scores
+        # get label
         label_id_blob = flow.reshape(label_id_blob, [-1])
         pre_example_loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
             logits=logit_blob, labels=label_id_blob
@@ -172,13 +174,13 @@ def _GatherIndexes(sequence_blob, positions_blob, seq_length, hidden_size):
 def _AddNextSentenceOutput(input_blob, label_blob, hidden_size, initializer_range):
     with flow.scope.namespace("cls-seq_relationship"):
         output_weight_blob = flow.get_variable(
-            name="output_weights",
+            name="weight",
             shape=[2, hidden_size],
             dtype=input_blob.dtype,
             initializer=bert_util.CreateInitializer(initializer_range),
         )
         output_bias_blob = flow.get_variable(
-            name="output_bias",
+            name="bias",
             shape=[2],
             dtype=input_blob.dtype,
             initializer=flow.constant_initializer(0.0),

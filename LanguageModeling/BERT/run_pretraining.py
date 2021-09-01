@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import os
+import pickle
 import argparse
 from datetime import datetime
 
@@ -39,8 +40,8 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
     ofrecord = flow.data.ofrecord_reader(data_dir,
                                          batch_size=batch_size,
                                          data_part_num=data_part_num,
-                                         random_shuffle = True,
-                                         shuffle_after_epoch=True)
+                                         random_shuffle = False,
+                                         shuffle_after_epoch=False)
     blob_confs = {}
     def _blob_conf(name, shape, dtype=flow.int32):
         blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
@@ -54,7 +55,7 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
     _blob_conf("masked_lm_weights", [max_predictions_per_seq], flow.float)
     return blob_confs
 
-@flow.global_function(type='train', function_config=GetFunctionConfig(args))
+@flow.global_function(type='predict', function_config=GetFunctionConfig(args))
 def PretrainJob():
     hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
     intermediate_size = hidden_size * 4
@@ -68,7 +69,7 @@ def PretrainJob():
         decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
                                args.max_predictions_per_seq)
 
-    total_loss, mlm_loss, nsp_loss = PreTrain(
+    total_loss, mlm_loss, nsp_loss, mlm_logit_prob, ns_logit_prob = PreTrain(
         decoders["input_ids"],
         decoders["input_mask"],
         decoders["segment_ids"],
@@ -93,7 +94,9 @@ def PretrainJob():
     )
     opt = CreateOptimizer(args)
     opt.minimize(total_loss)
-    return {'total_loss': total_loss, 'mlm_loss': mlm_loss, 'nsp_loss': nsp_loss}
+    return {'total_loss': total_loss, 'mlm_loss': mlm_loss, 'nsp_loss': nsp_loss,
+        "mlm_logit_prob": mlm_logit_prob, "ns_logit_prob": ns_logit_prob,}
+        # **decoders}
 
 
 def main():
@@ -106,14 +109,45 @@ def main():
 
     metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, 
                     batch_size=batch_size, keys=['total_loss', 'mlm_loss', 'nsp_loss'])
+    total_losses = []
+    mlm_losses = []
+    nsp_losses = []
     for step in range(args.iter_num):
-        PretrainJob().async_get(metric.metric_cb(step))
-        #PretrainJob().async_get(metric.metric_cb(step, epoch=3))
-        if (step + 1) % args.model_save_every_n_iter == 0:
-            snapshot.save("snapshot_%d" % (step + 1))
+        # PretrainJob().async_get(metric.metric_cb(step))
+        res = PretrainJob().get()
+        total_losses.append(res["total_loss"].numpy())
+        mlm_losses.append(res["mlm_loss"].numpy())
+        nsp_losses.append(res["nsp_loss"].numpy())
+        if (step + 1) % 10 == 0:
+            print(f"iter {step+1}: total loss is {total_losses[-1]}")
 
-    if args.save_last_snapshot:
-        snapshot.save("last_snapshot")
+        # return
+        #PretrainJob().async_get(metric.metric_cb(step, epoch=3))
+        # if (step + 1) % 10 == 0:
+        # if (step + 1) == 49 or (step + 1) == 50:
+        #     snapshot.save("snapshot_%d" % (step + 1))
+        #     for key in res:
+        #         res[key] = res[key].numpy()
+        #     with open(f"lazy_input_output_{step + 1}.pickle", 'wb') as handle:
+        #         pickle.dump(res, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # Save metrics for compare with nn-Graph
+    save_dir = "temp"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    with open(os.path.join(save_dir, "lazy_total_loss.txt"), 'w') as f:
+        for metric_value in total_losses:
+            f.write("%f\n" % metric_value)
+        
+    with open(os.path.join(save_dir, "lazy_mlm_loss.txt"), 'w') as f:
+        for metric_value in mlm_losses:
+            f.write("%f\n" % metric_value)
+
+    with open(os.path.join(save_dir, "lazy_nsp_loss.txt"), 'w') as f:
+        for metric_value in nsp_losses:
+            f.write("%f\n" % metric_value)
+    # if args.save_last_snapshot:
+        # snapshot.save("last_snapshot")
 
 
 if __name__ == "__main__":

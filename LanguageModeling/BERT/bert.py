@@ -13,9 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import math
+
 import oneflow.compatible.single_client as flow
 import oneflow.core.operator.op_conf_pb2 as op_conf_util
-import math
+
 
 class BertBackbone(object):
 
@@ -88,6 +90,7 @@ def CreateInitializer(std):
 def _Gelu(in_blob):
   return flow.math.gelu(in_blob)
 
+# BertEncoder
 def _TransformerModel(input_blob,
                       addr_blob,
                       seq_length,
@@ -107,10 +110,10 @@ def _TransformerModel(input_blob,
   prev_output_blob = flow.reshape(input_blob, (-1, input_width))
   all_layer_output_blobs = []
   for layer_idx in range(num_hidden_layers):
-    with flow.scope.namespace("layer_%d"%layer_idx):
+    with flow.scope.namespace("layer_%d"%layer_idx): # BertLayer
       layer_input_blob = prev_output_blob
-      with flow.scope.namespace("attention"):
-        with flow.scope.namespace("self"):
+      with flow.scope.namespace("attention"):  # BertAttention
+        with flow.scope.namespace("self"):  # BertSelfAttention
           attention_output_blob = _AttentionLayer(
               from_blob=layer_input_blob,
               to_blob=layer_input_blob,
@@ -122,31 +125,31 @@ def _TransformerModel(input_blob,
               do_return_2d_tensor=True,
               from_seq_length=seq_length,
               to_seq_length=seq_length)
-        with flow.scope.namespace("output"):
+        with flow.scope.namespace("output"): # BertSelfOutput
           attention_output_blob = _FullyConnected(
               attention_output_blob,
-              input_size=num_attention_heads * attention_head_size,
+              input_size=num_attention_heads * attention_head_size, # hidden_size
               units=hidden_size,
               weight_initializer=CreateInitializer(initializer_range),
               name='dense')
           attention_output_blob = _Dropout(attention_output_blob, hidden_dropout_prob)
           attention_output_blob = attention_output_blob + layer_input_blob
           attention_output_blob = _LayerNorm(attention_output_blob, hidden_size)
-      with flow.scope.namespace("intermediate"):
+      with flow.scope.namespace("intermediate"):  # BertIntermediate
         if callable(intermediate_act_fn):
           act_fn = op_conf_util.kNone
         else:
           act_fn = intermediate_act_fn
         intermediate_output_blob = _FullyConnected(
             attention_output_blob,
-            input_size=num_attention_heads * attention_head_size,
+            input_size=num_attention_heads * attention_head_size, # hidden_size
             units=intermediate_size,
             activation=act_fn,
             weight_initializer=CreateInitializer(initializer_range),
             name='dense')
         if callable(intermediate_act_fn):
           intermediate_output_blob = intermediate_act_fn(intermediate_output_blob)
-      with flow.scope.namespace("output"):
+      with flow.scope.namespace("output"):  # BertOutput
         layer_output_blob = _FullyConnected(
             intermediate_output_blob,
             input_size=intermediate_size,
@@ -309,6 +312,7 @@ def _EmbeddingPostprocessor(input_blob,
                                        initializer=CreateInitializer(initializer_range))
     assert seq_length <= max_position_embeddings
     if seq_length != max_position_embeddings:
+      # output [bs, seq, dim]
       position_table = flow.slice(position_table, begin=[None, 0, 0], size=[None, seq_length, -1])
     output = output + position_table
 

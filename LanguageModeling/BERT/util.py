@@ -140,11 +140,13 @@ class Metric(object):
 def CreateOptimizer(args):
     warmup_batches = int(args.iter_num * args.warmup_proportion)
     lr_warmup = flow.optimizer.warmup.linear(warmup_batches, 0)
-    lr_scheduler = flow.optimizer.PolynomialScheduler(args.learning_rate, args.iter_num, 0.0,
-                                                     warmup=lr_warmup)
+    # lr_scheduler = flow.optimizer.PolynomialScheduler(args.learning_rate, args.iter_num, 0.0,
+                                                    #  warmup=lr_warmup)
+    lr_scheduler = flow.optimizer.PiecewiseConstantScheduler([], [args.learning_rate])
     loss_scale_policy = None
     if args.use_fp16:
-        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
+        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000)
+    return flow.optimizer.Adam(lr_scheduler)
     return flow.optimizer.AdamW(lr_scheduler, epsilon=1e-6, weight_decay=args.weight_decay_rate,
                                 weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
                                 grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0),
