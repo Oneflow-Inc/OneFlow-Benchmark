@@ -539,7 +539,7 @@ class ParallelSparseSoftmaxCrossEntropyLoss(object):
                     loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
                         labels, logits
                     )
-                    loss = flow.amp_white_identity(loss)
+                    # loss = flow.amp_white_identity(loss)
 
                 loss = flow.math.reduce_mean(loss)
 

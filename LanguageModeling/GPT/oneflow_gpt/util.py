@@ -154,12 +154,12 @@ class Metric(object):
             self.acc_micro_batches_ += micro_batches
             self.acc_samples_ += micro_batches * self.num_samples_per_batch_
 
-            if self.step_ == self.nvidia_smi_report_step_:
-                cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
-                if self.nvidia_smi_report_file_ is not None:
-                    cmd += f" -f {self.nvidia_smi_report_file_}"
-                os.system(cmd)
-                self.print_title_ = False
+            # if self.step_ == self.nvidia_smi_report_step_:
+            #     cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
+            #     if self.nvidia_smi_report_file_ is not None:
+            #         cmd += f" -f {self.nvidia_smi_report_file_}"
+            #     os.system(cmd)
+            #     self.print_title_ = False
 
             if self.step_ % self.print_steps_ == 0 or self.step_ == self.max_step_:
                 self.throughput_ = self.acc_samples_ / self.acc_elapsed_time_

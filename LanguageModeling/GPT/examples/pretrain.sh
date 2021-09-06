@@ -81,7 +81,7 @@ cmd+=" --save-interval ${save_interval}"
 cmd+=" --log-interval ${log_interval}"
 cmd+=" --checkpoint-activations"
 cmd+=" --multihead-attention-fusion"
-cmd+=" --fp16"
+# cmd+=" --fp16"
 
 if [[ ${num_nodes} -gt 1 ]]; then
     cmd+=" --use-rdma"

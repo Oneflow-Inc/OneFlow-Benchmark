@@ -54,7 +54,7 @@ def _make_func_config(args):
     if args.fp16:
         func_cfg.enable_auto_mixed_precision(True)
     func_cfg.prune_parallel_cast_ops(True)
-    func_cfg.enable_fuse_add_to_output(True)
+    func_cfg.enable_fuse_add_to_output(False)
     func_cfg.enable_fuse_model_update_ops(True)
     func_cfg.enable_fuse_cast_scale(True)
     # turn on this flag when match ZeRO & DeepSpeed
