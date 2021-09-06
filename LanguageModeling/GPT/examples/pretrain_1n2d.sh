@@ -2,9 +2,9 @@
 # set -ex
 
 export ONEFLOW_GPT_NUM_GPUS_PER_NODE=2
-export ONEFLOW_GPT_NUM_NODES=2
+export ONEFLOW_GPT_NUM_NODES=1
 # Set this env for your training nodes ip
-export ONEFLOW_GPT_NODE_IPS="10.10.120.201,10.10.120.202"
+export ONEFLOW_GPT_NODE_IPS="10.10.120.201"
 
 export NCCL_SOCKET_IFNAME=enp49s0f0
 export NCCL_DEBUG=INFO 
