@@ -77,7 +77,7 @@ class StopWatch(object):
 
 
 class Metric(object):
-    def __init__(self, desc='train', print_steps=-1, batch_size=256, keys=[]):
+    def __init__(self, desc='train', print_steps=-1, batch_size=256, keys=[],nvidia_smi_report_step=10,):
         r"""accumulate and calculate metric
 
         Args:
@@ -91,6 +91,7 @@ class Metric(object):
         self.print_steps = print_steps
         assert batch_size > 0
         self.batch_size = batch_size
+        self.nvidia_smi_report_step = nvidia_smi_report_step
 
         assert isinstance(keys, (list, tuple))
         self.keys = keys
@@ -115,6 +116,10 @@ class Metric(object):
     def metric_cb(self, step=0, **kwargs):
         def callback(outputs):
             if step == 0: self._clear()
+
+            if step == self.nvidia_smi_report_step:
+                cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
+                os.system(cmd)
 
             for key in self.keys:
                 self.metric_dict[key] += outputs[key].sum()
