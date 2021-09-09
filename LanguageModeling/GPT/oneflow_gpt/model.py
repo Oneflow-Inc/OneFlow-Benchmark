@@ -112,13 +112,13 @@ class Embedding(object):
                 "wpe",
                 shape=(self.seq_length, self.hidden_size),
                 initializer=self.wpe_initializer,
-                parallel_distribution=distribute.get_wpe_parallel_dist(),
+                nd_sbp=distribute.get_wpe_parallel_dist(),
             )
             wte = flow.get_variable(
                 "wte",
                 shape=(self.vocab_size, self.hidden_size),
                 initializer=self.wte_initializer,
-                parallel_distribution=distribute.get_wte_parallel_dist(),
+                nd_sbp=distribute.get_wte_parallel_dist(),
             )
 
             # 2d sbp sig: [B, S(0)] x [S(0), B] -> [S(0), P] -> [S(0), B]
@@ -569,7 +569,7 @@ def layernorm(
             trainable=True,
             model_name="beta",
             reuse=False,
-            parallel_distribution=params_parallel_dist,
+            nd_sbp=params_parallel_dist,
         )
 
         gamma = flow.get_variable(
@@ -580,7 +580,7 @@ def layernorm(
             trainable=True,
             model_name="gamma",
             reuse=False,
-            parallel_distribution=params_parallel_dist,
+            nd_sbp=params_parallel_dist,
         )
 
     return flow.nn.layer_norm(
@@ -604,14 +604,14 @@ def get_linear_params(
             shape=(input_size, output_size),
             dtype=dtype,
             initializer=weight_initializer,
-            parallel_distribution=weight_parallel_dist,
+            nd_sbp=weight_parallel_dist,
         )
         bias = flow.get_variable(
             name="bias",
             shape=(output_size,),
             dtype=dtype,
             initializer=bias_initializer,
-            parallel_distribution=bias_parallel_dist,
+            nd_sbp=bias_parallel_dist,
         )
 
     return weight, bias

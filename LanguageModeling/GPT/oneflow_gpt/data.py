@@ -34,7 +34,7 @@ class GPTDataLoader(object):
                 random_seed=self.seed,
                 split_sizes=self.split,
                 split_index=0,
-                parallel_distribution=distribute.get_data_parallel_dist(),
+                nd_sbp=distribute.get_data_parallel_dist(),
                 name=self.name,
             )
 
