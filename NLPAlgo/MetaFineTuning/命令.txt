@@ -1,0 +1,12 @@
+生成prototype embedding并计算prototypical score
+
+python3 preprocess.py --task_name g1 --model_load_dir uncased_L-12_H-768_A-12_oneflow --data_dir data/k-shot-cross/g1/16-42 --num_epochs 4 --seed 42 --seq_length=128 --train_example_num 96  --dev_example_num 96 --vocab_file uncased_L-12_H-768_A-12/vocab.txt --resave_ofrecord
+
+
+meta fine-tuning部分
+
+python3 meta_finetuning.py --task_name g1 --model_load_dir uncased_L-12_H-768_A-12_oneflow --data_dir data/k-shot-cross/g1/16-42 --num_epochs 63 --seed 42 --seq_length=128 --train_example_num 96 --dev_example_num 96 --batch_size_per_device 4 --dev_batch_size_per_device 2 --dev_every_step_num 100 --vocab_file uncased_L-12_H-768_A-12/vocab.txt --learning_rate 5e-5 --resave_ofrecord
+
+fine-tuning部分
+
+python3 finetuning.py --task_name sst-2 --model_load_dir output/model_save-2021-06-15-08:54:42/snapshot_best_mft_model_g1_dev_0.7083333333333334 --data_dir data/k-shot-single/SST-2/16-42 --num_epochs 64 --seed 42 --seq_length=128 --train_example_num 32 --dev_example_num 32 --eval_example_num 872 --batch_size_per_device 2 --dev_batch_size_per_device 2 --eval_batch_size_per_device 2 --dev_every_step_num 50 --vocab_file uncased_L-12_H-768_A-12/vocab.txt --learning_rate 1e-5 --resave_ofrecord
