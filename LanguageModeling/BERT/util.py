@@ -149,15 +149,36 @@ def CreateOptimizer(args):
                                                      warmup=lr_warmup)
     loss_scale_policy = None
     if args.use_fp16:
-        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
-    return flow.optimizer.AdamW(lr_scheduler, epsilon=1e-6, weight_decay=args.weight_decay_rate,
-                                weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
-                                grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0),
-                                loss_scale_policy=loss_scale_policy)
+        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(
+            increment_period=2000
+        )
+
+    if args.optimizer_type == "lamb":
+        return flow.optimizer.LAMB(
+            lr_scheduler,
+            beta1=0.9,
+            beta2=0.999,
+            epsilon=1e-6,
+            weight_decay=args.weight_decay_rate,
+            weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
+            grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0),
+            loss_scale_policy=loss_scale_policy,
+        )
+    else:
+        return flow.optimizer.AdamW(
+            lr_scheduler,
+            epsilon=1e-6,
+            weight_decay=args.weight_decay_rate,
+            weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
+            grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0),
+            loss_scale_policy=loss_scale_policy,
+        )
+
 
 def GetFunctionConfig(args):
     config = flow.function_config()
     config.enable_auto_mixed_precision(args.use_fp16)
+    config.train.num_gradient_accumulation_steps(args.num_accumulation_steps)
     if args.use_xla:
         config.use_xla_jit(True)
     config.enable_fuse_add_to_output(True)

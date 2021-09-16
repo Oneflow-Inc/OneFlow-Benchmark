@@ -21,6 +21,8 @@ NODE_IPS=${13:-"10.11.0.2,10.11.0.3,10.11.0.4,10.11.0.5"}
 DEBUG_AND_NCCL=${14:-false}
 NSYS_BIN=${15:-""}
 ITER_N=${16:-1}
+NUM_ACC_STEP=${17:-1}
+OPTIMIZER_TYPE=${18:"adam"}
 
 
 LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
@@ -52,7 +54,7 @@ CMD+="${PYTHON_BIN} run_pretraining.py "
 CMD+="--gpu_num_per_node=${NUM_GPUS_PER_NODE} "
 CMD+="--num_nodes=${NUM_NODES} "
 CMD+="--node_ips=${NODE_IPS} "
-CMD+="--learning_rate=1.25e-5 "
+CMD+="--learning_rate=1e-4 "
 CMD+="--warmup_proportion=0.01 "
 CMD+="--weight_decay_rate=0.01 "
 CMD+="--batch_size_per_device=${BSZ_PER_DEVICE} "
@@ -63,6 +65,8 @@ if $USE_FP16; then
     echo USE_FP16=$USE_FP16
     CMD+="--use_fp16 "
 fi
+CMD+="--num_accumulation_steps=${NUM_ACC_STEP} "
+CMD+="--optimizer_type=${OPTIMIZER_TYPE} "
 CMD+="--max_predictions_per_seq=20 "
 CMD+="--num_hidden_layers=${NUM_HIDDEN_LAYERS} "
 CMD+="--num_attention_heads=${NUM_ATTENTION_HEADS} "
