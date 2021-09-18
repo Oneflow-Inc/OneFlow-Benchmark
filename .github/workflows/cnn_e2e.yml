@@ -1,6 +1,9 @@
 name: 'resnet e2e test'
 on: 
   pull_request:
+    types: [review_requested]
+    branches:
+      - "*"
   push:
     branches:
       - master
