@@ -131,10 +131,6 @@ class Metric(object):
                 cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
                 os.system(cmd)
 
-            if step == self.nvidia_smi_report_step:
-                cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
-                os.system(cmd)
-
             for key in self.keys:
                 self.metric_dict[key] += outputs[key].sum()
                 self.metric_dict["n_" + key] += outputs[key].size
