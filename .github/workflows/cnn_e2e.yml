@@ -17,3 +17,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "oneflow branch or commit is ${{ github.event.inputs.of_branch_or_commit }}."
+  conda:
+    name: Build with conda
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Oneflow-Inc/oneflow
+        uses: actions/checkout@v2
+      - name: Checkout Oneflow-Inc/conda-env
+        uses: actions/checkout@v2
+        with:
+          repository: Oneflow-Inc/conda-env
+          ref: 30a7f00eb48ee9009d85a848e720823e5054c66b
+          path: conda-env
+      - uses: Oneflow-Inc/get-oneflow@b9c5793ee3b0a3d5c9e2975f230d985e6712787e
+        name: Build with gcc7
+        with:
+          cmake-init-cache: cmake/caches/ci/gh-hosted/cpu-gcc.cmake
+          oneflow-src: .
+          oneflow-build-env: conda
+          conda-env-file: conda-env/dev/gcc7/environment-v2.yml
+          conda-env-name: oneflow-dev-gcc7-v2
