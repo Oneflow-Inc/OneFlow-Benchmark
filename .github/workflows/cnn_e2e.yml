@@ -33,7 +33,7 @@ jobs:
         name: Build with gcc7
         with:
           cmake-init-cache: cmake/caches/ci/gh-hosted/cpu-gcc.cmake
-          oneflow-src: .
+          oneflow-src: oneflow
           oneflow-build-env: conda
           conda-env-file: conda-env/dev/gcc7/environment-v2.yml
           conda-env-name: oneflow-dev-gcc7-v2
