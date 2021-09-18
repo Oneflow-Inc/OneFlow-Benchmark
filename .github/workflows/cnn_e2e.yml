@@ -6,13 +6,13 @@ on:
       - "*"
   workflow_dispatch:
     inputs:
-      placeholder:
-        description: "placeholder, no effect"
-        required: false
-
+      of_branch_or_commit:
+        description: "oneflow branch or commit"
+        required: true
+        default: 'master'
 jobs:
   build: 
     name: 'Build and test this repo'
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "oneflow branch or commit is: ${{ github.event.inputs.of_branch_or_commit }}."
