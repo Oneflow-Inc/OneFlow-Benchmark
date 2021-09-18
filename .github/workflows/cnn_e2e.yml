@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: Oneflow-Inc/oneflow
-          # ref: 30a7f00eb48ee9009d85a848e720823e5054c66b
+          ref: ${{ github.event.inputs.of_branch_or_commit }}
           path: oneflow-src
       - name: Checkout Oneflow-Inc/conda-env
         uses: actions/checkout@v2
