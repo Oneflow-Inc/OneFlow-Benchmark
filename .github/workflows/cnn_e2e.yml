@@ -21,8 +21,14 @@ jobs:
     name: Build with conda
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout actions/checkout@v2
+        uses: actions/checkout@v2
       - name: Checkout Oneflow-Inc/oneflow
         uses: actions/checkout@v2
+        with:
+          repository: Oneflow-Inc/oneflow
+          # ref: 30a7f00eb48ee9009d85a848e720823e5054c66b
+          path: oneflow-src
       - name: Checkout Oneflow-Inc/conda-env
         uses: actions/checkout@v2
         with:
@@ -33,7 +39,7 @@ jobs:
         name: Build with gcc7
         with:
           cmake-init-cache: cmake/caches/ci/gh-hosted/cpu-gcc.cmake
-          oneflow-src: oneflow
+          oneflow-src: oneflow-src
           oneflow-build-env: conda
           conda-env-file: conda-env/dev/gcc7/environment-v2.yml
           conda-env-name: oneflow-dev-gcc7-v2
