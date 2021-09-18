@@ -4,13 +4,10 @@ on:
     types: [review_requested]
     branches:
       - "*"
-  push:
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       placeholder:
-        oneflow_branch_or_commit: "oneflow branch or commit"
+        description: "placeholder, no effect"
         required: false
 
 jobs:
