@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       of_branch_or_commit:
-        description: "oneflow branch or commit"
+        description: 'oneflow branch or commit'
         required: true
         default: 'master'
 
@@ -16,4 +16,4 @@ jobs:
     name: 'Build and test this repo'
     runs-on: ubuntu-latest
     steps:
-      - run: echo "oneflow branch or commit is: ${{ github.event.inputs.of_branch_or_commit }}."
+      - run: echo "oneflow branch or commit is ${{ github.event.inputs.of_branch_or_commit }}."
