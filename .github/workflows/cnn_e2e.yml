@@ -1,0 +1,18 @@
+name: 'resnet e2e test'
+on: 
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      placeholder:
+        oneflow_branch_or_commit: "oneflow branch or commit"
+        required: false
+
+jobs:
+  build: 
+    name: 'Build and test this repo'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
