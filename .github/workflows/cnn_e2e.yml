@@ -38,7 +38,7 @@ jobs:
       - uses: Oneflow-Inc/get-oneflow@b9c5793ee3b0a3d5c9e2975f230d985e6712787e
         name: Build with gcc7
         with:
-          cmake-init-cache: cmake/caches/ci/gh-hosted/cpu-gcc.cmake
+          cmake-init-cache: oneflow-src/cmake/caches/ci/gh-hosted/cpu-gcc.cmake
           oneflow-src: oneflow-src
           oneflow-build-env: conda
           conda-env-file: conda-env/dev/gcc7/environment-v2.yml
