@@ -124,7 +124,7 @@ class Metric(object):
             if step == 0:
                 self._clear()
             if self.loss_key and epoch == 0 and step == self.nvidia_smi_report_step:
-                cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
+                cmd = "nvidia-smi --query-gpu=timestamp,name,driver_version,utilization.gpu,utilization.memory,memory.total,memory.free,memory.used --format=csv"
                 os.system(cmd)
 
             if self.prediction_key:
