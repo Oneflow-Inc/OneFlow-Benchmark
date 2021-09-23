@@ -61,7 +61,7 @@ CMD+="--num_nodes=${NUM_NODES} "
 CMD+="--gpu_num_per_node=${NUM_GPUS_PER_NODE} "
 CMD+="--node_ips=${NODE_IPS} "
 
-LEARNING_RATE=$(echo | awk "{print $NUM_NODES*$DEVICE_NUM_PER_NODE*$TRAIN_BATCH_SIZE/1000}")
+LEARNING_RATE=$(echo | awk "{print $NUM_NODES*$NUM_GPUS_PER_NODE*$BATCH_SIZE/1000}")
 
 CMD+="--batch_size_per_device=${BATCH_SIZE} "
 CMD+="--learning_rate=${LEARNING_RATE} "
