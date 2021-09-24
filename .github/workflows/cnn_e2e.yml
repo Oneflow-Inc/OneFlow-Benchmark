@@ -19,7 +19,7 @@ jobs:
       - run: echo "oneflow branch or commit is ${{ github.event.inputs.of_branch_or_commit }}."
   conda:
     name: Build with conda
-    runs-on: ubuntu-latest
+    runs-on: [‘self-hosted’, ‘linux’, ‘provision’]
     steps:
       - name: Checkout actions/checkout@v2
         uses: actions/checkout@v2
