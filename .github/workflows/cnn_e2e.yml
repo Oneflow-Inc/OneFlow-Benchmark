@@ -14,7 +14,7 @@ on:
 jobs:
   build: 
     name: 'Build and test this repo'
-    runs-on: ubuntu-latest
+    runs-on: [‘self-hosted’, ‘linux’, ‘provision’]
     steps:
       - run: echo "oneflow branch or commit is ${{ github.event.inputs.of_branch_or_commit }}."
   conda:
