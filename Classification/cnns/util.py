@@ -41,7 +41,8 @@ class Snapshot(object):
         if model_load_dir:
             assert os.path.isdir(model_load_dir)
             print("Restoring model from {}.".format(model_load_dir))
-            flow.load_variables(flow.checkpoint.get(model_load_dir))
+            flow.load_variables(flow.checkpoint.get(model_load_dir), ignore_mismatch=False)
+            # flow.checkpoint.save('loaded_init_ckpt')
         else:
             # flow.checkpoint.save("initial_model")
             print("Init model on demand.")
@@ -82,6 +83,15 @@ def match_top_k(predictions, labels, top_k=1):
     match_array = np.logical_or.reduce(max_k_preds == labels.reshape((-1, 1)), axis=1)
     num_matched = match_array.sum()
     return num_matched, match_array.shape[0]
+
+
+def dump_outputs(outputs, step, dump_dir='output'):
+    for k, v in outputs.items():
+        root = os.path.join(dump_dir, str(step))
+        if not os.path.isdir(root):
+            os.makedirs(root)
+        path = os.path.join(root, k)
+        np.save(path, v.numpy())
 
 
 class Metric(object):
@@ -142,6 +152,7 @@ class Metric(object):
             self.num_samples += num_samples
 
             if (step + 1) % self.calculate_batches == 0:
+                dump_outputs(outputs, step)
                 throughput = self.num_samples / self.timer.split()
                 if self.prediction_key:
                     top_1_accuracy = self.top_1_num_matched / self.num_samples
@@ -180,3 +191,20 @@ class Metric(object):
                 self._clear()
 
         return callback
+
+
+from oneflow.compatible.single_client import typing as tp
+
+def build_watch_cb(name, iter=0, root='output'):
+    path = os.path.join(root, str(iter), f'{name}.npy')
+    def cb(blob: tp.Numpy):
+        np.save(path, blob)
+    return cb
+
+
+def build_watch_diff_cb(name, iter=0, root='output'):
+    path = os.path.join(root, str(iter), f'{name}_grad.npy')
+    def cb(blob: tp.Numpy):
+        np.save(path, blob)
+    return cb
+

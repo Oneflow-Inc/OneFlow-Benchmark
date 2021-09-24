@@ -26,6 +26,9 @@ def _default_config(args):
     if args.use_xla:
         config.use_xla_jit(True)
     config.enable_fuse_add_to_output(True)
+    config.cudnn_conv_force_fwd_algo(0)
+    config.cudnn_conv_force_bwd_data_algo(1)
+    config.cudnn_conv_force_bwd_filter_algo(1)
     return config
 
 

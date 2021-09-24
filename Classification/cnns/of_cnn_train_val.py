@@ -27,6 +27,7 @@ import vgg_model
 import alexnet_model
 import inception_model
 import mobilenet_v2_model
+from util import build_watch_cb, build_watch_diff_cb
 
 parser = configs.get_parser()
 args = parser.parse_args()
@@ -51,7 +52,7 @@ model_dict = {
 
 
 flow.config.gpu_device_num(args.gpu_num_per_node)
-# flow.config.enable_debug_mode(True)
+flow.config.enable_debug_mode(True)
 
 if args.use_fp16 and args.num_nodes * args.gpu_num_per_node > 1:
     flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
@@ -84,12 +85,15 @@ def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
         print("Loading data from {}".format(args.train_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_training(args)
+        #(labels, images) = ofrecord_util.load_imagenet_for_training(args)
+        (labels, images) = ofrecord_util.load_imagenet_for_validation(args)
 
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
     logits = model_dict[args.model](images, args)
+    flow.watch(logits, build_watch_cb('logits'))
+    flow.watch_diff(logits, build_watch_diff_cb('logits_grad'))
     if args.label_smoothing > 0:
         one_hot_labels = label_smoothing(
             labels, args.num_classes, args.label_smoothing, logits.dtype
@@ -104,7 +108,7 @@ def TrainNet():
 
     loss = flow.math.reduce_mean(loss)
     predictions = flow.nn.softmax(logits)
-    outputs = {"loss": loss, "predictions": predictions, "labels": labels}
+    outputs = {"loss": loss, "predictions": predictions, "labels": labels, 'images': images, 'logits': logits}
 
     # set up warmup,learning rate and optimizer
     optimizer_util.set_up_optimizer(loss, args)
@@ -144,7 +148,13 @@ def main():
             loss_key="loss",
         )
         for i in range(epoch_size):
-            TrainNet().async_get(metric.metric_cb(epoch, i))
+            # TrainNet().async_get(metric.metric_cb(epoch, i))
+            a = TrainNet().get()
+            # snapshot.save("epoch_{}_iter{}".format(epoch, i))
+            print('loss:', a['loss'].numpy())
+            if i>=100:
+                break
+        break
 
         if args.val_data_dir:
             metric = Metric(
