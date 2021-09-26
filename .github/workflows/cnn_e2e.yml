@@ -1,9 +1,9 @@
 name: 'resnet e2e test'
 on: 
-  pull_request:
-    types: [review_requested]
-    branches:
-      - "*"
+  # pull_request:
+  #   types: [review_requested]
+  #   branches:
+  #     - "*"
   workflow_dispatch:
     inputs:
       of_branch_or_commit:
@@ -12,34 +12,44 @@ on:
         default: 'master'
 
 jobs:
-  build: 
-    name: 'Build and test this repo'
-    runs-on: ['self-hosted', 'linux', 'provision']
+  cancel_previous:
+    name: Cancel previous runs
+    runs-on: ubuntu-latest
     steps:
-      - run: echo "oneflow branch or commit is ${{ github.event.inputs.of_branch_or_commit }}."
-  conda:
-    name: Build with conda
-    runs-on: ['self-hosted', 'linux', 'provision']
-    steps:
-      - name: Checkout actions/checkout@v2
-        uses: actions/checkout@v2
-      - name: Checkout Oneflow-Inc/oneflow
-        uses: actions/checkout@v2
+      - name: Cancel previous runs of outdated commit
+        uses: styfle/cancel-workflow-action@0.9.0
         with:
-          repository: Oneflow-Inc/oneflow
-          ref: ${{ github.event.inputs.of_branch_or_commit }}
-          path: oneflow-src
-      - name: Checkout Oneflow-Inc/conda-env
-        uses: actions/checkout@v2
-        with:
-          repository: Oneflow-Inc/conda-env
-          ref: 30a7f00eb48ee9009d85a848e720823e5054c66b
-          path: conda-env
-      - uses: Oneflow-Inc/get-oneflow@4417f492e7e95b469e5f2abcf12669621443a47d
-        name: Build with gcc7
-        with:
-          cmake-init-cache: oneflow-src/cmake/caches/ci/gh-hosted/cpu-gcc.cmake
-          oneflow-src: oneflow-src
-          oneflow-build-env: conda
-          conda-env-file: conda-env/dev/gcc7/environment-v2.yml
-          conda-env-name: oneflow-dev-gcc7-v2
+          access_token: ${{ github.token }}
+          all_but_latest: true
+  # build: 
+  #   name: 'Build and test this repo'
+  #   runs-on: ['self-hosted', 'linux', 'provision']
+  #   steps:
+  #     - run: echo "oneflow branch or commit is ${{ github.event.inputs.of_branch_or_commit }}."
+  # conda:
+  #   name: Build with conda
+  #   runs-on: ['self-hosted', 'linux', 'provision']
+  #   steps:
+  #     - name: Checkout actions/checkout@v2
+  #       uses: actions/checkout@v2
+  #     - name: Checkout Oneflow-Inc/oneflow
+  #       uses: actions/checkout@v2
+  #       with:
+  #         repository: Oneflow-Inc/oneflow
+  #         ref: ${{ github.event.inputs.of_branch_or_commit }}
+  #         path: oneflow-src
+  #     - name: Checkout Oneflow-Inc/conda-env
+  #       uses: actions/checkout@v2
+  #       with:
+  #         repository: Oneflow-Inc/conda-env
+  #         ref: 30a7f00eb48ee9009d85a848e720823e5054c66b
+  #         path: conda-env
+  #     - uses: Oneflow-Inc/get-oneflow@4417f492e7e95b469e5f2abcf12669621443a47d
+  #       name: Build with gcc7
+  #       with:
+  #         cmake-init-cache: oneflow-src/cmake/caches/ci/gh-hosted/cpu-gcc.cmake
+  #         oneflow-src: oneflow-src
+  #         oneflow-build-env: conda
+  #         conda-env-file: conda-env/dev/gcc7/environment-v2.yml
+  #         conda-env-name: oneflow-dev-gcc7-v2
+
