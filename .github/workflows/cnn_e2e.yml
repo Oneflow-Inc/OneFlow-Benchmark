@@ -35,7 +35,7 @@ jobs:
           repository: Oneflow-Inc/conda-env
           ref: 30a7f00eb48ee9009d85a848e720823e5054c66b
           path: conda-env
-      - uses: Oneflow-Inc/get-oneflow@b9c5793ee3b0a3d5c9e2975f230d985e6712787e
+      - uses: Oneflow-Inc/get-oneflow@4417f492e7e95b469e5f2abcf12669621443a47d
         name: Build with gcc7
         with:
           cmake-init-cache: oneflow-src/cmake/caches/ci/gh-hosted/cpu-gcc.cmake
