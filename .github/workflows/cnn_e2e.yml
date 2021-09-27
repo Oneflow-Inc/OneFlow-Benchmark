@@ -37,7 +37,7 @@ jobs:
         with:
           repository: Oneflow-Inc/oneflow
           ref: ${{ github.event.pull_request.head.sha }}
-      - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/build@4417f492e7e95b469e5f2abcf12669621443a47d
+      - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/build@2a9efceab8d45b725a687e73f870f9b75a15e472
         name: find cache
         id: find-cache
         with:
@@ -78,7 +78,7 @@ jobs:
           repository: Oneflow-Inc/oneflow
           ref: ${{ github.event.inputs.of_branch_or_commit }}
           path: ${{ env.ONEFLOW_SRC }}
-      - uses: Oneflow-Inc/get-oneflow@4417f492e7e95b469e5f2abcf12669621443a47d
+      - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
         name: Build manylinux cu102
         id: build-cuda
         with:
@@ -98,7 +98,7 @@ jobs:
             3.6
       - name: Upload bin
         if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
-        uses: Oneflow-Inc/get-oneflow/degist/upload@4417f492e7e95b469e5f2abcf12669621443a47d
+        uses: Oneflow-Inc/get-oneflow/degist/upload@2a9efceab8d45b725a687e73f870f9b75a15e472
         with:
           digest: ${{ steps.save-cache.outputs.build-digest }}
           entry: ${{ matrix.entry }}
@@ -108,7 +108,7 @@ jobs:
           dst-dir: bin
       - name: Upload whl
         if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
-        uses: Oneflow-Inc/get-oneflow/degist/upload@4417f492e7e95b469e5f2abcf12669621443a47d
+        uses: Oneflow-Inc/get-oneflow/degist/upload@2a9efceab8d45b725a687e73f870f9b75a15e472
         with:
           digest: ${{ steps.save-cache.outputs.build-digest }}
           entry: ${{ matrix.entry }}
@@ -139,7 +139,7 @@ jobs:
   #         repository: Oneflow-Inc/conda-env
   #         ref: 30a7f00eb48ee9009d85a848e720823e5054c66b
   #         path: conda-env
-  #     - uses: Oneflow-Inc/get-oneflow@4417f492e7e95b469e5f2abcf12669621443a47d
+  #     - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
   #       name: Build with gcc7
   #       with:
   #         cmake-init-cache: oneflow-src/cmake/caches/ci/gh-hosted/cpu-gcc.cmake
