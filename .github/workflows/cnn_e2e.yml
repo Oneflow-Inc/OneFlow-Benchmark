@@ -154,7 +154,8 @@ jobs:
           oneflow-src: ${{ env.ONEFLOW_SRC }}
   test:
     name: Test suite
-    needs: [wait_for_gpu_slot, find-test-cache]
+    needs: [find-test-cache]
+    # needs: [wait_for_gpu_slot, find-test-cache]
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: true
