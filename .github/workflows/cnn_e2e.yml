@@ -60,8 +60,8 @@ jobs:
       ONEFLOW_SRC: oneflow-src
       MANYLINUX_CACHE_DIR: ~/manylinux-cache-dir/${{ matrix.entry }}
       WHEELHOUSE_DIR: manylinux-wheelhouse
-      SSH_TANK_HOST: 192.168.1.13
-      SSH_TANK_PATH: /tank
+      SSH_TANK_HOST: 192.168.1.22
+      SSH_TANK_PATH: /tmp
       OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
       OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
     steps:
