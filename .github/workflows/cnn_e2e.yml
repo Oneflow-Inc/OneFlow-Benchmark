@@ -155,9 +155,7 @@ jobs:
   test:
     name: Test suite
     needs: [find-test-cache]
-    # needs: [wait_for_gpu_slot, find-test-cache]
     runs-on: ['self-hosted', 'linux', 'provision']
-    # runs-on: ${{ matrix.runs-on }}
     env:
       TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ matrix.entry }}-test"
     steps:
@@ -166,8 +164,8 @@ jobs:
         run: |
           set -x
           docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
-      - name: Checkout Oneflow-Inc/OneFlow-Benchmark
-        uses: actions/checkout@v2
+      # - name: Checkout Oneflow-Inc/OneFlow-Benchmark
+      #   uses: actions/checkout@v2
       - name: Remove container
         timeout-minutes: 45
         if: ${{ contains(matrix.runs-on, 'self-hosted') }}
@@ -194,7 +192,7 @@ jobs:
         timeout-minutes: 10
         with:
           digest: ${{ steps.save-cache.outputs.build-digest }}
-          entry: ${{ matrix.compute-platform }}
+          entry: ${{ matrix.entry }}
           ssh-tank-host: ${{ env.SSH_TANK_HOST }}
           ssh-tank-path: ${{ env.SSH_TANK_PATH }}
   # build: 
