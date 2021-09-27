@@ -10,8 +10,8 @@ on:
         description: 'oneflow branch or commit'
         required: true
         default: 'master'
-  env:
-    ONEFLOW_SRC: oneflow-src
+env:
+  ONEFLOW_SRC: oneflow-src
 jobs:
   cancel_previous:
     name: Cancel previous runs
