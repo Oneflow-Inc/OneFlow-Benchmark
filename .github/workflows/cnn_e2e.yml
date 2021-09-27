@@ -156,11 +156,8 @@ jobs:
     name: Test suite
     needs: [find-test-cache]
     # needs: [wait_for_gpu_slot, find-test-cache]
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      fail-fast: true
-      max-parallel: 5
-      matrix: ${{ fromJson(needs.find-test-cache.outputs.matrix) }}
+    runs-on: ['self-hosted', 'linux', 'provision']
+    # runs-on: ${{ matrix.runs-on }}
     env:
       TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ matrix.entry }}-test"
     steps:
@@ -191,7 +188,7 @@ jobs:
           echo "::error file=test.yml,line=204,col=10::steps.save-cache.outputs.cache-hit != matrix.cache-hit"
           exit 1
       - name: Download wheel and binary
-        if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
+        if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
         uses: Oneflow-Inc/get-oneflow/degist/download@2a9efceab8d45b725a687e73f870f9b75a15e472
         id: download-digest
         timeout-minutes: 10
