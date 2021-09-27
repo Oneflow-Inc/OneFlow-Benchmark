@@ -1,5 +1,5 @@
 rm -rf core.*
-rm -rf ./output ./initial_model
+rm -rf ./output/logs/$HOSTNAME ./output/$HOSTNAME ./initial_model
 
 
 # bash args_train.sh ${NUM_NODES} ${NUM_GPUS_PER_NODE} ${BATCH_SIZE} ${USE_FP16} ${NUM_EPOCH} ${LOSS_PRINT_ITER} ${TRAIN_DATA_PATH} ${VAL_DATA_PATH} ${PYTHON_BIN} ${NODE_IPS} ${DEBUG_AND_NCCL} ${NSYS_BIN} ${ITER_NUM}

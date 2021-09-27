@@ -1,5 +1,5 @@
 rm -rf core.*
-rm -rf ./output/* initial_model
+rm -rf ./output/logs/$HOSTNAME ./output/$HOSTNAME ./initial_model
 
 # bash args_run_pretraining.sh ${NUM_NODES} ${NUM_GPUS_PER_NODE} ${BSZ_PER_DEVICE} ${USE_FP16} ${ITER_NUM} ${LOSS_PRINT_ITER} ${DATA_DIR} ${DATA_PART_NUM} ${SEQ_LENGHT} ${NUM_HIDDEN_LAYERS} ${NUM_ATTENTION_HEADS} ${PYTHON_BIN} ${NODE_IPS} ${NSYS_BIN}
 
@@ -22,7 +22,8 @@ DEBUG_AND_NCCL=${14:-false}
 NSYS_BIN=${15:-""}
 ITER_N=${16:-1}
 NUM_ACC_STEP=${17:-1}
-OPTIMIZER_TYPE=${18:"adam"}
+OPTIMIZER_TYPE=${18:-"adam"}
+
 
 RUN_TIME=$(date "+%Y%m%d_%H%M%S")
 LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
@@ -40,14 +41,14 @@ if $DEBUG_AND_NCCL; then
     echo NCCL_DEBUG=$NCCL_DEBUG
 fi
 
-if [ $NUM_GPUS_PER_NODE -eq 1 ]; then
-  export CUDA_VISIBLE_DEVICES=$(($ITER_N-1))
-fi
+# if [ $NUM_GPUS_PER_NODE -eq 1 ]; then
+#   export CUDA_VISIBLE_DEVICES=$(($ITER_N-1))
+# fi
 
 CMD=""
 
 if [[ ! -z "${NSYS_BIN}" ]]; then
-    CMD+="${NSYS_BIN} profile --stats true --output ${TRAN_MODEL}_v0.4.0_${NUM_NODES}_${NUM_GPUS_PER_NODE}_%h_%p "
+    CMD+="${NSYS_BIN} profile --stats true --output ${TRAN_MODEL}_v0.5.0_${NUM_NODES}_${NUM_GPUS_PER_NODE}_%h_%p "
 fi
 
 CMD+="${PYTHON_BIN} run_pretraining.py "
