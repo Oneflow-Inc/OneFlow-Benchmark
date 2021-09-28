@@ -174,6 +174,8 @@ class Metric(object):
 
                 self.print_fn_()
 
+                for key in self.keys_:
+                    self.kv_store_[key] = 0.0
                 self.acc_elapsed_time_ = 0.0
                 self.acc_micro_batches_ = 0
                 self.acc_samples_ = 0
