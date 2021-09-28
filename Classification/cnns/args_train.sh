@@ -23,7 +23,7 @@ ITER_NUM=${13:-1}
 # fi
 
 TRAN_MODEL="resnet50"
-RUN_TIME=$(date "+%Y%m%d_%H%M%S")
+RUN_TIME=$(date "+%Y%m%d_%H%M%S%N")
 LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
 mkdir -p $LOG_FOLDER
 LOG_FILENAME=$LOG_FOLDER/${TRAN_MODEL}_lazy_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_b${BATCH_SIZE}_fp16${USE_FP16}_${RUN_TIME}_iter${ITER_NUM}.log
