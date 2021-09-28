@@ -111,7 +111,7 @@ jobs:
           python-versions: |
             3.7
       - name: Upload bin
-        # if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
+        if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
         uses: Oneflow-Inc/get-oneflow/degist/upload@2a9efceab8d45b725a687e73f870f9b75a15e472
         with:
           digest: ${{ steps.save-cache.outputs.build-digest }}
@@ -121,7 +121,7 @@ jobs:
           src-dir: ${{ env.MANYLINUX_CACHE_DIR }}/build/bin
           dst-dir: bin
       - name: Upload whl
-        # if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
+        if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
         uses: Oneflow-Inc/get-oneflow/degist/upload@2a9efceab8d45b725a687e73f870f9b75a15e472
         with:
           digest: ${{ steps.save-cache.outputs.build-digest }}
