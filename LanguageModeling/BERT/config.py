@@ -122,6 +122,13 @@ def get_parser(parser=None):
         help="model save directory",
     )
     parser.add_argument(
+        "--model_save_init",
+        action="store_true",
+        default=False,
+        help="save model snapshot for inited",
+    )
+    
+    parser.add_argument(
         "--save_last_snapshot",
         type=str2bool,
         default=False,
