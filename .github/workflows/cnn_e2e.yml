@@ -169,8 +169,8 @@ jobs:
         run: |
           set -x
           docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
-      # - name: Checkout Oneflow-Inc/OneFlow-Benchmark
-      #   uses: actions/checkout@v2
+      - name: Checkout Oneflow-Inc/OneFlow-Benchmark
+        uses: actions/checkout@v2
       - name: Remove container
         timeout-minutes: 45
         # if: ${{ contains(matrix.runs-on, 'self-hosted') }}
@@ -249,8 +249,6 @@ jobs:
       #   # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
       #   run: |
       #     docker exec ${{ env.TEST_CONTAINER_NAME }} python3 -m oneflow --doctor
-      - name: Checkout OneFlow-Benchmark
-        uses: actions/checkout@v2
          
   # build: 
   #   name: 'Build and test this repo'
