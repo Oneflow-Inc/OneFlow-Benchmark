@@ -219,7 +219,7 @@ jobs:
           echo "ONEFLOW_WHEEL_PATH=${{ steps.download-digest.outputs.entry-dir }}/whl" >> $GITHUB_ENV
       - name: Start container
         # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
-        working-directory: ${{ env.ONEFLOW_SRC }}
+        # working-directory: ${{ env.ONEFLOW_SRC }}
         env:
           ONEFLOW_BIN_PATH: ${{ steps.download-digest.outputs.entry-dir }}/bin
         run: |
@@ -242,16 +242,16 @@ jobs:
             --name ${TEST_CONTAINER_NAME} \
             ${{ env.TEST_IMG_TAG }} \
             sleep 3600
-      - name: Test container
-        # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
-        run: |
-          docker exec ${{ env.TEST_CONTAINER_NAME }} ls
       - name: Install OneFlow
         # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
         run: |
           ls ${ONEFLOW_WHEEL_PATH}
           docker exec ${TEST_CONTAINER_NAME} python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
           docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=${ONEFLOW_WHEEL_PATH} oneflow
+      - name: Test container
+        # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
+        run: |
+          docker exec ${{ env.TEST_CONTAINER_NAME }} ls
       # - name: Run OneFlow doctor
       #   # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
       #   run: |
