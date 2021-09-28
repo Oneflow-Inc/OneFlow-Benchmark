@@ -92,6 +92,24 @@ def get_parser(parser=None):
     parser.add_argument(
         "--model_load_dir", type=str, default=None, help="model load directory if need"
     )
+    parser.add_argument(
+        "--save_epoch_interval",
+        type=int,
+        default=10,
+        help="Number of iterations between checkpoint saves.",
+    )
+    parser.add_argument(
+        "--save_last",
+        action="store_true",
+        default=False,
+        help="save model snapshot for last iteration",
+    )
+    parser.add_argument(
+        "--save_init",
+        action="store_true",
+        default=False,
+        help="save model snapshot for inited",
+    )
     parser.add_argument("--batch_size_per_device", type=int, default=64)
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
