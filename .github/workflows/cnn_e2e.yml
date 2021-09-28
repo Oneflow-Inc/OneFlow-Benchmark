@@ -172,6 +172,12 @@ jobs:
           docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
       - name: Checkout Oneflow-Inc/OneFlow-Benchmark
         uses: actions/checkout@v2
+      - name: Checkout Oneflow-Inc/oneflow
+        uses: actions/checkout@v2
+        with:
+          repository: Oneflow-Inc/oneflow
+          ref: ${{ github.event.inputs.of_branch_or_commit }}
+          path: ${{ env.ONEFLOW_SRC }}
       - name: Remove container
         timeout-minutes: 45
         # if: ${{ contains(matrix.runs-on, 'self-hosted') }}
