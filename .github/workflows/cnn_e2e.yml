@@ -108,7 +108,7 @@ jobs:
           docker-run-use-lld: false
           retry-failed-build: true
           python-versions: |
-            3.6
+            3.7
       - name: Upload bin
         if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
         uses: Oneflow-Inc/get-oneflow/degist/upload@2a9efceab8d45b725a687e73f870f9b75a15e472
