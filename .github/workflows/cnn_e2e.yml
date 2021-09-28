@@ -130,34 +130,39 @@ jobs:
           ssh-tank-path: ${{ env.SSH_TANK_PATH }}
           src-dir: ${{ env.WHEELHOUSE_DIR }}
           dst-dir: whl
-  find-test-cache:
-    name: "Find test cache"
-    runs-on: ubuntu-latest
-    needs: [build-manylinux]
-    outputs:
-      matrix: ${{ steps.find-cache.outputs.matrix }}
-    steps:
-      - name: Checkout Oneflow-Inc/oneflow
-        uses: actions/checkout@v2
-        with:
-          repository: Oneflow-Inc/oneflow
-          ref: ${{ github.event.inputs.of_branch_or_commit }}
-          path: ${{ env.ONEFLOW_SRC }}
-      - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/test@2a9efceab8d45b725a687e73f870f9b75a15e472
-        name: find cache
-        id: find-cache
-        timeout-minutes: 5
-        with:
-          runner-labels: |
-            self-hosted
-            linux
-          oneflow-src: ${{ env.ONEFLOW_SRC }}
+  # find-test-cache:
+  #   name: "Find test cache"
+  #   runs-on: ubuntu-latest
+  #   needs: [build-manylinux]
+  #   outputs:
+  #     matrix: ${{ steps.find-cache.outputs.matrix }}
+  #   steps:
+  #     - name: Checkout Oneflow-Inc/oneflow
+  #       uses: actions/checkout@v2
+  #       with:
+  #         repository: Oneflow-Inc/oneflow
+  #         ref: ${{ github.event.inputs.of_branch_or_commit }}
+  #         path: ${{ env.ONEFLOW_SRC }}
+  #     - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/test@2a9efceab8d45b725a687e73f870f9b75a15e472
+  #       name: find cache
+  #       id: find-cache
+  #       timeout-minutes: 5
+  #       with:
+  #         runner-labels: |
+  #           self-hosted
+  #           linux
+  #         oneflow-src: ${{ env.ONEFLOW_SRC }}
   test:
     name: Test suite
-    needs: [find-test-cache]
+    # needs: [find-test-cache]build-manylinux
+    needs: [build-manylinux]
     runs-on: ['self-hosted', 'linux', 'provision']
     env:
       TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ matrix.entry }}-test"
+    # strategy:
+    #   fail-fast: true
+    #   max-parallel: 5
+    #   matrix: ${{ fromJson(needs.find-test-cache.outputs.matrix) }}
     steps:
       - name: Fix permissions
         if: ${{ contains(matrix.runs-on, 'self-hosted') }}
@@ -168,7 +173,7 @@ jobs:
       #   uses: actions/checkout@v2
       - name: Remove container
         timeout-minutes: 45
-        if: ${{ contains(matrix.runs-on, 'self-hosted') }}
+        # if: ${{ contains(matrix.runs-on, 'self-hosted') }}
         run: |
           docker rm -f ${{ env.TEST_CONTAINER_NAME }} || true
       - uses: Oneflow-Inc/get-oneflow/cache-complete@2a9efceab8d45b725a687e73f870f9b75a15e472
@@ -177,22 +182,22 @@ jobs:
         timeout-minutes: 5
         with:
           oneflow-src: ${{ env.ONEFLOW_SRC }}
-          entry: ${{ matrix.entry }}
-          digest-type: ${{ matrix.digest-type }}
-          mark-as-completed: ${{ contains(matrix.runs-on, 'self-hosted') }}
+          entry: cu102
+          digest-type: test
+          mark-as-completed: true
       - name: Check digest and fail if cache result not identical to matrix
         if: ${{ fromJSON(steps.save-cache.outputs.cache-hit) != matrix.cache-hit }}
         run: |
           echo "::error file=test.yml,line=204,col=10::steps.save-cache.outputs.cache-hit != matrix.cache-hit"
           exit 1
       - name: Download wheel and binary
-        if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
+        # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
         uses: Oneflow-Inc/get-oneflow/degist/download@2a9efceab8d45b725a687e73f870f9b75a15e472
         id: download-digest
         timeout-minutes: 10
         with:
           digest: ${{ steps.save-cache.outputs.build-digest }}
-          entry: ${{ matrix.entry }}
+          entry: cu102
           ssh-tank-host: ${{ env.SSH_TANK_HOST }}
           ssh-tank-path: ${{ env.SSH_TANK_PATH }}
   # build: 
