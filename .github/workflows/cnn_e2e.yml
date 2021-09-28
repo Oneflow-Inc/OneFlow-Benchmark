@@ -94,6 +94,7 @@ jobs:
       - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
         name: Build manylinux cu102
         id: build-cuda
+        if: ${{ matrix.entry =='cu102' && !matrix.cache-hit }}
         with:
           cmake-init-cache: ${{ env.ONEFLOW_SRC }}/cmake/caches/ci/cuda.cmake
           build-script: ${{ env.ONEFLOW_SRC }}/ci/manylinux/build-gcc7.sh
