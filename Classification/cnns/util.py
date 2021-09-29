@@ -17,8 +17,6 @@ limitations under the License.
 import os
 import time
 import numpy as np
-import pandas as pd
-from datetime import datetime
 import oneflow.compatible.single_client as flow
 
 
