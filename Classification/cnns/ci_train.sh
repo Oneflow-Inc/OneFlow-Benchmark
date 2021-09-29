@@ -1,8 +1,8 @@
-GPU_NUM=${1:-8}
-NODE_NUM=${2:-1}
-BATCH_SIZE=${3:-192}
-LEARNING_RATE=${4:-1.536}
-NUM_EPOCH=${5:-50}
+NUM_EPOCH=${1:-50}
+GPU_NUM=${2:-8}
+NODE_NUM=${3:-1}
+BATCH_SIZE=${4:-192}
+LEARNING_RATE=${5:-1.536}
 SRC_ROOT=${6:-"Classification/cnns"}
 DATA_ROOT=${7:-"/dataset/ImageNet/ofrecord"}
 

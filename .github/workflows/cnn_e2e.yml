@@ -10,6 +10,14 @@ on:
         description: 'oneflow branch or commit'
         required: true
         default: 'master'
+      num_epochs:
+        description: 'number of training epoches'
+        required: true
+        default: 50
+      gpu_num_per_node:
+        description: 'gpu number per node'
+        required: true
+        default: 8
 env:
   ONEFLOW_SRC: oneflow-src
   SSH_TANK_HOST: 192.168.1.23
@@ -251,7 +259,7 @@ jobs:
       - name: Test container
         # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
         run: |
-          docker exec ${{ env.TEST_CONTAINER_NAME }} ls
+          docker exec ${{ env.TEST_CONTAINER_NAME }} bash Classification/cnns/ci_train.sh ${{ github.event.inputs.num_epochs }} ${{ github.event.inputs.gpu_num_per_node }}
       # - name: Run OneFlow doctor
       #   # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
       #   run: |
