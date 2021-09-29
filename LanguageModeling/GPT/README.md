@@ -173,7 +173,7 @@ python3 tools/launch_container.py \
 bash examples/pretrain_1n8d_2x4x1_16_1536x16.sh
 ```
 
-如果需要进一步扩充设备数量，由于单台机器适配的 GPU 设备数量有限，我们需要更多的物理机器 node。此时，我们需要配置 `--num-nodes` 和 `--node-ips` 参数，并且分别在每台机器上启动训练命令（`traning.py`）。同时在有 rdma 的环境中，可以开启 `--use-rdma` 来带来更佳的训练效率。以下是4机8卡下，各种并行方式混合的示例：
+如果需要进一步扩充设备数量，由于单台机器适配的 GPU 设备数量有限，我们需要更多的物理机器 node。此时，我们需要配置 `--num-nodes` 和 `--node-ips` 参数，并且分别在每台机器上启动训练命令（`traning.py`）。同时在有 rdma 的环境中，可以开启 `export ONEFLOW_COMM_NET_IB_ENABLE=1` 来带来更佳的训练效率。以下是4机8卡下，各种并行方式混合的示例：
 
 ```
 bash examples/distribute_pretrain_4n8d_2x4x4_512_2304x24.sh
