@@ -1,7 +1,7 @@
 NUM_EPOCH=${1:-50}
 GPU_NUM=${2:-8}
 NODE_NUM=${3:-1}
-BATCH_SIZE=${4:-192}
+BATCH_SIZE=${4:-32}
 LEARNING_RATE=${5:-1.536}
 SRC_ROOT=${6:-"Classification/cnns"}
 DATA_ROOT=${7:-"/dataset/ImageNet/ofrecord"}
@@ -39,7 +39,7 @@ python3 ${SRC_ROOT}/of_cnn_train_val.py \
      --nccl_fusion_max_ops=24 \
      --gpu_image_decoder=True \
      --num_epoch=$NUM_EPOCH \
-     --model=${model} 
-     # 2>&1 | tee ${LOGFILE}
+     --num_examples=1024 \
+     --model=${model} 2>&1 | tee ${LOGFILE}
 
 echo "Writting log to ${LOGFILE}"
