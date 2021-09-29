@@ -137,7 +137,7 @@ def main():
 
     print(" {} iter per epoch...".format(epoch_size))
 
-    for epoch in range(1, args.num_epochs):
+    for epoch in range(1, args.num_epochs + 1):
         metric = Metric(
             desc="train",
             calculate_batches=args.loss_print_every_n_iter,
