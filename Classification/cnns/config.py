@@ -114,9 +114,6 @@ def get_parser(parser=None):
     parser.add_argument("--val_batch_size_per_device", type=int, default=8)
 
     parser.add_argument(
-        "--use_rdma", type=str2bool, nargs="?", const=True, help="Use rdma.",
-    )
-    parser.add_argument(
         "--nccl_fusion_threshold_mb",
         type=int,
         default=0,
