@@ -39,6 +39,7 @@ python3 ${SRC_ROOT}/of_cnn_train_val.py \
      --nccl_fusion_max_ops=24 \
      --gpu_image_decoder=True \
      --num_epoch=$NUM_EPOCH \
-     --model=${model} 2>&1 | tee ${LOGFILE}
+     --model=${model} 
+     # 2>&1 | tee ${LOGFILE}
 
 echo "Writting log to ${LOGFILE}"
