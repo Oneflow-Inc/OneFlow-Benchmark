@@ -1,4 +1,4 @@
-test_case=n${E2E_NODE_NUM}_g${E2E_GPU_NUM}_b${E2E_BATCH_SIZE}_lr${E2E_LEARNING_RATE}_e${E2E_NUM_EPOCH}
+test_case=n${E2E_NODE_NUM}_g${E2E_GPU_NUM_PER_NODE}_b${E2E_BATCH_SIZE}_lr${E2E_LEARNING_RATE}_e${E2E_NUM_EPOCH}
 LOG_FOLDER=./log
 mkdir -p $LOG_FOLDER
 
@@ -14,7 +14,7 @@ python3 ${E2E_SRC_ROOT}/of_cnn_train_val.py \
      --val_data_dir=$E2E_DATA_ROOT/validation \
      --val_data_part_num=256 \
      --num_nodes=${E2E_NODE_NUM} \
-     --gpu_num_per_node=${E2E_GPU_NUM} \
+     --gpu_num_per_node=${E2E_GPU_NUM_PER_NODE} \
      --optimizer="sgd" \
      --momentum=0.875 \
      --label_smoothing=0.1 \
