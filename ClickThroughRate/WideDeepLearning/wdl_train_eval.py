@@ -14,17 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import argparse
+import re
+from numpy.core.records import record
 import oneflow.compatible.single_client as flow
 import datetime
 import os
 import glob
+import pandas
 from sklearn.metrics import roc_auc_score
 import numpy as np
 import time
+import pandas as pd
 
 def str_list(x):
     return x.split(',')
 parser = argparse.ArgumentParser()
+parser.add_argument('--test_name', type=str, default='a_test')
 parser.add_argument('--dataset_format', type=str, default='ofrecord', help='ofrecord or onerec')
 parser.add_argument(
     "--use_single_dataloader_thread",
@@ -34,10 +39,10 @@ parser.add_argument(
 parser.add_argument('--num_dataloader_thread_per_gpu', type=int, default=2)
 parser.add_argument('--train_data_dir', type=str, default='')
 parser.add_argument('--train_data_part_num', type=int, default=1)
-parser.add_argument('--train_part_name_suffix_length', type=int, default=-1)
+parser.add_argument('--train_part_name_suffix_length', type=int, default=5)
 parser.add_argument('--eval_data_dir', type=str, default='')
 parser.add_argument('--eval_data_part_num', type=int, default=1)
-parser.add_argument('--eval_part_name_suffix_length', type=int, default=-1)
+parser.add_argument('--eval_part_name_suffix_length', type=int, default=5)
 parser.add_argument('--eval_batchs', type=int, default=20)
 parser.add_argument('--eval_interval', type=int, default=1000)
 parser.add_argument('--batch_size', type=int, default=16384)
@@ -49,7 +54,7 @@ parser.add_argument('--deep_dropout_rate', type=float, default=0.5)
 parser.add_argument('--num_dense_fields', type=int, default=13)
 parser.add_argument('--num_wide_sparse_fields', type=int, default=2)
 parser.add_argument('--num_deep_sparse_fields', type=int, default=26)
-parser.add_argument('--max_iter', type=int, default=30000)
+parser.add_argument('--max_iter', type=int, default=100000)
 parser.add_argument('--loss_print_every_n_iter', type=int, default=100)
 parser.add_argument('--gpu_num_per_node', type=int, default=8)
 parser.add_argument('--num_nodes', type=int, default=1,
@@ -61,6 +66,9 @@ parser.add_argument('--hidden_units_num', type=int, default=7)
 parser.add_argument('--hidden_size', type=int, default=1024)
 
 FLAGS = parser.parse_args()
+
+
+records=[]
 
 #DEEP_HIDDEN_UNITS = [1024, 1024]#, 1024, 1024, 1024, 1024, 1024]
 DEEP_HIDDEN_UNITS = [FLAGS.hidden_size for i in range(FLAGS.hidden_units_num)]
@@ -170,7 +178,7 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
             kernel_initializer=flow.glorot_uniform_initializer(),
             bias_initializer=flow.constant_initializer(0.0),
             activation=flow.math.relu,
-            name='fc' + str(idx + 1)
+            name='fc' + str(idx)
         )
         deep_features = flow.nn.dropout(deep_features, rate=FLAGS.deep_dropout_rate)
     deep_scores = flow.layers.dense(
@@ -178,14 +186,25 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
         units=1,
         kernel_initializer=flow.glorot_uniform_initializer(),
         bias_initializer=flow.constant_initializer(0.0),
-        name='fc' + str(len(DEEP_HIDDEN_UNITS) + 1)
+        name='deep_scores'
     )
 
     scores = wide_scores + deep_scores
     return scores
 
+def get_memory_usage(rank):
+    nvidia_smi_report_file_path=os.path.join('/home/shiyunxiao/OneFlow-Benchmark/ClickThroughRate/WideDeepLearning/gpu_info/','gpu_memory_usage_%s.csv'%rank)
+    cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
+    if nvidia_smi_report_file_path is not None:
+        cmd += f" -f {nvidia_smi_report_file_path}"
+    os.system(cmd)
+    df=pd.read_csv(nvidia_smi_report_file_path)
+    memory=df.iat[rank,1].split()[0]
+    return memory
 
 global_loss = 0.0
+time_begin=0
+time_end=0
 def _create_train_callback(step):
     def nop(loss):
         global global_loss
@@ -194,9 +213,21 @@ def _create_train_callback(step):
 
     def print_loss(loss):
         global global_loss
+        global time_begin
+        global time_end
+        time_end=time.time()
+        latency=(time_end-time_begin)*1000/FLAGS.loss_print_every_n_iter
         global_loss += loss.mean()
-        print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter)
+        record_dict={}
+        record_dict['task']='train'
+        record_dict['step']=step+1
+        record_dict['loss']=global_loss/FLAGS.loss_print_every_n_iter
+        record_dict['latency/ms']=latency
+        for i in range(FLAGS.gpu_num_per_node):
+            record_dict['memory_usage_%s/MB'%i]=get_memory_usage(i)
+        records.append(record_dict)
         global_loss = 0.0
+        time_begin=time.time()
 
     if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
         return print_loss
@@ -206,13 +237,13 @@ def _create_train_callback(step):
 
 def CreateOptimizer(args):
     lr_scheduler = flow.optimizer.PiecewiseConstantScheduler([], [args.learning_rate])
-    return flow.optimizer.LazyAdam(lr_scheduler)
+    return flow.optimizer.SGD(lr_scheduler)
 
 
 def _get_train_conf():
     train_conf = flow.FunctionConfig()
     train_conf.default_data_type(flow.float)
-    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
+    #train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
 
 
@@ -221,7 +252,7 @@ def train_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
         _data_loader(data_dir=FLAGS.train_data_dir, data_part_num=FLAGS.train_data_part_num, 
                      batch_size=FLAGS.batch_size, 
-                     part_name_suffix_length=FLAGS.train_part_name_suffix_length, shuffle=True)
+                     part_name_suffix_length=FLAGS.train_part_name_suffix_length, shuffle=False)
     logits = _model(dense_fields, wide_sparse_fields, deep_sparse_fields)
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
     opt = CreateOptimizer(FLAGS)
@@ -278,23 +309,12 @@ def main():
     #flow.config.enable_numa_aware_cuda_malloc_host(True)
     #flow.config.collective_boxing.enable_fusion(False)
     check_point = flow.train.CheckPoint()
-    check_point.init()
+    check_point.load('/home/shiyunxiao/checkpoint_old')
+    global time_begin
+    time_begin=time.time()
     for i in range(FLAGS.max_iter):
         train_job().async_get(_create_train_callback(i))
-        if (i + 1 ) % FLAGS.eval_interval == 0:
-            labels = np.array([[0]])
-            preds = np.array([[0]])
-            cur_time = time.time()
-            eval_loss = 0.0
-            for j in range(FLAGS.eval_batchs):
-                loss, pred, ref = eval_job().get()
-                label_ = ref.numpy().astype(np.float32)
-                labels = np.concatenate((labels, label_), axis=0)
-                preds = np.concatenate((preds, pred.numpy()), axis=0)
-                eval_loss += loss.mean()
-            auc = roc_auc_score(labels[1:], preds[1:])
-            print(i+1, "eval_loss", eval_loss/FLAGS.eval_batchs, "eval_auc", auc)
-
-
+    df=pandas.DataFrame.from_dict(records, orient='columns')
+    df.to_csv('/home/shiyunxiao/wide_deep_test/old/%s.csv'%(FLAGS.test_name),index=False)
 if __name__ == '__main__':
     main()
