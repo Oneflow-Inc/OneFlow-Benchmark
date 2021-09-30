@@ -70,11 +70,11 @@ The main purpose of this test is to test the average latency over different GPU 
 
 Results：
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/fixed_batch_size_latency.png)
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/fixed_batch_size_latency.png?raw=true)
 
 the maximum memory usage over devices is shown below:
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/fixed_batch_size_memory.png)
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/fixed_batch_size_memory.png?raw=true)
 
 To summarise, from one device to 8 devices, OneFlow-WDL ran faster than HugeCTR with less memory usage.
 
@@ -83,11 +83,11 @@ The main purpose of test is to test the average latency over different GPU devic
 
 Results：
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/scaled_batch_size_latency.png)
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/scaled_batch_size_latency.png?raw=true)
 
 the maximum memory usage over devices is shown below:
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/scaled_batch_size_memory.png)
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/scaled_batch_size_memory.png?raw=true)
 
 Summary:
 - The latency kept increase alone with number of devices.
@@ -99,7 +99,7 @@ The main purpose of this test is to test the average latency with one GPU device
 
 Results：
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/scaled_batch_size_latency_1gpu.png)
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/scaled_batch_size_latency_1gpu.png?raw=true)
 
 Summary: OneFlow-WDL ran faster than HugeCTR over batch size from 512 to 16384.
 
@@ -110,9 +110,9 @@ There are two Embedding Tables config in OneFlow-WDL：
 
 In HugeCTR the vocab size is 1,603,616(1.6 million). We kept increasing vocab size from 3.2 million to 409.6 million during test, result is below：
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/big_vocab_table_2x1024.png) 
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/big_vocab_table_2x1024.png?raw=true) 
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/big_vocab_table_7x1024.png)
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/big_vocab_table_7x1024.png?raw=true)
 
 In above figures，the blue column is average latency and orange curve is for the memory usage over different vocab size.
 
@@ -125,14 +125,14 @@ We choose batch size=512 to run the convergence performance test.
 
 The follow graph is the results of first 500 iterations. We perform evaluation with 20 example after each iteration.
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/eval_auc_loss_500iters.png)
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/eval_auc_loss_500iters.png?raw=true)
 
 Conclusion: AUC grow rapidly over 0.75.
 
 ### Convergence test 2
 Same with the Convergence test 1, but we print the average loss value every 1000 iterations, then select 20 record to evaluate. 300,000 training iterations in total. Result:
 
-![image](https://github.com/Oneflow-Inc/oneflow-documentation/raw/master/cn/docs/adv_examples/imgs/train_eval_auc_loss.png)
+![image](https://github.com/Oneflow-Inc/oneflow-documentation/blob/v0.4.0/cn/docs/adv_examples/imgs/train_eval_auc_loss.png?raw=true)
 
 Conclusion and analysis:
 1. The blue curve of train loss have obvious descend. because, there are 36674623 data in training set. When batch_size=512, 71630 steps will finish a epoch. 300,0000 steps can use the training set over 4 times(epochs). The descend of blue curve proof that. OneFlow can suffle the data during the training process in order to reduce overfitting. 
