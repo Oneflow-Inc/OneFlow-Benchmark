@@ -30,7 +30,7 @@ python3 ${E2E_SRC_ROOT}/of_cnn_train_val.py \
      --nccl_fusion_threshold_mb=16 \
      --nccl_fusion_max_ops=24 \
      --gpu_image_decoder=True \
-     --num_epoch=$E2E_NUM_EPOCH \
+     --num_epoch=$E2E_NUM_EPOCHS \
      --num_examples=1024 \
      --model=${model} 2>&1 | tee ${LOGFILE}
 
