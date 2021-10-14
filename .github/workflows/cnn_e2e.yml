@@ -45,12 +45,11 @@ jobs:
           pwd
           ls
           git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
-          echo "--------------"
-
           git bisect good
           git bisect good
+          git bisect bad
           git log --pretty=format:"%H-%cd-%cr" -2
-          git bisect reset
+          git bisect log
 
 
           
