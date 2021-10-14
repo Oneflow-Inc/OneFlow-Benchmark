@@ -18,25 +18,30 @@ on:
         required: true
         default: 1
 env:
-  ONEFLOW_SRC: oneflow-src
+  DEBUG_WORKSPACE: debug_workspace
 
 jobs:
   test_module:
     name: Test Module ResNet50
     runs-on: ['self-hosted', 'linux', 'provision']
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Oneflow-Inc/OneFlow-Benchmark
+        uses: actions/checkout@v2
+        with:
+          path: debug_workspace/OneFlow-Benchmark
+          ref: v0.5.0_many_gpu_test
       - name: Checkout Oneflow-Inc/oneflow
         uses: actions/checkout@v2
         with:
           repository: Oneflow-Inc/oneflow
+          path: debug_workspace/oneflow
           ref: master
       - name: Build OneFlow
         env:
           module_resnet_type: ${{ github.event.inputs.of_good_commit }}
         run: |
           set -x
-          cd oneflow
+          cd debug_workspace/oneflow
           git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
           pwd
           if [ "${{ matrix.compute_platform }}" == "ddp" ]; then
@@ -58,4 +63,8 @@ jobs:
           make -j$(nproc)
           source source.sh
           python3 -m oneflow --doctor
+          cd ../../
+          cd OneFlow-Benchmark
+          git status
+
           
