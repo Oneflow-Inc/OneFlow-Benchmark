@@ -23,7 +23,7 @@ env:
 jobs:
   test_module:
     name: Test Module ResNet50
-    runs-on: ['self-hosted', 'linux', 'provision']
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Oneflow-Inc/OneFlow-Benchmark
         uses: actions/checkout@v2
@@ -42,18 +42,11 @@ jobs:
         run: |
           set -x
           cd debug_workspace/oneflow
-          /usr/bin/git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
+          git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
           pwd
-          
-          if [ ! -d "build" ]; then
-            mkdir ./build
-          fi
-          pwd
-          cd build
-          cmake .. -C ../cmake/caches/cn/cuda.cmake
-          make -j$(nproc)
-          source source.sh
-          python3 -m oneflow --doctor
+          git bisect good
+          git bisect good
+          git bisect bad
           cd ../../
           cd OneFlow-Benchmark
           git status
