@@ -40,7 +40,6 @@ jobs:
         env:
           module_resnet_type: ${{ github.event.inputs.of_good_commit }}
         run: |
-          set -x
           git --version
           cd debug_workspace/oneflow
           pwd
