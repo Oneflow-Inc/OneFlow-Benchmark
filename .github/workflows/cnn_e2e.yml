@@ -46,9 +46,9 @@ jobs:
           ls
           git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
           git bisect good
+          git bisect log
           git bisect good
-          cd ../../
-          cd OneFlow-Benchmark
+          git log --pretty=format:"%H-%cd-%cr" -2
           git status
 
           
