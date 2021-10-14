@@ -41,14 +41,19 @@ jobs:
           module_resnet_type: ${{ github.event.inputs.of_good_commit }}
         run: |
           set -x
+          git --version
           cd debug_workspace/oneflow
           pwd
           ls
           git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
+          echo "--------------"
+          git bisect log
           git bisect good
           git bisect log
           git bisect good
           git log --pretty=format:"%H-%cd-%cr" -2
           git status
+          git bisect reset
+
 
           
