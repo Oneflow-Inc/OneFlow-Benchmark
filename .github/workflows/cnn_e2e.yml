@@ -42,7 +42,7 @@ jobs:
         run: |
           set -x
           cd debug_workspace/oneflow
-          git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
+          /usr/bin/git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
           pwd
           
           if [ ! -d "build" ]; then
