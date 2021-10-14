@@ -42,11 +42,11 @@ jobs:
         run: |
           set -x
           cd debug_workspace/oneflow
-          git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
           pwd
+          ls
+          git bisect start ${{ github.event.inputs.of_bad_commit }} ${{ github.event.inputs.of_good_commit }}
           git bisect good
           git bisect good
-          git bisect bad
           cd ../../
           cd OneFlow-Benchmark
           git status
