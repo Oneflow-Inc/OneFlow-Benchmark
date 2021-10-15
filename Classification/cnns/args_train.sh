@@ -1,5 +1,4 @@
 rm -rf core.*
-rm -rf ./output/logs/$HOSTNAME ./output/$HOSTNAME ./initial_model
 
 
 # bash args_train.sh ${NUM_NODES} ${NUM_GPUS_PER_NODE} ${BATCH_SIZE} ${USE_FP16} ${NUM_EPOCH} ${LOSS_PRINT_ITER} ${TRAIN_DATA_PATH} ${VAL_DATA_PATH} ${PYTHON_BIN} ${NODE_IPS} ${DEBUG_AND_NCCL} ${NSYS_BIN} ${ITER_NUM}
@@ -16,7 +15,7 @@ PYTHON_BIN=${9:-"python3"}
 NODE_IPS=${10:-"10.11.0.2,10.11.0.3,10.11.0.4,10.11.0.5"}
 DEBUG_AND_NCCL=${11:-false}
 NSYS_BIN=${12:-""}
-ITER_NUM=${13:-1}
+RUN_COMMIT=${13:-"master"}
 
 # if [ $NUM_GPUS_PER_NODE -eq 1 ]; then
 #   export CUDA_VISIBLE_DEVICES=$(($ITER_NUM-1))
@@ -26,7 +25,7 @@ TRAN_MODEL="resnet50"
 RUN_TIME=$(date "+%Y%m%d_%H%M%S%N")
 LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
 mkdir -p $LOG_FOLDER
-LOG_FILENAME=$LOG_FOLDER/${TRAN_MODEL}_lazy_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_b${BATCH_SIZE}_fp16${USE_FP16}_${RUN_TIME}_iter${ITER_NUM}.log
+LOG_FILENAME=$LOG_FOLDER/${TRAN_MODEL}_lazy_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_b${BATCH_SIZE}_fp16${USE_FP16}_${RUN_TIME}_${RUN_COMMIT}.log
 
 export PYTHONUNBUFFERED=1
 echo PYTHONUNBUFFERED=$PYTHONUNBUFFERED
@@ -43,7 +42,7 @@ fi
 CMD=""
 
 if [[ ! -z "${NSYS_BIN}" ]]; then
-    CMD+="${NSYS_BIN} profile --stats true --output ${TRAN_MODEL}_v0.4.0_${NUM_NODES}_${NUM_GPUS_PER_NODE}_%h_%p "
+    CMD+="${NSYS_BIN} profile --stats true --output ${LOG_FOLDER}/${TRAN_MODEL}_lazy_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_b${BATCH_SIZE}_fp16${USE_FP16}_${RUN_COMMIT}_%h_%p "
 fi
 CMD+="${PYTHON_BIN} of_cnn_train_val.py "
 
@@ -87,8 +86,3 @@ echo "Rum cmd ${CMD}"
 $CMD 2>&1 | tee ${LOG_FILENAME}
 
 echo "Writting log to ${LOG_FILENAME}"
-
-if [ ! -d "./test_result" ]; then
-  mkdir ./test_result
-fi
-cp -r $LOG_FOLDER ./test_result/
