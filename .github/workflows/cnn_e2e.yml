@@ -20,8 +20,10 @@ on:
         default: 8
 env:
   ONEFLOW_SRC: oneflow-src
-  SSH_TANK_HOST: 192.168.1.23
-  SSH_TANK_PATH: /home/ci-user/tank
+  # SSH_TANK_HOST: 192.168.1.23
+  SSH_TANK_HOST: 10.0.22.16
+  # SSH_TANK_PATH: /home/ci-user/tank
+  SSH_TANK_PATH: /DATA/disk1/tank
   OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
   OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
 jobs:
@@ -60,7 +62,8 @@ jobs:
             cu102
   build-manylinux:
     name: "Build manylinux"
-    runs-on: ['self-hosted', 'linux', 'provision']
+    # runs-on: ['self-hosted', 'linux', 'provision']
+    runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
     needs: [find-build-cache]
     strategy:
       fail-fast: true
@@ -164,7 +167,8 @@ jobs:
     name: Test suite
     # needs: [find-test-cache]build-manylinux
     needs: [build-manylinux]
-    runs-on: ['self-hosted', 'linux', 'provision']
+    # runs-on: ['self-hosted', 'linux', 'provision']
+    runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
     env:
       TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ matrix.entry }}-test"
       TEST_WITH_TORCH_IMG_TAG: registry.cn-beijing.aliyuncs.com/oneflow/test-with-pytorch-1.9.0:e7a497b41d8b7f1bce055b1f23d027f93b1557ae
