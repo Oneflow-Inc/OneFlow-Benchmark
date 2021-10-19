@@ -1,11 +1,10 @@
 #! /bin/bash
+# set -ex
 
 # Runs the "117M" parameter model
 
-# bash args_pretrain_gpt.sh $NUM_NODES $NUM_GPUS_PER_NODE $M_P $P_P $MICRO_BATCH_SIZE $GLOABAL_BATCH_SIZE $USE_FP16 $TRAIN_ITERS $LOG_INTERVAL $DATA_PATH $NUM_LAYERS $HIDDEN_SIZE $NUM_ATTENTION_HEADS $SEQ_LENGTH $PYTHON_BIN $NODE_IPS $DEBUG_AND_NCCL $NSYS_BIN $ITER_NUM
+# bash args_pretrain_gpt.sh $NUM_NODES $NUM_GPUS_PER_NODE $M_P $P_P $MICRO_BATCH_SIZE $GLOABAL_BATCH_SIZE $USE_FP16 $TRAIN_ITERS $LOG_INTERVAL $DATA_PATH $NUM_LAYERS $HIDDEN_SIZE $NUM_ATTENTION_HEADS $SEQ_LENGTH $PYTHON_BIN $NODE_IPS $DEBUG_AND_NCCL $NSYS_BIN $RUN_COMMIT
 
-rm -rf core.*
-rm -rf ./output/logs/$HOSTNAME ./model_save
 
 NUM_NODES=${1:-1}
 NUM_GPUS_PER_NODE=${2:-8}
@@ -25,18 +24,19 @@ PYTHON_BIN=${15:-"python3"}
 NODE_IPS=${16:-"127.0.0.1"}
 DEBUG_AND_NCCL=${17:-false}
 NSYS_BIN=${18:-""}
-ITER_NUM=${19:-1}
+RUN_COMMIT=${19:-1}
 
 WORLD_SIZE=$(($NUM_GPUS_PER_NODE*$NUM_NODES))
 D_P=$(($WORLD_SIZE/$M_P/$P_P))
 
-
+RUN_TIME=$(date "+%Y%m%d_%H%M%S%N")
 LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
 mkdir -p $LOG_FOLDER
-LOG_FILENAME=$LOG_FOLDER/oneflow_gpt_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_dp${D_P}_mp${M_P}_pp${P_P}_mbs${MICRO_BATCH_SIZE}_gbs${GLOABAL_BATCH_SIZE}_sql${SEQ_LENGTH}_l${NUM_LAYERS}_hsz${HIDDEN_SIZE}_ahs${NUM_ATTENTION_HEADS}_pretrain_iter${ITER_NUM}.log
+LOG_FILENAME=$LOG_FOLDER/oneflow_gpt_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_dp${D_P}_mp${M_P}_pp${P_P}_mbs${MICRO_BATCH_SIZE}_gbs${GLOABAL_BATCH_SIZE}_sql${SEQ_LENGTH}_l${NUM_LAYERS}_hsz${HIDDEN_SIZE}_ahs${NUM_ATTENTION_HEADS}_${RUN_COMMIT}_${RUN_TIME}.log
 
-CHECKPOINT_PATH=./model_save
-mkdir -p $CHECKPOINT_PATH
+# save model
+# CHECKPOINT_PATH=./model_save
+# mkdir -p $CHECKPOINT_PATH
 
 
 export PYTHONUNBUFFERED=1
@@ -54,14 +54,14 @@ if $DEBUG_AND_NCCL; then
     echo NCCL_DEBUG=$NCCL_DEBUG
 fi
 
-if [ $NUM_GPUS_PER_NODE -eq 1 ]; then
-  export CUDA_VISIBLE_DEVICES=$(($ITER_NUM-1))
+if [[ ${NUM_NODES} -gt 1 ]]; then
+    export ONEFLOW_COMM_NET_IB_ENABLE=1
 fi
 
 CMD=""
 
 if [[ ! -z "${NSYS_BIN}" ]]; then
-    CMD+="${NSYS_BIN} profile --stats true --output oneflow_gpt_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_%h_%p "
+    CMD+="${NSYS_BIN} profile --stats true --output oneflow_gpt_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_dp${D_P}_mp${M_P}_pp${P_P}_mbs${MICRO_BATCH_SIZE}_gbs${GLOABAL_BATCH_SIZE}_sql${SEQ_LENGTH}_l${NUM_LAYERS}_hsz${HIDDEN_SIZE}_ahs${NUM_ATTENTION_HEADS}_${RUN_COMMIT}_%h_%p "
 fi
 
 CMD+="${PYTHON_BIN} oneflow_gpt/training.py "
@@ -93,8 +93,8 @@ CMD+=" --lr-warmup-fraction 0.01"
 CMD+=" --optimizer adamw"
 CMD+=" --weight-decay 1e-2"
 CMD+=" --clip-grad 1.0"
-CMD+=" --save ${CHECKPOINT_PATH}"
-CMD+=" --save-interval 100000"
+# CMD+=" --save ${CHECKPOINT_PATH}"
+# CMD+=" --save-interval 100000"
 CMD+=" --log-interval ${LOG_INTERVAL}"
 CMD+=" --checkpoint-activations"
 CMD+=" --multihead-attention-fusion"
@@ -104,9 +104,6 @@ if $USE_FP16; then
     CMD+=" --fp16"
 fi
 
-if [[ ${NUM_NODES} -gt 1 ]]; then
-    CMD+=" --use-rdma"
-fi
 
 if [[ ! -z "${NSYS_BIN}" ]]; then
     CMD+=" --profile-transformer-layer"
@@ -118,9 +115,3 @@ echo "Rum cmd ${CMD}"
 $CMD 2>&1 | tee ${LOG_FILENAME}
 
 echo "Writting log to ${LOG_FILENAME}"
-
-if [ ! -d "./test_result" ]; then
-  mkdir ./test_result
-fi
-cp -r $LOG_FOLDER ./test_result/
-

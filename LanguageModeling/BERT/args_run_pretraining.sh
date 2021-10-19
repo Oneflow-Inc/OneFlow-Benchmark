@@ -1,7 +1,7 @@
-rm -rf core.*
-rm -rf ./output/logs/$HOSTNAME ./output/$HOSTNAME ./initial_model
+#! /bin/bash
+# set -ex
 
-# bash args_run_pretraining.sh ${NUM_NODES} ${NUM_GPUS_PER_NODE} ${BSZ_PER_DEVICE} ${USE_FP16} ${ITER_NUM} ${LOSS_PRINT_ITER} ${DATA_DIR} ${DATA_PART_NUM} ${SEQ_LENGHT} ${NUM_HIDDEN_LAYERS} ${NUM_ATTENTION_HEADS} ${PYTHON_BIN} ${NODE_IPS} ${NSYS_BIN}
+# bash args_run_pretraining.sh ${NUM_NODES} ${NUM_GPUS_PER_NODE} ${BSZ_PER_DEVICE} ${USE_FP16} ${ITER_NUM} ${LOSS_PRINT_ITER} ${DATA_DIR} ${DATA_PART_NUM} ${SEQ_LENGHT} ${NUM_HIDDEN_LAYERS} ${NUM_ATTENTION_HEADS} ${PYTHON_BIN} ${NODE_IPS} ${NSYS_BIN} ${RUN_COMMIT}
 
 NUM_NODES=${1:-1}
 NUM_GPUS_PER_NODE=${2:-8}
@@ -20,7 +20,7 @@ PYTHON_BIN=${12:-"python3"}
 NODE_IPS=${13:-"10.11.0.2,10.11.0.3,10.11.0.4,10.11.0.5"}
 DEBUG_AND_NCCL=${14:-false}
 NSYS_BIN=${15:-""}
-ITER_N=${16:-1}
+RUN_COMMIT=${16:-"master"}
 NUM_ACC_STEP=${17:-1}
 OPTIMIZER_TYPE=${18:-"adam"}
 
@@ -28,10 +28,11 @@ OPTIMIZER_TYPE=${18:-"adam"}
 RUN_TIME=$(date "+%Y%m%d_%H%M%S%N")
 LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
 mkdir -p $LOG_FOLDER
-LOG_FILENAME=$LOG_FOLDER/bert_${RUN_TIME}_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_sq${SEQ_LENGHT}_nhl${NUM_HIDDEN_LAYERS}_nah${NUM_ATTENTION_HEADS}_bsz${BSZ_PER_DEVICE}_${OPTIMIZER_TYPE}_iter${ITER_N}.log
+LOG_FILENAME=$LOG_FOLDER/bert_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_sq${SEQ_LENGHT}_nhl${NUM_HIDDEN_LAYERS}_nah${NUM_ATTENTION_HEADS}_bsz${BSZ_PER_DEVICE}_${OPTIMIZER_TYPE}_${RUN_COMMIT}_${RUN_TIME}.log
 
 export PYTHONUNBUFFERED=1
 export GLOG_v=3
+export NCCL_LAUNCH_MODE=GROUP
 
 echo DEBUG_AND_NCCL=$DEBUG_AND_NCCL
 if $DEBUG_AND_NCCL; then
@@ -41,14 +42,14 @@ if $DEBUG_AND_NCCL; then
     echo NCCL_DEBUG=$NCCL_DEBUG
 fi
 
-# if [ $NUM_GPUS_PER_NODE -eq 1 ]; then
-#   export CUDA_VISIBLE_DEVICES=$(($ITER_N-1))
-# fi
+if [[ ${NUM_NODES} -gt 1 ]]; then
+    export ONEFLOW_COMM_NET_IB_ENABLE=1
+fi
 
 CMD=""
 
 if [[ ! -z "${NSYS_BIN}" ]]; then
-    CMD+="${NSYS_BIN} profile --stats true --output ${TRAN_MODEL}_v0.5.0_${NUM_NODES}_${NUM_GPUS_PER_NODE}_%h_%p "
+    CMD+="${NSYS_BIN} profile --stats true --output bert_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_sq${SEQ_LENGHT}_nhl${NUM_HIDDEN_LAYERS}_nah${NUM_ATTENTION_HEADS}_bsz${BSZ_PER_DEVICE}_${OPTIMIZER_TYPE}_${RUN_COMMIT}_%h_%p "
 fi
 
 CMD+="${PYTHON_BIN} run_pretraining.py "
@@ -88,8 +89,3 @@ echo "Rum cmd ${CMD}"
 $CMD 2>&1 | tee ${LOG_FILENAME}
 
 echo "Writting log to ${LOG_FILENAME}"
-
-if [ ! -d "./test_result" ]; then
-  mkdir ./test_result
-fi
-cp -r $LOG_FOLDER ./test_result/
