@@ -124,7 +124,7 @@ def main():
 
     InitNodes(args)
 
-    snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
+    snapshot = Snapshot(args.model_save_dir, args.model_load_dir, args.model_save_init)
 
     print("num_accumulation_steps:", args.num_accumulation_steps)
     metric = Metric(

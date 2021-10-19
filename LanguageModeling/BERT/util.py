@@ -16,10 +16,7 @@ limitations under the License.
 
 import os
 import time
-import numpy as np
 from collections import OrderedDict
-import pandas as pd
-from datetime import datetime
 import oneflow.compatible.single_client as flow
 
 
@@ -37,13 +34,13 @@ def InitNodes(args):
 
 
 class Snapshot(object):
-    def __init__(self, model_save_dir, model_load_dir):
+    def __init__(self, model_save_dir, model_load_dir, model_save_init=False):
         self._model_save_dir = model_save_dir
         if model_load_dir:
             assert os.path.isdir(model_load_dir)
             print("Restoring model from {}.".format(model_load_dir))
             flow.load_variables(flow.checkpoint.get(model_load_dir))
-        else:
+        elif model_save_init:
             flow.checkpoint.save("initial_model")
             print("Init model on demand.")
 
