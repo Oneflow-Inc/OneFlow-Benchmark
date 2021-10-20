@@ -38,9 +38,8 @@ jobs:
     steps:
       - name: Trigger release oneflow
         run: |
-            curl -XPOST --header 'authorization: Bearer ${{ secrets.WORKFLOW_GITHUB_TOKEN }}' \
-            -H "Accept: application/vnd.github.everest-preview+json" \
-            -H "Content-Type: application/json" \
+            curl -X POST --header 'authorization: Bearer ${{ secrets.WORKFLOW_GITHUB_TOKEN }}' \
+            -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/Oneflow-Inc/oneflow/actions/workflows/release.yaml/dispatches \
             --data '{"ref": "${{ github.event.inputs.of_branch_or_commit }}", "inputs": { "python_version":"3.8", "compute_platforms":"cu112" }}'
 
