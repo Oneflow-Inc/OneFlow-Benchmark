@@ -38,7 +38,7 @@ jobs:
     steps:
       - name: Checkout Oneflow-Inc/oneflow
         run: |
-            curl -XPOST -u "${{ secrets.PAT_USERNAME}}:${{secrets.PAT_TOKEN}}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/Oneflow-Inc/oneflow/actions/workflows/release.yaml/dispatches --data '{"ref": "${{ github.event.inputs.of_branch_or_commit }}"}'
+            curl -XPOST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/Oneflow-Inc/oneflow/actions/workflows/release.yaml/dispatches --data '{"ref": "${{ github.event.inputs.of_branch_or_commit }}"}'
 
   # build-oneflow:
   #   name: "Build oneflow"
