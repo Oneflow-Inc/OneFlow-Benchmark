@@ -36,9 +36,17 @@ jobs:
     name: "Trigger release oneflow"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Oneflow-Inc/oneflow
+      - name: Trigger release oneflow
         run: |
-            curl -XPOST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/Oneflow-Inc/oneflow/actions/workflows/release.yaml/dispatches --data '{"ref": "${{ github.event.inputs.of_branch_or_commit }}"}'
+            curl -XPOST -u "${{ secrets.ONEFLOW_RELEASE_NAME}}:${{secrets.ONEFLOW_RELEASE_TOKEN}}" \
+            -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/Oneflow-Inc/oneflow/actions/workflows/release.yaml/dispatches \
+            --data '{"ref": "${{ github.event.inputs.of_branch_or_commit }}", "inputs": { "python_version":"3.8", "compute_platforms":"cu112" }}'
+
+        # "inputs": { "python_version":"3.8", "compute_platforms":"cu112" }
+        # run: |
+        #     curl -XPOST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/Oneflow-Inc/oneflow/actions/workflows/release.yaml/dispatches --data '{"ref": "${{ github.event.inputs.of_branch_or_commit }}"}'
 
   # build-oneflow:
   #   name: "Build oneflow"
