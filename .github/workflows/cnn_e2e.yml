@@ -46,12 +46,15 @@ jobs:
       - name: Set environment variables
         run: |
           set -x
+          current_dir=$PWD
+          cd ${{ env.ONEFLOW_SRC }}
           oneflow_branch=`git rev-parse --abbrev-ref HEAD`
           oneflow_commit=`git rev-parse HEAD`
           oss_branch_dir=branch/${oneflow_branch}/${{ matrix.compute_platform }}
           oss_dir=${oss_branch_dir}/${oneflow_commit}
           echo "oss_branch_dir=${oss_branch_dir}" >> $GITHUB_ENV
           echo "oss_dir=${oss_dir}" >> $GITHUB_ENV
+          cd $current_dir
           set +x
       - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/build@2a9efceab8d45b725a687e73f870f9b75a15e472
         name: find cache
@@ -86,6 +89,7 @@ jobs:
       - name: Remove leftover cuda-installer.log
         run: |
           docker run --rm -v /tmp:/host/tmp -w /p busybox rm -f /host/tmp/cuda-installer.log
+      - uses: actions/checkout@v2
       - name: Checkout Oneflow-Inc/oneflow
         uses: actions/checkout@v2
         with:
