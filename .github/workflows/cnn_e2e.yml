@@ -66,8 +66,8 @@ jobs:
             cu102
   build-manylinux:
     name: "Build manylinux"
-    # runs-on: ['self-hosted', 'linux', 'provision']
-    runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
+    runs-on: ['self-hosted', 'linux', 'provision']
+    # runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
     needs: [find-build-cache]
     strategy:
       fail-fast: true
