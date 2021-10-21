@@ -47,7 +47,7 @@ jobs:
         run: |
           set -x
           oneflow_branch=`git rev-parse --abbrev-ref HEAD`
-          oneflow_commit=`git rev-parse HEAD~2`
+          oneflow_commit=`git rev-parse HEAD`
           oss_branch_dir=branch/${oneflow_branch}/${{ matrix.compute_platform }}
           oss_dir=${oss_branch_dir}/${oneflow_commit}
           echo "oss_branch_dir=${oss_branch_dir}" >> $GITHUB_ENV
