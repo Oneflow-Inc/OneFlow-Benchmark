@@ -43,20 +43,6 @@ jobs:
           repository: Oneflow-Inc/oneflow
           ref: ${{ github.event.inputs.of_branch_or_commit }}
           path: ${{ env.ONEFLOW_SRC }}
-      - name: Set environment variables
-        run: |
-          set -x
-          current_dir=$PWD
-          cd ${{ env.ONEFLOW_SRC }}
-          # oneflow_branch=`git rev-parse --abbrev-ref HEAD`
-          oneflow_branch=`git branch --show-current`
-          oneflow_commit=`git rev-parse HEAD`
-          oss_branch_dir=branch/${oneflow_branch}/${{ matrix.compute_platform }}
-          oss_dir=${oss_branch_dir}/${oneflow_commit}
-          echo "oss_branch_dir=${oss_branch_dir}" >> $GITHUB_ENV
-          echo "oss_dir=${oss_dir}" >> $GITHUB_ENV
-          cd $current_dir
-          set +x
       - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/build@2a9efceab8d45b725a687e73f870f9b75a15e472
         name: find cache
         id: find-cache
@@ -97,6 +83,20 @@ jobs:
           repository: Oneflow-Inc/oneflow
           ref: ${{ github.event.inputs.of_branch_or_commit }}
           path: ${{ env.ONEFLOW_SRC }}
+      - name: Set environment variables
+        run: |
+          set -x
+          current_dir=$PWD
+          cd ${{ env.ONEFLOW_SRC }}
+          # oneflow_branch=`git rev-parse --abbrev-ref HEAD`
+          oneflow_branch=`git branch --show-current`
+          oneflow_commit=`git rev-parse HEAD`
+          oss_branch_dir=branch/${oneflow_branch}/${{ matrix.compute_platform }}
+          oss_dir=${oss_branch_dir}/${oneflow_commit}
+          echo "oss_branch_dir=${oss_branch_dir}" >> $GITHUB_ENV
+          echo "oss_dir=${oss_dir}" >> $GITHUB_ENV
+          cd $current_dir
+          set +x
       - uses: Oneflow-Inc/get-oneflow/cache-complete@2a9efceab8d45b725a687e73f870f9b75a15e472
         name: Save cache if successful
         id: save-cache
@@ -139,7 +139,7 @@ jobs:
           oss_access_key_id: ${{ secrets.OSS_ACCESS_KEY_ID }}
           oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
       - name: Update pip index
-        if: env.is_built != '1' && contains(env.compute_platforms, matrix.compute_platform)
+        if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
         env:
           OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
           OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
