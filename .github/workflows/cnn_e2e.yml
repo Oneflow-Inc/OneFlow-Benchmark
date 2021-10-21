@@ -104,6 +104,8 @@ jobs:
           oss_dir=${oss_branch_dir}/${oneflow_commit}
           echo "oss_branch_dir=${oss_branch_dir}" >> $GITHUB_ENV
           echo "oss_dir=${oss_dir}" >> $GITHUB_ENV
+          oneflow_wheel_path=http://oneflow-staging.oss-cn-beijing.aliyuncs.com/branch/${oneflow_branch}/${{ github.event.inputs.compute_platform }}/${oneflow_commit}
+          echo "ONEFLOW_WHEEL_PATH=${oneflow_wheel_path}" >> $GITHUB_ENV
           cd $current_dir
           set +x
       - uses: Oneflow-Inc/get-oneflow/cache-complete@2a9efceab8d45b725a687e73f870f9b75a15e472
@@ -155,123 +157,93 @@ jobs:
         run: |
           python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
           python3 -m pip install oss2 beautifulsoup4 --user
-          python3 tools/create_pip_index.py --dir_key ${oss_dir} -b oneflow-staging --index_key=${oss_branch_dir}/index.html --index_key=${oss_dir}/index.html
+          python3 ${{ env.ONEFLOW_SRC }}/tools/create_pip_index.py --dir_key ${oss_dir} -b oneflow-staging --index_key=${oss_branch_dir}/index.html --index_key=${oss_dir}/index.html
 
-  # test:
-  #   name: Test suite
-  #   # needs: [find-test-cache]build-manylinux
-  #   needs: [build-manylinux]
-  #   # runs-on: ['self-hosted', 'linux', 'provision']
-  #   runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
-  #   env:
-  #     TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ matrix.entry }}-test"
-  #     TEST_WITH_TORCH_IMG_TAG: registry.cn-beijing.aliyuncs.com/oneflow/test-with-pytorch-1.9.0:e7a497b41d8b7f1bce055b1f23d027f93b1557ae
-  #   # strategy:
-  #   #   fail-fast: true
-  #   #   max-parallel: 5
-  #   #   matrix: ${{ fromJson(needs.find-test-cache.outputs.matrix) }}
-  #   steps:
-  #     - name: Fix permissions
-  #       # if: ${{ contains(matrix.runs-on, 'self-hosted') }}
-  #       run: |
-  #         set -x
-  #         docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
-  #     - name: Checkout Oneflow-Inc/OneFlow-Benchmark
-  #       uses: actions/checkout@v2
-  #     - name: Checkout Oneflow-Inc/oneflow
-  #       uses: actions/checkout@v2
-  #       with:
-  #         repository: Oneflow-Inc/oneflow
-  #         ref: ${{ github.event.inputs.of_branch_or_commit }}
-  #         path: ${{ env.ONEFLOW_SRC }}
-  #     - name: Remove container
-  #       timeout-minutes: 45
-  #       # if: ${{ contains(matrix.runs-on, 'self-hosted') }}
-  #       run: |
-  #         docker rm -f ${{ env.TEST_CONTAINER_NAME }} || true
-  #     - uses: Oneflow-Inc/get-oneflow/cache-complete@2a9efceab8d45b725a687e73f870f9b75a15e472
-  #       name: Save cache if successful
-  #       id: save-cache
-  #       timeout-minutes: 5
-  #       with:
-  #         oneflow-src: ${{ env.ONEFLOW_SRC }}
-  #         entry: ${{ github.event.inputs.compute_platform }}
-  #         digest-type: test
-  #         mark-as-completed: true
-  #     # - name: Check digest and fail if cache result not identical to matrix
-  #     #   if: ${{ fromJSON(steps.save-cache.outputs.cache-hit) != matrix.cache-hit }}
-  #     #   run: |
-  #     #     echo "::error file=test.yml,line=204,col=10::steps.save-cache.outputs.cache-hit != matrix.cache-hit"
-  #     #     exit 1
-  #     - name: Download wheel and binary
-  #       # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
-  #       uses: Oneflow-Inc/get-oneflow/degist/download@2a9efceab8d45b725a687e73f870f9b75a15e472
-  #       id: download-digest
-  #       timeout-minutes: 10
-  #       with:
-  #         digest: ${{ steps.save-cache.outputs.build-digest }}
-  #         entry: ${{ github.event.inputs.compute_platform }}
-  #         ssh-tank-host: ${{ env.SSH_TANK_HOST }}
-  #         ssh-tank-path: ${{ env.SSH_TANK_PATH }}
-  #         digest-cache-dir: '~/digest-cache-bm'
-  #     - name: Enable Pytorch container
-  #       run: |
-  #         echo "TEST_IMG_TAG=${TEST_WITH_TORCH_IMG_TAG}" >> $GITHUB_ENV
-  #     - name: Set environment variables
-  #       # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
-  #       run: |
-  #         set -x
-  #         echo "ONEFLOW_TEST_CACHE_DIR=$HOME/ci-cache/test_cache" >> $GITHUB_ENV
-  #         echo "ONEFLOW_WHEEL_PATH=${{ steps.download-digest.outputs.entry-dir }}/whl" >> $GITHUB_ENV
-  #     - name: Start container
-  #       # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
-  #       # working-directory: ${{ env.ONEFLOW_SRC }}
-  #       env:
-  #         ONEFLOW_BIN_PATH: ${{ steps.download-digest.outputs.entry-dir }}/bin
-  #       run: |
-  #         docker pull ${{ env.TEST_IMG_TAG }}
-  #         docker run -d --rm --privileged --network host --shm-size=8g \
-  #           --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
-  #           --runtime=nvidia \
-  #           -v /dataset:/dataset:ro -v /model_zoo:/model_zoo:ro \
-  #           -v ${ONEFLOW_WHEEL_PATH}:${ONEFLOW_WHEEL_PATH}:ro \
-  #           -v ${ONEFLOW_BIN_PATH}:${ONEFLOW_BIN_PATH}:ro \
-  #           -v $HOME/test-container-cache/dot-local:/root/.local \
-  #           -v $HOME/test-container-cache/dot-cache:/root/.cache \
-  #           -e ONEFLOW_WHEEL_PATH=${ONEFLOW_WHEEL_PATH} \
-  #           -e ONEFLOW_BIN_PATH=${ONEFLOW_BIN_PATH} \
-  #           -e ONEFLOW_CI=1 \
-  #           -v $PWD:$PWD \
-  #           -w $PWD \
-  #           -v ${ONEFLOW_TEST_CACHE_DIR}:${ONEFLOW_TEST_CACHE_DIR} \
-  #           -e ONEFLOW_TEST_CACHE_DIR=${ONEFLOW_TEST_CACHE_DIR} \
-  #           -e E2E_NUM_EPOCHS=${{ github.event.inputs.num_epochs }} \
-  #           -e E2E_GPU_NUM_PER_NODE=${{ github.event.inputs.gpu_num_per_node }} \
-  #           -e E2E_NODE_NUM=1 \
-  #           -e E2E_BATCH_SIZE=32 \
-  #           -e E2E_LEARNING_RATE=1.536 \
-  #           -e E2E_SRC_ROOT=Classification/cnns \
-  #           -e E2E_DATA_ROOT=/dataset/ImageNet/ofrecord \
-  #           --name ${TEST_CONTAINER_NAME} \
-  #           ${{ env.TEST_IMG_TAG }} \
-  #           sleep 3600
-  #     - name: Install OneFlow
-  #       # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
-  #       run: |
-  #         docker exec ${TEST_CONTAINER_NAME} python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-  #         docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=${ONEFLOW_WHEEL_PATH} oneflow
-  #     - name: Test container
-  #       # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
-  #       run: |
-  #         docker exec ${{ env.TEST_CONTAINER_NAME }} bash ci/test/resnet50_e2e.sh 
-  #     - name: Upload log 
-  #       # if: ${{ always() && (steps.distributed_try_3.outcome=='failure' || steps.new_interface_distributed_try_3.outcome=='failure') && github.event.pull_request.head.repo.full_name == github.repository }}
-  #       uses: ./.github/actions/upload_oss
-  #       with:
-  #         src_path: log
-  #         oss_dst_path: oss://oneflow-log/OneFlow-Benchmark/${{ github.ref }}.${GITHUB_SHA::7}/oneflow/${{ github.event.inputs.of_branch_or_commit }}/${{github.run_id}}/log
-  #         oss_access_key_id: ${{ secrets.OSS_ACCESS_KEY_ID }}
-  #         oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
-  #         upload_core: false
+  test:
+    name: Test suite
+    # needs: [find-test-cache]build-manylinux
+    needs: [build-manylinux]
+    # runs-on: ['self-hosted', 'linux', 'provision']
+    runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
+    env:
+      TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ matrix.entry }}-test"
+      TEST_WITH_TORCH_IMG_TAG: registry.cn-beijing.aliyuncs.com/oneflow/test-with-pytorch-1.9.0:e7a497b41d8b7f1bce055b1f23d027f93b1557ae
+    # strategy:
+    #   fail-fast: true
+    #   max-parallel: 5
+    #   matrix: ${{ fromJson(needs.find-test-cache.outputs.matrix) }}
+    steps:
+      - name: Fix permissions
+        # if: ${{ contains(matrix.runs-on, 'self-hosted') }}
+        run: |
+          set -x
+          docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
+      - name: Checkout Oneflow-Inc/OneFlow-Benchmark
+        uses: actions/checkout@v2
+      - name: Remove container
+        timeout-minutes: 45
+        # if: ${{ contains(matrix.runs-on, 'self-hosted') }}
+        run: |
+          docker rm -f ${{ env.TEST_CONTAINER_NAME }} || true
+      - name: Enable Pytorch container
+        run: |
+          echo "TEST_IMG_TAG=${TEST_WITH_TORCH_IMG_TAG}" >> $GITHUB_ENV
+      # - name: Set environment variables
+      #   # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
+      #   run: |
+      #     set -x
+      #     echo "ONEFLOW_TEST_CACHE_DIR=$HOME/ci-cache/test_cache" >> $GITHUB_ENV
+      #     echo "ONEFLOW_WHEEL_PATH=http://oneflow-staging.oss-cn-beijing.aliyuncs.com/branch/master/cu102/41b06bf56daaa5ea0087998399d5980e9fc5ab59" >> $GITHUB_ENV
+      - name: Start container
+        # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
+        # working-directory: ${{ env.ONEFLOW_SRC }}
+        # env:
+        #   ONEFLOW_BIN_PATH: ${{ steps.download-digest.outputs.entry-dir }}/bin
+        run: |
+          docker pull ${{ env.TEST_IMG_TAG }}
+          docker run -d --rm --privileged --network host --shm-size=8g \
+            --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+            --runtime=nvidia \
+            -v /DATA/disk1:/dataset:ro \
+            -e ONEFLOW_WHEEL_PATH=${ONEFLOW_WHEEL_PATH} \
+            -v $PWD:$PWD \
+            -w $PWD \
+            -e E2E_NUM_EPOCHS=${{ github.event.inputs.num_epochs }} \
+            -e E2E_GPU_NUM_PER_NODE=${{ github.event.inputs.gpu_num_per_node }} \
+            -e E2E_NODE_NUM=1 \
+            -e E2E_BATCH_SIZE=32 \
+            -e E2E_LEARNING_RATE=1.536 \
+            -e E2E_SRC_ROOT=Classification/cnns \
+            -e E2E_DATA_ROOT=/dataset/ImageNet/ofrecord \
+            --name ${TEST_CONTAINER_NAME} \
+            ${{ env.TEST_IMG_TAG }} \
+            sleep 3600
+            # -e ONEFLOW_CI=1 \
+            # -v /model_zoo:/model_zoo:ro \
+            # -v $HOME/test-container-cache/dot-local:/root/.local \
+            # -v $HOME/test-container-cache/dot-cache:/root/.cache \
+            # -e ONEFLOW_BIN_PATH=${ONEFLOW_BIN_PATH} \
+            # -v ${ONEFLOW_WHEEL_PATH}:${ONEFLOW_WHEEL_PATH}:ro \
+            # -v ${ONEFLOW_BIN_PATH}:${ONEFLOW_BIN_PATH}:ro \
+            # -v ${ONEFLOW_TEST_CACHE_DIR}:${ONEFLOW_TEST_CACHE_DIR} \
+            # -e ONEFLOW_TEST_CACHE_DIR=${ONEFLOW_TEST_CACHE_DIR} \
+      - name: Install OneFlow
+        # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
+        run: |
+          docker exec ${TEST_CONTAINER_NAME} python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+          docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=${ONEFLOW_WHEEL_PATH} oneflow
+      - name: Test container
+        # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
+        run: |
+          docker exec ${{ env.TEST_CONTAINER_NAME }} bash ci/test/resnet50_e2e.sh 
+      - name: Upload log 
+        # if: ${{ always() && (steps.distributed_try_3.outcome=='failure' || steps.new_interface_distributed_try_3.outcome=='failure') && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: ./.github/actions/upload_oss
+        with:
+          src_path: log
+          oss_dst_path: oss://oneflow-log/OneFlow-Benchmark/${{ github.ref }}.${GITHUB_SHA::7}/oneflow/${{ github.event.inputs.of_branch_or_commit }}/${{github.run_id}}/log
+          oss_access_key_id: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+          upload_core: false
 
 
