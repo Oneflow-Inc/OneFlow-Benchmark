@@ -18,6 +18,14 @@ on:
         description: 'gpu number per node'
         required: true
         default: 8
+      python_version:
+        description: "python_version"
+        default: "3.7"
+        required: false
+      compute_platform:
+        description: "compute_platform"
+        default: "cu112"
+        required: false
 env:
   ONEFLOW_SRC: oneflow-src
 jobs:
@@ -53,7 +61,7 @@ jobs:
             build
           oneflow-src: ${{ env.ONEFLOW_SRC }}
           entries: |
-            cu102
+            ${{ github.event.inputs.compute_platform }}
   build-manylinux:
     name: "Build manylinux"
     runs-on: ['self-hosted', 'linux', 'provision']
@@ -92,7 +100,7 @@ jobs:
           # oneflow_branch=`git branch --show-current`
           # oneflow_branch=`git symbolic-ref --short HEAD`
           oneflow_commit=`git rev-parse HEAD`
-          oss_branch_dir=branch/${oneflow_branch}/${{ matrix.compute_platform }}
+          oss_branch_dir=branch/${oneflow_branch}/${{ github.event.inputs.compute_platform }}
           oss_dir=${oss_branch_dir}/${oneflow_commit}
           echo "oss_branch_dir=${oss_branch_dir}" >> $GITHUB_ENV
           echo "oss_dir=${oss_dir}" >> $GITHUB_ENV
@@ -113,9 +121,9 @@ jobs:
       #     echo "::error file=test.yml,line=204,col=10::steps.save-cache.outputs.cache-hit != matrix.cache-hit"
       #     exit 1
       # - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
-      #   name: Build manylinux cu102
+      #   name: Build manylinux ${{ github.event.inputs.compute_platform }}
       #   id: build-cuda
-      #   if: ${{ matrix.entry =='cu102' && !matrix.cache-hit }}
+      #   if: ${{ matrix.entry =='${{ github.event.inputs.compute_platform }}' && !matrix.cache-hit }}
       #   with:
       #     cmake-init-cache: ${{ env.ONEFLOW_SRC }}/cmake/caches/ci/cuda.cmake
       #     build-script: ${{ env.ONEFLOW_SRC }}/ci/manylinux/build-gcc7.sh
@@ -124,13 +132,13 @@ jobs:
       #     wheelhouse-dir: ${{ env.WHEELHOUSE_DIR }}
       #     clear-wheelhouse-dir: true
       #     self-hosted: true
-      #     cuda-version: "10.2"
+      #     cuda-version: "11.2"
       #     manylinux-cache-dir: ${{ env.MANYLINUX_CACHE_DIR }}
       #     docker-run-use-system-http-proxy: false
       #     docker-run-use-lld: false
       #     retry-failed-build: true
       #     python-versions: |
-      #       3.7
+      #       ${{ github.event.inputs.python_version }}
       # - name: Upload wheel
       #   if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
       #   uses: ./.github/actions/upload_oss
@@ -187,7 +195,7 @@ jobs:
   #       timeout-minutes: 5
   #       with:
   #         oneflow-src: ${{ env.ONEFLOW_SRC }}
-  #         entry: cu102
+  #         entry: ${{ github.event.inputs.compute_platform }}
   #         digest-type: test
   #         mark-as-completed: true
   #     # - name: Check digest and fail if cache result not identical to matrix
@@ -202,7 +210,7 @@ jobs:
   #       timeout-minutes: 10
   #       with:
   #         digest: ${{ steps.save-cache.outputs.build-digest }}
-  #         entry: cu102
+  #         entry: ${{ github.event.inputs.compute_platform }}
   #         ssh-tank-host: ${{ env.SSH_TANK_HOST }}
   #         ssh-tank-path: ${{ env.SSH_TANK_PATH }}
   #         digest-cache-dir: '~/digest-cache-bm'
