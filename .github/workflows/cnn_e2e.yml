@@ -205,7 +205,7 @@ jobs:
             --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
             --runtime=nvidia \
             -v /DATA/disk1:/dataset:ro \
-            -e ONEFLOW_WHEEL_PATH=${{ env.ONEFLOW_WHEEL_PATH }} \
+            -e ONEFLOW_WHEEL_PATH=${{ jobs.build-manylinux.env.ONEFLOW_WHEEL_PATH }} \
             -v $PWD:$PWD \
             -w $PWD \
             -e E2E_NUM_EPOCHS=${{ github.event.inputs.num_epochs }} \
@@ -230,8 +230,9 @@ jobs:
       - name: Install OneFlow
         # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
         run: |
+          docker exec ${TEST_CONTAINER_NAME} python3 --version
           docker exec ${TEST_CONTAINER_NAME} python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-          docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=${{ env.ONEFLOW_WHEEL_PATH }} oneflow
+          docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=${ONEFLOW_WHEEL_PATH} oneflow
       - name: Test container
         # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') }}
         run: |
