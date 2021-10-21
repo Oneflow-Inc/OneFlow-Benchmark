@@ -141,28 +141,7 @@ jobs:
           ssh-tank-path: ${{ env.SSH_TANK_PATH }}
           src-dir: ${{ env.WHEELHOUSE_DIR }}
           dst-dir: whl
-  # find-test-cache:
-  #   name: "Find test cache"
-  #   runs-on: ubuntu-latest
-  #   needs: [build-manylinux]
-  #   outputs:
-  #     matrix: ${{ steps.find-cache.outputs.matrix }}
-  #   steps:
-  #     - name: Checkout Oneflow-Inc/oneflow
-  #       uses: actions/checkout@v2
-  #       with:
-  #         repository: Oneflow-Inc/oneflow
-  #         ref: ${{ github.event.inputs.of_branch_or_commit }}
-  #         path: ${{ env.ONEFLOW_SRC }}
-  #     - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/test@2a9efceab8d45b725a687e73f870f9b75a15e472
-  #       name: find cache
-  #       id: find-cache
-  #       timeout-minutes: 5
-  #       with:
-  #         runner-labels: |
-  #           self-hosted
-  #           linux
-  #         oneflow-src: ${{ env.ONEFLOW_SRC }}
+
   test:
     name: Test suite
     # needs: [find-test-cache]build-manylinux
@@ -280,40 +259,4 @@ jobs:
           oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
           upload_core: false
 
-      # - name: Run OneFlow doctor
-      #   # if: ${{ !fromJson(matrix.cache-hit) && contains(matrix.runs-on, 'self-hosted') && (!fromJson(matrix.is-xla) || (fromJson(matrix.is-xla) && needs.changed_files.outputs.should_run_single_client_tests == '1')) }}
-      #   run: |
-      #     docker exec ${{ env.TEST_CONTAINER_NAME }} python3 -m oneflow --doctor
-         
-  # build: 
-  #   name: 'Build and test this repo'
-  #   runs-on: ['self-hosted', 'linux', 'provision']
-  #   steps:
-  #     - run: echo "oneflow branch or commit is ${{ github.event.inputs.of_branch_or_commit }}."
-  # conda:
-  #   name: Build with conda
-  #   runs-on: ['self-hosted', 'linux', 'provision']
-  #   steps:
-  #     - name: Checkout actions/checkout@v2
-  #       uses: actions/checkout@v2
-  #     - name: Checkout Oneflow-Inc/oneflow
-  #       uses: actions/checkout@v2
-  #       with:
-  #         repository: Oneflow-Inc/oneflow
-  #         ref: ${{ github.event.inputs.of_branch_or_commit }}
-  #         path: oneflow-src
-  #     - name: Checkout Oneflow-Inc/conda-env
-  #       uses: actions/checkout@v2
-  #       with:
-  #         repository: Oneflow-Inc/conda-env
-  #         ref: 30a7f00eb48ee9009d85a848e720823e5054c66b
-  #         path: conda-env
-  #     - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
-  #       name: Build with gcc7
-  #       with:
-  #         cmake-init-cache: oneflow-src/cmake/caches/ci/gh-hosted/cpu-gcc.cmake
-  #         oneflow-src: oneflow-src
-  #         oneflow-build-env: conda
-  #         conda-env-file: conda-env/dev/gcc7/environment-v2.yml
-  #         conda-env-name: oneflow-dev-gcc7-v2
 
