@@ -125,7 +125,7 @@ jobs:
       - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
         name: Build manylinux ${{ github.event.inputs.compute_platform }}
         id: build-cuda
-        # if: ${{ matrix.entry =='${{ github.event.inputs.compute_platform }}' && !matrix.cache-hit }}
+        if: ${{ matrix.entry =='${{ github.event.inputs.compute_platform }}' && !matrix.cache-hit }}
         with:
           cmake-init-cache: ${{ env.ONEFLOW_SRC }}/cmake/caches/ci/cuda.cmake
           build-script: ${{ env.ONEFLOW_SRC }}/ci/manylinux/build-gcc7.sh
@@ -142,7 +142,7 @@ jobs:
           python-versions: |
             ${{ github.event.inputs.python_version }}
       - name: Upload wheel
-        # if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
+        if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
         uses: ./.github/actions/upload_oss
         with:
           src_path: ${{ env.WHEELHOUSE_DIR }}
@@ -150,7 +150,7 @@ jobs:
           oss_access_key_id: ${{ secrets.OSS_ACCESS_KEY_ID }}
           oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
       - name: Update pip index
-        # if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
+        if: ${{ !fromJson(matrix.cache-hit) && steps.build-cuda.outcome == 'success' }}
         env:
           OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
           OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
@@ -205,7 +205,7 @@ jobs:
             --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
             --runtime=nvidia \
             -v /DATA/disk1:/dataset:ro \
-            -e ONEFLOW_WHEEL_PATH=${ONEFLOW_WHEEL_PATH} \
+            -e ONEFLOW_WHEEL_PATH=${{ env.ONEFLOW_WHEEL_PATH }} \
             -v $PWD:$PWD \
             -w $PWD \
             -e E2E_NUM_EPOCHS=${{ github.event.inputs.num_epochs }} \
