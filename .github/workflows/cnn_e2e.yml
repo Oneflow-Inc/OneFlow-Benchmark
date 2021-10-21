@@ -88,9 +88,9 @@ jobs:
           set -x
           current_dir=$PWD
           cd ${{ env.ONEFLOW_SRC }}
-          # oneflow_branch=`git rev-parse --abbrev-ref HEAD`
+          oneflow_branch=`git rev-parse --abbrev-ref HEAD`
           # oneflow_branch=`git branch --show-current`
-          oneflow_branch=`git symbolic-ref --short HEAD`
+          # oneflow_branch=`git symbolic-ref --short HEAD`
           oneflow_commit=`git rev-parse HEAD`
           oss_branch_dir=branch/${oneflow_branch}/${{ matrix.compute_platform }}
           oss_dir=${oss_branch_dir}/${oneflow_commit}
