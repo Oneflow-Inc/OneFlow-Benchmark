@@ -64,7 +64,6 @@ jobs:
             ${{ github.event.inputs.compute_platform }}
   build-manylinux:
     name: "Build manylinux"
-    id: build-manylinux
     runs-on: ['self-hosted', 'linux', 'provision']
     # runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
     needs: [find-build-cache]
