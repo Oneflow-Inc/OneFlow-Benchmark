@@ -206,7 +206,7 @@ jobs:
             --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
             --runtime=nvidia \
             -v /DATA/disk1:/dataset:ro \
-            -e ONEFLOW_WHEEL_PATH=${{ jobs.build-manylinux.env.ONEFLOW_WHEEL_PATH }} \
+            -e ONEFLOW_WHEEL_PATH=${{ env.ONEFLOW_WHEEL_PATH }} \
             -v $PWD:$PWD \
             -w $PWD \
             -e E2E_NUM_EPOCHS=${{ github.event.inputs.num_epochs }} \
