@@ -152,9 +152,9 @@ jobs:
           digest-type: build
           mark-as-completed: ${{ contains(matrix.runs-on, 'self-hosted') }}
       - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
-        name: Build OneFlow ${{ github.event.inputs.compute_platform }}
+        name: Build OneFlow ${{ matrix.entry }}
         id: build-cuda
-        if: ${{ matrix.entry =='${{ github.event.inputs.compute_platform }}' && !matrix.cache-hit }}
+        if: ${{ matrix.entry == ${{ github.event.inputs.compute_platform }} && !matrix.cache-hit }}
         with:
           cmake-init-cache: ${{ env.ONEFLOW_SRC }}/cmake/caches/ci/cuda.cmake
           build-script: ${{ env.ONEFLOW_SRC }}/ci/manylinux/build-gcc7.sh
