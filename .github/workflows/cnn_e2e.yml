@@ -77,7 +77,7 @@ jobs:
       - name: test only
         run: |
           set -x
-          echo 'find-wheel-hit = ${{ needs.find-wheel.outputs.find-wheel-hit }}''
+          echo 'find-wheel-hit = ${{ needs.find-wheel.outputs.find-wheel-hit }}'
       - uses: actions/checkout@v2
         if: ${{ needs.find-wheel.outputs.find-wheel-hit == 1 }}
       - name: Checkout Oneflow-Inc/oneflow
