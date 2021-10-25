@@ -74,7 +74,6 @@ jobs:
     outputs:
       matrix: ${{ steps.find-cache.outputs.matrix }}
     steps:
-    steps:
       - name: test only
         run: |
           set -x
