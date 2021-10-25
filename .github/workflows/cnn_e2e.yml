@@ -72,7 +72,7 @@ jobs:
   find-build-cache:
     name: "Find build wheel"
     needs: [find-oss-wheel]
-    if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit != 1 }}
+    if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit == 1 }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.find-cache.outputs.matrix }}
@@ -183,7 +183,7 @@ jobs:
         run: |
           python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
           python3 -m pip install oss2 beautifulsoup4 --user
-          python3 ${{ env.ONEFLOW_SRC }}/tools/create_pip_index.py --dir_key ${oss_dir} -b oneflow-staging --index_key=${oss_branch_dir}/index.html --index_key=${oss_dir}/index.html
+          python3 ${{ env.ONEFLOW_SRC }}/tools/create_pip_index.py --dir_key ${oss_dir} -b oneflow-staging --index_key=${oss_branch_dir}/index.html --index_key=${oss_dir}/index.html --index_key=${{ needs.find-oss-wheel.outputs.ONEFLOW_WHEEL_PATH }}/index.html
 
   # test:
   #   name: Test suite
