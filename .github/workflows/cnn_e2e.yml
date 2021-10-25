@@ -42,7 +42,7 @@ jobs:
     name: "Set env and Find wheel in oss"
     runs-on: ubuntu-latest
     outputs:
-      found: ${{ steps.find-wheel.outputs.found }}
+      find-wheel-hit: ${{ steps.find-wheel.outputs.find-wheel-hit }}
       ONEFLOW_WHEEL_PATH: ${{ steps.set-wheel-path.outputs.ONEFLOW_WHEEL_PATH }}
     steps:
       - name: Checkout Oneflow-Inc/oneflow
@@ -67,34 +67,37 @@ jobs:
         with:
           ref: ${{ env.oneflow_commit }}
           entry: ${{ github.event.inputs.compute_platform }}
-  # find-build-cache:
-  #   name: "Find build wheel"
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     matrix: ${{ steps.find-cache.outputs.matrix }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Checkout Oneflow-Inc/oneflow
-  #       uses: actions/checkout@v2
-  #       with:
-  #         repository: Oneflow-Inc/oneflow
-  #         ref: ${{ github.event.inputs.of_branch_or_commit }}
-  #         path: ${{ env.ONEFLOW_SRC }}
-  #     - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/build@2a9efceab8d45b725a687e73f870f9b75a15e472
-  #       name: find cache
-  #       id: find-cache
-  #       with:
-  #         runner-labels: |
-  #           self-hosted
-  #           linux
-  #           build
-  #         oneflow-src: ${{ env.ONEFLOW_SRC }}
-  #         entries: |
-  #           ${{ github.event.inputs.compute_platform }}
+  find-build-cache:
+    name: "Find build wheel"
+    needs: [find-oss-wheel]
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.find-cache.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+        if: ${{ fromJSON(needs.find-wheel.outputs.find-wheel-hit) == 1 }}
+      - name: Checkout Oneflow-Inc/oneflow
+        uses: actions/checkout@v2
+        if: ${{ fromJSON(needs.find-wheel.outputs.find-wheel-hit) == 1 }}
+        with:
+          repository: Oneflow-Inc/oneflow
+          ref: ${{ github.event.inputs.of_branch_or_commit }}
+          path: ${{ env.ONEFLOW_SRC }}
+      - uses: Oneflow-Inc/get-oneflow/cache-complete/matrix/build@2a9efceab8d45b725a687e73f870f9b75a15e472
+        if: ${{ fromJSON(needs.find-wheel.outputs.find-wheel-hit) == 1 }}
+        name: find cache
+        id: find-cache
+        with:
+          runner-labels: |
+            self-hosted
+            linux
+            build
+          oneflow-src: ${{ env.ONEFLOW_SRC }}
+          entries: |
+            ${{ github.event.inputs.compute_platform }}
   # build-manylinux:
   #   name: "Build manylinux"
   #   runs-on: ['self-hosted', 'linux', 'provision']
-  #   # runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
   #   needs: [find-build-cache]
   #   strategy:
   #     fail-fast: true
