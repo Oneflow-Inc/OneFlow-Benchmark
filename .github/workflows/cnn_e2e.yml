@@ -148,7 +148,7 @@ jobs:
         timeout-minutes: 5
         with:
           oneflow-src: ${{ env.ONEFLOW_SRC }}
-          entry: 
+          entry: ${{ matrix.entry }}
           digest-type: build
           mark-as-completed: ${{ contains(matrix.runs-on, 'self-hosted') }}
       - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
