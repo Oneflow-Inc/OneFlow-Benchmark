@@ -66,7 +66,7 @@ jobs:
         uses: Oneflow-Inc/get-oneflow/find-wheel@ee5b8d83dfc4645d0e67ae603d31f78fd4b1c1a7
         with:
           ref: ${{ env.oneflow_commit }}
-          platform: ${{ github.event.inputs.compute_platform }}
+          entry: ${{ github.event.inputs.compute_platform }}
   # find-build-cache:
   #   name: "Find build wheel"
   #   runs-on: ubuntu-latest
