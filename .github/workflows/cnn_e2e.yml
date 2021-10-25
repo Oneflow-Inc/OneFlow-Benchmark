@@ -67,6 +67,8 @@ jobs:
         with:
           ref: ${{ env.oneflow_commit }}
           entry: ${{ github.event.inputs.compute_platform }}
+      - name: step-2
+        run: echo "find-wheel.outputs.find-wheel-hit = ${{ steps.find-wheel.outputs.find-wheel-hit }}"
   find-build-cache:
     name: "Find build wheel"
     needs: [find-oss-wheel]
