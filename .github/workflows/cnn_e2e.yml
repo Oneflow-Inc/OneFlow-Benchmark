@@ -63,14 +63,15 @@ jobs:
           set +x
       - name: Check if wheel available
         id: find-wheel
-        uses: Oneflow-Inc/get-oneflow/find-wheel@ee5b8d83dfc4645d0e67ae603d31f78fd4b1c1a7
+        uses: Oneflow-Inc/get-oneflow/find-wheel@ecd186e8c13383f0a2b7eabe6ea37c53a8660572
         with:
           ref: ${{ env.oneflow_commit }}
           entry: ${{ github.event.inputs.compute_platform }}
+          python-version: ${{ github.event.inputs.python_version }}
   build-oneflow:
     name: "Build OneFlow ${{ github.event.inputs.compute_platform }}"
     needs: [find-oss-wheel]
-    if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit == 1 }}
+    if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
     runs-on: ['self-hosted', 'linux', 'provision']
     env:
       MANYLINUX_CACHE_DIR: ~/manylinux-cache-dir/${{ github.event.inputs.compute_platform }}
