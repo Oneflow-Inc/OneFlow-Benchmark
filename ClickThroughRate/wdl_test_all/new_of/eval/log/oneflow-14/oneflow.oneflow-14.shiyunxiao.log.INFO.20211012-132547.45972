@@ -1,0 +1,82 @@
+Log file created at: 2021/10/12 13:25:47
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1012 13:25:47.176017 45972 global.h:36] NewGlobal 14cudaDeviceProp
+I1012 13:25:47.201766 45972 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1012 13:25:47.201800 45972 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1012 13:25:47.201812 45972 env_global_objects_scope.cpp:159] using rpc backend: gRPC
+I1012 13:25:47.201817 45972 global.h:36] NewGlobal N7oneflow10CtrlServerE
+I1012 13:25:47.202491 45972 ctrl_server.cpp:40] CtrlServer listening on 0.0.0.0:38189
+I1012 13:25:47.202632 45972 rank_info_bootstrap_server.cpp:47] RankInfoBootstrapServer listening on 0.0.0.0:44235
+I1012 13:25:47.203372 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.208036 45972 ctrl_bootstrap.cpp:76] 
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 42418
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 43593
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 39710
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 39561
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 44119
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 45251
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 38189
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 44307
+}
+rank: 6
+node_size: 1
+I1012 13:25:47.210548 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.212589 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.213923 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.214433 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.215510 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.217001 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.218185 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.219192 45972 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.219246 45972 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1012 13:25:47.219261 45972 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1012 13:25:47.675408 45972 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1012 13:25:47.676373 45972 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1012 13:25:47.676384 45972 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1012 13:25:47.676390 45972 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1012 13:25:47.676396 45972 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1012 13:25:47.676878 45972 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1012 13:25:47.676892 45972 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1012 13:25:47.676896 45972 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1012 13:25:47.677075 45972 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1012 13:25:47.677105 45972 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1012 13:25:47.677237 45972 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:43135
+I1012 13:25:47.686981 45972 epoll_comm_network.cpp:197] machine 0 sockfd 74
+I1012 13:25:47.687016 45972 epoll_comm_network.cpp:197] machine 1 sockfd 76
+I1012 13:25:47.687026 45972 epoll_comm_network.cpp:197] machine 2 sockfd 68
+I1012 13:25:47.687036 45972 epoll_comm_network.cpp:197] machine 3 sockfd 70
+I1012 13:25:47.687043 45972 epoll_comm_network.cpp:197] machine 4 sockfd 72
+I1012 13:25:47.687052 45972 epoll_comm_network.cpp:197] machine 5 sockfd 66
+I1012 13:25:47.687060 45972 epoll_comm_network.cpp:197] machine 6 sockfd -1
+I1012 13:25:47.687069 45972 epoll_comm_network.cpp:197] machine 7 sockfd 64
+I1012 13:25:47.687220 45972 global.h:36] NewGlobal N7oneflow9TransportE
+I1012 13:25:47.687417 45972 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+F1012 13:25:49.886196 45972 parallel_desc.cpp:77] 
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/job/parallel_desc.cpp", line 77, in ParallelDesc
+    CheckWithResourceDesc(*(Global<ResourceDesc, ForSession>::Get()))
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/job/parallel_desc.cpp", line 297, in CheckWithResourceDesc
+    Check failed: (dev_phy_id) < (resource_desc.GpuDeviceNum()) (6 vs 2)

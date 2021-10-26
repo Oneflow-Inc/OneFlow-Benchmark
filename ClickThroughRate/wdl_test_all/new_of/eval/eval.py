@@ -19,6 +19,7 @@ import pandas as pd
 from datetime import datetime
 
 
+
 class Trainer(object):
     def __init__(self,args):
         self.args = args
@@ -65,8 +66,7 @@ class Trainer(object):
         return memory
 
     def record_to_csv(self):
-        currentPath=os.path.dirname(os.path.abspath(__file__))
-        dir_path=os.path.join(currentPath,'csv/%s'%(self. test_name))
+        dir_path=os.path.join('/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/wdl_test_all/results/new/%s'%(self. test_name))
         isExists=os.path.exists(dir_path)
         if not isExists:
              os.makedirs(dir_path) 
@@ -166,29 +166,30 @@ class Trainer(object):
         args = self.args
         latency=0
         time_begin=time.time()
+        tmp_latency_list=[]
         for i in range(args.max_iter):
             loss = self.train_one_step()
+            time_end=time.time()
+            tmp_latency=(time_end-time_begin)*1000/args.print_interval
+            tmp_latency_list.append(tmp_latency)
             losses.append(handle({"loss": loss})["loss"])
-            if self.execution_mode == "eager":
-                loss.backward()
-                self.opt.step()
-                self.opt.zero_grad()
+            time_begin=time.time()
             if (i + 1) % args.print_interval == 0:
                 time_end=time.time()
-                latency=(time_end-time_begin)*1000/args.print_interval
+                tmp_latency=(time_end-time_begin)*1000/args.print_interval
+                tmp_latency_list.append(tmp_latency)
                 l = sum(losses) / len(losses)
+                latency=np.sum(tmp_latency_list)
                 self.to_record(i+1,l,round(latency,3))
+                tmp_latency_list=[]
                 losses = []
                 latency=0
                 time_begin=time.time()   
+            
         self.record_to_csv()
     
-
-    def train_one_step(self):
-        self.wdl_module.train()
-        if self.execution_mode == "graph":
-            predicts, labels, train_loss = self.train_graph()
-        else:
+    def train_eager(self):
+        def forward():
             (
                 labels,
                 dense_fields,
@@ -203,6 +204,29 @@ class Trainer(object):
                 dense_fields, wide_sparse_fields, deep_sparse_fields
             )
             train_loss = self.loss(predicts, labels)
+            return predicts,labels,train_loss
+        predicts,labels,loss = forward()
+
+        if loss.is_consistent:
+            # NOTE(zwx): scale init grad with world_size
+            # because consistent_tensor.mean() include dividor numel * world_size
+            loss.backward()
+            # for param_group in self.opt.param_groups:
+            #     for param in param_group.parameters:
+            #         param.grad *= self.world_size             
+        else:
+            loss.backward()
+        self.opt.step()
+        self.opt.zero_grad()
+
+        return predicts,labels,loss
+
+    def train_one_step(self):
+        self.wdl_module.train()
+        if self.execution_mode == "graph":
+            predicts, labels, train_loss = self.train_graph()
+        else:
+            predicts, labels, train_loss = self.train_eager()
         return train_loss
         
 

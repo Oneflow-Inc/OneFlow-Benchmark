@@ -1,0 +1,1308 @@
+Log file created at: 2021/10/13 09:40:46
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1013 09:40:46.518963 23612 global.h:36] NewGlobal 14cudaDeviceProp
+I1013 09:40:46.519771 23612 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1013 09:40:46.519788 23612 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1013 09:40:46.519795 23612 env_global_objects_scope.cpp:152] using rpc backend: local
+I1013 09:40:46.519809 23612 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1013 09:40:46.519817 23612 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1013 09:40:46.587296 23612 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1013 09:40:46.588485 23612 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1013 09:40:46.588500 23612 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1013 09:40:46.588511 23612 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1013 09:40:46.588519 23612 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1013 09:40:46.589354 23612 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1013 09:40:46.589370 23612 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1013 09:40:46.589375 23612 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1013 09:40:46.589521 23612 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1013 09:40:46.589536 23612 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1013 09:40:46.589653 23612 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:37870
+I1013 09:40:46.589689 23612 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1013 09:40:46.589802 23612 global.h:36] NewGlobal N7oneflow9TransportE
+I1013 09:40:46.591203 23612 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I1013 09:40:46.591233 23612 version.cpp:22] OneFlow git version: b295ca2324
+I1013 09:40:46.591250 23612 device_register_gpu.cpp:56] CUDA runtime version: 11.2
+I1013 09:40:46.591279 23612 device_register_gpu.cpp:65] cuDNN version: 8.1.1
+I1013 09:40:46.591290 23612 device_register_gpu.cpp:78] NCCL version: 2.9.8
+I1013 09:40:46.591298 23612 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1013 09:40:46.591306 23612 global.h:36] NewGlobal N7oneflow5IDMgrE
+I1013 09:40:46.591313 23612 global.h:36] NewGlobal N7oneflow16AvailableMemDescE
+I1013 09:40:46.591341 23612 global.h:36] NewGlobal St13unordered_mapISslSt4hashISsESt8equal_toISsESaISt4pairIKSslEEE
+I1013 09:40:46.591348 23612 global.h:36] NewGlobal N7oneflow19CriticalSectionDescE
+I1013 09:40:46.591354 23612 global.h:36] NewGlobal N7oneflow16InterUserJobInfoE
+I1013 09:40:46.591362 23612 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I1013 09:40:46.591370 23612 global.h:36] NewGlobal N7oneflow16JobSetCompileCtxE
+I1013 09:40:46.591377 23612 global.h:36] NewGlobal N7oneflow26RuntimeBufferManagersScopeE
+I1013 09:40:46.591384 23612 global.h:36] NewGlobal N7oneflow9BufferMgrIlEE
+I1013 09:40:46.591392 23612 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I1013 09:40:46.591398 23612 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I1013 09:40:46.591404 23612 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I1013 09:40:46.591410 23612 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I1013 09:40:46.591418 23612 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I1013 09:40:46.591423 23612 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I1013 09:40:46.591439 23612 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I1013 09:40:46.591445 23612 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I1013 09:40:46.591451 23612 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I1013 09:40:46.591460 23612 global.h:36] NewGlobal N7oneflow6boxing10collective24CollectiveBoxingExecutorE
+I1013 09:40:46.591467 23612 global.h:36] NewGlobal N7oneflow6boxing10collective31CollectiveBoxingDeviceCtxPollerE
+I1013 09:40:46.591601 23612 session.h:77] NewGlobal N7oneflow25SessionGlobalObjectsScopeE
+I1013 09:40:46.592288 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:46.974680 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1013 09:40:46.974875 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:46.977782 23612 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1013 09:40:46.981751 23612 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1013 09:40:47.141515 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1013 09:40:47.157358 23612 global.h:36] NewGlobal N7oneflow24InterJobReuseMemStrategyE
+I1013 09:40:47.157384 23612 global.h:36] NewGlobal N7oneflow7OneflowE
+I1013 09:40:47.168901 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:47.377847 23612 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1013 09:40:47.455433 23612 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1013 09:40:47.464867 23612 oneflow.cpp:210] 
+job_id: 0 , job_name: train_job , compile time: 0.295919 seconds.
+I1013 09:40:47.512310 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1013 09:40:47.512612 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:47.558436 23612 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1013 09:40:47.575613 23612 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1013 09:40:47.581667 23612 oneflow.cpp:210] 
+job_id: 1 , job_name: System-ModelInit , compile time: 0.0689198 seconds.
+I1013 09:40:47.604168 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1013 09:40:47.604218 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:47.675205 23612 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1013 09:40:47.695760 23612 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1013 09:40:47.700335 23612 oneflow.cpp:210] 
+job_id: 2 , job_name: System-ModelLoad , compile time: 0.0960827 seconds.
+I1013 09:40:47.714587 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1013 09:40:47.714622 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:47.771477 23612 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1013 09:40:47.790869 23612 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1013 09:40:47.795540 23612 oneflow.cpp:210] 
+job_id: 3 , job_name: System-ModelSave , compile time: 0.0808952 seconds.
+I1013 09:40:47.809998 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1013 09:40:47.810032 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:47.820613 23612 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1013 09:40:47.825075 23612 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1013 09:40:47.826781 23612 oneflow.cpp:210] 
+job_id: 4 , job_name: System-Pull-Return_22 , compile time: 0.0167263 seconds.
+I1013 09:40:47.830973 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1013 09:40:47.835827 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:47.835870 23612 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1013 09:40:47.842200 23612 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1013 09:40:47.845806 23612 oneflow.cpp:210] 
+job_id: 5 , job_name: MainJob-unamed , compile time: 0.00994867 seconds.
+I1013 09:40:47.854137 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1013 09:40:47.857170 23612 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 374.897 MiB ] device memory in Rank: 0 , Device: 0
+I1013 09:40:47.987809 23612 oneflow.cpp:998]  PushPlan merged_plan time: 0.0121882 seconds.
+I1013 09:40:48.024600 23612 oneflow.cpp:1014]  PullPlan merged_plan time: 0.0319457 seconds.
+I1013 09:40:50.138418 23612 runtime_context.cpp:21] NewCounter constructing_actor_cnt 400
+I1013 09:40:50.139341 24152 naive_actor.cpp:25] actor 2199023255700 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.139799 24152 thread.cpp:96] Thread 1048576 construct Actor kDeviceTick 2199023255700
+I1013 09:40:50.139413 24148 naive_actor.cpp:25] actor 1099614388235 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.139775 24149 wait_and_send_ids_actor.cpp:53] actor 1099616485376 switch to &WaitAndSendIdsActor::HandlerWaitToStart
+I1013 09:40:50.139961 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388235
+I1013 09:40:50.139976 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 399
+I1013 09:40:50.139978 24149 thread.cpp:96] Thread 524338 construct Actor kWaitAndSendIds 1099616485376
+I1013 09:40:50.140064 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 398
+I1013 09:40:50.140092 24149 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 397
+I1013 09:40:50.140316 24152 naive_actor.cpp:25] actor 2199023255739 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.140353 24152 thread.cpp:96] Thread 1048576 construct Actor kDeviceTick 2199023255739
+I1013 09:40:50.140458 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 396
+I1013 09:40:50.140619 24148 naive_actor.cpp:25] actor 1099614388228 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.140659 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388228
+I1013 09:40:50.140697 24152 naive_actor.cpp:25] actor 2199023255778 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.140714 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 395
+I1013 09:40:50.140749 24152 thread.cpp:96] Thread 1048576 construct Actor kDeviceTick 2199023255778
+I1013 09:40:50.140859 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 394
+I1013 09:40:50.141039 24148 naive_actor.cpp:25] actor 1099614388245 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.141137 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388245
+I1013 09:40:50.141196 24152 naive_actor.cpp:25] actor 2199023255817 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.141198 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 393
+I1013 09:40:50.141242 24152 thread.cpp:96] Thread 1048576 construct Actor kDeviceTick 2199023255817
+I1013 09:40:50.141327 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 392
+I1013 09:40:50.141530 24148 naive_actor.cpp:25] actor 1099614388254 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.141566 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388254
+I1013 09:40:50.141618 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 391
+I1013 09:40:50.141855 24148 naive_actor.cpp:25] actor 1099614388263 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.141889 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388263
+I1013 09:40:50.141938 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 390
+I1013 09:40:50.142169 24148 naive_actor.cpp:25] actor 1099614388271 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.142202 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388271
+I1013 09:40:50.142251 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 389
+I1013 09:40:50.142501 24148 naive_actor.cpp:25] actor 1099614388278 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.142535 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388278
+I1013 09:40:50.142586 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 388
+I1013 09:40:50.155097 24137 naive_actor.cpp:25] actor 1099549376512 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155216 24137 thread.cpp:96] Thread 524306 construct Actor kForeignInput 1099549376512
+I1013 09:40:50.155205 24147 naive_actor.cpp:25] actor 1099570348032 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155205 24141 naive_actor.cpp:25] actor 1099557765120 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155341 24137 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 387
+I1013 09:40:50.155308 24138 naive_actor.cpp:25] actor 1099551473664 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155493 24133 naive_actor.cpp:25] actor 1099540987904 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155565 24143 naive_actor.cpp:25] actor 1099561959424 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155345 24141 thread.cpp:96] Thread 524310 construct Actor kNormalForward 1099557765120
+I1013 09:40:50.155388 24144 naive_actor.cpp:25] actor 1099564056576 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155478 24140 naive_actor.cpp:25] actor 1099555667968 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.156028 24140 thread.cpp:96] Thread 524309 construct Actor kForeignInput 1099555667968
+I1013 09:40:50.155506 24139 naive_actor.cpp:25] actor 1099553570816 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.156280 24139 thread.cpp:96] Thread 524308 construct Actor kNormalForward 1099553570816
+I1013 09:40:50.156329 24121 naive_actor.cpp:25] actor 1099515822080 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.156404 24139 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 384
+I1013 09:40:50.156414 24135 naive_actor.cpp:25] actor 1099545182208 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155680 24143 thread.cpp:96] Thread 524312 construct Actor kForeignInput 1099561959424
+I1013 09:40:50.155683 24154 naive_actor.cpp:25] actor 2199025352706 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.156705 24143 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 383
+I1013 09:40:50.155757 24132 naive_actor.cpp:25] actor 1099538890752 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155778 24152 naive_actor.cpp:25] actor 2199023255584 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.156930 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255584
+I1013 09:40:50.155865 24144 thread.cpp:96] Thread 524313 construct Actor kNormalForward 1099564056576
+I1013 09:40:50.157028 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 382
+I1013 09:40:50.155887 24141 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 386
+I1013 09:40:50.155895 24145 naive_actor.cpp:25] actor 1099566153728 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.155972 24156 naive_actor.cpp:25] actor 2199027449858 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.157320 24156 thread.cpp:96] Thread 1048578 construct Actor kCopyHd 2199027449858
+I1013 09:40:50.155977 24131 naive_actor.cpp:25] actor 1099536793600 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.156002 24125 naive_actor.cpp:25] actor 1099524210688 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.157583 24125 thread.cpp:96] Thread 524294 construct Actor kNormalForward 1099524210688
+I1013 09:40:50.155314 24147 thread.cpp:96] Thread 524316 construct Actor kForeignOutput 1099570348032
+I1013 09:40:50.156016 24150 sink_actor.cpp:21] actor 1099618582528 switch to &SinkActor::HandlerNormal
+I1013 09:40:50.157730 24125 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 378
+I1013 09:40:50.156145 24128 naive_actor.cpp:25] actor 1099530502144 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.157938 24128 thread.cpp:96] Thread 524297 construct Actor kNormalForward 1099530502144
+I1013 09:40:50.156186 24140 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 385
+I1013 09:40:50.155511 24138 thread.cpp:96] Thread 524307 construct Actor kNormalForward 1099551473664
+I1013 09:40:50.156291 24127 naive_actor.cpp:25] actor 1099528404992 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.158246 24138 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 376
+I1013 09:40:50.158329 24152 naive_actor.cpp:25] actor 2199023255563 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.158394 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255563
+I1013 09:40:50.156385 24126 naive_actor.cpp:25] actor 1099526307840 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.158454 24126 thread.cpp:96] Thread 524295 construct Actor kNormalForward 1099526307840
+I1013 09:40:50.156406 24134 naive_actor.cpp:25] actor 1099543085056 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.158525 24134 thread.cpp:96] Thread 524303 construct Actor kNormalForward 1099543085056
+I1013 09:40:50.155259 24130 naive_actor.cpp:25] actor 1099534696448 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.156415 24121 thread.cpp:96] Thread 524290 construct Actor kNormalForward 1099515822080
+I1013 09:40:50.158600 24134 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 373
+I1013 09:40:50.155604 24133 thread.cpp:96] Thread 524302 construct Actor kNormalForward 1099540987904
+I1013 09:40:50.156613 24135 thread.cpp:96] Thread 524304 construct Actor kNormalForward 1099545182208
+I1013 09:40:50.156708 24154 thread.cpp:96] Thread 1048577 construct Actor kSliceBoxing 2199025352706
+I1013 09:40:50.158965 24135 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 370
+I1013 09:40:50.156883 24132 thread.cpp:96] Thread 524301 construct Actor kNormalForward 1099538890752
+I1013 09:40:50.155843 24146 naive_actor.cpp:25] actor 1099568250880 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.157102 24144 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 381
+I1013 09:40:50.157272 24145 thread.cpp:96] Thread 524314 construct Actor kNormalForward 1099566153728
+I1013 09:40:50.157356 24156 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 380
+I1013 09:40:50.157474 24131 thread.cpp:96] Thread 524300 construct Actor kNormalForward 1099536793600
+I1013 09:40:50.159476 24145 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 367
+I1013 09:40:50.159509 24156 naive_actor.cpp:25] actor 2199027449856 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.159528 24156 thread.cpp:96] Thread 1048578 construct Actor kCopyHd 2199027449856
+I1013 09:40:50.155957 24129 naive_actor.cpp:25] actor 1099532599296 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.159561 24131 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 366
+I1013 09:40:50.159584 24129 thread.cpp:96] Thread 524298 construct Actor kNormalForward 1099532599296
+I1013 09:40:50.156160 24136 naive_actor.cpp:25] actor 1099547279360 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.158058 24128 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 377
+I1013 09:40:50.155565 24148 naive_actor.cpp:25] actor 1099614388236 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.159773 24148 thread.cpp:96] Thread 524337 construct Actor kSrcSubsetTick 1099614388236
+I1013 09:40:50.158262 24127 thread.cpp:96] Thread 524296 construct Actor kNormalForward 1099528404992
+I1013 09:40:50.156348 24122 naive_actor.cpp:25] actor 1099517919232 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.159914 24122 thread.cpp:96] Thread 524291 construct Actor kNormalForward 1099517919232
+I1013 09:40:50.158504 24126 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 374
+I1013 09:40:50.160027 24122 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 361
+I1013 09:40:50.158581 24130 thread.cpp:96] Thread 524299 construct Actor kNormalForward 1099534696448
+I1013 09:40:50.156440 24124 naive_actor.cpp:25] actor 1099522113536 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.160173 24124 thread.cpp:96] Thread 524293 construct Actor kNormalForward 1099522113536
+I1013 09:40:50.158674 24121 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 372
+I1013 09:40:50.158876 24133 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 371
+I1013 09:40:50.155719 24142 naive_actor.cpp:25] actor 1099559862272 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.160373 24142 thread.cpp:96] Thread 524311 construct Actor kNormalForward 1099559862272
+I1013 09:40:50.158982 24120 naive_actor.cpp:25] actor 1099513724928 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.159054 24119 naive_actor.cpp:25] actor 1099511627776 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.160513 24142 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 358
+I1013 09:40:50.160518 24119 thread.cpp:96] Thread 524288 construct Actor kNormalForward 1099511627776
+I1013 09:40:50.157723 24147 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 379
+I1013 09:40:50.159564 24156 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 365
+I1013 09:40:50.157789 24150 thread.cpp:96] Thread 524339 construct Actor kCallbackNotify 1099618582528
+I1013 09:40:50.156127 24123 naive_actor.cpp:25] actor 1099520016384 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.160728 24123 thread.cpp:96] Thread 524292 construct Actor kNormalForward 1099520016384
+I1013 09:40:50.159663 24129 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 364
+I1013 09:40:50.159865 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 363
+I1013 09:40:50.159873 24127 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 362
+I1013 09:40:50.158484 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 375
+I1013 09:40:50.160125 24130 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 360
+I1013 09:40:50.161267 24148 naive_actor.cpp:25] actor 1099614388226 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.161299 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388226
+I1013 09:40:50.160264 24124 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 359
+I1013 09:40:50.160480 24120 thread.cpp:96] Thread 524289 construct Actor kNormalForward 1099513724928
+I1013 09:40:50.159180 24132 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 368
+I1013 09:40:50.159193 24146 thread.cpp:96] Thread 524315 construct Actor kNormalForward 1099568250880
+I1013 09:40:50.161634 24152 naive_actor.cpp:25] actor 2199023255574 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.161718 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255574
+I1013 09:40:50.160665 24156 naive_actor.cpp:25] actor 2199027449857 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.161756 24156 thread.cpp:96] Thread 1048578 construct Actor kCopyHd 2199027449857
+I1013 09:40:50.161780 24156 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 351
+I1013 09:40:50.159663 24136 thread.cpp:96] Thread 524305 construct Actor kNormalForward 1099547279360
+I1013 09:40:50.160732 24150 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 356
+I1013 09:40:50.161880 24136 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 349
+I1013 09:40:50.160810 24123 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 355
+I1013 09:40:50.158973 24154 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 369
+I1013 09:40:50.161374 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 354
+I1013 09:40:50.161543 24120 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 353
+I1013 09:40:50.161725 24146 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 352
+I1013 09:40:50.160617 24119 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 357
+I1013 09:40:50.161792 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 350
+I1013 09:40:50.162140 24154 naive_actor.cpp:25] actor 2199025352707 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.162369 24154 thread.cpp:96] Thread 1048577 construct Actor kSliceBoxing 2199025352707
+I1013 09:40:50.162410 24154 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 348
+I1013 09:40:50.162472 24148 naive_actor.cpp:25] actor 1099614388230 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.162549 24154 naive_actor.cpp:25] actor 2199025352704 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.162554 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388230
+I1013 09:40:50.162575 24154 thread.cpp:96] Thread 1048577 construct Actor kSliceBoxing 2199025352704
+I1013 09:40:50.162632 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 347
+I1013 09:40:50.162633 24154 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 346
+I1013 09:40:50.162688 24152 naive_actor.cpp:25] actor 2199023255587 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.162868 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255587
+I1013 09:40:50.162906 24154 naive_actor.cpp:25] actor 2199025352705 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.162950 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 345
+I1013 09:40:50.162967 24154 thread.cpp:96] Thread 1048577 construct Actor kSliceBoxing 2199025352705
+I1013 09:40:50.163010 24148 naive_actor.cpp:25] actor 1099614388241 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.163060 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388241
+I1013 09:40:50.163277 24154 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 344
+I1013 09:40:50.163311 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 343
+I1013 09:40:50.163468 24154 naive_actor.cpp:25] actor 2199025352708 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.163514 24154 thread.cpp:96] Thread 1048577 construct Actor kCopyHd 2199025352708
+I1013 09:40:50.163569 24154 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 342
+I1013 09:40:50.163695 24148 naive_actor.cpp:25] actor 1099614388234 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.163702 24154 naive_actor.cpp:25] actor 2199025352709 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.163753 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388234
+I1013 09:40:50.163786 24154 thread.cpp:96] Thread 1048577 construct Actor kCopyHd 2199025352709
+I1013 09:40:50.163851 24154 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 341
+I1013 09:40:50.163861 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 340
+I1013 09:40:50.164013 24154 naive_actor.cpp:25] actor 2199025352710 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.164058 24154 thread.cpp:96] Thread 1048577 construct Actor kCopyHd 2199025352710
+I1013 09:40:50.164098 24154 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 339
+I1013 09:40:50.164160 24152 naive_actor.cpp:25] actor 2199023255555 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.164211 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255555
+I1013 09:40:50.164253 24148 naive_actor.cpp:25] actor 1099614388238 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.164276 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 338
+I1013 09:40:50.164295 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388238
+I1013 09:40:50.164373 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 337
+I1013 09:40:50.164611 24152 naive_actor.cpp:25] actor 2199023255582 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.164664 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255582
+I1013 09:40:50.164713 24148 naive_actor.cpp:25] actor 1099614388240 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.164721 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 336
+I1013 09:40:50.164754 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388240
+I1013 09:40:50.164829 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 335
+I1013 09:40:50.165033 24152 naive_actor.cpp:25] actor 2199023255569 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.165082 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255569
+I1013 09:40:50.165139 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 334
+I1013 09:40:50.165169 24148 naive_actor.cpp:25] actor 1099614388225 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.165216 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388225
+I1013 09:40:50.165273 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 333
+I1013 09:40:50.165592 24148 naive_actor.cpp:25] actor 1099614388232 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.165686 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388232
+I1013 09:40:50.165755 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 332
+I1013 09:40:50.165886 24152 naive_actor.cpp:25] actor 2199023255611 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.165936 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255611
+I1013 09:40:50.166004 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 331
+I1013 09:40:50.166244 24148 esac_actor.cpp:73] actor 1099614388323 switch to &EsacActor::HandlerNormal
+I1013 09:40:50.166296 24148 thread.cpp:96] Thread 524337 construct Actor kEsac 1099614388323
+I1013 09:40:50.166383 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 330
+I1013 09:40:50.166749 24148 naive_actor.cpp:25] actor 1099614388231 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.166800 24148 thread.cpp:96] Thread 524337 construct Actor kDstSubsetTick 1099614388231
+I1013 09:40:50.166864 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 329
+I1013 09:40:50.166910 24152 naive_actor.cpp:25] actor 2199023255554 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.166958 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255554
+I1013 09:40:50.167032 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 328
+I1013 09:40:50.167212 24148 naive_actor.cpp:25] actor 1099614388227 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.167261 24148 thread.cpp:96] Thread 524337 construct Actor kSrcSubsetTick 1099614388227
+I1013 09:40:50.167320 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 327
+I1013 09:40:50.167649 24148 naive_actor.cpp:25] actor 1099614388224 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.167701 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388224
+I1013 09:40:50.167713 24152 naive_actor.cpp:25] actor 2199023255586 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.167753 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255586
+I1013 09:40:50.167765 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 326
+I1013 09:40:50.167809 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 325
+I1013 09:40:50.168072 24148 naive_actor.cpp:25] actor 1099614388319 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.168123 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388319
+I1013 09:40:50.168181 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 324
+I1013 09:40:50.168486 24148 naive_actor.cpp:25] actor 1099614388233 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.168537 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388233
+I1013 09:40:50.168562 24152 naive_actor.cpp:25] actor 2199023255560 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.168596 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255560
+I1013 09:40:50.168603 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 323
+I1013 09:40:50.168653 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 322
+I1013 09:40:50.168921 24148 naive_actor.cpp:25] actor 1099614388239 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.168972 24148 thread.cpp:96] Thread 524337 construct Actor kDstSubsetTick 1099614388239
+I1013 09:40:50.169030 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 321
+I1013 09:40:50.169351 24148 naive_actor.cpp:25] actor 1099614388242 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.169401 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388242
+I1013 09:40:50.169418 24152 naive_actor.cpp:25] actor 2199023255628 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.169467 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255628
+I1013 09:40:50.169472 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 320
+I1013 09:40:50.169631 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 319
+I1013 09:40:50.169893 24148 naive_actor.cpp:25] actor 1099614388244 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.169943 24148 thread.cpp:96] Thread 524337 construct Actor kSrcSubsetTick 1099614388244
+I1013 09:40:50.170001 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 318
+I1013 09:40:50.170307 24148 naive_actor.cpp:25] actor 1099614388247 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.170358 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388247
+I1013 09:40:50.170414 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 317
+I1013 09:40:50.170423 24152 naive_actor.cpp:25] actor 2199023255570 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.170503 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255570
+I1013 09:40:50.170578 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 316
+I1013 09:40:50.170756 24148 naive_actor.cpp:25] actor 1099614388243 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.170806 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388243
+I1013 09:40:50.170862 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 315
+I1013 09:40:50.171231 24148 naive_actor.cpp:25] actor 1099614388248 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.171283 24148 thread.cpp:96] Thread 524337 construct Actor kDstSubsetTick 1099614388248
+I1013 09:40:50.171344 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 314
+I1013 09:40:50.171371 24152 naive_actor.cpp:25] actor 2199023255585 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.171420 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255585
+I1013 09:40:50.171501 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 313
+I1013 09:40:50.171700 24148 naive_actor.cpp:25] actor 1099614388250 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.171751 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388250
+I1013 09:40:50.171815 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 312
+I1013 09:40:50.172129 24148 naive_actor.cpp:25] actor 1099614388322 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.172178 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388322
+I1013 09:40:50.172255 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 311
+I1013 09:40:50.172353 24152 naive_actor.cpp:25] actor 2199023255580 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.172401 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255580
+I1013 09:40:50.172478 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 310
+I1013 09:40:50.172587 24148 naive_actor.cpp:25] actor 1099614388249 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.172636 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388249
+I1013 09:40:50.172693 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 309
+I1013 09:40:50.172791 24152 naive_actor.cpp:25] actor 2199023255553 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.172835 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255553
+I1013 09:40:50.172888 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 308
+I1013 09:40:50.173018 24148 naive_actor.cpp:25] actor 1099614388252 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.173065 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388252
+I1013 09:40:50.173128 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 307
+I1013 09:40:50.173416 24148 naive_actor.cpp:25] actor 1099614388251 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.173512 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388251
+I1013 09:40:50.173583 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 306
+I1013 09:40:50.173663 24152 naive_actor.cpp:25] actor 2199023255622 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.173709 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255622
+I1013 09:40:50.173770 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 305
+I1013 09:40:50.173910 24148 naive_actor.cpp:25] actor 1099614388258 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.173960 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388258
+I1013 09:40:50.174015 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 304
+I1013 09:40:50.174300 24148 naive_actor.cpp:25] actor 1099614388320 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.174347 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388320
+I1013 09:40:50.174399 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 303
+I1013 09:40:50.174655 24152 naive_actor.cpp:25] actor 2199023255573 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.174705 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255573
+I1013 09:40:50.174715 24148 naive_actor.cpp:25] actor 1099614388253 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.174757 24148 thread.cpp:96] Thread 524337 construct Actor kSrcSubsetTick 1099614388253
+I1013 09:40:50.174774 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 302
+I1013 09:40:50.174808 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 301
+I1013 09:40:50.175093 24148 naive_actor.cpp:25] actor 1099614388256 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.175143 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388256
+I1013 09:40:50.175202 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 300
+I1013 09:40:50.175498 24148 naive_actor.cpp:25] actor 1099614388259 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.175544 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388259
+I1013 09:40:50.175591 24152 naive_actor.cpp:25] actor 2199023255575 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.175596 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 299
+I1013 09:40:50.175626 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255575
+I1013 09:40:50.175702 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 298
+I1013 09:40:50.175978 24148 naive_actor.cpp:25] actor 1099614388257 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.176029 24148 thread.cpp:96] Thread 524337 construct Actor kDstSubsetTick 1099614388257
+I1013 09:40:50.176088 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 297
+I1013 09:40:50.176450 24148 naive_actor.cpp:25] actor 1099614388266 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.176470 24152 naive_actor.cpp:25] actor 2199023255583 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.176503 24148 thread.cpp:96] Thread 524337 construct Actor kDstSubsetTick 1099614388266
+I1013 09:40:50.176528 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255583
+I1013 09:40:50.176599 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 296
+I1013 09:40:50.176611 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 295
+I1013 09:40:50.176908 24148 naive_actor.cpp:25] actor 1099614388260 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.176957 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388260
+I1013 09:40:50.177021 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 294
+I1013 09:40:50.177275 24152 naive_actor.cpp:25] actor 2199023255617 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.177314 24148 naive_actor.cpp:25] actor 1099614388262 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.177404 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255617
+I1013 09:40:50.177439 24148 thread.cpp:96] Thread 524337 construct Actor kSrcSubsetTick 1099614388262
+I1013 09:40:50.177502 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 293
+I1013 09:40:50.177537 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 292
+I1013 09:40:50.177827 24148 naive_actor.cpp:25] actor 1099614388261 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.177877 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388261
+I1013 09:40:50.177939 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 291
+I1013 09:40:50.178151 24152 naive_actor.cpp:25] actor 2199023255625 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.178196 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255625
+I1013 09:40:50.178236 24148 naive_actor.cpp:25] actor 1099614388265 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.178254 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 290
+I1013 09:40:50.178274 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388265
+I1013 09:40:50.178354 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 289
+I1013 09:40:50.178661 24148 naive_actor.cpp:25] actor 1099614388267 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.178709 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388267
+I1013 09:40:50.178766 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 288
+I1013 09:40:50.179049 24148 naive_actor.cpp:25] actor 1099614388268 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.179095 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388268
+I1013 09:40:50.179116 24152 naive_actor.cpp:25] actor 2199023255665 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.179147 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 287
+I1013 09:40:50.179148 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255665
+I1013 09:40:50.179234 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 286
+I1013 09:40:50.179466 24148 naive_actor.cpp:25] actor 1099614388321 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.179517 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388321
+I1013 09:40:50.179523 24152 naive_actor.cpp:25] actor 2199023255567 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.179571 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255567
+I1013 09:40:50.179586 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 285
+I1013 09:40:50.179622 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 284
+I1013 09:40:50.179864 24152 naive_actor.cpp:25] actor 2199023255577 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.179873 24148 naive_actor.cpp:25] actor 1099614388269 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.179910 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255577
+I1013 09:40:50.179936 24148 thread.cpp:96] Thread 524337 construct Actor kDeviceTick 1099614388269
+I1013 09:40:50.179991 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 283
+I1013 09:40:50.180004 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 282
+I1013 09:40:50.180246 24152 naive_actor.cpp:25] actor 2199023255579 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.180291 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255579
+I1013 09:40:50.180299 24148 naive_actor.cpp:25] actor 1099614388275 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.180338 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388275
+I1013 09:40:50.180349 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 281
+I1013 09:40:50.180388 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 280
+I1013 09:40:50.180650 24152 naive_actor.cpp:25] actor 2199023255562 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.180701 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255562
+I1013 09:40:50.180713 24148 naive_actor.cpp:25] actor 1099614388270 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.180754 24148 thread.cpp:96] Thread 524337 construct Actor kSrcSubsetTick 1099614388270
+I1013 09:40:50.180761 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 279
+I1013 09:40:50.180809 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 278
+I1013 09:40:50.181135 24148 naive_actor.cpp:25] actor 1099614388274 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.181185 24148 thread.cpp:96] Thread 524337 construct Actor kDstSubsetTick 1099614388274
+I1013 09:40:50.181242 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 277
+I1013 09:40:50.181459 24152 naive_actor.cpp:25] actor 2199023255621 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.181504 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255621
+I1013 09:40:50.181548 24148 naive_actor.cpp:25] actor 1099614388284 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.181562 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 276
+I1013 09:40:50.181586 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388284
+I1013 09:40:50.181655 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 275
+I1013 09:40:50.181847 24152 naive_actor.cpp:25] actor 2199023255558 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.181892 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255558
+I1013 09:40:50.181943 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 274
+I1013 09:40:50.181972 24148 naive_actor.cpp:25] actor 1099614388277 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.182016 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388277
+I1013 09:40:50.182070 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 273
+I1013 09:40:50.182371 24148 naive_actor.cpp:25] actor 1099614388276 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.182417 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388276
+I1013 09:40:50.182495 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 272
+I1013 09:40:50.182606 24152 naive_actor.cpp:25] actor 2199023255566 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.182652 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255566
+I1013 09:40:50.182724 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 271
+I1013 09:40:50.182847 24148 naive_actor.cpp:25] actor 1099614388282 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.182890 24148 thread.cpp:96] Thread 524337 construct Actor kDstSubsetTick 1099614388282
+I1013 09:40:50.182945 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 270
+I1013 09:40:50.183213 24148 naive_actor.cpp:25] actor 1099614388281 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.183257 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388281
+I1013 09:40:50.183307 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 269
+I1013 09:40:50.183451 24152 naive_actor.cpp:25] actor 2199023255565 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.183497 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255565
+I1013 09:40:50.183564 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 268
+I1013 09:40:50.183599 24148 naive_actor.cpp:25] actor 1099614388318 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.183730 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388318
+I1013 09:40:50.183801 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 267
+I1013 09:40:50.183843 24152 naive_actor.cpp:25] actor 2199023255564 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.183885 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255564
+I1013 09:40:50.183943 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 266
+I1013 09:40:50.184116 24148 naive_actor.cpp:25] actor 1099614388279 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.184165 24148 thread.cpp:96] Thread 524337 construct Actor kSrcSubsetTick 1099614388279
+I1013 09:40:50.184216 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 265
+I1013 09:40:50.184486 24148 naive_actor.cpp:25] actor 1099614388273 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.184531 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388273
+I1013 09:40:50.184581 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 264
+I1013 09:40:50.184706 24152 naive_actor.cpp:25] actor 2199023255559 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.184754 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255559
+I1013 09:40:50.184823 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 263
+I1013 09:40:50.184860 24148 naive_actor.cpp:25] actor 1099614388283 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.184891 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388283
+I1013 09:40:50.184950 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 262
+I1013 09:40:50.185227 24148 naive_actor.cpp:25] actor 1099614388300 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.185271 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388300
+I1013 09:40:50.185328 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 261
+I1013 09:40:50.185479 24152 naive_actor.cpp:25] actor 2199023255581 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.185523 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255581
+I1013 09:40:50.185577 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 260
+I1013 09:40:50.185604 24148 naive_actor.cpp:25] actor 1099614388299 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.185636 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388299
+I1013 09:40:50.185693 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 259
+I1013 09:40:50.185964 24148 naive_actor.cpp:25] actor 1099614388291 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.186009 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388291
+I1013 09:40:50.186058 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 258
+I1013 09:40:50.186285 24152 naive_actor.cpp:25] actor 2199023255556 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.186329 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255556
+I1013 09:40:50.186331 24148 naive_actor.cpp:25] actor 1099614388287 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.186384 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388287
+I1013 09:40:50.186398 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 257
+I1013 09:40:50.186444 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 256
+I1013 09:40:50.186771 24148 reentrant_lock_actor.cpp:76] actor 1099614388285 switch to &ReentrantLockActor::HandlerNormal
+I1013 09:40:50.186818 24148 thread.cpp:96] Thread 524337 construct Actor kReentrantLock 1099614388285
+I1013 09:40:50.186870 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 255
+I1013 09:40:50.186991 24152 naive_actor.cpp:25] actor 2199023255571 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.187067 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255571
+I1013 09:40:50.187135 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 254
+I1013 09:40:50.187165 24148 naive_actor.cpp:25] actor 1099614388289 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.187196 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388289
+I1013 09:40:50.187258 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 253
+I1013 09:40:50.187532 24148 naive_actor.cpp:25] actor 1099614388292 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.187577 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388292
+I1013 09:40:50.187634 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 252
+I1013 09:40:50.187880 24152 naive_actor.cpp:25] actor 2199023255561 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.187906 24148 naive_actor.cpp:25] actor 1099614388297 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.187924 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255561
+I1013 09:40:50.187952 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388297
+I1013 09:40:50.188020 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 251
+I1013 09:40:50.188024 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 250
+I1013 09:40:50.188295 24148 naive_actor.cpp:25] actor 1099614388295 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.188342 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388295
+I1013 09:40:50.188392 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 249
+I1013 09:40:50.188609 24152 naive_actor.cpp:25] actor 2199023255576 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.188654 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255576
+I1013 09:40:50.188679 24148 naive_actor.cpp:25] actor 1099614388290 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.188704 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 248
+I1013 09:40:50.188710 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388290
+I1013 09:40:50.188776 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 247
+I1013 09:40:50.189044 24148 naive_actor.cpp:25] actor 1099614388298 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.189091 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388298
+I1013 09:40:50.189141 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 246
+I1013 09:40:50.189414 24148 naive_actor.cpp:25] actor 1099614388294 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.189471 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388294
+I1013 09:40:50.189522 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 245
+I1013 09:40:50.189668 24152 naive_actor.cpp:25] actor 2199023255552 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.189714 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255552
+I1013 09:40:50.189786 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 244
+I1013 09:40:50.189790 24148 naive_actor.cpp:25] actor 1099614388296 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.189846 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388296
+I1013 09:40:50.189905 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 243
+I1013 09:40:50.190176 24148 naive_actor.cpp:25] actor 1099614388293 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.190220 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388293
+I1013 09:40:50.190279 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 242
+I1013 09:40:50.190482 24152 naive_actor.cpp:25] actor 2199023255626 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.190526 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255626
+I1013 09:40:50.190562 24148 naive_actor.cpp:25] actor 1099614388288 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.190654 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388288
+I1013 09:40:50.190671 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 241
+I1013 09:40:50.190703 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 240
+I1013 09:40:50.190941 24152 naive_actor.cpp:25] actor 2199023255605 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.190984 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255605
+I1013 09:40:50.190990 24148 naive_actor.cpp:25] actor 1099614388301 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.191032 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388301
+I1013 09:40:50.191042 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 239
+I1013 09:40:50.191080 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 238
+I1013 09:40:50.191351 24148 naive_actor.cpp:25] actor 1099614388302 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.191396 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388302
+I1013 09:40:50.191454 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 237
+I1013 09:40:50.191730 24148 naive_actor.cpp:25] actor 1099614388304 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.191774 24152 naive_actor.cpp:25] actor 2199023255616 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.191776 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388304
+I1013 09:40:50.191810 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255616
+I1013 09:40:50.191866 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 236
+I1013 09:40:50.191886 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 235
+I1013 09:40:50.192133 24152 naive_actor.cpp:25] actor 2199023255592 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.192142 24148 naive_actor.cpp:25] actor 1099614388303 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.192176 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255592
+I1013 09:40:50.192201 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388303
+I1013 09:40:50.192248 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 234
+I1013 09:40:50.192281 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 233
+I1013 09:40:50.192579 24148 naive_actor.cpp:25] actor 1099614388305 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.192623 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388305
+I1013 09:40:50.192682 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 232
+I1013 09:40:50.192909 24152 naive_actor.cpp:25] actor 2199023255629 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.192952 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255629
+I1013 09:40:50.192975 24148 naive_actor.cpp:25] actor 1099614388306 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.193006 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388306
+I1013 09:40:50.193015 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 231
+I1013 09:40:50.193050 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 230
+I1013 09:40:50.193307 24148 naive_actor.cpp:25] actor 1099614388307 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.193351 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388307
+I1013 09:40:50.193405 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 229
+I1013 09:40:50.193692 24152 naive_actor.cpp:25] actor 2199023255601 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.193737 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255601
+I1013 09:40:50.193827 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 228
+I1013 09:40:50.193904 24148 case_actor.cpp:76] actor 1099614388286 switch to &CaseActor::HandlerNormal
+I1013 09:40:50.193953 24148 thread.cpp:96] Thread 524337 construct Actor kCase 1099614388286
+I1013 09:40:50.194036 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 227
+I1013 09:40:50.194324 24148 naive_actor.cpp:25] actor 1099614388313 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.194365 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388313
+I1013 09:40:50.194422 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 226
+I1013 09:40:50.194651 24152 naive_actor.cpp:25] actor 2199023255677 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.194695 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255677
+I1013 09:40:50.194700 24148 naive_actor.cpp:25] actor 1099614388308 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.194758 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388308
+I1013 09:40:50.194778 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 225
+I1013 09:40:50.194805 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 224
+I1013 09:40:50.195055 24148 naive_actor.cpp:25] actor 1099614388310 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.195101 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388310
+I1013 09:40:50.195148 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 223
+I1013 09:40:50.195402 24148 naive_actor.cpp:25] actor 1099614388309 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.195456 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388309
+I1013 09:40:50.195511 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 222
+I1013 09:40:50.195571 24152 naive_actor.cpp:25] actor 2199023255593 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.195614 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255593
+I1013 09:40:50.195668 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 221
+I1013 09:40:50.195775 24148 naive_actor.cpp:25] actor 1099614388314 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.195816 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388314
+I1013 09:40:50.195873 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 220
+I1013 09:40:50.196126 24148 naive_actor.cpp:25] actor 1099614388312 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.196169 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388312
+I1013 09:40:50.196216 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 219
+I1013 09:40:50.196280 24152 naive_actor.cpp:25] actor 2199023255659 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.196321 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255659
+I1013 09:40:50.196372 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 218
+I1013 09:40:50.196537 24148 naive_actor.cpp:25] actor 1099614388316 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.196583 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388316
+I1013 09:40:50.196633 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 217
+I1013 09:40:50.197058 24148 esac_actor.cpp:73] actor 1099614388315 switch to &EsacActor::HandlerNormal
+I1013 09:40:50.197099 24152 naive_actor.cpp:25] actor 2199023255600 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.197103 24148 thread.cpp:96] Thread 524337 construct Actor kEsac 1099614388315
+I1013 09:40:50.197131 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255600
+I1013 09:40:50.197216 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 216
+I1013 09:40:50.197217 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 215
+I1013 09:40:50.197589 24148 naive_actor.cpp:25] actor 1099614388311 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.197651 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388311
+I1013 09:40:50.197713 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 214
+I1013 09:40:50.197975 24148 naive_actor.cpp:25] actor 1099614388317 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.197985 24152 naive_actor.cpp:25] actor 2199023255568 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.198021 24148 thread.cpp:96] Thread 524337 construct Actor kTick 1099614388317
+I1013 09:40:50.198045 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255568
+I1013 09:40:50.198096 24148 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 213
+I1013 09:40:50.198117 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 212
+I1013 09:40:50.198747 24152 naive_actor.cpp:25] actor 2199023255610 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.198777 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255610
+I1013 09:40:50.198829 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 211
+I1013 09:40:50.199401 24152 naive_actor.cpp:25] actor 2199023255612 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.199441 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255612
+I1013 09:40:50.199493 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 210
+I1013 09:40:50.200136 24152 naive_actor.cpp:25] actor 2199023255627 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.200165 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255627
+I1013 09:40:50.200215 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 209
+I1013 09:40:50.200788 24152 naive_actor.cpp:25] actor 2199023255557 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.200819 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255557
+I1013 09:40:50.200867 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 208
+I1013 09:40:50.201092 24152 naive_actor.cpp:25] actor 2199023255599 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.201119 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255599
+I1013 09:40:50.201162 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 207
+I1013 09:40:50.201800 24152 naive_actor.cpp:25] actor 2199023255603 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.201829 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255603
+I1013 09:40:50.201879 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 206
+I1013 09:40:50.202101 24152 naive_actor.cpp:25] actor 2199023255670 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.202129 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255670
+I1013 09:40:50.202172 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 205
+I1013 09:40:50.202845 24152 naive_actor.cpp:25] actor 2199023255615 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.202874 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255615
+I1013 09:40:50.202926 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 204
+I1013 09:40:50.203629 24152 naive_actor.cpp:25] actor 2199023255663 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.203658 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255663
+I1013 09:40:50.203711 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 203
+I1013 09:40:50.203948 24152 naive_actor.cpp:25] actor 2199023255572 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.203976 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255572
+I1013 09:40:50.204051 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 202
+I1013 09:40:50.204739 24152 naive_actor.cpp:25] actor 2199023255673 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.204819 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255673
+I1013 09:40:50.204877 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 201
+I1013 09:40:50.205487 24152 naive_actor.cpp:25] actor 2199023255609 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.205526 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255609
+I1013 09:40:50.205575 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 200
+I1013 09:40:50.206156 24152 naive_actor.cpp:25] actor 2199023255619 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.206183 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255619
+I1013 09:40:50.206233 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 199
+I1013 09:40:50.206459 24152 naive_actor.cpp:25] actor 2199023255594 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.206485 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255594
+I1013 09:40:50.206527 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 198
+I1013 09:40:50.207187 24152 naive_actor.cpp:25] actor 2199023255667 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.207216 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255667
+I1013 09:40:50.207266 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 197
+I1013 09:40:50.207928 24152 naive_actor.cpp:25] actor 2199023255578 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.207962 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255578
+I1013 09:40:50.208010 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 196
+I1013 09:40:50.208662 24152 naive_actor.cpp:25] actor 2199023255669 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.208690 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255669
+I1013 09:40:50.208741 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 195
+I1013 09:40:50.209357 24152 naive_actor.cpp:25] actor 2199023255590 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.209385 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255590
+I1013 09:40:50.209442 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 194
+I1013 09:40:50.210016 24152 naive_actor.cpp:25] actor 2199023255604 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.210044 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255604
+I1013 09:40:50.210090 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 193
+I1013 09:40:50.210698 24152 naive_actor.cpp:25] actor 2199023255608 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.210726 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255608
+I1013 09:40:50.210775 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 192
+I1013 09:40:50.211341 24152 naive_actor.cpp:25] actor 2199023255607 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.211369 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255607
+I1013 09:40:50.211417 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 191
+I1013 09:40:50.212042 24152 naive_actor.cpp:25] actor 2199023255606 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.212069 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255606
+I1013 09:40:50.212118 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 190
+I1013 09:40:50.212337 24152 naive_actor.cpp:25] actor 2199023255589 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.212363 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255589
+I1013 09:40:50.212442 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 189
+I1013 09:40:50.213039 24152 naive_actor.cpp:25] actor 2199023255623 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.213119 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255623
+I1013 09:40:50.213172 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 188
+I1013 09:40:50.213793 24152 naive_actor.cpp:25] actor 2199023255588 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.213822 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255588
+I1013 09:40:50.213889 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 187
+I1013 09:40:50.214483 24152 naive_actor.cpp:25] actor 2199023255602 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.214511 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255602
+I1013 09:40:50.214560 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 186
+I1013 09:40:50.215175 24152 naive_actor.cpp:25] actor 2199023255613 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.215204 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255613
+I1013 09:40:50.215255 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 185
+I1013 09:40:50.215786 24152 naive_actor.cpp:25] actor 2199023255661 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.215814 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255661
+I1013 09:40:50.215859 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 184
+I1013 09:40:50.216460 24152 naive_actor.cpp:25] actor 2199023255598 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.216486 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255598
+I1013 09:40:50.216532 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 183
+I1013 09:40:50.216753 24152 naive_actor.cpp:25] actor 2199023255674 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.216778 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255674
+I1013 09:40:50.216818 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 182
+I1013 09:40:50.217308 24152 naive_actor.cpp:25] actor 2199023255653 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.217336 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255653
+I1013 09:40:50.217381 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 181
+I1013 09:40:50.217603 24152 naive_actor.cpp:25] actor 2199023255664 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.217629 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255664
+I1013 09:40:50.217669 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 180
+I1013 09:40:50.218180 24152 naive_actor.cpp:25] actor 2199023255634 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.218207 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255634
+I1013 09:40:50.218253 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 179
+I1013 09:40:50.218799 24152 naive_actor.cpp:25] actor 2199023255624 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.218827 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255624
+I1013 09:40:50.218874 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 178
+I1013 09:40:50.219503 24152 naive_actor.cpp:25] actor 2199023255643 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.219530 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255643
+I1013 09:40:50.219578 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 177
+I1013 09:40:50.220141 24152 naive_actor.cpp:25] actor 2199023255595 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.220198 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255595
+I1013 09:40:50.220250 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 176
+I1013 09:40:50.220896 24152 naive_actor.cpp:25] actor 2199023255691 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.220973 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255691
+I1013 09:40:50.221026 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 175
+I1013 09:40:50.221642 24152 naive_actor.cpp:25] actor 2199023255635 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.221669 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255635
+I1013 09:40:50.221716 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 174
+I1013 09:40:50.222226 24152 naive_actor.cpp:25] actor 2199023255642 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.222254 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255642
+I1013 09:40:50.222297 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 173
+I1013 09:40:50.222513 24152 naive_actor.cpp:25] actor 2199023255690 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.222538 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255690
+I1013 09:40:50.222579 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 172
+I1013 09:40:50.223105 24152 naive_actor.cpp:25] actor 2199023255650 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.223134 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255650
+I1013 09:40:50.223177 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 171
+I1013 09:40:50.223693 24152 naive_actor.cpp:25] actor 2199023255658 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.223722 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255658
+I1013 09:40:50.223767 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 170
+I1013 09:40:50.224339 24152 naive_actor.cpp:25] actor 2199023255660 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.224366 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255660
+I1013 09:40:50.224411 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 169
+I1013 09:40:50.225054 24152 naive_actor.cpp:25] actor 2199023255675 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.225081 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255675
+I1013 09:40:50.225131 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 168
+I1013 09:40:50.225806 24152 naive_actor.cpp:25] actor 2199023255641 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.225833 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255641
+I1013 09:40:50.225884 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 167
+I1013 09:40:50.226372 24152 naive_actor.cpp:25] actor 2199023255645 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.226399 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255645
+I1013 09:40:50.226451 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 166
+I1013 09:40:50.226935 24152 naive_actor.cpp:25] actor 2199023255591 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.226963 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255591
+I1013 09:40:50.227005 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 165
+I1013 09:40:50.227546 24152 naive_actor.cpp:25] actor 2199023255614 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.227573 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255614
+I1013 09:40:50.227617 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 164
+I1013 09:40:50.228102 24152 naive_actor.cpp:25] actor 2199023255657 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.228157 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255657
+I1013 09:40:50.228207 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 163
+I1013 09:40:50.228416 24152 naive_actor.cpp:25] actor 2199023255597 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.228467 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255597
+I1013 09:40:50.228510 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 162
+I1013 09:40:50.229038 24152 naive_actor.cpp:25] actor 2199023255636 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.229065 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255636
+I1013 09:40:50.229110 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 161
+I1013 09:40:50.229688 24152 naive_actor.cpp:25] actor 2199023255620 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.229715 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255620
+I1013 09:40:50.229761 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 160
+I1013 09:40:50.230239 24152 naive_actor.cpp:25] actor 2199023255652 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.230266 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255652
+I1013 09:40:50.230309 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 159
+I1013 09:40:50.230893 24152 naive_actor.cpp:25] actor 2199023255632 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.230918 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255632
+I1013 09:40:50.230963 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 158
+I1013 09:40:50.231536 24152 naive_actor.cpp:25] actor 2199023255646 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.231564 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255646
+I1013 09:40:50.231606 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 157
+I1013 09:40:50.232084 24152 naive_actor.cpp:25] actor 2199023255656 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.232110 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255656
+I1013 09:40:50.232153 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 156
+I1013 09:40:50.232687 24152 naive_actor.cpp:25] actor 2199023255655 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.232714 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255655
+I1013 09:40:50.232758 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 155
+I1013 09:40:50.233320 24152 naive_actor.cpp:25] actor 2199023255654 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.233347 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255654
+I1013 09:40:50.233390 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 154
+I1013 09:40:50.233950 24152 naive_actor.cpp:25] actor 2199023255648 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.233978 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255648
+I1013 09:40:50.234019 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 153
+I1013 09:40:50.234558 24152 naive_actor.cpp:25] actor 2199023255631 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.234586 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255631
+I1013 09:40:50.234630 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 152
+I1013 09:40:50.235244 24152 naive_actor.cpp:25] actor 2199023255671 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.235270 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255671
+I1013 09:40:50.235317 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 151
+I1013 09:40:50.235903 24152 naive_actor.cpp:25] actor 2199023255630 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.235977 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255630
+I1013 09:40:50.236025 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 150
+I1013 09:40:50.236590 24152 naive_actor.cpp:25] actor 2199023255644 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.236616 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255644
+I1013 09:40:50.236660 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 149
+I1013 09:40:50.237172 24152 naive_actor.cpp:25] actor 2199023255618 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.237198 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255618
+I1013 09:40:50.237241 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 148
+I1013 09:40:50.237747 24152 naive_actor.cpp:25] actor 2199023255651 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.237773 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255651
+I1013 09:40:50.237814 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 147
+I1013 09:40:50.238366 24152 naive_actor.cpp:25] actor 2199023255640 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.238390 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255640
+I1013 09:40:50.238442 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 146
+I1013 09:40:50.238641 24152 naive_actor.cpp:25] actor 2199023255682 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.238664 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255682
+I1013 09:40:50.238701 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 145
+I1013 09:40:50.238889 24152 naive_actor.cpp:25] actor 2199023255672 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.238914 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255672
+I1013 09:40:50.238950 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 144
+I1013 09:40:50.239496 24152 naive_actor.cpp:25] actor 2199023255649 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.239522 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255649
+I1013 09:40:50.239564 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 143
+I1013 09:40:50.240058 24152 naive_actor.cpp:25] actor 2199023255637 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.240084 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255637
+I1013 09:40:50.240128 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 142
+I1013 09:40:50.240725 24152 naive_actor.cpp:25] actor 2199023255683 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.240751 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255683
+I1013 09:40:50.240795 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 141
+I1013 09:40:50.240994 24152 naive_actor.cpp:25] actor 2199023255676 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.241019 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255676
+I1013 09:40:50.241056 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 140
+I1013 09:40:50.241268 24152 naive_actor.cpp:25] actor 2199023255698 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.241292 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255698
+I1013 09:40:50.241328 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 139
+I1013 09:40:50.241849 24152 naive_actor.cpp:25] actor 2199023255647 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.241875 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255647
+I1013 09:40:50.241916 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 138
+I1013 09:40:50.242592 24152 naive_actor.cpp:25] actor 2199023255689 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.242638 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255689
+I1013 09:40:50.242689 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 137
+I1013 09:40:50.243270 24152 naive_actor.cpp:25] actor 2199023255693 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.243296 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255693
+I1013 09:40:50.243342 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 136
+I1013 09:40:50.243809 24152 naive_actor.cpp:25] actor 2199023255596 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.243835 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255596
+I1013 09:40:50.243876 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 135
+I1013 09:40:50.244376 24152 naive_actor.cpp:25] actor 2199023255633 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.244402 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255633
+I1013 09:40:50.244453 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 134
+I1013 09:40:50.244654 24152 naive_actor.cpp:25] actor 2199023255662 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.244678 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255662
+I1013 09:40:50.244716 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 133
+I1013 09:40:50.245218 24152 naive_actor.cpp:25] actor 2199023255639 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.245244 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255639
+I1013 09:40:50.245286 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 132
+I1013 09:40:50.245505 24152 naive_actor.cpp:25] actor 2199023255684 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.245551 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255684
+I1013 09:40:50.245590 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 131
+I1013 09:40:50.246187 24152 naive_actor.cpp:25] actor 2199023255687 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.246213 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255687
+I1013 09:40:50.246256 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 130
+I1013 09:40:50.246459 24152 naive_actor.cpp:25] actor 2199023255680 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.246482 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255680
+I1013 09:40:50.246520 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 129
+I1013 09:40:50.246702 24152 naive_actor.cpp:25] actor 2199023255694 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.246745 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255694
+I1013 09:40:50.246784 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 128
+I1013 09:40:50.246982 24152 naive_actor.cpp:25] actor 2199023255699 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.247005 24152 thread.cpp:96] Thread 1048576 construct Actor kDeviceTick 2199023255699
+I1013 09:40:50.247040 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 127
+I1013 09:40:50.247241 24152 naive_actor.cpp:25] actor 2199023255696 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.247264 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255696
+I1013 09:40:50.247299 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 126
+I1013 09:40:50.247870 24152 naive_actor.cpp:25] actor 2199023255679 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.247895 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255679
+I1013 09:40:50.247964 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 125
+I1013 09:40:50.248160 24152 naive_actor.cpp:25] actor 2199023255678 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.248200 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255678
+I1013 09:40:50.248239 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 124
+I1013 09:40:50.248435 24152 naive_actor.cpp:25] actor 2199023255692 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.248459 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255692
+I1013 09:40:50.248493 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 123
+I1013 09:40:50.248673 24152 naive_actor.cpp:25] actor 2199023255666 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.248697 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255666
+I1013 09:40:50.248731 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 122
+I1013 09:40:50.248906 24152 naive_actor.cpp:25] actor 2199023255688 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.248929 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255688
+I1013 09:40:50.248963 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 121
+I1013 09:40:50.249523 24152 naive_actor.cpp:25] actor 2199023255697 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.249547 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255697
+I1013 09:40:50.249590 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 120
+I1013 09:40:50.250146 24152 naive_actor.cpp:25] actor 2199023255685 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.250170 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255685
+I1013 09:40:50.250213 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 119
+I1013 09:40:50.250778 24152 naive_actor.cpp:25] actor 2199023255695 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.250802 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255695
+I1013 09:40:50.250845 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 118
+I1013 09:40:50.251338 24152 naive_actor.cpp:25] actor 2199023255638 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.251363 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255638
+I1013 09:40:50.251405 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 117
+I1013 09:40:50.251966 24152 naive_actor.cpp:25] actor 2199023255681 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.251991 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255681
+I1013 09:40:50.252033 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 116
+I1013 09:40:50.252225 24152 naive_actor.cpp:25] actor 2199023255668 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.252249 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255668
+I1013 09:40:50.252285 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 115
+I1013 09:40:50.252473 24152 naive_actor.cpp:25] actor 2199023255686 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.252496 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255686
+I1013 09:40:50.252532 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 114
+I1013 09:40:50.252712 24152 naive_actor.cpp:25] actor 2199023255703 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.252735 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255703
+I1013 09:40:50.252769 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 113
+I1013 09:40:50.252946 24152 naive_actor.cpp:25] actor 2199023255711 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.252969 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255711
+I1013 09:40:50.253029 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 112
+I1013 09:40:50.253212 24152 naive_actor.cpp:25] actor 2199023255718 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.253252 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255718
+I1013 09:40:50.253290 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 111
+I1013 09:40:50.253477 24152 naive_actor.cpp:25] actor 2199023255715 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.253500 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255715
+I1013 09:40:50.253535 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 110
+I1013 09:40:50.253720 24152 naive_actor.cpp:25] actor 2199023255702 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.253742 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255702
+I1013 09:40:50.253777 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 109
+I1013 09:40:50.253952 24152 naive_actor.cpp:25] actor 2199023255701 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.253975 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255701
+I1013 09:40:50.254009 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 108
+I1013 09:40:50.254185 24152 naive_actor.cpp:25] actor 2199023255710 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.254207 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255710
+I1013 09:40:50.254242 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 107
+I1013 09:40:50.254418 24152 naive_actor.cpp:25] actor 2199023255708 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.254451 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255708
+I1013 09:40:50.254487 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 106
+I1013 09:40:50.254662 24152 naive_actor.cpp:25] actor 2199023255706 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.254685 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255706
+I1013 09:40:50.254720 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 105
+I1013 09:40:50.254894 24152 naive_actor.cpp:25] actor 2199023255712 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.254916 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255712
+I1013 09:40:50.254951 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 104
+I1013 09:40:50.255131 24152 naive_actor.cpp:25] actor 2199023255707 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.255154 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255707
+I1013 09:40:50.255188 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 103
+I1013 09:40:50.255362 24152 naive_actor.cpp:25] actor 2199023255713 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.255384 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255713
+I1013 09:40:50.255419 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 102
+I1013 09:40:50.255605 24152 naive_actor.cpp:25] actor 2199023255705 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.255627 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255705
+I1013 09:40:50.255662 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 101
+I1013 09:40:50.255842 24152 naive_actor.cpp:25] actor 2199023255709 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.255864 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255709
+I1013 09:40:50.255899 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 100
+I1013 09:40:50.256080 24152 naive_actor.cpp:25] actor 2199023255714 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.256127 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255714
+I1013 09:40:50.256193 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 99
+I1013 09:40:50.256382 24152 naive_actor.cpp:25] actor 2199023255721 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.256422 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255721
+I1013 09:40:50.256469 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 98
+I1013 09:40:50.256641 24152 naive_actor.cpp:25] actor 2199023255717 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.256664 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255717
+I1013 09:40:50.256697 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 97
+I1013 09:40:50.256876 24152 naive_actor.cpp:25] actor 2199023255720 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.256898 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255720
+I1013 09:40:50.256933 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 96
+I1013 09:40:50.257108 24152 naive_actor.cpp:25] actor 2199023255723 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.257131 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255723
+I1013 09:40:50.257165 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 95
+I1013 09:40:50.257344 24152 naive_actor.cpp:25] actor 2199023255725 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.257366 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255725
+I1013 09:40:50.257401 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 94
+I1013 09:40:50.257586 24152 naive_actor.cpp:25] actor 2199023255722 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.257609 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255722
+I1013 09:40:50.257643 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 93
+I1013 09:40:50.257836 24152 naive_actor.cpp:25] actor 2199023255719 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.257858 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255719
+I1013 09:40:50.257892 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 92
+I1013 09:40:50.258064 24152 naive_actor.cpp:25] actor 2199023255724 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.258085 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255724
+I1013 09:40:50.258118 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 91
+I1013 09:40:50.258288 24152 naive_actor.cpp:25] actor 2199023255704 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.258311 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255704
+I1013 09:40:50.258345 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 90
+I1013 09:40:50.258527 24152 naive_actor.cpp:25] actor 2199023255727 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.258548 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255727
+I1013 09:40:50.258581 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 89
+I1013 09:40:50.258751 24152 naive_actor.cpp:25] actor 2199023255730 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.258774 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255730
+I1013 09:40:50.258807 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 88
+I1013 09:40:50.258978 24152 naive_actor.cpp:25] actor 2199023255726 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.258999 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255726
+I1013 09:40:50.259033 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 87
+I1013 09:40:50.259210 24152 naive_actor.cpp:25] actor 2199023255731 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.259254 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255731
+I1013 09:40:50.259294 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 86
+I1013 09:40:50.259481 24152 naive_actor.cpp:25] actor 2199023255733 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.259521 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255733
+I1013 09:40:50.259557 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 85
+I1013 09:40:50.259732 24152 naive_actor.cpp:25] actor 2199023255729 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.259754 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255729
+I1013 09:40:50.259788 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 84
+I1013 09:40:50.259963 24152 naive_actor.cpp:25] actor 2199023255728 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.259984 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255728
+I1013 09:40:50.260020 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 83
+I1013 09:40:50.260188 24152 naive_actor.cpp:25] actor 2199023255732 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.260211 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255732
+I1013 09:40:50.260246 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 82
+I1013 09:40:50.260418 24152 naive_actor.cpp:25] actor 2199023255735 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.260448 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255735
+I1013 09:40:50.260483 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 81
+I1013 09:40:50.260659 24152 naive_actor.cpp:25] actor 2199023255734 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.260681 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255734
+I1013 09:40:50.260715 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 80
+I1013 09:40:50.260886 24152 naive_actor.cpp:25] actor 2199023255736 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.260908 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255736
+I1013 09:40:50.260942 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 79
+I1013 09:40:50.261114 24152 naive_actor.cpp:25] actor 2199023255716 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.261137 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255716
+I1013 09:40:50.261170 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 78
+I1013 09:40:50.261355 24152 naive_actor.cpp:25] actor 2199023255738 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.261377 24152 thread.cpp:96] Thread 1048576 construct Actor kDeviceTick 2199023255738
+I1013 09:40:50.261410 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 77
+I1013 09:40:50.262565 24152 naive_actor.cpp:25] actor 2199023255737 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.262590 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255737
+I1013 09:40:50.262688 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 76
+I1013 09:40:50.262881 24152 naive_actor.cpp:25] actor 2199023255746 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.262902 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255746
+I1013 09:40:50.262938 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 75
+I1013 09:40:50.263118 24152 naive_actor.cpp:25] actor 2199023255749 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.263140 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255749
+I1013 09:40:50.263175 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 74
+I1013 09:40:50.263350 24152 naive_actor.cpp:25] actor 2199023255761 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.263396 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255761
+I1013 09:40:50.263442 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 73
+I1013 09:40:50.263629 24152 naive_actor.cpp:25] actor 2199023255759 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.263669 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255759
+I1013 09:40:50.263706 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 72
+I1013 09:40:50.263890 24152 naive_actor.cpp:25] actor 2199023255748 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.263911 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255748
+I1013 09:40:50.263947 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 71
+I1013 09:40:50.264120 24152 naive_actor.cpp:25] actor 2199023255741 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.264142 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255741
+I1013 09:40:50.264176 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 70
+I1013 09:40:50.264349 24152 naive_actor.cpp:25] actor 2199023255740 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.264371 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255740
+I1013 09:40:50.264406 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 69
+I1013 09:40:50.264587 24152 naive_actor.cpp:25] actor 2199023255747 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.264609 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255747
+I1013 09:40:50.264643 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 68
+I1013 09:40:50.264817 24152 naive_actor.cpp:25] actor 2199023255752 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.264839 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255752
+I1013 09:40:50.264873 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 67
+I1013 09:40:50.265053 24152 naive_actor.cpp:25] actor 2199023255750 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.265075 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255750
+I1013 09:40:50.265108 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 66
+I1013 09:40:50.265281 24152 naive_actor.cpp:25] actor 2199023255751 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.265305 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255751
+I1013 09:40:50.265338 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 65
+I1013 09:40:50.265525 24152 naive_actor.cpp:25] actor 2199023255753 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.265548 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255753
+I1013 09:40:50.265583 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 64
+I1013 09:40:50.265755 24152 naive_actor.cpp:25] actor 2199023255743 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.265779 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255743
+I1013 09:40:50.265811 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 63
+I1013 09:40:50.265983 24152 naive_actor.cpp:25] actor 2199023255744 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.266006 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255744
+I1013 09:40:50.266041 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 62
+I1013 09:40:50.266242 24152 naive_actor.cpp:25] actor 2199023255760 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.266264 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255760
+I1013 09:40:50.266299 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 61
+I1013 09:40:50.266516 24152 naive_actor.cpp:25] actor 2199023255763 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.266557 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255763
+I1013 09:40:50.266595 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 60
+I1013 09:40:50.266770 24152 naive_actor.cpp:25] actor 2199023255758 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.266793 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255758
+I1013 09:40:50.266826 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 59
+I1013 09:40:50.267000 24152 naive_actor.cpp:25] actor 2199023255756 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.267022 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255756
+I1013 09:40:50.267055 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 58
+I1013 09:40:50.267230 24152 naive_actor.cpp:25] actor 2199023255762 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.267253 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255762
+I1013 09:40:50.267287 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 57
+I1013 09:40:50.267469 24152 naive_actor.cpp:25] actor 2199023255766 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.267491 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255766
+I1013 09:40:50.267525 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 56
+I1013 09:40:50.267701 24152 naive_actor.cpp:25] actor 2199023255764 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.267745 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255764
+I1013 09:40:50.267778 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 55
+I1013 09:40:50.267956 24152 naive_actor.cpp:25] actor 2199023255768 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.267977 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255768
+I1013 09:40:50.268011 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 54
+I1013 09:40:50.268182 24152 naive_actor.cpp:25] actor 2199023255769 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.268203 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255769
+I1013 09:40:50.268239 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 53
+I1013 09:40:50.268409 24152 naive_actor.cpp:25] actor 2199023255765 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.268437 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255765
+I1013 09:40:50.268472 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 52
+I1013 09:40:50.268646 24152 naive_actor.cpp:25] actor 2199023255754 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.268669 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255754
+I1013 09:40:50.268702 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 51
+I1013 09:40:50.268873 24152 naive_actor.cpp:25] actor 2199023255767 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.268895 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255767
+I1013 09:40:50.268930 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 50
+I1013 09:40:50.269099 24152 naive_actor.cpp:25] actor 2199023255755 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.269120 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255755
+I1013 09:40:50.269155 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 49
+I1013 09:40:50.269330 24152 naive_actor.cpp:25] actor 2199023255757 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.269351 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255757
+I1013 09:40:50.269384 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 48
+I1013 09:40:50.269594 24152 naive_actor.cpp:25] actor 2199023255772 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.269634 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255772
+I1013 09:40:50.269671 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 47
+I1013 09:40:50.269845 24152 naive_actor.cpp:25] actor 2199023255771 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.269866 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255771
+I1013 09:40:50.269901 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 46
+I1013 09:40:50.270071 24152 naive_actor.cpp:25] actor 2199023255773 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.270092 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255773
+I1013 09:40:50.270126 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 45
+I1013 09:40:50.270298 24152 naive_actor.cpp:25] actor 2199023255770 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.270319 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255770
+I1013 09:40:50.270354 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 44
+I1013 09:40:50.270537 24152 naive_actor.cpp:25] actor 2199023255774 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.270560 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255774
+I1013 09:40:50.270592 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 43
+I1013 09:40:50.270761 24152 naive_actor.cpp:25] actor 2199023255775 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.270783 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255775
+I1013 09:40:50.270817 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 42
+I1013 09:40:50.270999 24152 naive_actor.cpp:25] actor 2199023255777 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.271021 24152 thread.cpp:96] Thread 1048576 construct Actor kDeviceTick 2199023255777
+I1013 09:40:50.271054 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 41
+I1013 09:40:50.271227 24152 naive_actor.cpp:25] actor 2199023255745 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.271250 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255745
+I1013 09:40:50.271284 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 40
+I1013 09:40:50.271462 24152 naive_actor.cpp:25] actor 2199023255742 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.271484 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255742
+I1013 09:40:50.271518 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 39
+I1013 09:40:50.272651 24152 naive_actor.cpp:25] actor 2199023255776 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.272675 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255776
+I1013 09:40:50.272773 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 38
+I1013 09:40:50.272961 24152 naive_actor.cpp:25] actor 2199023255785 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.272984 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255785
+I1013 09:40:50.273020 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 37
+I1013 09:40:50.273200 24152 naive_actor.cpp:25] actor 2199023255792 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.273222 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255792
+I1013 09:40:50.273257 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 36
+I1013 09:40:50.273444 24152 naive_actor.cpp:25] actor 2199023255797 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.273466 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255797
+I1013 09:40:50.273500 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 35
+I1013 09:40:50.273701 24152 naive_actor.cpp:25] actor 2199023255788 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.273741 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255788
+I1013 09:40:50.273778 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 34
+I1013 09:40:50.273955 24152 naive_actor.cpp:25] actor 2199023255787 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.273977 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255787
+I1013 09:40:50.274011 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 33
+I1013 09:40:50.274186 24152 naive_actor.cpp:25] actor 2199023255784 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.274209 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255784
+I1013 09:40:50.274242 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 32
+I1013 09:40:50.274413 24152 naive_actor.cpp:25] actor 2199023255781 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.274443 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255781
+I1013 09:40:50.274478 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 31
+I1013 09:40:50.274649 24152 naive_actor.cpp:25] actor 2199023255786 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.274672 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255786
+I1013 09:40:50.274705 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 30
+I1013 09:40:50.274881 24152 naive_actor.cpp:25] actor 2199023255791 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.274904 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255791
+I1013 09:40:50.274937 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 29
+I1013 09:40:50.275106 24152 naive_actor.cpp:25] actor 2199023255780 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.275128 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255780
+I1013 09:40:50.275162 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 28
+I1013 09:40:50.275333 24152 naive_actor.cpp:25] actor 2199023255779 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.275355 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255779
+I1013 09:40:50.275388 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 27
+I1013 09:40:50.275565 24152 naive_actor.cpp:25] actor 2199023255782 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.275588 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255782
+I1013 09:40:50.275622 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 26
+I1013 09:40:50.275794 24152 naive_actor.cpp:25] actor 2199023255789 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.275815 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255789
+I1013 09:40:50.275849 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 25
+I1013 09:40:50.276021 24152 naive_actor.cpp:25] actor 2199023255790 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.276042 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255790
+I1013 09:40:50.276075 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 24
+I1013 09:40:50.276249 24152 naive_actor.cpp:25] actor 2199023255793 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.276271 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255793
+I1013 09:40:50.276305 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 23
+I1013 09:40:50.276484 24152 naive_actor.cpp:25] actor 2199023255783 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.276506 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255783
+I1013 09:40:50.276563 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 22
+I1013 09:40:50.276743 24152 naive_actor.cpp:25] actor 2199023255795 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.276782 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255795
+I1013 09:40:50.276819 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 21
+I1013 09:40:50.276990 24152 naive_actor.cpp:25] actor 2199023255802 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.277012 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255802
+I1013 09:40:50.277046 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 20
+I1013 09:40:50.277215 24152 naive_actor.cpp:25] actor 2199023255805 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.277237 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255805
+I1013 09:40:50.277271 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 19
+I1013 09:40:50.277447 24152 naive_actor.cpp:25] actor 2199023255799 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.277469 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255799
+I1013 09:40:50.277503 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 18
+I1013 09:40:50.277680 24152 naive_actor.cpp:25] actor 2199023255801 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.277702 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255801
+I1013 09:40:50.277736 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 17
+I1013 09:40:50.277904 24152 naive_actor.cpp:25] actor 2199023255804 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.277926 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255804
+I1013 09:40:50.277961 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 16
+I1013 09:40:50.278136 24152 naive_actor.cpp:25] actor 2199023255803 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.278158 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255803
+I1013 09:40:50.278192 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 15
+I1013 09:40:50.278363 24152 naive_actor.cpp:25] actor 2199023255810 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.278385 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255810
+I1013 09:40:50.278419 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 14
+I1013 09:40:50.278594 24152 naive_actor.cpp:25] actor 2199023255809 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.278616 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255809
+I1013 09:40:50.278650 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 13
+I1013 09:40:50.278818 24152 naive_actor.cpp:25] actor 2199023255808 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.278841 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255808
+I1013 09:40:50.278873 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 12
+I1013 09:40:50.279052 24152 naive_actor.cpp:25] actor 2199023255794 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.279074 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255794
+I1013 09:40:50.279107 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 11
+I1013 09:40:50.279278 24152 naive_actor.cpp:25] actor 2199023255806 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.279299 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255806
+I1013 09:40:50.279332 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 10
+I1013 09:40:50.279510 24152 naive_actor.cpp:25] actor 2199023255796 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.279532 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255796
+I1013 09:40:50.279592 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 9
+I1013 09:40:50.279768 24152 naive_actor.cpp:25] actor 2199023255807 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.279806 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255807
+I1013 09:40:50.279843 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 8
+I1013 09:40:50.280014 24152 naive_actor.cpp:25] actor 2199023255800 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.280035 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255800
+I1013 09:40:50.280069 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 7
+I1013 09:40:50.280241 24152 naive_actor.cpp:25] actor 2199023255813 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.280263 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255813
+I1013 09:40:50.280297 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 6
+I1013 09:40:50.280485 24152 naive_actor.cpp:25] actor 2199023255811 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.280508 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255811
+I1013 09:40:50.280541 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 5
+I1013 09:40:50.280722 24152 naive_actor.cpp:25] actor 2199023255816 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.280745 24152 thread.cpp:96] Thread 1048576 construct Actor kDeviceTick 2199023255816
+I1013 09:40:50.280777 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 4
+I1013 09:40:50.280951 24152 naive_actor.cpp:25] actor 2199023255812 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.280974 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255812
+I1013 09:40:50.281008 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 3
+I1013 09:40:50.281180 24152 naive_actor.cpp:25] actor 2199023255814 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.281203 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255814
+I1013 09:40:50.281235 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 2
+I1013 09:40:50.281405 24152 naive_actor.cpp:25] actor 2199023255798 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.281433 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255798
+I1013 09:40:50.281468 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 1
+I1013 09:40:50.282611 24152 naive_actor.cpp:25] actor 2199023255815 switch to &NaiveActor::HandlerNormal
+I1013 09:40:50.282636 24152 thread.cpp:96] Thread 1048576 construct Actor kNormalForward 2199023255815
+I1013 09:40:50.282742 24152 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 0
+I1013 09:40:50.284590 23612 runtime.cpp:93] Actors on this machine constructed
+I1013 09:40:50.284646 23612 runtime.cpp:95] Actors on every machine constructed
+I1013 09:40:50.284677 23612 runtime_context.cpp:21] NewCounter job_5_running_actor_count 41
+I1013 09:40:50.284698 23612 runtime_context.cpp:21] NewCounter job_4_running_actor_count 16
+I1013 09:40:50.284715 23612 runtime_context.cpp:21] NewCounter job_3_running_actor_count 51
+I1013 09:40:50.284732 23612 runtime_context.cpp:21] NewCounter job_2_running_actor_count 51
+I1013 09:40:50.284749 23612 runtime_context.cpp:21] NewCounter job_0_running_actor_count 191
+I1013 09:40:50.284765 23612 runtime_context.cpp:21] NewCounter job_1_running_actor_count 50
+I1013 09:40:50.284842 24149 wait_and_send_ids_actor.cpp:73] actor 1099616485376 switch to &WaitAndSendIdsActor::HandlerNormal
+I1013 09:40:50.284971 23612 global.h:36] NewGlobal N7oneflow7JobDescE
+I1013 09:40:50.311904 23612 global.h:43] DeleteGlobal N7oneflow7JobDescE

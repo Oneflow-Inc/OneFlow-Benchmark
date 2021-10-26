@@ -1,0 +1,36 @@
+digraph {
+"9532" [label="Return_27\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9533" [label="System-Pull-ForeignOutput_74\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9534" [label="System-AutoTick-Prepend-DeviceTick_139\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9535" [label="System-AutoTick-SrcSubsetTick_140\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9536" [label="System-AutoTick-AppendDeviceTick_141\n0:cpu:0\nop_time_shape:(1,1)"]
+"9537" [label="System-AutoTick-SourceTick_142\n0:cpu:0\nop_time_shape:(1,1)"]
+"9538" [label="System-AutoTick-Tick_143\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9539" [label="System-AutoTick-DstSubsetTick_144\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9540" [label="System-AutoTick-Tick_145\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9541" [label="System-AutoTick-SinkTick_146\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9542" [label="System-AutoTick-PrependTick_147\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9543" [label="System-AutoTick-AppendDeviceTick_148\n0:cpu:0\nop_time_shape:(1,1)"]
+"9544" [label="System-AutoTick-SrcSubsetTick_149\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9545" [label="System-AutoTick-SourceTick_150\n0:cpu:0\nop_time_shape:(1,1)"]
+"9546" [label="System-AutoTick-Tick_151\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9547" [label="System-AutoTick-DstSubsetTick_152\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9548" [label="System-AutoTick-Tick_153\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9549" [label="System-AutoTick-SinkTick_154\n0:cpu:0\nin_blob_time_shape:(1,1)\nop_time_shape:(1,1)"]
+"9534" -> "9532"[label="out:(1,)"];
+"9532" -> "9533"[label="out:()"];
+"9535" -> "9534"[label="out:(1,)"];
+"9538" -> "9535"[label="out:(1,)"];
+"9537" -> "9538"[label="out:(1,)"];
+"9536" -> "9539"[label="out:(1,)"];
+"9535" -> "9539"[label="out:(1,)"];
+"9539" -> "9540"[label="out:(1,)"];
+"9540" -> "9541"[label="out:(1,)"];
+"9544" -> "9542"[label="out:(1,)"];
+"9546" -> "9544"[label="out:(1,)"];
+"9545" -> "9546"[label="out:(1,)"];
+"9543" -> "9547"[label="out:(1,)"];
+"9544" -> "9547"[label="out:(1,)"];
+"9547" -> "9548"[label="out:(1,)"];
+"9548" -> "9549"[label="out:(1,)"];
+}

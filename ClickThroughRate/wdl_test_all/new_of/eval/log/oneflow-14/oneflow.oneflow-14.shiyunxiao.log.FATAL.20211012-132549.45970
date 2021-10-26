@@ -1,0 +1,8 @@
+Log file created at: 2021/10/12 13:25:49
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F1012 13:25:49.809736 45970 parallel_desc.cpp:77] 
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/job/parallel_desc.cpp", line 77, in ParallelDesc
+    CheckWithResourceDesc(*(Global<ResourceDesc, ForSession>::Get()))
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/job/parallel_desc.cpp", line 297, in CheckWithResourceDesc
+    Check failed: (dev_phy_id) < (resource_desc.GpuDeviceNum()) (4 vs 2)

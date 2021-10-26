@@ -21,6 +21,7 @@ python3 -m oneflow.distributed.launch \
         --max_iter 100 \
         --execution_mode 'eager' \
         --test_name 'n1g1_eager_mem' \
+        --use_single_dataloader_thread \
         --model_load_dir "/home/shiyunxiao/checkpoint_new" \
 
         

@@ -26,6 +26,7 @@ import numpy as np
 import time
 import pandas as pd
 import sys
+import oneflow.compatible.single_client.typing as tp
 
 def str_list(x):
     return x.split(',')
@@ -37,7 +38,7 @@ parser.add_argument(
     action="store_true",
     help="use single dataloader threads per node or not."
 )
-parser.add_argument('--num_dataloader_thread_per_gpu', type=int, default=2)
+parser.add_argument('--num_dataloader_thread_per_gpu', type=int, default=1)
 parser.add_argument('--train_data_dir', type=str, default='')
 parser.add_argument('--train_data_part_num', type=int, default=1)
 parser.add_argument('--train_part_name_suffix_length', type=int, default=5)
@@ -84,18 +85,17 @@ def _data_loader(data_dir, data_part_num, batch_size, part_name_suffix_length=-1
     with flow.scope.placement("cpu", devices):
         if FLAGS.dataset_format == 'ofrecord':
             data = _data_loader_ofrecord(data_dir, data_part_num, batch_size, 
-                                         part_name_suffix_length, shuffle) 
+                                            part_name_suffix_length, shuffle) 
         elif FLAGS.dataset_format == 'onerec':
             data = _data_loader_onerec(data_dir, batch_size, shuffle)
         elif FLAGS.dataset_format == 'synthetic':
             data = _data_loader_synthetic(batch_size)
         else:
             assert 0, "Please specify dataset_type as `ofrecord`, `onerec` or `synthetic`."
-    return flow.identity_n(data)
+        return flow.identity_n(data)
     
-
 def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_length=-1,
-                          shuffle=True):
+                          shuffle=False):
     assert data_dir
     print('load ofrecord data form', data_dir)
     ofrecord = flow.data.ofrecord_reader(data_dir,
@@ -110,8 +110,9 @@ def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_
     dense_fields = _blob_decoder("dense_fields", (FLAGS.num_dense_fields,), flow.float)
     wide_sparse_fields = _blob_decoder("wide_sparse_fields", (FLAGS.num_wide_sparse_fields,))
     deep_sparse_fields = _blob_decoder("deep_sparse_fields", (FLAGS.num_deep_sparse_fields,))
+        
     return [labels, dense_fields, wide_sparse_fields, deep_sparse_fields]
-
+    
 
 def _data_loader_synthetic(batch_size):
     def _blob_random(shape, dtype=flow.int32, initializer=flow.zeros_initializer(flow.int32)):
@@ -146,6 +147,17 @@ def _data_loader_onerec(data_dir, batch_size, shuffle):
     return [labels, dense_fields, wide_sparse_fields, deep_sparse_fields]
 
 
+
+def watch_handler_field(y: tp.Numpy):
+    with open('/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/field_benchmark2.txt',mode='w+') as f:
+        for i in y:
+            f.write(str(i))
+            f.write('\n')
+def watch_handler_embedding(y: tp.Numpy):
+    with open('/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/embedding_benchmark2.txt',mode='w+') as f:
+        for i in y:
+            f.write(str(i))
+            f.write('\n')
 def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
     wide_sparse_fields = flow.parallel_cast(wide_sparse_fields, distribute=flow.distribute.broadcast())
     wide_embedding_table = flow.get_variable(
@@ -167,7 +179,10 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
         initializer=flow.random_uniform_initializer(minval=-0.05, maxval=0.05),
         distribute=flow.distribute.split(1),
     )
+
     deep_embedding = flow.gather(params=deep_embedding_table, indices=deep_sparse_fields)
+
+
     deep_embedding = flow.parallel_cast(deep_embedding, distribute=flow.distribute.split(0),
                                         gradient_distribute=flow.distribute.split(2))
     deep_embedding = flow.reshape(deep_embedding, shape=(-1, deep_embedding.shape[-1] * deep_embedding.shape[-2]))
@@ -229,10 +244,15 @@ def _create_train_callback(step):
         for i in range(FLAGS.gpu_num_per_node):
             record_dict['memory_usage_%s/MB'%i]=get_memory_usage(i)
         records.append(record_dict)
+        if (step + 1)==FLAGS.max_iter:
+            df=pandas.DataFrame.from_dict(records, orient='columns')
+            df.to_csv('/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/wdl_test_all/results/old/%s.csv'%(FLAGS.test_name),index=False)
+
+
         global_loss = 0.0
         time_begin=time.time()
 
-    if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
+    if (step + 1)% FLAGS.loss_print_every_n_iter == 0:
         return print_loss
     else:
         return nop
@@ -256,14 +276,13 @@ def train_job():
         _data_loader(data_dir=FLAGS.train_data_dir, data_part_num=FLAGS.train_data_part_num, 
                      batch_size=FLAGS.batch_size, 
                      part_name_suffix_length=FLAGS.train_part_name_suffix_length, shuffle=False)
+
     logits = _model(dense_fields, wide_sparse_fields, deep_sparse_fields)
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
     opt = CreateOptimizer(FLAGS)
     opt.minimize(loss)
     loss = flow.math.reduce_mean(loss)
     return loss
-
-
 
 
 def InitNodes(args):
@@ -298,16 +317,12 @@ def main():
     flow.config.enable_debug_mode(True)
     flow.config.enable_legacy_model_io(True)
     flow.config.nccl_use_compute_stream(True)
-    # flow.config.collective_boxing.nccl_enable_all_to_all(True)
-    #flow.config.enable_numa_aware_cuda_malloc_host(True)
-    #flow.config.collective_boxing.enable_fusion(False)
     check_point = flow.train.CheckPoint()
     check_point.load('/home/shiyunxiao/checkpoint_old')
     global time_begin
     time_begin=time.time()
     for i in range(FLAGS.max_iter):
         train_job().async_get(_create_train_callback(i))
-    df=pandas.DataFrame.from_dict(records, orient='columns')
-    df.to_csv('/home/shiyunxiao/wdl_test_all/results/old/%s.csv'%(FLAGS.test_name),index=False)
+
 if __name__ == '__main__':
     main()

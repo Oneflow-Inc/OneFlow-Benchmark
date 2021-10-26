@@ -17,7 +17,7 @@ python3 -m oneflow.distributed.launch \
         --deep_embedding_vec_size 16 \
         --batch_size 32 \
         --print_interval 1 \
-        --deep_dropout_rate 0.5 \
+        --deep_dropout_rate 0 \
         --max_iter 100 \
         --execution_mode 'eager' \
         --ddp \

@@ -1,0 +1,5 @@
+src_op_name,dst_op_name,src_parallel_desc,dst_parallel_desc,src_nd_sbp,dst_nd_sbp,lbi,dtype,shape,builder,comment
+System-AutoTick-SourceTick_142,System-AutoTick-Tick_143,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-SourceTick_142/out,kInt8,(1),OneToOneSubTskGphBuilder,-
+System-AutoTick-Tick_145,System-AutoTick-SinkTick_146,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-Tick_145/out,kInt8,(1),OneToOneSubTskGphBuilder,-
+System-AutoTick-SourceTick_150,System-AutoTick-Tick_151,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-SourceTick_150/out,kInt8,(1),OneToOneSubTskGphBuilder,-
+System-AutoTick-Tick_153,System-AutoTick-SinkTick_154,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-Tick_153/out,kInt8,(1),OneToOneSubTskGphBuilder,-

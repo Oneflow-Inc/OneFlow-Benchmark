@@ -1,0 +1,3265 @@
+net {
+  op {
+    name: "OFRecord_Reader_0"
+    device_tag: "cpu"
+    scope_symbol_id: 4611686018427441150
+    user_conf {
+      op_type_name: "OFRecordReader"
+      output {
+        key: "out"
+        value {
+          s: "OFRecord_Reader_0/out_0"
+        }
+      }
+      attr {
+        key: "batch_size"
+        value {
+          at_int32: 16384
+        }
+      }
+      attr {
+        key: "data_dir"
+        value {
+          at_string: "/dataset/wdl_ofrecord/ofrecord/train"
+        }
+      }
+      attr {
+        key: "data_part_num"
+        value {
+          at_int32: 256
+        }
+      }
+      attr {
+        key: "nd_sbp"
+        value {
+          at_list_string {
+          }
+        }
+      }
+      attr {
+        key: "part_name_prefix"
+        value {
+          at_string: "part-"
+        }
+      }
+      attr {
+        key: "part_name_suffix_length"
+        value {
+          at_int32: 5
+        }
+      }
+      attr {
+        key: "random_shuffle"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "seed"
+        value {
+          at_int64: -1
+        }
+      }
+      attr {
+        key: "shuffle_after_epoch"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "shuffle_buffer_size"
+        value {
+          at_int32: 1024
+        }
+      }
+    }
+  }
+  op {
+    name: "OFRecordRawDecoder_1"
+    device_tag: "cpu"
+    scope_symbol_id: 4611686018427441150
+    user_conf {
+      op_type_name: "ofrecord_raw_decoder"
+      input {
+        key: "in"
+        value {
+          s: "OFRecord_Reader_0/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "OFRecordRawDecoder_1/out_0"
+        }
+      }
+      attr {
+        key: "data_type"
+        value {
+          at_data_type: kInt32
+        }
+      }
+      attr {
+        key: "dim1_varying_length"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "name"
+        value {
+          at_string: "labels"
+        }
+      }
+      attr {
+        key: "shape"
+        value {
+          at_shape {
+            dim: 1
+          }
+        }
+      }
+      attr {
+        key: "truncate"
+        value {
+          at_bool: false
+        }
+      }
+    }
+  }
+  op {
+    name: "OFRecordRawDecoder_2"
+    device_tag: "cpu"
+    scope_symbol_id: 4611686018427441150
+    user_conf {
+      op_type_name: "ofrecord_raw_decoder"
+      input {
+        key: "in"
+        value {
+          s: "OFRecord_Reader_0/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "OFRecordRawDecoder_2/out_0"
+        }
+      }
+      attr {
+        key: "data_type"
+        value {
+          at_data_type: kFloat
+        }
+      }
+      attr {
+        key: "dim1_varying_length"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "name"
+        value {
+          at_string: "dense_fields"
+        }
+      }
+      attr {
+        key: "shape"
+        value {
+          at_shape {
+            dim: 13
+          }
+        }
+      }
+      attr {
+        key: "truncate"
+        value {
+          at_bool: false
+        }
+      }
+    }
+  }
+  op {
+    name: "OFRecordRawDecoder_3"
+    device_tag: "cpu"
+    scope_symbol_id: 4611686018427441150
+    user_conf {
+      op_type_name: "ofrecord_raw_decoder"
+      input {
+        key: "in"
+        value {
+          s: "OFRecord_Reader_0/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "OFRecordRawDecoder_3/out_0"
+        }
+      }
+      attr {
+        key: "data_type"
+        value {
+          at_data_type: kInt32
+        }
+      }
+      attr {
+        key: "dim1_varying_length"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "name"
+        value {
+          at_string: "wide_sparse_fields"
+        }
+      }
+      attr {
+        key: "shape"
+        value {
+          at_shape {
+            dim: 2
+          }
+        }
+      }
+      attr {
+        key: "truncate"
+        value {
+          at_bool: false
+        }
+      }
+    }
+  }
+  op {
+    name: "OFRecordRawDecoder_4"
+    device_tag: "cpu"
+    scope_symbol_id: 4611686018427441150
+    user_conf {
+      op_type_name: "ofrecord_raw_decoder"
+      input {
+        key: "in"
+        value {
+          s: "OFRecord_Reader_0/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "OFRecordRawDecoder_4/out_0"
+        }
+      }
+      attr {
+        key: "data_type"
+        value {
+          at_data_type: kInt32
+        }
+      }
+      attr {
+        key: "dim1_varying_length"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "name"
+        value {
+          at_string: "deep_sparse_fields"
+        }
+      }
+      attr {
+        key: "shape"
+        value {
+          at_shape {
+            dim: 26
+          }
+        }
+      }
+      attr {
+        key: "truncate"
+        value {
+          at_bool: false
+        }
+      }
+    }
+  }
+  op {
+    name: "IdentityN_5"
+    device_tag: "cpu"
+    scope_symbol_id: 4611686018427441150
+    user_conf {
+      op_type_name: "tuple_identity"
+      input {
+        key: "in"
+        value {
+          s: "OFRecordRawDecoder_1/out_0"
+          s: "OFRecordRawDecoder_2/out_0"
+          s: "OFRecordRawDecoder_3/out_0"
+          s: "OFRecordRawDecoder_4/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "IdentityN_5/out_0"
+          s: "IdentityN_5/out_1"
+          s: "IdentityN_5/out_2"
+          s: "IdentityN_5/out_3"
+        }
+      }
+    }
+  }
+  op {
+    name: "ParallelCast_6"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "parallel_cast"
+      input {
+        key: "in"
+        value {
+          s: "IdentityN_5/out_2"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "ParallelCast_6/out_0"
+        }
+      }
+      attr {
+        key: "grad_sbp_parallel"
+        value {
+          at_string: ""
+        }
+      }
+      attr {
+        key: "sbp_parallel"
+        value {
+          at_string: "B"
+        }
+      }
+    }
+  }
+  op {
+    name: "wide_embedding"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1603616
+        dim: 1
+      }
+      data_type: kFloat
+      initializer {
+        random_uniform_conf {
+          min: -0.05
+          max: 0.05
+        }
+      }
+      nd_sbp: "S(0)"
+    }
+  }
+  op {
+    name: "Gather_7"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "gather"
+      input {
+        key: "in"
+        value {
+          s: "wide_embedding/out"
+        }
+      }
+      input {
+        key: "indices"
+        value {
+          s: "ParallelCast_6/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Gather_7/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int64: 0
+        }
+      }
+    }
+  }
+  op {
+    name: "Reshape_8"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "reshape"
+      input {
+        key: "in"
+        value {
+          s: "Gather_7/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Reshape_8/out_0"
+        }
+      }
+      attr {
+        key: "shape"
+        value {
+          at_shape {
+            dim: 16384
+            dim: 2
+          }
+        }
+      }
+    }
+  }
+  op {
+    name: "ReduceSum_9"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "reduce_sum"
+      input {
+        key: "input_tensor"
+        value {
+          s: "Reshape_8/out_0"
+        }
+      }
+      output {
+        key: "output_tensor"
+        value {
+          s: "ReduceSum_9/output_tensor_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_list_int32 {
+            val: 1
+          }
+        }
+      }
+      attr {
+        key: "keepdims"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "ParallelCast_10"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "parallel_cast"
+      input {
+        key: "in"
+        value {
+          s: "ReduceSum_9/output_tensor_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "ParallelCast_10/out_0"
+        }
+      }
+      attr {
+        key: "grad_sbp_parallel"
+        value {
+          at_string: "B"
+        }
+      }
+      attr {
+        key: "sbp_parallel"
+        value {
+          at_string: "S(0)"
+        }
+      }
+    }
+  }
+  op {
+    name: "ParallelCast_11"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "parallel_cast"
+      input {
+        key: "in"
+        value {
+          s: "IdentityN_5/out_3"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "ParallelCast_11/out_0"
+        }
+      }
+      attr {
+        key: "grad_sbp_parallel"
+        value {
+          at_string: ""
+        }
+      }
+      attr {
+        key: "sbp_parallel"
+        value {
+          at_string: "B"
+        }
+      }
+    }
+  }
+  op {
+    name: "deep_embedding"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1603616
+        dim: 16
+      }
+      data_type: kFloat
+      initializer {
+        random_uniform_conf {
+          min: -0.05
+          max: 0.05
+        }
+      }
+      nd_sbp: "S(1)"
+    }
+  }
+  op {
+    name: "Gather_12"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "gather"
+      input {
+        key: "in"
+        value {
+          s: "deep_embedding/out"
+        }
+      }
+      input {
+        key: "indices"
+        value {
+          s: "ParallelCast_11/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Gather_12/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int64: 0
+        }
+      }
+    }
+  }
+  op {
+    name: "ParallelCast_13"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "parallel_cast"
+      input {
+        key: "in"
+        value {
+          s: "Gather_12/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "ParallelCast_13/out_0"
+        }
+      }
+      attr {
+        key: "grad_sbp_parallel"
+        value {
+          at_string: "S(2)"
+        }
+      }
+      attr {
+        key: "sbp_parallel"
+        value {
+          at_string: "S(0)"
+        }
+      }
+    }
+  }
+  op {
+    name: "Reshape_14"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "reshape"
+      input {
+        key: "in"
+        value {
+          s: "ParallelCast_13/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Reshape_14/out_0"
+        }
+      }
+      attr {
+        key: "shape"
+        value {
+          at_shape {
+            dim: 16384
+            dim: 416
+          }
+        }
+      }
+    }
+  }
+  op {
+    name: "Concat_15"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "concat"
+      input {
+        key: "in"
+        value {
+          s: "Reshape_14/out_0"
+          s: "IdentityN_5/out_1"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Concat_15/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int64: 1
+        }
+      }
+      attr {
+        key: "max_dim_size"
+        value {
+          at_int64: 429
+        }
+      }
+    }
+  }
+  op {
+    name: "fc0-weight"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427445246
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+        dim: 429
+      }
+      data_type: kFloat
+      initializer {
+        variance_scaling_conf {
+          scale: 1
+          variance_norm: kAverage
+          distribution: kRandomUniform
+          data_format: ""
+        }
+      }
+      model_name: "weight"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc0-matmul"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427445246
+    user_conf {
+      op_type_name: "matmul"
+      input {
+        key: "a"
+        value {
+          s: "Concat_15/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc0-weight/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc0-matmul/out_0"
+        }
+      }
+      attr {
+        key: "alpha"
+        value {
+          at_double: 1
+        }
+      }
+      attr {
+        key: "transpose_a"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "transpose_b"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "fc0-bias"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427445246
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        constant_conf {
+          value: 0
+        }
+      }
+      model_name: "bias"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc0-bias_add"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427445246
+    user_conf {
+      op_type_name: "bias_add"
+      input {
+        key: "a"
+        value {
+          s: "fc0-matmul/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc0-bias/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc0-bias_add/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int32: 1
+        }
+      }
+    }
+  }
+  op {
+    name: "fc0-activation"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427445246
+    user_conf {
+      op_type_name: "relu"
+      input {
+        key: "in"
+        value {
+          s: "fc0-bias_add/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc0-activation/out_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_16-dropout_random_mask_like"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "random_mask_like"
+      input {
+        key: "like"
+        value {
+          s: "fc0-activation/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_16-dropout_random_mask_like/out_0"
+        }
+      }
+      attr {
+        key: "rate"
+        value {
+          at_float: 0.5
+        }
+      }
+      attr {
+        key: "seed"
+        value {
+          at_int64: -8532918380486403999
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_16"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "dropout"
+      input {
+        key: "in"
+        value {
+          s: "fc0-activation/out_0"
+        }
+      }
+      input {
+        key: "mask"
+        value {
+          s: "Dropout_16-dropout_random_mask_like/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_16/out_0"
+        }
+      }
+      attr {
+        key: "scale"
+        value {
+          at_float: 2
+        }
+      }
+    }
+  }
+  op {
+    name: "fc1-weight"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427449342
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        variance_scaling_conf {
+          scale: 1
+          variance_norm: kAverage
+          distribution: kRandomUniform
+          data_format: ""
+        }
+      }
+      model_name: "weight"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc1-matmul"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427449342
+    user_conf {
+      op_type_name: "matmul"
+      input {
+        key: "a"
+        value {
+          s: "Dropout_16/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc1-weight/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc1-matmul/out_0"
+        }
+      }
+      attr {
+        key: "alpha"
+        value {
+          at_double: 1
+        }
+      }
+      attr {
+        key: "transpose_a"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "transpose_b"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "fc1-bias"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427449342
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        constant_conf {
+          value: 0
+        }
+      }
+      model_name: "bias"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc1-bias_add"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427449342
+    user_conf {
+      op_type_name: "bias_add"
+      input {
+        key: "a"
+        value {
+          s: "fc1-matmul/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc1-bias/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc1-bias_add/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int32: 1
+        }
+      }
+    }
+  }
+  op {
+    name: "fc1-activation"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427449342
+    user_conf {
+      op_type_name: "relu"
+      input {
+        key: "in"
+        value {
+          s: "fc1-bias_add/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc1-activation/out_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_17-dropout_random_mask_like"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "random_mask_like"
+      input {
+        key: "like"
+        value {
+          s: "fc1-activation/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_17-dropout_random_mask_like/out_0"
+        }
+      }
+      attr {
+        key: "rate"
+        value {
+          at_float: 0.5
+        }
+      }
+      attr {
+        key: "seed"
+        value {
+          at_int64: -605540728110627074
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_17"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "dropout"
+      input {
+        key: "in"
+        value {
+          s: "fc1-activation/out_0"
+        }
+      }
+      input {
+        key: "mask"
+        value {
+          s: "Dropout_17-dropout_random_mask_like/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_17/out_0"
+        }
+      }
+      attr {
+        key: "scale"
+        value {
+          at_float: 2
+        }
+      }
+    }
+  }
+  op {
+    name: "fc2-weight"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427453438
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        variance_scaling_conf {
+          scale: 1
+          variance_norm: kAverage
+          distribution: kRandomUniform
+          data_format: ""
+        }
+      }
+      model_name: "weight"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc2-matmul"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427453438
+    user_conf {
+      op_type_name: "matmul"
+      input {
+        key: "a"
+        value {
+          s: "Dropout_17/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc2-weight/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc2-matmul/out_0"
+        }
+      }
+      attr {
+        key: "alpha"
+        value {
+          at_double: 1
+        }
+      }
+      attr {
+        key: "transpose_a"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "transpose_b"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "fc2-bias"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427453438
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        constant_conf {
+          value: 0
+        }
+      }
+      model_name: "bias"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc2-bias_add"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427453438
+    user_conf {
+      op_type_name: "bias_add"
+      input {
+        key: "a"
+        value {
+          s: "fc2-matmul/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc2-bias/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc2-bias_add/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int32: 1
+        }
+      }
+    }
+  }
+  op {
+    name: "fc2-activation"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427453438
+    user_conf {
+      op_type_name: "relu"
+      input {
+        key: "in"
+        value {
+          s: "fc2-bias_add/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc2-activation/out_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_18-dropout_random_mask_like"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "random_mask_like"
+      input {
+        key: "like"
+        value {
+          s: "fc2-activation/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_18-dropout_random_mask_like/out_0"
+        }
+      }
+      attr {
+        key: "rate"
+        value {
+          at_float: 0.5
+        }
+      }
+      attr {
+        key: "seed"
+        value {
+          at_int64: -2732939850751154285
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_18"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "dropout"
+      input {
+        key: "in"
+        value {
+          s: "fc2-activation/out_0"
+        }
+      }
+      input {
+        key: "mask"
+        value {
+          s: "Dropout_18-dropout_random_mask_like/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_18/out_0"
+        }
+      }
+      attr {
+        key: "scale"
+        value {
+          at_float: 2
+        }
+      }
+    }
+  }
+  op {
+    name: "fc3-weight"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427457534
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        variance_scaling_conf {
+          scale: 1
+          variance_norm: kAverage
+          distribution: kRandomUniform
+          data_format: ""
+        }
+      }
+      model_name: "weight"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc3-matmul"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427457534
+    user_conf {
+      op_type_name: "matmul"
+      input {
+        key: "a"
+        value {
+          s: "Dropout_18/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc3-weight/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc3-matmul/out_0"
+        }
+      }
+      attr {
+        key: "alpha"
+        value {
+          at_double: 1
+        }
+      }
+      attr {
+        key: "transpose_a"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "transpose_b"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "fc3-bias"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427457534
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        constant_conf {
+          value: 0
+        }
+      }
+      model_name: "bias"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc3-bias_add"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427457534
+    user_conf {
+      op_type_name: "bias_add"
+      input {
+        key: "a"
+        value {
+          s: "fc3-matmul/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc3-bias/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc3-bias_add/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int32: 1
+        }
+      }
+    }
+  }
+  op {
+    name: "fc3-activation"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427457534
+    user_conf {
+      op_type_name: "relu"
+      input {
+        key: "in"
+        value {
+          s: "fc3-bias_add/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc3-activation/out_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_19-dropout_random_mask_like"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "random_mask_like"
+      input {
+        key: "like"
+        value {
+          s: "fc3-activation/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_19-dropout_random_mask_like/out_0"
+        }
+      }
+      attr {
+        key: "rate"
+        value {
+          at_float: 0.5
+        }
+      }
+      attr {
+        key: "seed"
+        value {
+          at_int64: -2676956800769162401
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_19"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "dropout"
+      input {
+        key: "in"
+        value {
+          s: "fc3-activation/out_0"
+        }
+      }
+      input {
+        key: "mask"
+        value {
+          s: "Dropout_19-dropout_random_mask_like/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_19/out_0"
+        }
+      }
+      attr {
+        key: "scale"
+        value {
+          at_float: 2
+        }
+      }
+    }
+  }
+  op {
+    name: "fc4-weight"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427461630
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        variance_scaling_conf {
+          scale: 1
+          variance_norm: kAverage
+          distribution: kRandomUniform
+          data_format: ""
+        }
+      }
+      model_name: "weight"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc4-matmul"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427461630
+    user_conf {
+      op_type_name: "matmul"
+      input {
+        key: "a"
+        value {
+          s: "Dropout_19/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc4-weight/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc4-matmul/out_0"
+        }
+      }
+      attr {
+        key: "alpha"
+        value {
+          at_double: 1
+        }
+      }
+      attr {
+        key: "transpose_a"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "transpose_b"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "fc4-bias"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427461630
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        constant_conf {
+          value: 0
+        }
+      }
+      model_name: "bias"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc4-bias_add"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427461630
+    user_conf {
+      op_type_name: "bias_add"
+      input {
+        key: "a"
+        value {
+          s: "fc4-matmul/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc4-bias/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc4-bias_add/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int32: 1
+        }
+      }
+    }
+  }
+  op {
+    name: "fc4-activation"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427461630
+    user_conf {
+      op_type_name: "relu"
+      input {
+        key: "in"
+        value {
+          s: "fc4-bias_add/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc4-activation/out_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_20-dropout_random_mask_like"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "random_mask_like"
+      input {
+        key: "like"
+        value {
+          s: "fc4-activation/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_20-dropout_random_mask_like/out_0"
+        }
+      }
+      attr {
+        key: "rate"
+        value {
+          at_float: 0.5
+        }
+      }
+      attr {
+        key: "seed"
+        value {
+          at_int64: 1645171827255279871
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_20"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "dropout"
+      input {
+        key: "in"
+        value {
+          s: "fc4-activation/out_0"
+        }
+      }
+      input {
+        key: "mask"
+        value {
+          s: "Dropout_20-dropout_random_mask_like/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_20/out_0"
+        }
+      }
+      attr {
+        key: "scale"
+        value {
+          at_float: 2
+        }
+      }
+    }
+  }
+  op {
+    name: "fc5-weight"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427465726
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        variance_scaling_conf {
+          scale: 1
+          variance_norm: kAverage
+          distribution: kRandomUniform
+          data_format: ""
+        }
+      }
+      model_name: "weight"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc5-matmul"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427465726
+    user_conf {
+      op_type_name: "matmul"
+      input {
+        key: "a"
+        value {
+          s: "Dropout_20/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc5-weight/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc5-matmul/out_0"
+        }
+      }
+      attr {
+        key: "alpha"
+        value {
+          at_double: 1
+        }
+      }
+      attr {
+        key: "transpose_a"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "transpose_b"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "fc5-bias"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427465726
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        constant_conf {
+          value: 0
+        }
+      }
+      model_name: "bias"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc5-bias_add"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427465726
+    user_conf {
+      op_type_name: "bias_add"
+      input {
+        key: "a"
+        value {
+          s: "fc5-matmul/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc5-bias/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc5-bias_add/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int32: 1
+        }
+      }
+    }
+  }
+  op {
+    name: "fc5-activation"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427465726
+    user_conf {
+      op_type_name: "relu"
+      input {
+        key: "in"
+        value {
+          s: "fc5-bias_add/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc5-activation/out_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_21-dropout_random_mask_like"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "random_mask_like"
+      input {
+        key: "like"
+        value {
+          s: "fc5-activation/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_21-dropout_random_mask_like/out_0"
+        }
+      }
+      attr {
+        key: "rate"
+        value {
+          at_float: 0.5
+        }
+      }
+      attr {
+        key: "seed"
+        value {
+          at_int64: 3776774715200250427
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_21"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "dropout"
+      input {
+        key: "in"
+        value {
+          s: "fc5-activation/out_0"
+        }
+      }
+      input {
+        key: "mask"
+        value {
+          s: "Dropout_21-dropout_random_mask_like/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_21/out_0"
+        }
+      }
+      attr {
+        key: "scale"
+        value {
+          at_float: 2
+        }
+      }
+    }
+  }
+  op {
+    name: "fc6-weight"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427469822
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        variance_scaling_conf {
+          scale: 1
+          variance_norm: kAverage
+          distribution: kRandomUniform
+          data_format: ""
+        }
+      }
+      model_name: "weight"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc6-matmul"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427469822
+    user_conf {
+      op_type_name: "matmul"
+      input {
+        key: "a"
+        value {
+          s: "Dropout_21/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc6-weight/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc6-matmul/out_0"
+        }
+      }
+      attr {
+        key: "alpha"
+        value {
+          at_double: 1
+        }
+      }
+      attr {
+        key: "transpose_a"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "transpose_b"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "fc6-bias"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427469822
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        constant_conf {
+          value: 0
+        }
+      }
+      model_name: "bias"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "fc6-bias_add"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427469822
+    user_conf {
+      op_type_name: "bias_add"
+      input {
+        key: "a"
+        value {
+          s: "fc6-matmul/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "fc6-bias/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc6-bias_add/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int32: 1
+        }
+      }
+    }
+  }
+  op {
+    name: "fc6-activation"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427469822
+    user_conf {
+      op_type_name: "relu"
+      input {
+        key: "in"
+        value {
+          s: "fc6-bias_add/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "fc6-activation/out_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_22-dropout_random_mask_like"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "random_mask_like"
+      input {
+        key: "like"
+        value {
+          s: "fc6-activation/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_22-dropout_random_mask_like/out_0"
+        }
+      }
+      attr {
+        key: "rate"
+        value {
+          at_float: 0.5
+        }
+      }
+      attr {
+        key: "seed"
+        value {
+          at_int64: -7775999124300915916
+        }
+      }
+    }
+  }
+  op {
+    name: "Dropout_22"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "dropout"
+      input {
+        key: "in"
+        value {
+          s: "fc6-activation/out_0"
+        }
+      }
+      input {
+        key: "mask"
+        value {
+          s: "Dropout_22-dropout_random_mask_like/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "Dropout_22/out_0"
+        }
+      }
+      attr {
+        key: "scale"
+        value {
+          at_float: 2
+        }
+      }
+    }
+  }
+  op {
+    name: "deep_scores-weight"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427473918
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1
+        dim: 1024
+      }
+      data_type: kFloat
+      initializer {
+        variance_scaling_conf {
+          scale: 1
+          variance_norm: kAverage
+          distribution: kRandomUniform
+          data_format: ""
+        }
+      }
+      model_name: "weight"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "deep_scores-matmul"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427473918
+    user_conf {
+      op_type_name: "matmul"
+      input {
+        key: "a"
+        value {
+          s: "Dropout_22/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "deep_scores-weight/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "deep_scores-matmul/out_0"
+        }
+      }
+      attr {
+        key: "alpha"
+        value {
+          at_double: 1
+        }
+      }
+      attr {
+        key: "transpose_a"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "transpose_b"
+        value {
+          at_bool: true
+        }
+      }
+    }
+  }
+  op {
+    name: "deep_scores-bias"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427473918
+    variable_conf {
+      out: "out"
+      shape {
+        dim: 1
+      }
+      data_type: kFloat
+      initializer {
+        constant_conf {
+          value: 0
+        }
+      }
+      model_name: "bias"
+      trainable: true
+      nd_sbp: "B"
+    }
+  }
+  op {
+    name: "deep_scores-bias_add"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427473918
+    user_conf {
+      op_type_name: "bias_add"
+      input {
+        key: "a"
+        value {
+          s: "deep_scores-matmul/out_0"
+        }
+      }
+      input {
+        key: "b"
+        value {
+          s: "deep_scores-bias/out"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "deep_scores-bias_add/out_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_int32: 1
+        }
+      }
+    }
+  }
+  op {
+    name: "AddN_23"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "add_n"
+      input {
+        key: "in"
+        value {
+          s: "ParallelCast_10/out_0"
+          s: "deep_scores-bias_add/out_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "AddN_23/out_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "SigmoidCrossEntropy_24"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "sigmoid_cross_entropy"
+      input {
+        key: "label"
+        value {
+          s: "IdentityN_5/out_0"
+        }
+      }
+      input {
+        key: "prediction"
+        value {
+          s: "AddN_23/out_0"
+        }
+      }
+      output {
+        key: "loss"
+        value {
+          s: "SigmoidCrossEntropy_24/loss_0"
+        }
+      }
+    }
+  }
+  op {
+    name: "ReduceSum_25"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "reduce_sum"
+      input {
+        key: "input_tensor"
+        value {
+          s: "SigmoidCrossEntropy_24/loss_0"
+        }
+      }
+      output {
+        key: "output_tensor"
+        value {
+          s: "ReduceSum_25/output_tensor_0"
+        }
+      }
+      attr {
+        key: "axis"
+        value {
+          at_list_int32 {
+            val: 0
+            val: 1
+          }
+        }
+      }
+      attr {
+        key: "keepdims"
+        value {
+          at_bool: false
+        }
+      }
+    }
+  }
+  op {
+    name: "ScalarMul_26"
+    device_tag: "gpu"
+    scope_symbol_id: 4611686018427432958
+    user_conf {
+      op_type_name: "scalar_mul"
+      input {
+        key: "in"
+        value {
+          s: "ReduceSum_25/output_tensor_0"
+        }
+      }
+      output {
+        key: "out"
+        value {
+          s: "ScalarMul_26/out_0"
+        }
+      }
+      attr {
+        key: "float_operand"
+        value {
+          at_double: 6.103515625e-05
+        }
+      }
+      attr {
+        key: "has_float_operand"
+        value {
+          at_bool: true
+        }
+      }
+      attr {
+        key: "has_int_operand"
+        value {
+          at_bool: false
+        }
+      }
+      attr {
+        key: "int_operand"
+        value {
+          at_int64: 0
+        }
+      }
+    }
+  }
+  op {
+    name: "Return_27"
+    device_tag: "cpu"
+    scope_symbol_id: 4611686018427486206
+    return_conf {
+      in: "ScalarMul_26/out_0"
+      out: "out"
+    }
+  }
+}
+placement {
+  placement_group {
+    op_set {
+      op_name: "OFRecord_Reader_0"
+      op_name: "OFRecordRawDecoder_1"
+      op_name: "OFRecordRawDecoder_2"
+      op_name: "OFRecordRawDecoder_3"
+      op_name: "OFRecordRawDecoder_4"
+      op_name: "IdentityN_5"
+    }
+    parallel_conf {
+      device_name: "@0:0"
+      device_name: "@0:1"
+      device_name: "@0:2"
+      device_name: "@0:3"
+      device_tag: "cpu"
+      hierarchy {
+        dim: 4
+      }
+    }
+  }
+  placement_group {
+    op_set {
+      op_name: "ParallelCast_6"
+      op_name: "wide_embedding"
+      op_name: "Gather_7"
+      op_name: "Reshape_8"
+      op_name: "ReduceSum_9"
+      op_name: "ParallelCast_10"
+      op_name: "ParallelCast_11"
+      op_name: "deep_embedding"
+      op_name: "Gather_12"
+      op_name: "ParallelCast_13"
+      op_name: "Reshape_14"
+      op_name: "Concat_15"
+      op_name: "fc0-weight"
+      op_name: "fc0-matmul"
+      op_name: "fc0-bias"
+      op_name: "fc0-bias_add"
+      op_name: "fc0-activation"
+      op_name: "Dropout_16-dropout_random_mask_like"
+      op_name: "Dropout_16"
+      op_name: "fc1-weight"
+      op_name: "fc1-matmul"
+      op_name: "fc1-bias"
+      op_name: "fc1-bias_add"
+      op_name: "fc1-activation"
+      op_name: "Dropout_17-dropout_random_mask_like"
+      op_name: "Dropout_17"
+      op_name: "fc2-weight"
+      op_name: "fc2-matmul"
+      op_name: "fc2-bias"
+      op_name: "fc2-bias_add"
+      op_name: "fc2-activation"
+      op_name: "Dropout_18-dropout_random_mask_like"
+      op_name: "Dropout_18"
+      op_name: "fc3-weight"
+      op_name: "fc3-matmul"
+      op_name: "fc3-bias"
+      op_name: "fc3-bias_add"
+      op_name: "fc3-activation"
+      op_name: "Dropout_19-dropout_random_mask_like"
+      op_name: "Dropout_19"
+      op_name: "fc4-weight"
+      op_name: "fc4-matmul"
+      op_name: "fc4-bias"
+      op_name: "fc4-bias_add"
+      op_name: "fc4-activation"
+      op_name: "Dropout_20-dropout_random_mask_like"
+      op_name: "Dropout_20"
+      op_name: "fc5-weight"
+      op_name: "fc5-matmul"
+      op_name: "fc5-bias"
+      op_name: "fc5-bias_add"
+      op_name: "fc5-activation"
+      op_name: "Dropout_21-dropout_random_mask_like"
+      op_name: "Dropout_21"
+      op_name: "fc6-weight"
+      op_name: "fc6-matmul"
+      op_name: "fc6-bias"
+      op_name: "fc6-bias_add"
+      op_name: "fc6-activation"
+      op_name: "Dropout_22-dropout_random_mask_like"
+      op_name: "Dropout_22"
+      op_name: "deep_scores-weight"
+      op_name: "deep_scores-matmul"
+      op_name: "deep_scores-bias"
+      op_name: "deep_scores-bias_add"
+      op_name: "AddN_23"
+      op_name: "SigmoidCrossEntropy_24"
+      op_name: "ReduceSum_25"
+      op_name: "ScalarMul_26"
+    }
+    parallel_conf {
+      device_name: "@0:0"
+      device_tag: "gpu"
+      hierarchy {
+        dim: 1
+      }
+    }
+  }
+  placement_group {
+    op_set {
+      op_name: "Return_27"
+    }
+    parallel_conf {
+      device_name: "@0:0"
+      device_tag: "cpu"
+      hierarchy {
+        dim: 1
+      }
+    }
+  }
+  blob_placement_group {
+    lbi {
+      op_name: "OFRecord_Reader_0"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "OFRecordRawDecoder_1"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "OFRecordRawDecoder_2"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "OFRecordRawDecoder_3"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "OFRecordRawDecoder_4"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "IdentityN_5"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "IdentityN_5"
+      blob_name: "out_1"
+    }
+    lbi {
+      op_name: "IdentityN_5"
+      blob_name: "out_2"
+    }
+    lbi {
+      op_name: "IdentityN_5"
+      blob_name: "out_3"
+    }
+    parallel_conf {
+      device_name: "@0:0"
+      device_name: "@0:1"
+      device_name: "@0:2"
+      device_name: "@0:3"
+      device_tag: "cpu"
+      hierarchy {
+        dim: 4
+      }
+    }
+  }
+  blob_placement_group {
+    lbi {
+      op_name: "ParallelCast_6"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "wide_embedding"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "Gather_7"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Reshape_8"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "ReduceSum_9"
+      blob_name: "output_tensor_0"
+    }
+    lbi {
+      op_name: "ParallelCast_10"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "ParallelCast_11"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "deep_embedding"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "Gather_12"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "ParallelCast_13"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Reshape_14"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Concat_15"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc0-weight"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc0-matmul"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc0-bias"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc0-bias_add"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc0-activation"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_16-dropout_random_mask_like"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_16"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc1-weight"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc1-matmul"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc1-bias"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc1-bias_add"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc1-activation"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_17-dropout_random_mask_like"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_17"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc2-weight"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc2-matmul"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc2-bias"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc2-bias_add"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc2-activation"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_18-dropout_random_mask_like"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_18"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc3-weight"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc3-matmul"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc3-bias"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc3-bias_add"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc3-activation"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_19-dropout_random_mask_like"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_19"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc4-weight"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc4-matmul"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc4-bias"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc4-bias_add"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc4-activation"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_20-dropout_random_mask_like"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_20"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc5-weight"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc5-matmul"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc5-bias"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc5-bias_add"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc5-activation"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_21-dropout_random_mask_like"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_21"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc6-weight"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc6-matmul"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc6-bias"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "fc6-bias_add"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "fc6-activation"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_22-dropout_random_mask_like"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "Dropout_22"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "deep_scores-weight"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "deep_scores-matmul"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "deep_scores-bias"
+      blob_name: "out"
+    }
+    lbi {
+      op_name: "deep_scores-bias_add"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "AddN_23"
+      blob_name: "out_0"
+    }
+    lbi {
+      op_name: "SigmoidCrossEntropy_24"
+      blob_name: "loss_0"
+    }
+    lbi {
+      op_name: "ReduceSum_25"
+      blob_name: "output_tensor_0"
+    }
+    lbi {
+      op_name: "ScalarMul_26"
+      blob_name: "out_0"
+    }
+    parallel_conf {
+      device_name: "@0:0"
+      device_tag: "gpu"
+      hierarchy {
+        dim: 1
+      }
+    }
+  }
+  blob_placement_group {
+    lbi {
+      op_name: "Return_27"
+      blob_name: "out"
+    }
+    parallel_conf {
+      device_name: "@0:0"
+      device_tag: "cpu"
+      hierarchy {
+        dim: 1
+      }
+    }
+  }
+}
+job_conf {
+  job_name: "train_job"
+  train_conf {
+    optimizer_conf {
+      variable_op_names: "wide_embedding"
+      variable_op_names: "deep_embedding"
+      variable_op_names: "fc0-weight"
+      variable_op_names: "fc0-bias"
+      variable_op_names: "fc1-weight"
+      variable_op_names: "fc1-bias"
+      variable_op_names: "fc2-weight"
+      variable_op_names: "fc2-bias"
+      variable_op_names: "fc3-weight"
+      variable_op_names: "fc3-bias"
+      variable_op_names: "fc4-weight"
+      variable_op_names: "fc4-bias"
+      variable_op_names: "fc5-weight"
+      variable_op_names: "fc5-bias"
+      variable_op_names: "fc6-weight"
+      variable_op_names: "fc6-bias"
+      variable_op_names: "deep_scores-weight"
+      variable_op_names: "deep_scores-bias"
+      base_learning_rate: 0.001
+      learning_rate_decay {
+        piecewise_constant_conf {
+          values: 0.001
+        }
+      }
+      momentum_conf {
+        beta: 0.9
+      }
+    }
+    loss_lbn: "SigmoidCrossEntropy_24/loss_0"
+  }
+  default_data_type: kFloat
+}
+job_parallel_view_conf {
+  op_name2sbp_signature_conf {
+    key: "deep_scores-bias_add"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "deep_scores-matmul"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc0-bias_add"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc0-matmul"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc1-bias_add"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc1-matmul"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc2-bias_add"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc2-matmul"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc3-bias_add"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc3-matmul"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc4-bias_add"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc4-matmul"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc5-bias_add"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc5-matmul"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc6-bias_add"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2sbp_signature_conf {
+    key: "fc6-matmul"
+    value {
+      bn_in_op2sbp_parallel {
+        key: "b_0"
+        value {
+          broadcast_parallel {
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "deep_scores-bias_add"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "deep_scores-matmul"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc0-bias_add"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc0-matmul"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc1-bias_add"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc1-matmul"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc2-bias_add"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc2-matmul"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc3-bias_add"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc3-matmul"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc4-bias_add"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc4-matmul"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc5-bias_add"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc5-matmul"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc6-bias_add"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+  op_name2nd_sbp_signature_conf {
+    key: "fc6-matmul"
+    value {
+      bn_in_op2nd_sbp {
+        key: "b_0"
+        value {
+          sbp_parallel {
+            broadcast_parallel {
+            }
+          }
+        }
+      }
+    }
+  }
+}

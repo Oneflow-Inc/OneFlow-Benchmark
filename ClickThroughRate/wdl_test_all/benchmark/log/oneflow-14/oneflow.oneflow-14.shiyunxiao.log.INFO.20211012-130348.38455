@@ -1,0 +1,135 @@
+Log file created at: 2021/10/12 13:03:48
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1012 13:03:48.900136 38455 global.h:36] NewGlobal 14cudaDeviceProp
+I1012 13:03:48.900880 38455 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1012 13:03:48.900895 38455 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1012 13:03:48.900902 38455 env_global_objects_scope.cpp:152] using rpc backend: local
+I1012 13:03:48.900914 38455 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1012 13:03:48.900923 38455 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1012 13:03:48.959337 38455 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1012 13:03:48.960278 38455 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1012 13:03:48.960287 38455 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1012 13:03:48.960294 38455 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1012 13:03:48.960299 38455 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1012 13:03:48.960916 38455 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1012 13:03:48.960927 38455 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1012 13:03:48.960932 38455 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1012 13:03:48.961027 38455 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1012 13:03:48.961037 38455 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1012 13:03:48.961138 38455 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:42462
+I1012 13:03:48.961165 38455 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1012 13:03:48.961251 38455 global.h:36] NewGlobal N7oneflow9TransportE
+I1012 13:03:48.962410 38455 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I1012 13:03:48.962436 38455 version.cpp:22] OneFlow git version: b295ca2324
+I1012 13:03:48.962450 38455 device_register_gpu.cpp:56] CUDA runtime version: 11.2
+I1012 13:03:48.962464 38455 device_register_gpu.cpp:65] cuDNN version: 8.1.1
+I1012 13:03:48.962471 38455 device_register_gpu.cpp:78] NCCL version: 2.9.8
+I1012 13:03:48.962477 38455 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1012 13:03:48.962482 38455 global.h:36] NewGlobal N7oneflow5IDMgrE
+I1012 13:03:48.962487 38455 global.h:36] NewGlobal N7oneflow16AvailableMemDescE
+W1012 13:03:48.962502 38455 session_global_objects_scope.cpp:61] Invalid CUDA device ordinal: rank 0 ordinal 2
+W1012 13:03:48.962807 38455 session_global_objects_scope.cpp:61] Invalid CUDA device ordinal: rank 0 ordinal 3
+W1012 13:03:48.962824 38455 session_global_objects_scope.cpp:61] Invalid CUDA device ordinal: rank 0 ordinal 4
+W1012 13:03:48.962837 38455 session_global_objects_scope.cpp:61] Invalid CUDA device ordinal: rank 0 ordinal 5
+W1012 13:03:48.962852 38455 session_global_objects_scope.cpp:61] Invalid CUDA device ordinal: rank 0 ordinal 6
+W1012 13:03:48.962867 38455 session_global_objects_scope.cpp:61] Invalid CUDA device ordinal: rank 0 ordinal 7
+I1012 13:03:48.962884 38455 global.h:36] NewGlobal St13unordered_mapISslSt4hashISsESt8equal_toISsESaISt4pairIKSslEEE
+I1012 13:03:48.962890 38455 global.h:36] NewGlobal N7oneflow19CriticalSectionDescE
+I1012 13:03:48.962895 38455 global.h:36] NewGlobal N7oneflow16InterUserJobInfoE
+I1012 13:03:48.962901 38455 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I1012 13:03:48.962905 38455 global.h:36] NewGlobal N7oneflow16JobSetCompileCtxE
+I1012 13:03:48.962911 38455 global.h:36] NewGlobal N7oneflow26RuntimeBufferManagersScopeE
+I1012 13:03:48.962915 38455 global.h:36] NewGlobal N7oneflow9BufferMgrIlEE
+I1012 13:03:48.962920 38455 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I1012 13:03:48.962925 38455 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I1012 13:03:48.962929 38455 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I1012 13:03:48.962934 38455 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I1012 13:03:48.962939 38455 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I1012 13:03:48.962942 38455 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I1012 13:03:48.962947 38455 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I1012 13:03:48.963150 38455 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I1012 13:03:48.963187 38455 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I1012 13:03:48.963198 38455 global.h:36] NewGlobal N7oneflow6boxing10collective24CollectiveBoxingExecutorE
+I1012 13:03:48.963204 38455 global.h:36] NewGlobal N7oneflow6boxing10collective31CollectiveBoxingDeviceCtxPollerE
+I1012 13:03:48.963347 38455 session.h:77] NewGlobal N7oneflow25SessionGlobalObjectsScopeE
+I1012 13:03:48.964073 38455 global.h:36] NewGlobal N7oneflow7JobDescE
+I1012 13:03:49.343053 38455 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1012 13:03:49.343137 38455 global.h:36] NewGlobal N7oneflow7JobDescE
+I1012 13:03:49.346043 38455 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1012 13:03:49.351961 38455 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1012 13:03:49.634099 38455 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1012 13:03:49.650858 38455 global.h:36] NewGlobal N7oneflow24InterJobReuseMemStrategyE
+I1012 13:03:49.650885 38455 global.h:36] NewGlobal N7oneflow7OneflowE
+I1012 13:03:49.670749 38455 global.h:36] NewGlobal N7oneflow7JobDescE
+I1012 13:03:49.913980 38455 insert_nccl_logical_op_pass.cpp:663]  Try insert nccl logical ops into job: train_job. Begin...
+I1012 13:03:49.914624 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-S2B-107 from: [IdentityN_5](order=0, nd_sbp=[S(0)])->[ParallelCast_6](order=1, nd_sbp=[B]) and before: [ParallelCast_6](order=1)
+I1012 13:03:49.914712 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-S2B-108 from: [IdentityN_5](order=0, nd_sbp=[S(0)])->[ParallelCast_11](order=2, nd_sbp=[B]) and before: [ParallelCast_6](order=1)
+I1012 13:03:49.914876 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-S2S-109 from: [Gather_12](order=5, nd_sbp=[S(2)])->[Reshape_14](order=7, nd_sbp=[S(0)]) and before: [Reshape_8](order=6)
+I1012 13:03:49.915009 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2S-110 from: [ReduceSum_9](order=8, nd_sbp=[P])->[AddN_16](order=33, nd_sbp=[S(0)]) and before: [Concat_15](order=9)
+I1012 13:03:49.915581 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-S2B-111 from: [SigmoidCrossEntropy_17_grad](order=37, nd_sbp=[S(0)])->[ReduceSum_9_grad](order=42, nd_sbp=[B]) and before: [ScalarMul_19](order=38)
+I1012 13:03:49.915666 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-112 from: [deep_scores-matmul_grad_b](order=39, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_70](order=43, nd_sbp=[B]) and before: [deep_scores-matmul_grad_a](order=40)
+I1012 13:03:49.915750 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-113 from: [deep_scores-bias_add_grad](order=41, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_74](order=46, nd_sbp=[B]) and before: [ReduceSum_9_grad](order=42)
+I1012 13:03:49.915899 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-114 from: [fc6-matmul_grad_b](order=48, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_64](order=53, nd_sbp=[B]) and before: [fc6-bias_add_grad](order=49)
+I1012 13:03:49.915969 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-115 from: [fc6-bias_add_grad](order=49, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_63](order=54, nd_sbp=[B]) and before: [fc6-matmul_grad_a](order=50)
+I1012 13:03:49.916124 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-116 from: [fc5-matmul_grad_b](order=59, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_59](order=63, nd_sbp=[B]) and before: [fc5-bias_add_grad](order=60)
+I1012 13:03:49.916198 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-117 from: [fc5-bias_add_grad](order=60, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_62](order=64, nd_sbp=[B]) and before: [fc5-matmul_grad_a](order=61)
+I1012 13:03:49.916332 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-118 from: [fc4-matmul_grad_b](order=68, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_68](order=71, nd_sbp=[B]) and before: [fc4-bias_add_grad](order=69)
+I1012 13:03:49.916435 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-119 from: [fc4-bias_add_grad](order=69, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_73](order=72, nd_sbp=[B]) and before: [fc4-matmul_grad_a](order=70)
+I1012 13:03:49.916569 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-120 from: [fc3-bias_add_grad](order=76, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_71](order=79, nd_sbp=[B]) and before: [fc3-matmul_grad_b](order=77)
+I1012 13:03:49.916654 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-121 from: [fc3-matmul_grad_b](order=77, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_58](order=80, nd_sbp=[B]) and before: [fc3-matmul_grad_a](order=78)
+I1012 13:03:49.916787 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-122 from: [fc2-matmul_grad_b](order=84, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_67](order=87, nd_sbp=[B]) and before: [fc2-bias_add_grad](order=85)
+I1012 13:03:49.916854 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-123 from: [fc2-bias_add_grad](order=85, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_60](order=88, nd_sbp=[B]) and before: [fc2-matmul_grad_a](order=86)
+I1012 13:03:49.916987 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-124 from: [fc1-matmul_grad_b](order=92, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_69](order=95, nd_sbp=[B]) and before: [fc1-bias_add_grad](order=93)
+I1012 13:03:49.917058 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-125 from: [fc1-bias_add_grad](order=93, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_75](order=96, nd_sbp=[B]) and before: [fc1-matmul_grad_a](order=94)
+I1012 13:03:49.917187 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-126 from: [fc0-matmul_grad_b](order=100, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_66](order=103, nd_sbp=[B]) and before: [fc0-bias_add_grad](order=101)
+I1012 13:03:49.917255 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-P2B-127 from: [fc0-bias_add_grad](order=101, nd_sbp=[P])->[System-ModelDiffScale-ScalarMul_61](order=104, nd_sbp=[B]) and before: [fc0-matmul_grad_a](order=102)
+I1012 13:03:49.917383 38455 insert_nccl_logical_op_pass.cpp:432]  insert nccl op: System-NCCL-Logical-S2S-128 from: [Reshape_14_grad](order=108, nd_sbp=[S(0)])->[Gather_12_grad](order=109, nd_sbp=[S(2)]) and before: [Gather_12_grad](order=109)
+I1012 13:03:49.917450 38455 insert_nccl_logical_op_pass.cpp:699]  Try insert nccl logical ops into job: train_job. ...End
+
+I1012 13:03:49.972879 38455 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1012 13:03:50.231083 38455 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1012 13:03:50.252835 38455 oneflow.cpp:210] 
+job_id: 0 , job_name: train_job , compile time: 0.582042 seconds.
+I1012 13:03:50.423311 38455 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1012 13:03:50.423669 38455 global.h:36] NewGlobal N7oneflow7JobDescE
+I1012 13:03:50.472337 38455 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1012 13:03:50.517956 38455 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1012 13:03:50.524319 38455 oneflow.cpp:210] 
+job_id: 1 , job_name: System-ModelInit , compile time: 0.100149 seconds.
+I1012 13:03:50.555784 38455 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1012 13:03:50.555816 38455 global.h:36] NewGlobal N7oneflow7JobDescE
+I1012 13:03:50.602154 38455 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1012 13:03:50.650159 38455 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1012 13:03:50.656497 38455 oneflow.cpp:210] 
+job_id: 2 , job_name: System-ModelLoad , compile time: 0.100653 seconds.
+I1012 13:03:50.687219 38455 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1012 13:03:50.687248 38455 global.h:36] NewGlobal N7oneflow7JobDescE
+I1012 13:03:50.731989 38455 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1012 13:03:50.773648 38455 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1012 13:03:50.779981 38455 oneflow.cpp:210] 
+job_id: 3 , job_name: System-ModelSave , compile time: 0.0926705 seconds.
+I1012 13:03:50.810508 38455 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1012 13:03:50.810535 38455 global.h:36] NewGlobal N7oneflow7JobDescE
+I1012 13:03:50.820530 38455 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1012 13:03:50.826287 38455 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1012 13:03:50.830163 38455 oneflow.cpp:210] 
+job_id: 4 , job_name: System-Pull-Return_20 , compile time: 0.0196058 seconds.
+I1012 13:03:50.837546 38455 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1012 13:03:50.857446 38455 global.h:36] NewGlobal N7oneflow7JobDescE
+I1012 13:03:50.857482 38455 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1012 13:03:50.862866 38455 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1012 13:03:50.865999 38455 oneflow.cpp:210] 
+job_id: 5 , job_name: MainJob-unamed , compile time: 0.00852608 seconds.
+I1012 13:03:50.872958 38455 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1012 13:03:50.889369 38455 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 94.1563 MiB ] device memory in Rank: 0 , Device: 6
+I1012 13:03:50.889396 38455 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 94.1563 MiB ] device memory in Rank: 0 , Device: 4
+I1012 13:03:50.889405 38455 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 94.1563 MiB ] device memory in Rank: 0 , Device: 3
+I1012 13:03:50.889413 38455 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 94.1578 MiB ] device memory in Rank: 0 , Device: 0
+I1012 13:03:50.889421 38455 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 94.1563 MiB ] device memory in Rank: 0 , Device: 7
+I1012 13:03:50.889433 38455 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 94.1563 MiB ] device memory in Rank: 0 , Device: 1
+I1012 13:03:50.889441 38455 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 94.1563 MiB ] device memory in Rank: 0 , Device: 5
+I1012 13:03:50.889448 38455 plan_util.cpp:928]  Plan: merged_plan needs to allocate [ 94.1563 MiB ] device memory in Rank: 0 , Device: 2
+I1012 13:03:51.256609 38455 oneflow.cpp:998]  PushPlan merged_plan time: 0.0342313 seconds.
+I1012 13:03:51.373284 38455 oneflow.cpp:1014]  PullPlan merged_plan time: 0.108052 seconds.
+F1012 13:03:52.656618 38455 cuda_util.cpp:173] Check failed: cudaSetDevice(dev_id) : invalid device ordinal (101) 

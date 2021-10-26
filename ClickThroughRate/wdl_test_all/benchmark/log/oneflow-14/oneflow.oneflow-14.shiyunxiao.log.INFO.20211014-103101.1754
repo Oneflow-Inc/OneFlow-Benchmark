@@ -1,0 +1,68 @@
+Log file created at: 2021/10/14 10:31:01
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1014 10:31:01.107251  1754 global.h:36] NewGlobal 14cudaDeviceProp
+I1014 10:31:01.108177  1754 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1014 10:31:01.108192  1754 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1014 10:31:01.108201  1754 env_global_objects_scope.cpp:152] using rpc backend: local
+I1014 10:31:01.108253  1754 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1014 10:31:01.108264  1754 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1014 10:31:01.162634  1754 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1014 10:31:01.163555  1754 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1014 10:31:01.163586  1754 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1014 10:31:01.163594  1754 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1014 10:31:01.163600  1754 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1014 10:31:01.164294  1754 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1014 10:31:01.164309  1754 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1014 10:31:01.164314  1754 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1014 10:31:01.164419  1754 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1014 10:31:01.164431  1754 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1014 10:31:01.164527  1754 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:40482
+I1014 10:31:01.164556  1754 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1014 10:31:01.164674  1754 global.h:36] NewGlobal N7oneflow9TransportE
+I1014 10:31:01.165863  1754 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I1014 10:31:01.165887  1754 version.cpp:22] OneFlow git version: b295ca2324
+I1014 10:31:01.165902  1754 device_register_gpu.cpp:56] CUDA runtime version: 11.2
+I1014 10:31:01.165925  1754 device_register_gpu.cpp:65] cuDNN version: 8.1.1
+I1014 10:31:01.165935  1754 device_register_gpu.cpp:78] NCCL version: 2.9.8
+I1014 10:31:01.165942  1754 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1014 10:31:01.165949  1754 global.h:36] NewGlobal N7oneflow5IDMgrE
+I1014 10:31:01.165956  1754 global.h:36] NewGlobal N7oneflow16AvailableMemDescE
+I1014 10:31:01.165978  1754 global.h:36] NewGlobal St13unordered_mapISslSt4hashISsESt8equal_toISsESaISt4pairIKSslEEE
+I1014 10:31:01.165984  1754 global.h:36] NewGlobal N7oneflow19CriticalSectionDescE
+I1014 10:31:01.165990  1754 global.h:36] NewGlobal N7oneflow16InterUserJobInfoE
+I1014 10:31:01.165997  1754 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I1014 10:31:01.166003  1754 global.h:36] NewGlobal N7oneflow16JobSetCompileCtxE
+I1014 10:31:01.166009  1754 global.h:36] NewGlobal N7oneflow26RuntimeBufferManagersScopeE
+I1014 10:31:01.166016  1754 global.h:36] NewGlobal N7oneflow9BufferMgrIlEE
+I1014 10:31:01.166021  1754 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I1014 10:31:01.166028  1754 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I1014 10:31:01.166033  1754 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I1014 10:31:01.166039  1754 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I1014 10:31:01.166044  1754 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I1014 10:31:01.166050  1754 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I1014 10:31:01.166055  1754 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I1014 10:31:01.166061  1754 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I1014 10:31:01.166066  1754 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I1014 10:31:01.166074  1754 global.h:36] NewGlobal N7oneflow6boxing10collective24CollectiveBoxingExecutorE
+I1014 10:31:01.166080  1754 global.h:36] NewGlobal N7oneflow6boxing10collective31CollectiveBoxingDeviceCtxPollerE
+I1014 10:31:01.166179  1754 session.h:77] NewGlobal N7oneflow25SessionGlobalObjectsScopeE
+I1014 10:31:01.166779  1754 global.h:36] NewGlobal N7oneflow7JobDescE
+I1014 10:31:01.691211  1754 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1014 10:31:01.691466  1754 global.h:36] NewGlobal N7oneflow7JobDescE
+I1014 10:31:01.694931  1754 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1014 10:31:01.699736  1754 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I1014 10:31:01.884250  1754 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1014 10:31:01.902899  1754 global.h:36] NewGlobal N7oneflow24InterJobReuseMemStrategyE
+I1014 10:31:01.902985  1754 global.h:36] NewGlobal N7oneflow7OneflowE
+I1014 10:31:01.915586  1754 global.h:36] NewGlobal N7oneflow7JobDescE
+I1014 10:31:02.153218  1754 global.h:36] NewGlobal N7oneflow7OpGraphE
+F1014 10:31:02.191896  1754 exec_graph.cpp:117] 
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/graph/exec_graph.cpp", line 117, in InferBlobDescs
+    op_->InferBlobDescsIf(GetBlobDesc4BnInOp, parallel_ctx, &GlobalJobDesc())
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/operator/operator.cpp", line 320, in InferBlobDescsIf
+    InferOutBlobDescsIf(GetBlobDesc4BnInOp, parallel_ctx)
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/operator/user_op.cpp", line 600, in InferOutBlobDescs
+    val_->physical_tensor_desc_infer_fn(&infer_ctx)
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/user/ops/ofrecord_reader_op.cpp", line 38, in operator()
+    Check failed: (batch_size % parallel_num) == (0) (4 vs 0)

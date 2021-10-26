@@ -1,0 +1,9 @@
+src_op_name,dst_op_name,src_parallel_desc,dst_parallel_desc,src_nd_sbp,dst_nd_sbp,lbi,dtype,shape,builder,comment
+IdentityN_5,ParallelCast_6,{0:cpu:0-3 (4)},{0:gpu:0-0 (1)},[S(0)],[B],IdentityN_5/out_2,kInt32,(16384 2),SliceBoxingSubTskGphBuilder,BuildSubTaskGphS2B
+IdentityN_5,ParallelCast_11,{0:cpu:0-3 (4)},{0:gpu:0-0 (1)},[S(0)],[B],IdentityN_5/out_3,kInt32,(16384 26),SliceBoxingSubTskGphBuilder,BuildSubTaskGphS2B
+IdentityN_5,System-Boxing-Identity-76,{0:cpu:0-3 (4)},{0:gpu:0-0 (1)},[S(0)],[B],IdentityN_5/out_1,kFloat,(16384 13),SliceBoxingSubTskGphBuilder,BuildSubTaskGphS2B
+IdentityN_5,System-Boxing-Identity-77,{0:cpu:0-3 (4)},{0:gpu:0-0 (1)},[S(0)],[B],IdentityN_5/out_0,kInt32,(16384 1),SliceBoxingSubTskGphBuilder,BuildSubTaskGphS2B
+System-AutoTick-SourceTick_84,System-AutoTick-Tick_85,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-SourceTick_84/out,kInt8,(1),OneToOneSubTskGphBuilder,-
+System-AutoTick-Tick_87,System-AutoTick-SinkTick_88,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-Tick_87/out,kInt8,(1),OneToOneSubTskGphBuilder,-
+System-AutoTick-SourceTick_92,System-AutoTick-Tick_93,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-SourceTick_92/out,kInt8,(1),OneToOneSubTskGphBuilder,-
+System-AutoTick-Tick_95,System-AutoTick-SinkTick_96,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-Tick_95/out,kInt8,(1),OneToOneSubTskGphBuilder,-

@@ -36,7 +36,7 @@ def get_args(print_args=True):
         action="store_true",
         help="save initial model parameters or not.",
     )
-    parser.add_argument("--num_dataloader_thread_per_gpu", type=int, default=2)
+    parser.add_argument("--num_dataloader_thread_per_gpu", type=int, default=1)
     parser.add_argument(
         "--data_dir", type=str, default="/dataset/wdl_ofrecord/ofrecord"
     )

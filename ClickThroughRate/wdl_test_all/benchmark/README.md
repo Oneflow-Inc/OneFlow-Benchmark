@@ -3,7 +3,7 @@
 .
 ├── gpu_info                Inside are temporary csv files that include gpu usage situation
 ├── log
-├── n1g1_benchmark_mem.sh   test memory and latency in one gpu
+├── n1g8_benchmark.sh       test loss in multi-gpus
 ├── n1g1_benchmark.sh       test loss in one gpu
 ├── n1g8_benchmark_mem.sh   test memory and latency in multi-gpus
 ├── README.md

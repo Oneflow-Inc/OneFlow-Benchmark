@@ -1,0 +1,54 @@
+Log file created at: 2021/10/14 10:51:29
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1014 10:51:29.011041 11599 global.h:36] NewGlobal 14cudaDeviceProp
+I1014 10:51:29.012578 11599 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1014 10:51:29.012606 11599 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1014 10:51:29.012619 11599 env_global_objects_scope.cpp:152] using rpc backend: local
+I1014 10:51:29.012701 11599 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1014 10:51:29.012719 11599 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1014 10:51:29.073843 11599 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1014 10:51:29.074926 11599 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1014 10:51:29.074940 11599 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1014 10:51:29.074946 11599 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1014 10:51:29.074954 11599 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1014 10:51:29.075700 11599 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1014 10:51:29.075716 11599 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1014 10:51:29.075721 11599 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1014 10:51:29.075834 11599 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1014 10:51:29.075846 11599 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1014 10:51:29.076001 11599 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:46058
+I1014 10:51:29.076036 11599 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1014 10:51:29.076135 11599 global.h:36] NewGlobal N7oneflow9TransportE
+I1014 10:51:29.077831 11599 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I1014 10:51:29.077854 11599 version.cpp:22] OneFlow git version: b295ca2324
+I1014 10:51:29.077870 11599 device_register_gpu.cpp:56] CUDA runtime version: 11.2
+I1014 10:51:29.077894 11599 device_register_gpu.cpp:65] cuDNN version: 8.1.1
+I1014 10:51:29.077903 11599 device_register_gpu.cpp:78] NCCL version: 2.9.8
+I1014 10:51:29.077910 11599 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1014 10:51:29.077917 11599 global.h:36] NewGlobal N7oneflow5IDMgrE
+I1014 10:51:29.077924 11599 global.h:36] NewGlobal N7oneflow16AvailableMemDescE
+I1014 10:51:29.077946 11599 global.h:36] NewGlobal St13unordered_mapISslSt4hashISsESt8equal_toISsESaISt4pairIKSslEEE
+I1014 10:51:29.077960 11599 global.h:36] NewGlobal N7oneflow19CriticalSectionDescE
+I1014 10:51:29.077966 11599 global.h:36] NewGlobal N7oneflow16InterUserJobInfoE
+I1014 10:51:29.077973 11599 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I1014 10:51:29.077980 11599 global.h:36] NewGlobal N7oneflow16JobSetCompileCtxE
+I1014 10:51:29.077986 11599 global.h:36] NewGlobal N7oneflow26RuntimeBufferManagersScopeE
+I1014 10:51:29.077991 11599 global.h:36] NewGlobal N7oneflow9BufferMgrIlEE
+I1014 10:51:29.077997 11599 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I1014 10:51:29.078003 11599 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I1014 10:51:29.078008 11599 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I1014 10:51:29.078014 11599 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I1014 10:51:29.078019 11599 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I1014 10:51:29.078025 11599 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I1014 10:51:29.078030 11599 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I1014 10:51:29.078037 11599 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I1014 10:51:29.078042 11599 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I1014 10:51:29.078049 11599 global.h:36] NewGlobal N7oneflow6boxing10collective24CollectiveBoxingExecutorE
+I1014 10:51:29.078054 11599 global.h:36] NewGlobal N7oneflow6boxing10collective31CollectiveBoxingDeviceCtxPollerE
+I1014 10:51:29.078163 11599 session.h:77] NewGlobal N7oneflow25SessionGlobalObjectsScopeE
+I1014 10:51:29.078848 11599 global.h:36] NewGlobal N7oneflow7JobDescE
+I1014 10:51:29.681066 11599 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I1014 10:51:29.681315 11599 global.h:36] NewGlobal N7oneflow7JobDescE
+I1014 10:51:29.685060 11599 global.h:36] NewGlobal N7oneflow7OpGraphE
+I1014 10:51:29.693325 11599 global.h:43] DeleteGlobal N7oneflow7OpGraphE

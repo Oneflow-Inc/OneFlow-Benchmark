@@ -1,0 +1,77 @@
+Log file created at: 2021/10/12 13:25:47
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1012 13:25:47.110294 45966 global.h:36] NewGlobal 14cudaDeviceProp
+I1012 13:25:47.134255 45966 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1012 13:25:47.134287 45966 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1012 13:25:47.134299 45966 env_global_objects_scope.cpp:159] using rpc backend: gRPC
+I1012 13:25:47.134305 45966 global.h:36] NewGlobal N7oneflow10CtrlServerE
+I1012 13:25:47.134994 45966 ctrl_server.cpp:40] CtrlServer listening on 0.0.0.0:42418
+I1012 13:25:47.135144 45966 rank_info_bootstrap_server.cpp:47] RankInfoBootstrapServer listening on 0.0.0.0:29500
+I1012 13:25:47.136173 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.208088 45966 ctrl_bootstrap.cpp:76] 
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 42418
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 43593
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 39710
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 39561
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 44119
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 45251
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 38189
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 44307
+}
+rank: 0
+node_size: 1
+I1012 13:25:47.209925 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.211792 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.212743 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.213557 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.214337 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.215200 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.215963 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.216696 45966 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1012 13:25:47.216785 45966 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1012 13:25:47.216807 45966 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1012 13:25:47.676801 45966 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1012 13:25:47.678864 45966 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1012 13:25:47.678877 45966 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1012 13:25:47.678884 45966 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1012 13:25:47.678889 45966 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1012 13:25:47.679383 45966 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1012 13:25:47.679397 45966 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1012 13:25:47.679402 45966 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1012 13:25:47.679632 45966 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1012 13:25:47.679648 45966 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1012 13:25:47.679793 45966 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:35389
+I1012 13:25:47.686460 45966 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1012 13:25:47.686479 45966 epoll_comm_network.cpp:197] machine 1 sockfd 66
+I1012 13:25:47.686486 45966 epoll_comm_network.cpp:197] machine 2 sockfd 64
+I1012 13:25:47.686491 45966 epoll_comm_network.cpp:197] machine 3 sockfd 68
+I1012 13:25:47.686496 45966 epoll_comm_network.cpp:197] machine 4 sockfd 70
+I1012 13:25:47.686499 45966 epoll_comm_network.cpp:197] machine 5 sockfd 72
+I1012 13:25:47.686504 45966 epoll_comm_network.cpp:197] machine 6 sockfd 76
+I1012 13:25:47.686508 45966 epoll_comm_network.cpp:197] machine 7 sockfd 62
+I1012 13:25:47.687045 45966 global.h:36] NewGlobal N7oneflow9TransportE
+I1012 13:25:47.687196 45966 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE

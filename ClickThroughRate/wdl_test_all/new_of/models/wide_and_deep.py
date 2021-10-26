@@ -40,7 +40,6 @@ class Dense(nn.Module):
         x = self.features(x)
         return x
 
-
 class WideAndDeep(nn.Module):
     def __init__(self, FLAGS) -> None:
         super(WideAndDeep, self).__init__()

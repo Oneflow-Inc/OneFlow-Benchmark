@@ -1,0 +1,46 @@
+Log file created at: 2021/10/13 15:21:05
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1013 15:21:05.972689 11780 global.h:36] NewGlobal 14cudaDeviceProp
+I1013 15:21:05.990588 11780 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1013 15:21:05.990610 11780 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1013 15:21:05.990622 11780 env_global_objects_scope.cpp:152] using rpc backend: local
+I1013 15:21:05.990639 11780 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1013 15:21:05.990648 11780 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1013 15:21:06.104840 11780 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1013 15:21:06.107112 11780 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1013 15:21:06.107129 11780 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1013 15:21:06.107137 11780 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1013 15:21:06.107146 11780 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1013 15:21:06.108044 11780 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1013 15:21:06.108063 11780 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1013 15:21:06.108070 11780 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1013 15:21:06.108346 11780 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1013 15:21:06.108387 11780 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1013 15:21:06.108531 11780 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:34729
+I1013 15:21:06.108585 11780 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1013 15:21:06.109253 11780 global.h:36] NewGlobal N7oneflow9TransportE
+I1013 15:21:06.109411 11780 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I1013 15:21:06.321684 11780 global.h:43] DeleteGlobal St10shared_ptrIN7oneflow15ForeignCallbackEE
+I1013 15:21:06.321758 11780 global.h:43] DeleteGlobal N7oneflow21EnvGlobalObjectsScopeE
+I1013 15:21:06.321775 11780 global.h:43] DeleteGlobal N7oneflow14KernelObserverE
+I1013 15:21:06.321787 11780 global.h:43] DeleteGlobal N7oneflow9TransportE
+I1013 15:21:06.321887 11780 global.h:43] DeleteGlobal N7oneflow12EpollCommNetE
+I1013 15:21:06.321902 11780 epoll_comm_network.cpp:87] CommNet Thread 0 finish
+I1013 15:21:06.321954 11780 epoll_comm_network.cpp:87] CommNet Thread 1 finish
+I1013 15:21:06.322321 11780 epoll_comm_network.cpp:87] CommNet Thread 2 finish
+I1013 15:21:06.322372 11780 epoll_comm_network.cpp:87] CommNet Thread 3 finish
+I1013 15:21:06.322537 11780 global.h:43] DeleteGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1013 15:21:06.322551 11780 global.h:43] DeleteGlobal N7oneflow2vm19VirtualMachineScopeE
+I1013 15:21:06.322556 11780 global.h:43] DeleteGlobal N7oneflow9OneflowVME
+I1013 15:21:06.323241 11780 global.h:43] DeleteGlobal N7oneflow18CudnnConvAlgoCacheE
+I1013 15:21:06.323257 11780 global.h:43] DeleteGlobal N7oneflow16EagerNcclCommMgrE
+I1013 15:21:06.323264 11780 global.h:43] DeleteGlobal N7oneflow10ThreadPoolE
+I1013 15:21:06.325654 11780 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I1013 15:21:06.325670 11780 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I1013 15:21:06.325677 11780 global.h:43] DeleteGlobal N7oneflow6device27NodeDeviceDescriptorManagerE
+I1013 15:21:06.325984 11780 global.h:43] DeleteGlobal N7oneflow10RpcManagerE
+I1013 15:21:06.325994 11780 global.h:43] DeleteGlobal N7oneflow10CtrlClientE
+I1013 15:21:06.326004 11780 global.h:43] DeleteGlobal N7oneflow10ProcessCtxE
+I1013 15:21:06.326012 11780 global.h:43] DeleteGlobal N7oneflow7EnvDescE
+I1013 15:21:06.326025 11780 global.h:43] DeleteGlobal 14cudaDeviceProp
