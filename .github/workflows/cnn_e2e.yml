@@ -69,6 +69,7 @@ jobs:
           entry: ${{ github.event.inputs.compute_platform }}
   build-oneflow:
     name: "Build OneFlow ${{ github.event.inputs.compute_platform }}"
+    needs: [find-oss-wheel]
     if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit != 1 }}
     runs-on: ['self-hosted', 'linux', 'provision']
     env:
