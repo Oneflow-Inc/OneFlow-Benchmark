@@ -70,7 +70,7 @@ jobs:
   build-oneflow:
     name: "Build OneFlow ${{ github.event.inputs.compute_platform }}"
     needs: [find-oss-wheel]
-    if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit != 1 }}
+    if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit == 1 }}
     runs-on: ['self-hosted', 'linux', 'provision']
     env:
       MANYLINUX_CACHE_DIR: ~/manylinux-cache-dir/${{ github.event.inputs.compute_platform }}
