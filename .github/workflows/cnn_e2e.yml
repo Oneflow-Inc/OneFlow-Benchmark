@@ -41,6 +41,9 @@ jobs:
   find-oss-wheel:
     name: "Set env and Find wheel in oss"
     runs-on: ubuntu-latest
+    env:
+      OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+      OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
     outputs:
       find-wheel-hit: ${{ steps.find-wheel.outputs.find-wheel-hit }}
       ONEFLOW_WHEEL_PATH: ${{ steps.set-wheel-path.outputs.ONEFLOW_WHEEL_PATH }}
