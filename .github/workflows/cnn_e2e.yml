@@ -80,9 +80,9 @@ jobs:
       WHEELHOUSE_DIR: manylinux-wheelhouse
       OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
       OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+    if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
     steps:
       - name: Fix permissions
-        # if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit == false }}
         run: |
           set -x
           echo ${OSS_ACCESS_KEY_ID}
