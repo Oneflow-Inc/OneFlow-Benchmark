@@ -89,7 +89,7 @@ jobs:
           echo needs.find-oss-wheel.outputs.find-wheel-hit=${{ needs.find-oss-wheel.outputs.find-wheel-hit }}
           docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
       - name: Remove leftover cuda-installer.log
-        if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit == 'false'}}
+        if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit }}
         run: |
           docker run --rm -v /tmp:/host/tmp -w /p busybox rm -f /host/tmp/cuda-installer.log
       - uses: actions/checkout@v2
