@@ -80,15 +80,15 @@ jobs:
       WHEELHOUSE_DIR: manylinux-wheelhouse
       OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
       OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
-    # if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
+    # if: ${{ !fromJson(needs.find-oss-wheel.outputs.find-wheel-hit) }}
     steps:
       - name: test needs.find-oss-wheel.outputs.find-wheel-hit
-        if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit }}
+        if: ${{ fromJson(needs.find-oss-wheel.outputs.find-wheel-hit) }}
         run: |
           echo test 1: ${OSS_ACCESS_KEY_ID}
           echo needs.find-oss-wheel.outputs.find-wheel-hit=${{ needs.find-oss-wheel.outputs.find-wheel-hit }}
       - name: test !needs.find-oss-wheel.outputs.find-wheel-hit
-        if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
+        if: ${{ !fromJson(needs.find-oss-wheel.outputs.find-wheel-hit) }}
         run: |
           echo test 2: ${OSS_ACCESS_KEY_ID}
           echo needs.find-oss-wheel.outputs.find-wheel-hit=${{ needs.find-oss-wheel.outputs.find-wheel-hit }}
