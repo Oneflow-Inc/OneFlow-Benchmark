@@ -63,7 +63,7 @@ jobs:
           set +x
       - name: Check if wheel available
         id: find-wheel
-        uses: Oneflow-Inc/get-oneflow/find-wheel@5ef34358307145c688d820531b512b467fc01fe2
+        uses: Oneflow-Inc/get-oneflow/find-wheel@addc8720b3780fd132a94059bc3cb2e216f4d7d4
         with:
           ref: ${{ env.oneflow_commit }}
           entry: ${{ github.event.inputs.compute_platform }}
