@@ -7,6 +7,7 @@ import time
 import numpy as np
 from sklearn.metrics import roc_auc_score
 import oneflow as flow
+import oneflow._C as F
 from tqdm import tqdm
 from config import get_args
 from models.dataloader_utils import OFRecordDataLoader
@@ -23,7 +24,8 @@ from datetime import datetime
 class Trainer(object):
     def __init__(self,args):
         self.args = args
-        self. test_name=args. test_name
+        self.batch_size=args.batch_size
+        self. test_name=args.test_name
         self.execution_mode = args.execution_mode
         self.ddp = args.ddp
         if self.ddp == 1 and self.execution_mode == "graph":
@@ -45,11 +47,8 @@ class Trainer(object):
             self.opt,
         ) = self.prepare_modules()
         if self.execution_mode == "graph":
-            self.eval_graph = WideAndDeepGraph(
-                self.wdl_module, self.val_dataloader, self.loss
-            )
             self.train_graph = WideAndDeepTrainGraph(
-                self.wdl_module, self.train_dataloader, self.loss, self.opt
+                self.args,self.wdl_module, self.train_dataloader, self.loss, self.opt
             )
         self.record=[]
 
@@ -110,7 +109,12 @@ class Trainer(object):
         train_dataloader = OFRecordDataLoader(args)
         val_dataloader = OFRecordDataLoader(args, mode="val")
 
-        bce_loss = flow.nn.BCELoss(reduction="mean")
+        #新版里面用的 flow.nn.BCELoss 这个 module，背后是新写的 binary_cross_entropy op & kernel，这个 op 自带 reduction 属性，kernel 实现的时候没考虑 consistent 的并行情况。
+        '''
+        weight (oneflow.Tensor, optional) – The manual rescaling weight to the loss. Default to None, whose corresponding weight value is 1.
+        reduction (str, optional) – The reduce type, it can be one of “none”, “mean”, “sum”. Defaults to “mean”.
+        '''
+        bce_loss = flow.nn.BCELoss(reduction="sum")
         bce_loss.to("cuda")
 
         opt = flow.optim.SGD(
@@ -203,7 +207,10 @@ class Trainer(object):
             predicts = self.wdl_module(
                 dense_fields, wide_sparse_fields, deep_sparse_fields
             )
-            train_loss = self.loss(predicts, labels)
+
+            train_loss = self.loss(predicts,labels)
+            train_loss=train_loss/self.batch_size
+
             return predicts,labels,train_loss
         predicts,labels,loss = forward()
 
@@ -211,11 +218,12 @@ class Trainer(object):
             # NOTE(zwx): scale init grad with world_size
             # because consistent_tensor.mean() include dividor numel * world_size
             loss.backward()
-            # for param_group in self.opt.param_groups:
-            #     for param in param_group.parameters:
-            #         param.grad *= self.world_size             
+            for param_group in self.opt.param_groups:
+                for param in param_group.parameters:
+                    param.grad *= self.world_size             
         else:
             loss.backward()
+            # loss/=self.world_size
         self.opt.step()
         self.opt.zero_grad()
 

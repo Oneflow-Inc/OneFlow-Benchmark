@@ -2,8 +2,9 @@ import oneflow as flow
 
 
 class WideAndDeepGraph(flow.nn.Graph):
-    def __init__(self, wdl_module, dataloader, bce_loss):
+    def __init__(self, args,wdl_module, dataloader, bce_loss):
         super(WideAndDeepGraph, self).__init__()
+        self.args=args
         self.module = wdl_module
         self.dataloader = dataloader
         self.bce_loss = bce_loss
@@ -26,12 +27,13 @@ class WideAndDeepGraph(flow.nn.Graph):
 
         predicts = self.module(dense_fields, wide_sparse_fields, deep_sparse_fields)
         loss = self.bce_loss(predicts, labels)
+        loss=loss/self.args.batch_size
         return predicts, labels, loss
 
 
 class WideAndDeepTrainGraph(WideAndDeepGraph):
-    def __init__(self, wdl_module, dataloader, bce_loss, optimizer):
-        super(WideAndDeepTrainGraph, self).__init__(wdl_module, dataloader, bce_loss)
+    def __init__(self, args,wdl_module, dataloader, bce_loss, optimizer):
+        super(WideAndDeepTrainGraph, self).__init__(args,wdl_module, dataloader, bce_loss)
         self.add_optimizer(optimizer)
 
     def build(self):
