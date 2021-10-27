@@ -82,36 +82,21 @@ jobs:
       OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
     if: ${{ !fromJson(needs.find-oss-wheel.outputs.find-wheel-hit) }}
     steps:
-      # - name: test needs.find-oss-wheel.outputs.find-wheel-hit
-      #   if: ${{ fromJson(needs.find-oss-wheel.outputs.find-wheel-hit) }}
-      #   run: |
-      #     echo test 1: ${OSS_ACCESS_KEY_ID}
-      #     echo needs.find-oss-wheel.outputs.find-wheel-hit=${{ needs.find-oss-wheel.outputs.find-wheel-hit }}
-      # - name: test !needs.find-oss-wheel.outputs.find-wheel-hit
-      #   if: ${{ !fromJson(needs.find-oss-wheel.outputs.find-wheel-hit) }}
-      #   run: |
-      #     echo test 2: ${OSS_ACCESS_KEY_ID}
-      #     echo needs.find-oss-wheel.outputs.find-wheel-hit=${{ needs.find-oss-wheel.outputs.find-wheel-hit }}
       - name: Fix permissions
-        # if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
         run: |
           set -x
           docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
       - name: Remove leftover cuda-installer.log
-        # if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
         run: |
           docker run --rm -v /tmp:/host/tmp -w /p busybox rm -f /host/tmp/cuda-installer.log
       - uses: actions/checkout@v2
-        # if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
       - name: Checkout Oneflow-Inc/oneflow
-        # if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
         uses: actions/checkout@v2
         with:
           repository: Oneflow-Inc/oneflow
           ref: ${{ github.event.inputs.of_branch_or_commit }}
           path: ${{ env.ONEFLOW_SRC }}
       - name: Set environment variables
-        # if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
         id: set-env
         run: |
           set -x
@@ -129,7 +114,6 @@ jobs:
           cd $current_dir
           set +x
       - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
-        # if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
         name: Build OneFlow ${{ github.event.inputs.compute_platform }}
         id: build-cuda
         with:
@@ -157,9 +141,6 @@ jobs:
           oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
       - name: Update pip index
         if: ${{ steps.build-cuda.outcome == 'success' }}
-        # env:
-        #   OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
-        #   OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
         run: |
           python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
           python3 -m pip install oss2 beautifulsoup4 --user
