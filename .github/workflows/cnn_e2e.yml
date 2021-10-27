@@ -82,10 +82,11 @@ jobs:
       OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
     steps:
       - name: Fix permissions
-        if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit == false }}
+        # if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit == false }}
         run: |
           set -x
           echo ${OSS_ACCESS_KEY_ID}
+          echo needs.find-oss-wheel.outputs.find-wheel-hit=${{ needs.find-oss-wheel.outputs.find-wheel-hit }}
           docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
       - name: Remove leftover cuda-installer.log
         if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
