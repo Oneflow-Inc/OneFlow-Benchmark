@@ -82,7 +82,7 @@ jobs:
       OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
     steps:
       - name: Fix permissions
-        if: ${{ !needs.find-oss-wheel.outputs.find-wheel-hit }}
+        if: ${{ needs.find-oss-wheel.outputs.find-wheel-hit == false }}
         run: |
           set -x
           echo ${OSS_ACCESS_KEY_ID}
