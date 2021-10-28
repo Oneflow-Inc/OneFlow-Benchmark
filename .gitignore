@@ -106,3 +106,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# output files
+*.txt
+*.qdrep
+out
