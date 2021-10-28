@@ -202,16 +202,16 @@ jobs:
           docker exec ${TEST_CONTAINER_NAME} python3 --version
           docker exec ${TEST_CONTAINER_NAME} python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
           docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=https://staging.oneflow.info/${{ needs.find-oss-wheel.outputs.ONEFLOW_WHEEL_PATH }} oneflow
-      # - name: Test container
-      #   run: |
-      #     docker exec ${{ env.TEST_CONTAINER_NAME }} bash ci/test/resnet50_e2e.sh 
-      # - name: Upload log 
-      #   uses: ./.github/actions/upload_oss
-      #   with:
-      #     src_path: log
-      #     oss_dst_path: oss://oneflow-log/OneFlow-Benchmark/${{ github.ref }}.${GITHUB_SHA::7}/oneflow/${{ github.event.inputs.of_branch_or_commit }}/${{github.run_id}}/log
-      #     oss_access_key_id: ${{ secrets.OSS_ACCESS_KEY_ID }}
-      #     oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
-      #     upload_core: false
+      - name: Run Test
+        run: |
+          docker exec ${{ env.TEST_CONTAINER_NAME }} bash ci/test/resnet50_e2e.sh 
+      - name: Upload log 
+        uses: ./.github/actions/upload_oss
+        with:
+          src_path: log
+          oss_dst_path: oss://oneflow-log/OneFlow-Benchmark/${{ github.ref }}.${GITHUB_SHA::7}/oneflow/${{ github.event.inputs.of_branch_or_commit }}/${{github.run_id}}/log
+          oss_access_key_id: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+          upload_core: false
 
 
