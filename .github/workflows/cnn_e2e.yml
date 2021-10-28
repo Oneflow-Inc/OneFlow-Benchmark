@@ -152,7 +152,7 @@ jobs:
     if: always()
     runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
     env:
-      TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ matrix.entry }}-test"
+      TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ github.event.inputs.compute_platform }}-test"
       TEST_WITH_TORCH_IMG_TAG: registry.cn-beijing.aliyuncs.com/oneflow/test-with-pytorch-1.9.0:e7a497b41d8b7f1bce055b1f23d027f93b1557ae
     steps:
       - name: Fix permissions
