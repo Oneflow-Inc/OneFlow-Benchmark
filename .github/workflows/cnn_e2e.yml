@@ -201,7 +201,7 @@ jobs:
         run: |
           docker exec ${TEST_CONTAINER_NAME} python3 --version
           docker exec ${TEST_CONTAINER_NAME} python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-          docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=http://oneflow-staging.oss-cn-beijing.aliyuncs.com/${{ needs.find-oss-wheel.outputs.ONEFLOW_WHEEL_PATH }} oneflow
+          docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=https://staging.oneflow.info/${{ needs.find-oss-wheel.outputs.ONEFLOW_WHEEL_PATH }} oneflow
       # - name: Test container
       #   run: |
       #     docker exec ${{ env.TEST_CONTAINER_NAME }} bash ci/test/resnet50_e2e.sh 
