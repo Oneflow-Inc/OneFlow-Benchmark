@@ -15,6 +15,6 @@ for i in $(seq $2 $3); do
         echo "0.25" > CostRatioFile.txt
         echo "${wait_time}" >> CostRatioFile.txt
         echo "${transfer_cost}" >> CostRatioFile.txt
-        ./train.sh > "${7}txt/${7}_${i}_${j}.txt"
+        ./train.sh ${7} > "${7}txt/${7}_${i}_${j}.txt"
     done
 done

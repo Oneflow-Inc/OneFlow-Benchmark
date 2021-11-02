@@ -3,17 +3,19 @@ rm -rf ./output/snapshots/*
 
 
 # # nsys profile -o debug5 --export text --force-overwrite true \
-# python3 of_cnn_train_val.py \
-#     --num_examples=4096 \
-#     --num_val_examples=256 \
-#     --num_nodes=1 \
-#     --gpu_num_per_node=4 \
-#     --model_update="momentum" \
-#     --learning_rate=0.001 \
-#     --loss_print_every_n_iter=1 \
-#     --batch_size_per_device=32 \
-#     --num_epoch=5 \
-#     --model="resnet50"
+if [ $1 == "resnet" ]; then
+python3 of_cnn_train_val.py \
+    --num_examples=4096 \
+    --num_val_examples=256 \
+    --num_nodes=1 \
+    --gpu_num_per_node=4 \
+    --model_update="momentum" \
+    --learning_rate=0.001 \
+    --loss_print_every_n_iter=1 \
+    --batch_size_per_device=32 \
+    --num_epoch=5 \
+    --model="resnet50"
+fi
 
 #Please change $DATA_ROOT this to your own data root.
 # python3 of_cnn_train_val.py \
@@ -33,6 +35,7 @@ rm -rf ./output/snapshots/*
 
 #Please change $DATA_ROOT this to your own data root.
 # nsys profile -o vgg98 --force-overwrite true \
+if [ $1 == "vgg" ]; then
 python3 of_cnn_train_val.py \
     --train_data_part_num=64 \
     --val_data_part_num=64 \
@@ -47,6 +50,7 @@ python3 of_cnn_train_val.py \
     --num_epoch=5 \
     --use_fp16=false \
     --model="vgg"
+fi
 
 # #Please change $DATA_ROOT this to your own data root.
 # python3 of_cnn_train_val.py \

@@ -1,0 +1,6 @@
+./train_all.sh 1.65 0 0 1.65 1 10 "resnet"
+./train_all.sh 1.65 1 10 1.65 0 0 "resnet"
+./train_all.sh 1.65 11 12 1.65 0 12 "resnet"
+./train_all.sh 1.65 0 10 1.65 11 12 "resnet"
+./train_all.sh 1.65 11 12 1.65 0 12 "vgg"
+./train_all.sh 1.65 0 10 1.65 11 12 "vgg"

@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 if __name__ == "__main__":
-    model = 'resnet'
+    model = 'vgg'
     throughput_file = '{0}txt/{0}_average_throughput.txt'.format(model)
     strategy_file = '{0}txt/{0}_model_strategy.txt'.format(model)
 

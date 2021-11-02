@@ -1,18 +1,38 @@
 
 
 if __name__ == "__main__":
+    # decide model
     nrows = 13
     ncols = 13
-    model = 'resnet'
-    op_names = ['System-RegularizeGradient-L1L2-659',
-        'Resnet-res2_1_branch2a-weight_optimizer',
-        'Resnet-res3_3_branch2c-weight_optimizer', 
-        'esnet-res5_0_branch2a-weight_optimizer', 
-        'Resnet-res5_2_branch2b-weight_optimizer', 
-        'Resnet-res5_2_branch2b_bn-gamma_optimizer',
-        'Softmax_69']
+    model = 'vgg'
+
+    # chose operators for distinguishing different strategies.
+    if model == 'resnet':
+        op_names = ['System-RegularizeGradient-L1L2-659',
+            'Resnet-res2_1_branch2a-weight_optimizer',
+            'Resnet-res3_3_branch2c-weight_optimizer', 
+            'esnet-res5_0_branch2a-weight_optimizer', 
+            'Resnet-res5_2_branch2b-weight_optimizer', 
+            'Resnet-res5_2_branch2b_bn-gamma_optimizer',
+            'Softmax_69']
+        
+    if model == 'vgg':
+        op_names = ['Reshape_28',
+            'conv2_bias_optimizer',
+            'conv2_bn-beta_optimizer',
+            'conv2_weight_optimizer',
+            'conv6_weight_optimizer',
+            'dense2-weight_optimizer',
+            'dense1-weight_optimizer',
+            'conv0_bn_grad']
+
+    # each starting line of operator contains a marker
     op_marker = '(^_^)'
+
     nop = len(op_names)
+    for i in range(nop):
+        op_names[i] += ' ' + op_marker
+
     sbps = [{} for i in range(nop)]
     type = {}
     sbp_buffer = [0] * nop
@@ -30,12 +50,13 @@ if __name__ == "__main__":
                             if op_name in line:
                                 readnewline = False
                                 f.readline()
+                                # collect all the lines with sbps, different strategies have different sbp lines for one of the operators
                                 line = f.readline()
                                 sbp = ''
                                 while not op_marker in line:
                                     sbp += ', ' + line
                                     line = f.readline()
-
+                                # associate the sbp with a number
                                 if not sbp in sbps[k]:
                                     sbps[k][sbp] = len(sbps[k])
                                 sbp_buffer[k] = sbps[k][sbp]
@@ -46,7 +67,7 @@ if __name__ == "__main__":
                 type_num = 0
                 for sbp_num in sbp_buffer:
                     type_num = type_num * 10 + sbp_num
-
+                # associate the type with a characteristic
                 if not type_num in type:
                     type[type_num] = chr(len(type)+65)
                 model_strategy[i][j] = type[type_num]

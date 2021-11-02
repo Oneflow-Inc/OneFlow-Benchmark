@@ -2,9 +2,9 @@ import math
 import numpy as np
 
 if __name__ == "__main__":
-    nrows = 11
-    ncols = 11
-    model = 'resnet'
+    nrows = 13
+    ncols = 13
+    model = 'vgg'
     ave_throughput = [[0]*ncols for i in range(nrows)]
     for i in range(nrows):
         for j in range(ncols):
