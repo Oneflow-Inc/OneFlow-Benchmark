@@ -5,7 +5,8 @@ import pandas as pd
 import os
 
 
-dirpath='/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/wdl_test_all'
+
+dirpath=os.path.join(os.path.dirname(os.path.abspath(__file__)),'../')
 
 def benchmark_n1g1_loss():
     '''
@@ -25,7 +26,7 @@ def benchmark_n1g1_loss():
     plt.legend([legendname])
     plt.savefig(imgpath,dpi=400)
 
-def n1n1_loss():
+def n1g1_loss():
     '''draw n1g1 benchmark,eager,graph,ddp line chart of loss'''
     filename='n1g1_ddp_eager_graph_benchmark_100loss'
     benchmark_csvpath=dirpath+'/results/old/n1g1_benchmark.csv'
@@ -152,7 +153,7 @@ def n1g1_mem_avg():
     np.mean(n1g1_graph_mem),
     np.mean(old_n1g1_mem))
 
-def all_n1g8_loss(column='loss'):
+def n1g8_loss(column='loss'):
     '''draw n1g8 benchmark,eager,graph,ddp line of latency or memory'''
     gpu_num=2
     filename='n1g8_ddp_eager_graph_%s'%(column[:3])
@@ -267,8 +268,8 @@ def n1g8_tabel():
     print(df)
 
 if __name__ == "__main__":
-    n1n1_loss()
-    all_n1g8_loss('loss')
+    n1g1_loss()
+    n1g8_loss('loss')
     n1g8_tabel()
     n1g1_tabel()
     
