@@ -22,4 +22,4 @@ python3 -m oneflow.distributed.launch \
         --execution_mode 'eager' \
         --test_name 'n1g8_eager_mem' \
         --model_load_dir "/home/shiyunxiao/checkpoint_new" \
-        #--learning_rate 2e-3
+        --learning_rate 5e-4

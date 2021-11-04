@@ -18,7 +18,7 @@ from graph import WideAndDeepGraph,WideAndDeepTrainGraph
 import warnings
 import pandas as pd
 from datetime import datetime
-
+from pathlib import Path
 
 class Trainer(object):
     def __init__(self,args):
@@ -53,6 +53,9 @@ class Trainer(object):
 
     def get_memory_usage(self):
         currentPath=os.path.dirname(os.path.abspath(__file__))
+        dir = Path(os.path.join(currentPath,'csv/gpu_info'))
+        if not dir.is_dir():
+            os.makedirs(dir) 
         nvidia_smi_report_file_path=os.path.join('csv/gpu_info','gpu_memory_usage_%s.csv'%self.rank)
         nvidia_smi_report_file_path=os.path.join(currentPath,nvidia_smi_report_file_path)
         cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
@@ -64,11 +67,12 @@ class Trainer(object):
         return memory
 
     def record_to_csv(self):
-        dir_path=os.path.join('/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/wdl_test_all/results/new/%s'%(self. test_name))
-        isExists=os.path.exists(dir_path)
-        if not isExists:
-             os.makedirs(dir_path) 
-        filePath=os.path.join(dir_path,'record_%s.csv'%(self.rank))
+        currentPath=os.path.dirname(os.path.abspath(__file__))
+        new_dir=os.path.join(currentPath,'../../results/new')
+        file_dir=os.path.join(new_dir,self. test_name)
+        if not os.path.exists(file_dir):
+             os.mkdir(file_dir) 
+        filePath=os.path.join(file_dir,'record_%s.csv'%(self.rank))
         df_record=pd.DataFrame.from_dict(self.record, orient='columns')
         df_record.to_csv(filePath,index=False)
 
@@ -161,10 +165,8 @@ class Trainer(object):
                         .to_local()
                         .numpy()
                     )
-                    #dict[key] = value.numpy()
                 else:
                     dict[key] = value.numpy()
-                print(dict[key])
             return dict
 
         losses = []
@@ -174,12 +176,12 @@ class Trainer(object):
         tmp_latency_list=[]
         for i in range(args.max_iter):
             loss = self.train_one_step()
-            print(loss)
             time_end=time.time()
             tmp_latency=(time_end-time_begin)*1000/args.print_interval
             tmp_latency_list.append(tmp_latency)
-            losses.append(handle({"loss": loss})["loss"])
-            #losses.append(loss.numpy())
+            #losses.append(handle({"loss": loss})["loss"])
+            #numpy()出错
+            losses.append(loss.numpy())
             time_begin=time.time()
             if (i + 1) % args.print_interval == 0:
                 time_end=time.time()
@@ -196,7 +198,6 @@ class Trainer(object):
         self.record_to_csv()
     
     def train_eager(self):
-        print('---------train_eager1--------')
         def forward():
             (
                 labels,
@@ -211,30 +212,21 @@ class Trainer(object):
             predicts = self.wdl_module(
                 dense_fields, wide_sparse_fields, deep_sparse_fields
             )
-            # print(predicts.numpy().shape)
-            # print(labels.numpy().shape)
-            print('predicts.sbp',predicts.sbp)
-            print('labels.sbp',predicts.sbp)
+            #计算loss出错
             train_loss = self.loss(predicts,labels)
-            #train_loss = self.loss(predicts.numpy(),labels.numpy())
-            
-
             return predicts,labels,train_loss
+
         predicts,labels,loss = forward()
-        print('---------loss.is_consistent--------')
         if loss.is_consistent:
-            print('---------train_eager2--------')
             # NOTE(zwx): scale init grad with world_size
             # consistent 模式下，mean 在计算得时候除以得是总的batch size = world_size * local_batch
             #所以要先乘以 world_size 再 backward, 每张卡上得 梯度才正常
             #然后grad 要再除以 world_size 是因为，做了 allreduce 之后，只把所有卡得梯度累加了
-            loss = loss * self.world_size
-            #loss=loss.to_local()*self.world_size
+            loss.backward()
             for param_group in self.opt.param_groups:
                 for param in param_group.parameters:
                     param.grad *= self.world_size
         else:
-            print('---------train_eager3--------')
             loss.backward()
             #loss = loss / self.world_size
         self.opt.step()
@@ -247,7 +239,6 @@ class Trainer(object):
             predicts, labels, train_loss = self.train_graph()
         else:
             predicts, labels, train_loss = self.train_eager()
-        print('---------train_eager4--------')
         return train_loss
         
 
