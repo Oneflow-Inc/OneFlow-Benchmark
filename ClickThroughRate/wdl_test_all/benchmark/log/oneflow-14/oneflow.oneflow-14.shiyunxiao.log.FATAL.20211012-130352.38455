@@ -1,4 +1,0 @@
-Log file created at: 2021/10/12 13:03:52
-Running on machine: oneflow-14
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-F1012 13:03:52.656618 38455 cuda_util.cpp:173] Check failed: cudaSetDevice(dev_id) : invalid device ordinal (101) 

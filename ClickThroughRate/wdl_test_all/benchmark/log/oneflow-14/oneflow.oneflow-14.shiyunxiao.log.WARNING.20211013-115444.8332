@@ -1,5 +1,0 @@
-Log file created at: 2021/10/13 11:54:44
-Running on machine: oneflow-14
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-F1013 11:54:44.577756  8837 ofrecord_dataset.h:73] Check failed: parallel_num_ <= data_part_num_ (2 vs. 1) 
-F1013 11:54:44.578474  8836 ofrecord_dataset.h:73] Check failed: parallel_num_ <= data_part_num_ (2 vs. 1) 
