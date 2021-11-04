@@ -20,7 +20,6 @@ import pandas as pd
 from datetime import datetime
 
 
-
 class Trainer(object):
     def __init__(self,args):
         self.args = args
@@ -48,7 +47,7 @@ class Trainer(object):
         ) = self.prepare_modules()
         if self.execution_mode == "graph":
             self.train_graph = WideAndDeepTrainGraph(
-                self.args,self.wdl_module, self.train_dataloader, self.loss, self.opt
+                self.wdl_module, self.train_dataloader, self.loss, self.opt
             )
         self.record=[]
 
@@ -69,7 +68,7 @@ class Trainer(object):
         isExists=os.path.exists(dir_path)
         if not isExists:
              os.makedirs(dir_path) 
-        filePath=os.path.join(dir_path,'record_%s_%s.csv'%(self.args.batch_size,self.rank))
+        filePath=os.path.join(dir_path,'record_%s.csv'%(self.rank))
         df_record=pd.DataFrame.from_dict(self.record, orient='columns')
         df_record.to_csv(filePath,index=False)
 
@@ -114,7 +113,7 @@ class Trainer(object):
         weight (oneflow.Tensor, optional) – The manual rescaling weight to the loss. Default to None, whose corresponding weight value is 1.
         reduction (str, optional) – The reduce type, it can be one of “none”, “mean”, “sum”. Defaults to “mean”.
         '''
-        bce_loss = flow.nn.BCELoss(reduction="sum")
+        bce_loss = flow.nn.BCELoss(reduction="mean")
         bce_loss.to("cuda")
 
         opt = flow.optim.SGD(
@@ -162,8 +161,10 @@ class Trainer(object):
                         .to_local()
                         .numpy()
                     )
+                    #dict[key] = value.numpy()
                 else:
                     dict[key] = value.numpy()
+                print(dict[key])
             return dict
 
         losses = []
@@ -173,10 +174,12 @@ class Trainer(object):
         tmp_latency_list=[]
         for i in range(args.max_iter):
             loss = self.train_one_step()
+            print(loss)
             time_end=time.time()
             tmp_latency=(time_end-time_begin)*1000/args.print_interval
             tmp_latency_list.append(tmp_latency)
             losses.append(handle({"loss": loss})["loss"])
+            #losses.append(loss.numpy())
             time_begin=time.time()
             if (i + 1) % args.print_interval == 0:
                 time_end=time.time()
@@ -193,6 +196,7 @@ class Trainer(object):
         self.record_to_csv()
     
     def train_eager(self):
+        print('---------train_eager1--------')
         def forward():
             (
                 labels,
@@ -207,26 +211,34 @@ class Trainer(object):
             predicts = self.wdl_module(
                 dense_fields, wide_sparse_fields, deep_sparse_fields
             )
-
+            # print(predicts.numpy().shape)
+            # print(labels.numpy().shape)
+            print('predicts.sbp',predicts.sbp)
+            print('labels.sbp',predicts.sbp)
             train_loss = self.loss(predicts,labels)
-            train_loss=train_loss/self.batch_size
+            #train_loss = self.loss(predicts.numpy(),labels.numpy())
+            
 
             return predicts,labels,train_loss
         predicts,labels,loss = forward()
-
+        print('---------loss.is_consistent--------')
         if loss.is_consistent:
+            print('---------train_eager2--------')
             # NOTE(zwx): scale init grad with world_size
-            # because consistent_tensor.mean() include dividor numel * world_size
-            loss.backward()
+            # consistent 模式下，mean 在计算得时候除以得是总的batch size = world_size * local_batch
+            #所以要先乘以 world_size 再 backward, 每张卡上得 梯度才正常
+            #然后grad 要再除以 world_size 是因为，做了 allreduce 之后，只把所有卡得梯度累加了
+            loss = loss * self.world_size
+            #loss=loss.to_local()*self.world_size
             for param_group in self.opt.param_groups:
                 for param in param_group.parameters:
-                    param.grad *= self.world_size             
+                    param.grad *= self.world_size
         else:
+            print('---------train_eager3--------')
             loss.backward()
-            # loss/=self.world_size
+            #loss = loss / self.world_size
         self.opt.step()
         self.opt.zero_grad()
-
         return predicts,labels,loss
 
     def train_one_step(self):
@@ -235,6 +247,7 @@ class Trainer(object):
             predicts, labels, train_loss = self.train_graph()
         else:
             predicts, labels, train_loss = self.train_eager()
+        print('---------train_eager4--------')
         return train_loss
         
 
@@ -243,3 +256,4 @@ if __name__ == "__main__":
     flow.distributed.launch.main()
     trainer = Trainer()
     trainer()
+

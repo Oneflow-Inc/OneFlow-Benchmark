@@ -1,0 +1,42 @@
+Log file created at: 2021/11/03 13:05:34
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1103 13:05:34.699936 12194 global.h:36] NewGlobal 14cudaDeviceProp
+I1103 13:05:34.717249 12194 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1103 13:05:34.717272 12194 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1103 13:05:34.717284 12194 env_global_objects_scope.cpp:159] using rpc backend: gRPC
+I1103 13:05:34.717289 12194 global.h:36] NewGlobal N7oneflow10CtrlServerE
+I1103 13:05:34.718075 12194 ctrl_server.cpp:40] CtrlServer listening on 0.0.0.0:34905
+I1103 13:05:34.718219 12194 rank_info_bootstrap_server.cpp:47] RankInfoBootstrapServer listening on 0.0.0.0:36831
+I1103 13:05:34.719199 12194 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 13:05:34.720618 12194 ctrl_bootstrap.cpp:76] 
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 42144
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 34905
+}
+rank: 1
+node_size: 1
+I1103 13:05:34.722941 12194 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 13:05:34.723948 12194 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 13:05:34.724000 12194 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 13:05:34.724014 12194 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 13:05:34.885073 12194 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1103 13:05:34.888480 12194 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1103 13:05:34.888499 12194 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1103 13:05:34.888507 12194 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1103 13:05:34.888514 12194 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1103 13:05:34.889148 12194 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1103 13:05:34.889168 12194 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1103 13:05:34.889175 12194 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1103 13:05:34.890031 12194 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1103 13:05:34.890054 12194 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1103 13:05:34.890190 12194 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:46428
+I1103 13:05:34.890828 12194 epoll_comm_network.cpp:197] machine 0 sockfd 42
+I1103 13:05:34.890851 12194 epoll_comm_network.cpp:197] machine 1 sockfd -1
+I1103 13:05:34.890980 12194 global.h:36] NewGlobal N7oneflow9TransportE
+I1103 13:05:34.891067 12194 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I1103 13:05:34.891193 12194 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE

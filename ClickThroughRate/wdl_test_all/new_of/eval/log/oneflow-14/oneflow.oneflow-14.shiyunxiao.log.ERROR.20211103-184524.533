@@ -1,0 +1,4 @@
+Log file created at: 2021/11/03 18:45:24
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F1103 18:45:24.918817   533 shape.cpp:116] Check failed: index < this->NumAxes() (0 vs. 0)  Shape: () visit index: 0 > num_axes: 0

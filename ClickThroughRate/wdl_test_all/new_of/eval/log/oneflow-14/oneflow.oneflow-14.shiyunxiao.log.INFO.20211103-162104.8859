@@ -1,0 +1,45 @@
+Log file created at: 2021/11/03 16:21:04
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1103 16:21:04.838961  8859 global.h:36] NewGlobal 14cudaDeviceProp
+I1103 16:21:04.851999  8859 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1103 16:21:04.852030  8859 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1103 16:21:04.852043  8859 env_global_objects_scope.cpp:159] using rpc backend: gRPC
+I1103 16:21:04.852049  8859 global.h:36] NewGlobal N7oneflow10CtrlServerE
+I1103 16:21:04.852984  8859 ctrl_server.cpp:40] CtrlServer listening on 0.0.0.0:41824
+I1103 16:21:04.853149  8859 rank_info_bootstrap_server.cpp:47] RankInfoBootstrapServer listening on 0.0.0.0:34146
+I1103 16:21:04.854091  8859 rpc_client.cpp:190] LoadServer 127.0.0.1 Failed at 0 times error_code 14 error_message failed to connect to all addresses
+I1103 16:21:14.854925  8859 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 1 times
+I1103 16:21:14.856351  8859 ctrl_bootstrap.cpp:76] 
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 38003
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 41824
+}
+rank: 1
+node_size: 1
+I1103 16:21:14.858929  8859 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 16:21:14.860244  8859 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 16:21:14.860385  8859 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 16:21:14.860414  8859 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 16:21:15.027213  8859 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1103 16:21:15.029112  8859 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1103 16:21:15.029129  8859 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1103 16:21:15.029136  8859 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1103 16:21:15.029145  8859 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1103 16:21:15.029757  8859 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1103 16:21:15.029776  8859 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1103 16:21:15.029784  8859 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1103 16:21:15.030628  8859 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1103 16:21:15.030666  8859 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1103 16:21:15.030797  8859 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:41655
+I1103 16:21:15.031515  8859 epoll_comm_network.cpp:197] machine 0 sockfd 42
+I1103 16:21:15.031535  8859 epoll_comm_network.cpp:197] machine 1 sockfd -1
+I1103 16:21:15.031661  8859 global.h:36] NewGlobal N7oneflow9TransportE
+I1103 16:21:15.031736  8859 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I1103 16:21:15.031853  8859 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I1103 16:21:17.240849  9120 eager_nccl_comm_manager.cpp:69]  EagerNcclCommMgr::ncclCommInitRank device_vec.size() = 2, nccl_unique_id = 0200ffffff91ffffffc60b0b010e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, rank = 1, key = {eager_nccl_unique_id_rpc_key,0:0,1:1}
+F1103 16:21:17.317641  9120 eager_nccl_kernels.cu:267] Check failed: in->shape().elem_cnt() == out->shape().elem_cnt() (5 vs. 4) (1,5) vs (2,2)

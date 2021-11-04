@@ -1,0 +1,4 @@
+Log file created at: 2021/11/03 16:21:17
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F1103 16:21:17.317262  9116 eager_nccl_kernels.cu:267] Check failed: in->shape().elem_cnt() == out->shape().elem_cnt() (5 vs. 6) (1,5) vs (2,3)

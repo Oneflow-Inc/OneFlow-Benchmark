@@ -1,0 +1,44 @@
+Log file created at: 2021/11/03 18:22:50
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1103 18:22:50.594323 48277 global.h:36] NewGlobal 14cudaDeviceProp
+I1103 18:22:50.615893 48277 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1103 18:22:50.615923 48277 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1103 18:22:50.615940 48277 env_global_objects_scope.cpp:159] using rpc backend: gRPC
+I1103 18:22:50.615948 48277 global.h:36] NewGlobal N7oneflow10CtrlServerE
+I1103 18:22:50.616911 48277 ctrl_server.cpp:40] CtrlServer listening on 0.0.0.0:46341
+I1103 18:22:50.617112 48277 rank_info_bootstrap_server.cpp:47] RankInfoBootstrapServer listening on 0.0.0.0:29500
+I1103 18:22:50.618176 48277 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 18:23:00.471637 48277 ctrl_bootstrap.cpp:76] 
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 46341
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 40168
+}
+rank: 0
+node_size: 1
+I1103 18:23:00.473770 48277 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 18:23:00.474836 48277 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 18:23:00.475070 48277 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 18:23:00.475116 48277 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 18:23:00.658088 48277 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1103 18:23:00.660660 48277 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1103 18:23:00.660691 48277 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1103 18:23:00.660701 48277 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1103 18:23:00.660709 48277 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1103 18:23:00.661383 48277 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1103 18:23:00.661406 48277 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1103 18:23:00.661414 48277 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1103 18:23:00.661787 48277 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1103 18:23:00.661831 48277 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1103 18:23:00.662032 48277 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:46546
+I1103 18:23:00.663004 48277 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1103 18:23:00.663028 48277 epoll_comm_network.cpp:197] machine 1 sockfd 42
+I1103 18:23:00.663161 48277 global.h:36] NewGlobal N7oneflow9TransportE
+I1103 18:23:00.663259 48277 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I1103 18:23:00.663400 48277 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I1103 18:23:04.727694  7379 eager_nccl_comm_manager.cpp:69]  EagerNcclCommMgr::ncclCommInitRank device_vec.size() = 2, nccl_unique_id = 0200ffffffecffffff940b0b010e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, rank = 0, key = {eager_nccl_unique_id_rpc_key,0:0,1:1}
+F1103 18:23:05.017128 48277 shape.cpp:116] Check failed: index < this->NumAxes() (0 vs. 0)  Shape: () visit index: 0 > num_axes: 0

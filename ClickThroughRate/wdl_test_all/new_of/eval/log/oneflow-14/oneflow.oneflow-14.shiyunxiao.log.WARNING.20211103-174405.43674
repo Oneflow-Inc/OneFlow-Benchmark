@@ -1,0 +1,18 @@
+Log file created at: 2021/11/03 17:44:05
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F1103 17:44:05.351424 43674 operator.cpp:696] 
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/operator/operator.cpp", line 696, in InferNdSbpSignature
+    InferSbpSignature(&sbp_signature, sbp_constraints, ibn2sbp_infer_hint)
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/operator/operator.cpp", line 569, in InferSbpSignature
+    InferSbpSignature(infered_sbp_signature, sbp_sig_conf, CalcOrderValue4SbpSig, SbpInferHint4Ibn, *op_parallel_desc_)
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/operator/operator.cpp", line 634, in InferSbpSignature
+    GetSbpSignaturesIf(LogicalBlobDesc4Ibn, parallel_desc, &total_sbp_sig_list)
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/operator/operator.cpp", line 460, in GetSbpSignaturesIf
+    GetSbpSignatures(LogicalBlobDesc4Ibn, parallel_desc, sbp_sig_list)
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/operator/user_op.cpp", line 688, in GetSbpSignatures
+    val_->get_sbp_fn(&sbp_ctx)
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/user/ops/reshape_user_op_util.cpp", line 114, in GetReshapeUserOpSbpSignatures
+    ReshapeUserOpUtil::GetGroupStartInAxis2OutAxis(squeezed_in_shape, squeezed_out_shape, parallel_num, &squeezed_group_start_in_axis2out_axis)
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/user/ops/reshape_user_op_util.cpp", line 71, in GetGroupStartInAxis2OutAxis
+    Check failed: (in_shape.NumAxes()) != (0) (0 vs 0)

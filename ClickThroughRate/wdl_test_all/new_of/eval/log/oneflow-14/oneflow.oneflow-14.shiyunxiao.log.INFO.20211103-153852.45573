@@ -1,0 +1,24 @@
+Log file created at: 2021/11/03 15:38:52
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1103 15:38:52.381028 45573 global.h:36] NewGlobal 14cudaDeviceProp
+I1103 15:38:52.436239 45573 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1103 15:38:52.436302 45573 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1103 15:38:52.436322 45573 env_global_objects_scope.cpp:152] using rpc backend: local
+I1103 15:38:52.436355 45573 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 15:38:52.436368 45573 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 15:38:52.549651 45573 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1103 15:38:52.551259 45573 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1103 15:38:52.551275 45573 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1103 15:38:52.551285 45573 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1103 15:38:52.551293 45573 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1103 15:38:52.552165 45573 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1103 15:38:52.552186 45573 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1103 15:38:52.552194 45573 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1103 15:38:52.552489 45573 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1103 15:38:52.552517 45573 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1103 15:38:52.552698 45573 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:41124
+I1103 15:38:52.552748 45573 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1103 15:38:52.553341 45573 global.h:36] NewGlobal N7oneflow9TransportE
+I1103 15:38:52.553429 45573 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I1103 15:38:52.553576 45573 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE

@@ -1,0 +1,64 @@
+Log file created at: 2021/11/03 17:20:08
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1103 17:20:08.124222 32576 global.h:36] NewGlobal 14cudaDeviceProp
+I1103 17:20:08.143010 32576 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1103 17:20:08.143033 32576 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1103 17:20:08.143044 32576 env_global_objects_scope.cpp:159] using rpc backend: gRPC
+I1103 17:20:08.143050 32576 global.h:36] NewGlobal N7oneflow10CtrlServerE
+I1103 17:20:08.143930 32576 ctrl_server.cpp:40] CtrlServer listening on 0.0.0.0:32926
+I1103 17:20:08.144079 32576 rank_info_bootstrap_server.cpp:47] RankInfoBootstrapServer listening on 0.0.0.0:29500
+I1103 17:20:08.145002 32576 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 17:20:18.076262 32576 ctrl_bootstrap.cpp:76] 
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 32926
+}
+ctrl_addr {
+  host: "127.0.0.1"
+  port: 36103
+}
+rank: 0
+node_size: 1
+I1103 17:20:18.079066 32576 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 17:20:18.080206 32576 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times
+I1103 17:20:18.080374 32576 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 17:20:18.080410 32576 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 17:20:18.257614 32576 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1103 17:20:18.259722 32576 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1103 17:20:18.259737 32576 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1103 17:20:18.259744 32576 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1103 17:20:18.259752 32576 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1103 17:20:18.260332 32576 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1103 17:20:18.260349 32576 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1103 17:20:18.260356 32576 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1103 17:20:18.260706 32576 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1103 17:20:18.260751 32576 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1103 17:20:18.260910 32576 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:45782
+I1103 17:20:18.263049 32576 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1103 17:20:18.263077 32576 epoll_comm_network.cpp:197] machine 1 sockfd 42
+I1103 17:20:18.263751 32576 global.h:36] NewGlobal N7oneflow9TransportE
+I1103 17:20:18.263834 32576 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I1103 17:20:18.263950 32576 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I1103 17:20:21.694499 32936 eager_nccl_comm_manager.cpp:69]  EagerNcclCommMgr::ncclCommInitRank device_vec.size() = 2, nccl_unique_id = 0200ffffffe2170b0b010e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, rank = 0, key = {eager_nccl_unique_id_rpc_key,0:0,1:1}
+I1103 17:20:21.865702 32576 version.cpp:22] OneFlow git version: 55d32c3
+I1103 17:20:21.865742 32576 device_register_gpu.cpp:56] CUDA runtime version: 11.2
+I1103 17:20:21.865757 32576 device_register_gpu.cpp:65] cuDNN version: 8.1.1
+I1103 17:20:21.865763 32576 device_register_gpu.cpp:78] NCCL version: 2.11.4
+I1103 17:20:21.865770 32576 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I1103 17:20:21.865782 32576 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 17:20:21.865789 32576 global.h:36] NewGlobal N7oneflow5IDMgrE
+I1103 17:20:21.865797 32576 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I1103 17:20:21.865803 32576 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I1103 17:20:21.865808 32576 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I1103 17:20:21.865813 32576 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I1103 17:20:21.865818 32576 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I1103 17:20:21.865823 32576 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I1103 17:20:21.865984 32576 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I1103 17:20:21.866044 32576 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I1103 17:20:21.866062 32576 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I1103 17:20:21.866070 32576 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I1103 17:20:21.866079 32576 global.h:36] NewGlobal N7oneflow6boxing10collective9SchedulerE
+I1103 17:20:21.866104 32576 global.h:36] NewGlobal N7oneflow6boxing10collective31CollectiveBoxingDeviceCtxPollerE
+I1103 17:20:21.869462 32576 global.h:36] NewGlobal N7oneflow7JobDescE
+F1103 17:20:22.060362 32576 shape.cpp:116] Check failed: index < this->NumAxes() (0 vs. 0)  Shape: () visit index: 0 > num_axes: 0

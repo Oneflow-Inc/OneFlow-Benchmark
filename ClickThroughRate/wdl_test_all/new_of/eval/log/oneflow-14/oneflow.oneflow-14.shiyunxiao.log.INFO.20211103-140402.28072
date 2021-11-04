@@ -1,0 +1,11 @@
+Log file created at: 2021/11/03 14:04:02
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1103 14:04:02.578430 28072 global.h:36] NewGlobal 14cudaDeviceProp
+I1103 14:04:02.655174 28072 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1103 14:04:02.655234 28072 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1103 14:04:02.655261 28072 env_global_objects_scope.cpp:159] using rpc backend: gRPC
+I1103 14:04:02.655273 28072 global.h:36] NewGlobal N7oneflow10CtrlServerE
+I1103 14:04:02.656599 28072 ctrl_server.cpp:40] CtrlServer listening on 0.0.0.0:35947
+I1103 14:04:02.657120 28072 rank_info_bootstrap_server.cpp:47] RankInfoBootstrapServer listening on 0.0.0.0:17789
+I1103 14:04:02.671711 28072 rpc_client.cpp:187] LoadServer 127.0.0.1 Successful at 0 times

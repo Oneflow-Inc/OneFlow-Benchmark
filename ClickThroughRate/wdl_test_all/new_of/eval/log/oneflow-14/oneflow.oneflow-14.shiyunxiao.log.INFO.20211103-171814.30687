@@ -1,0 +1,25 @@
+Log file created at: 2021/11/03 17:18:14
+Running on machine: oneflow-14
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1103 17:18:14.955261 30687 global.h:36] NewGlobal 14cudaDeviceProp
+I1103 17:18:14.972887 30687 global.h:36] NewGlobal N7oneflow7EnvDescE
+I1103 17:18:14.972908 30687 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I1103 17:18:14.972919 30687 env_global_objects_scope.cpp:152] using rpc backend: local
+I1103 17:18:14.972940 30687 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 17:18:14.972949 30687 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I1103 17:18:15.083248 30687 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I1103 17:18:15.085775 30687 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I1103 17:18:15.085794 30687 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I1103 17:18:15.085806 30687 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I1103 17:18:15.085815 30687 global.h:36] NewGlobal N7oneflow9OneflowVME
+I1103 17:18:15.086681 30687 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I1103 17:18:15.086704 30687 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I1103 17:18:15.086712 30687 oneflow_vm.cpp:75] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I1103 17:18:15.087808 30687 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I1103 17:18:15.087852 30687 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I1103 17:18:15.088027 30687 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:36822
+I1103 17:18:15.088074 30687 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I1103 17:18:15.088218 30687 global.h:36] NewGlobal N7oneflow9TransportE
+I1103 17:18:15.088295 30687 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I1103 17:18:15.088413 30687 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I1103 17:18:18.624207 30842 eager_nccl_comm_manager.cpp:69]  EagerNcclCommMgr::ncclCommInitRank device_vec.size() = 1, nccl_unique_id = 0200ffffffae330b0b010e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, rank = 0, key = {eager_nccl_unique_id_rpc_key,0:0}
