@@ -18,7 +18,7 @@ from graph import WideAndDeepGraph,WideAndDeepTrainGraph
 import warnings
 import pandas as pd
 from datetime import datetime
-
+from pathlib import Path
 
 
 class Trainer(object):
@@ -54,6 +54,9 @@ class Trainer(object):
 
     def get_memory_usage(self):
         currentPath=os.path.dirname(os.path.abspath(__file__))
+        dir = Path(os.path.join(currentPath,'csv/gpu_info'))
+        if not dir.is_dir():
+            os.makedirs(dir) 
         nvidia_smi_report_file_path=os.path.join('csv/gpu_info','gpu_memory_usage_%s.csv'%self.rank)
         nvidia_smi_report_file_path=os.path.join(currentPath,nvidia_smi_report_file_path)
         cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
