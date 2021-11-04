@@ -152,23 +152,6 @@ class Trainer(object):
         self.train()
 
     def train(self):
-        def handle(dict):
-            for key, value in dict.items():
-                if self.is_consistent == True:
-                    dict[key] = (
-                        value.to_consistent(
-                            placement=flow.placement(
-                                "cuda", {0: range(self.world_size)}
-                            ),
-                            sbp=flow.sbp.broadcast,
-                        )
-                        .to_local()
-                        .numpy()
-                    )
-                else:
-                    dict[key] = value.numpy()
-            return dict
-
         losses = []
         args = self.args
         latency=0
@@ -179,7 +162,6 @@ class Trainer(object):
             time_end=time.time()
             tmp_latency=(time_end-time_begin)*1000/args.print_interval
             tmp_latency_list.append(tmp_latency)
-            #losses.append(handle({"loss": loss})["loss"])
             #numpy()出错
             losses.append(loss.numpy())
             time_begin=time.time()
@@ -194,7 +176,6 @@ class Trainer(object):
                 losses = []
                 latency=0
                 time_begin=time.time()   
-            
         self.record_to_csv()
     
     def train_eager(self):

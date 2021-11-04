@@ -1,3 +1,0 @@
-src_op_name,dst_op_name,src_parallel_desc,dst_parallel_desc,src_nd_sbp,dst_nd_sbp,lbi,dtype,shape,builder,comment
-System-AutoTick-SourceTick_120,System-AutoTick-Tick_121,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-SourceTick_120/out,kInt8,(1),OneToOneSubTskGphBuilder,-
-System-AutoTick-Tick_123,System-AutoTick-SinkTick_124,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},[B],[B],System-AutoTick-Tick_123/out,kInt8,(1),OneToOneSubTskGphBuilder,-
