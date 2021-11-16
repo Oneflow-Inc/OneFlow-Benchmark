@@ -149,15 +149,17 @@ def _data_loader_onerec(data_dir, batch_size, shuffle):
 
 
 def watch_handler_field(y: tp.Numpy):
-    with open('/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/field_benchmark2.txt',mode='w+') as f:
+    
+    with open('~/OneFlow-Benchmark/ClickThroughRate/field_benchmark2.txt',mode='w+') as f:
         for i in y:
             f.write(str(i))
             f.write('\n')
 def watch_handler_embedding(y: tp.Numpy):
-    with open('/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/embedding_benchmark2.txt',mode='w+') as f:
+    with open('~/OneFlow-Benchmark/ClickThroughRate/embedding_benchmark2.txt',mode='w+') as f:
         for i in y:
             f.write(str(i))
             f.write('\n')
+
 def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
     wide_sparse_fields = flow.parallel_cast(wide_sparse_fields, distribute=flow.distribute.broadcast())
     wide_embedding_table = flow.get_variable(
@@ -210,8 +212,10 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
 
 def get_memory_usage(rank):
     currentPath=os.path.dirname(os.path.abspath(sys.argv[0]))
-    nvidia_smi_report_file_path=os.path.join(currentPath,'gpu_info/gpu_memory_usage_%s.csv'%rank)
-    # ('~/benckmark/OneFlow-Benchmark/ClickThroughRate/WideDeepLearning/gpu_info','gpu_memory_usage_%s.csv'%rank)
+    nvidia_smi_report_file_dir = os.path.join(currentPath, "log/gpu_info")
+    if not os.path.exists(nvidia_smi_report_file_dir):
+        os.system("mkdir -p " + nvidia_smi_report_file_dir)
+    nvidia_smi_report_file_path=os.path.join(nvidia_smi_report_file_dir,'gpu_memory_usage_%s.csv'%rank)
     cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
     if nvidia_smi_report_file_path is not None:
         cmd += f" -f {nvidia_smi_report_file_path}"
@@ -244,9 +248,10 @@ def _create_train_callback(step):
         for i in range(FLAGS.gpu_num_per_node):
             record_dict['memory_usage_%s/MB'%i]=get_memory_usage(i)
         records.append(record_dict)
+        print("iter %d :" % (step + 1), record_dict['loss'])
         if (step + 1)==FLAGS.max_iter:
             df=pandas.DataFrame.from_dict(records, orient='columns')
-            df.to_csv('/home/shiyunxiao/of_benchmark/OneFlow-Benchmark/ClickThroughRate/wdl_test_all/results/old/%s.csv'%(FLAGS.test_name),index=False)
+            df.to_csv('~/OneFlow-Benchmark/ClickThroughRate/wdl_test_all/benchmark/log/%s.csv'%(FLAGS.test_name),index=False)
 
 
         global_loss = 0.0
@@ -318,7 +323,7 @@ def main():
     flow.config.enable_legacy_model_io(True)
     flow.config.nccl_use_compute_stream(True)
     check_point = flow.train.CheckPoint()
-    check_point.load('/home/shiyunxiao/checkpoint_old')
+    check_point.load('./checkpoint_old')
     global time_begin
     time_begin=time.time()
     for i in range(FLAGS.max_iter):
