@@ -248,7 +248,8 @@ def _create_train_callback(step):
         for i in range(FLAGS.gpu_num_per_node):
             record_dict['memory_usage_%s/MB'%i]=get_memory_usage(i)
         records.append(record_dict)
-        print("iter %d :" % (step + 1), record_dict['loss'])
+        if (step + 1) % 100 == 0:
+            print("iter %d :" % (step + 1), record_dict['loss'])
         if (step + 1)==FLAGS.max_iter:
             df=pandas.DataFrame.from_dict(records, orient='columns')
             df.to_csv('~/OneFlow-Benchmark/ClickThroughRate/wdl_test_all/benchmark/log/%s.csv'%(FLAGS.test_name),index=False)
