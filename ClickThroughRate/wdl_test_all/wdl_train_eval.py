@@ -252,7 +252,7 @@ def _create_train_callback(step):
             print("iter %d :" % (step + 1), record_dict['loss'])
         if (step + 1)==FLAGS.max_iter:
             df=pandas.DataFrame.from_dict(records, orient='columns')
-            df.to_csv('~/OneFlow-Benchmark/ClickThroughRate/wdl_test_all/benchmark/log/%s.csv'%(FLAGS.test_name),index=False)
+            df.to_csv('~/OneFlow-Benchmark/ClickThroughRate/wdl_test_all/log/%s.csv'%(FLAGS.test_name),index=False)
 
 
         global_loss = 0.0
