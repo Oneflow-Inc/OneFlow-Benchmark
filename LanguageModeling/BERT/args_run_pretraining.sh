@@ -24,11 +24,12 @@ RUN_COMMIT=${16:-"master"}
 NUM_ACC_STEP=${17:-1}
 OPTIMIZER_TYPE=${18:-"adam"}
 
+SRC_DIR=$(realpath $(dirname $0))
 
 RUN_TIME=$(date "+%Y%m%d_%H%M%S%N")
-LOG_FOLDER=./output/logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
+LOG_FOLDER=$SRC_DIR/test_logs/$HOSTNAME/${NUM_NODES}n${NUM_GPUS_PER_NODE}g
 mkdir -p $LOG_FOLDER
-LOG_FILENAME=$LOG_FOLDER/bert_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_sq${SEQ_LENGHT}_nhl${NUM_HIDDEN_LAYERS}_nah${NUM_ATTENTION_HEADS}_bsz${BSZ_PER_DEVICE}_${OPTIMIZER_TYPE}_${RUN_COMMIT}_${RUN_TIME}.log
+LOG_FILENAME=$LOG_FOLDER/bert_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_sq${SEQ_LENGHT}_nhl${NUM_HIDDEN_LAYERS}_nah${NUM_ATTENTION_HEADS}_bsz${BSZ_PER_DEVICE}_${OPTIMIZER_TYPE}_${RUN_COMMIT}_${RUN_TIME}
 
 export PYTHONUNBUFFERED=1
 export GLOG_v=3
@@ -49,7 +50,7 @@ fi
 CMD=""
 
 if [[ ! -z "${NSYS_BIN}" ]]; then
-    CMD+="${NSYS_BIN} profile --stats true --output bert_${NUM_NODES}n${NUM_GPUS_PER_NODE}g_sq${SEQ_LENGHT}_nhl${NUM_HIDDEN_LAYERS}_nah${NUM_ATTENTION_HEADS}_bsz${BSZ_PER_DEVICE}_${OPTIMIZER_TYPE}_${RUN_COMMIT}_%h_%p "
+    CMD+="${NSYS_BIN} profile --stats true --output ${LOG_FILENAME} "
 fi
 
 CMD+="${PYTHON_BIN} run_pretraining.py "
@@ -80,12 +81,15 @@ CMD+="--hidden_dropout_prob=0.1 "
 CMD+="--hidden_size_per_head=64 "
 CMD+="--data_part_num=${DATA_PART_NUM} "
 CMD+="--data_dir=${DATA_DIR} "
-CMD+="--log_dir=${LOG_FOLDER} "
+#CMD+="--log_dir=${LOG_FOLDER} "
 CMD+="--model_save_every_n_iter=10000 "
 CMD+="--model_save_dir=${LOG_FOLDER} "
 
 echo "Rum cmd ${CMD}"
 
-$CMD 2>&1 | tee ${LOG_FILENAME}
+$CMD 2>&1 | tee ${LOG_FILENAME}.log
 
 echo "Writting log to ${LOG_FILENAME}"
+
+rm -rf ./log/$HOSTNAME
+rm -rf ./output/$HOSTNAME

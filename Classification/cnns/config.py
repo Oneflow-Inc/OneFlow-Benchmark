@@ -202,6 +202,12 @@ def get_parser(parser=None):
         default=1,
         help="print loss every n iteration",
     )
+    parser.add_argument(
+        "--exit_iter",
+        type=int,
+        default=-1,
+        help="exit iter",
+    )
     add_ofrecord_args(parser)
     add_optimizer_args(parser)
     return parser

@@ -92,7 +92,7 @@ class Metric(object):
         prediction_key="predictions",
         label_key="labels",
         loss_key=None,
-        nvidia_smi_report_step=10,
+        nvidia_smi_report_step=100,
     ):
         self.desc = desc
         self.calculate_batches = calculate_batches
@@ -121,7 +121,7 @@ class Metric(object):
         def callback(outputs):
             if step == 0:
                 self._clear()
-            if self.loss_key and epoch == 0 and step == self.nvidia_smi_report_step:
+            if self.loss_key and epoch == 1 and step == self.nvidia_smi_report_step:
                 cmd = "nvidia-smi --query-gpu=timestamp,name,driver_version,utilization.gpu,utilization.memory,memory.total,memory.free,memory.used --format=csv"
                 os.system(cmd)
 

@@ -132,6 +132,9 @@ def main():
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir, args.save_init)
 
+    if args.exit_iter != -1:
+        epoch_size = args.exit_iter
+
     print(" {} iter per epoch...".format(epoch_size))
 
     for epoch in range(1, args.num_epochs + 1):
