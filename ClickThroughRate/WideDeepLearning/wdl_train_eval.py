@@ -74,8 +74,8 @@ def _data_loader(data_dir, data_part_num, batch_size, part_name_suffix_length=-1
         devices = ['{}:0-{}'.format(i, num_dataloader_thread - 1) for i in range(FLAGS.num_nodes)]
     with flow.scope.placement("cpu", devices):
         if FLAGS.dataset_format == 'ofrecord':
-            data = _data_loader_ofrecord(data_dir, data_part_num, batch_size, 
-                                         part_name_suffix_length, shuffle) 
+            data = _data_loader_ofrecord(data_dir, data_part_num, batch_size,
+                                         part_name_suffix_length, shuffle)
         elif FLAGS.dataset_format == 'onerec':
             data = _data_loader_onerec(data_dir, batch_size, shuffle)
         elif FLAGS.dataset_format == 'synthetic':
@@ -83,7 +83,7 @@ def _data_loader(data_dir, data_part_num, batch_size, part_name_suffix_length=-1
         else:
             assert 0, "Please specify dataset_type as `ofrecord`, `onerec` or `synthetic`."
     return flow.identity_n(data)
-    
+
 
 def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_length=-1,
                           shuffle=True):
@@ -106,10 +106,10 @@ def _data_loader_ofrecord(data_dir, data_part_num, batch_size, part_name_suffix_
 
 def _data_loader_synthetic(batch_size):
     def _blob_random(shape, dtype=flow.int32, initializer=flow.zeros_initializer(flow.int32)):
-        return flow.data.decode_random(shape=shape, dtype=dtype, batch_size=batch_size, 
+        return flow.data.decode_random(shape=shape, dtype=dtype, batch_size=batch_size,
                                         initializer=initializer)
     labels = _blob_random((1,), initializer=flow.random_uniform_initializer(dtype=flow.int32))
-    dense_fields = _blob_random((FLAGS.num_dense_fields,), dtype=flow.float, 
+    dense_fields = _blob_random((FLAGS.num_dense_fields,), dtype=flow.float,
                                 initializer=flow.random_uniform_initializer())
     wide_sparse_fields = _blob_random((FLAGS.num_wide_sparse_fields,))
     deep_sparse_fields = _blob_random((FLAGS.num_deep_sparse_fields,))
@@ -212,15 +212,15 @@ def CreateOptimizer(args):
 def _get_train_conf():
     train_conf = flow.FunctionConfig()
     train_conf.default_data_type(flow.float)
-    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
+    # train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
 
 
 @flow.global_function('train', _get_train_conf())
 def train_job():
     labels, dense_fields, wide_sparse_fields, deep_sparse_fields = \
-        _data_loader(data_dir=FLAGS.train_data_dir, data_part_num=FLAGS.train_data_part_num, 
-                     batch_size=FLAGS.batch_size, 
+        _data_loader(data_dir=FLAGS.train_data_dir, data_part_num=FLAGS.train_data_part_num,
+                     batch_size=FLAGS.batch_size,
                      part_name_suffix_length=FLAGS.train_part_name_suffix_length, shuffle=True)
     logits = _model(dense_fields, wide_sparse_fields, deep_sparse_fields)
     loss = flow.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
