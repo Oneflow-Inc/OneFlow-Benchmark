@@ -85,7 +85,7 @@ def load_imagenet_for_training(args):
     if args.gpu_image_decoder:
         encoded = flow.data.OFRecordBytesDecoder(ofrecord, "encoded")
         image = flow.data.ImageDecoderRandomCropResize(
-            encoded, target_width=224, target_height=224, num_workers=3
+            encoded, target_width=224, target_height=224, num_workers=3, warmup_size=2048
         )
     else:
         image = flow.data.OFRecordImageDecoderRandomCrop(
