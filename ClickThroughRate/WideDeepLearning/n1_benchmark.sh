@@ -1,13 +1,15 @@
-DEVICE_NUM_PER_NODE=2
-EMBD_SIZE=1603616 
+DEVICE_NUM_PER_NODE=1
 DATA_ROOT=/dataset/wdl_ofrecord/ofrecord
+EMBD_SIZE=2322444
+BATHSIZE=1024
+
 python3 wdl_train_eval.py \
   --learning_rate=0.001 \
-  --batch_size=32 \
+  --batch_size=$BATHSIZE \
   --train_data_dir $DATA_ROOT/train \
   --loss_print_every_n_iter=1000 \
   --eval_interval=0 \
-  --deep_dropout_rate=0\
+  --deep_dropout_rate=0.5 \
   --max_iter=3100 \
   --hidden_units_num=7\
   --hidden_size=1024 \

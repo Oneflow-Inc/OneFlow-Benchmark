@@ -198,7 +198,9 @@ def _create_train_callback(step):
         global time_begin
         global_loss += loss.mean()
         time_end = time.time()
-        print(step+1, 'time', time_end, 'latency(ms):', (time_end - time_begin) * 1000 / FLAGS.loss_print_every_n_iter, 'loss',  global_loss/FLAGS.loss_print_every_n_iter)
+        print(step + 1, 'time', time_end, 'latency(ms):', (time_end - time_begin) * 1000 / FLAGS.loss_print_every_n_iter,
+            'loss',  global_loss/FLAGS.loss_print_every_n_iter
+        )
         global_loss = 0.0
         time_begin = time.time()
 
@@ -216,7 +218,7 @@ def CreateOptimizer(args):
 def _get_train_conf():
     train_conf = flow.FunctionConfig()
     train_conf.default_data_type(flow.float)
-    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
+    # train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
 
 
