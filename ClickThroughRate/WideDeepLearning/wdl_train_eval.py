@@ -198,8 +198,9 @@ def _create_train_callback(step):
         global time_begin
         global_loss += loss.mean()
         time_end = time.time()
-        print(step + 1, 'time', time_end, 'latency(ms):', (time_end - time_begin) * 1000 / FLAGS.loss_print_every_n_iter,
-            'loss',  global_loss/FLAGS.loss_print_every_n_iter
+        print("%d/%d, time: %.6f, latency(ms): %.14f, loss: %.16f" % (step + 1, FLAGS.max_iter, time_end,
+            (time_end - time_begin) * 1000 / FLAGS.loss_print_every_n_iter,
+            global_loss / FLAGS.loss_print_every_n_iter)
         )
         global_loss = 0.0
         time_begin = time.time()
