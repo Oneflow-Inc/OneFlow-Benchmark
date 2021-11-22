@@ -186,6 +186,7 @@ def _model(dense_fields, wide_sparse_fields, deep_sparse_fields):
 
 
 global_loss = 0.0
+time_begin = 0.0
 def _create_train_callback(step):
     def nop(loss):
         global global_loss
@@ -194,9 +195,15 @@ def _create_train_callback(step):
 
     def print_loss(loss):
         global global_loss
+        global time_begin
         global_loss += loss.mean()
-        print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter)
+        time_end = time.time()
+        print("%d/%d, time: %.6f, latency(ms): %.14f, loss: %.16f" % (step + 1, FLAGS.max_iter, time_end,
+            (time_end - time_begin) * 1000 / FLAGS.loss_print_every_n_iter,
+            global_loss / FLAGS.loss_print_every_n_iter)
+        )
         global_loss = 0.0
+        time_begin = time.time()
 
     if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
         return print_loss
@@ -212,7 +219,7 @@ def CreateOptimizer(args):
 def _get_train_conf():
     train_conf = flow.FunctionConfig()
     train_conf.default_data_type(flow.float)
-    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
+    # train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=['wide_embedding', 'deep_embedding'])))
     return train_conf
 
 
@@ -279,9 +286,11 @@ def main():
     #flow.config.collective_boxing.enable_fusion(False)
     check_point = flow.train.CheckPoint()
     check_point.init()
+    global time_begin
+    time_begin = time.time()
     for i in range(FLAGS.max_iter):
         train_job().async_get(_create_train_callback(i))
-        if (i + 1 ) % FLAGS.eval_interval == 0:
+        if FLAGS.eval_interval > 0 and (i + 1 ) % FLAGS.eval_interval == 0:
             labels = np.array([[0]])
             preds = np.array([[0]])
             cur_time = time.time()
