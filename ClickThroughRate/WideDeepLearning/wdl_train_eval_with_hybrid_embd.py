@@ -249,15 +249,15 @@ def CreateOptimizer(args):
 def _get_train_conf():
     train_conf = flow.FunctionConfig()
     train_conf.default_data_type(flow.float)
-    # indexed_slices_ops = [
-    #     'wide_embedding',
-    #     'deep_embedding',
-    #     'hf_wide_embedding',
-    #     'hf_deep_embedding',
-    #     'lf_wide_embedding',
-    #     'lf_deep_embedding',
-    # ]
-    # train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=indexed_slices_ops)))
+    indexed_slices_ops = [
+        'wide_embedding',
+        'deep_embedding',
+        'hf_wide_embedding',
+        'hf_deep_embedding',
+        'lf_wide_embedding',
+        'lf_deep_embedding',
+    ]
+    train_conf.indexed_slices_optimizer_conf(dict(include_op_names=dict(op_name=indexed_slices_ops)))
     return train_conf
 
 
