@@ -235,9 +235,9 @@ def forward_p2b_parallel_cast(x):
         # backward: B -> B, identity
         x = flow.hierarchical_parallel_cast(
             x,
-            parallel_distribution=parallel_dist,
+            nd_sbp=parallel_dist,
             grad_mode="manual",
-            grad_parallel_distribution=parallel_dist,
+            grad_nd_sbp=parallel_dist,
         )
     elif dist_util.is_data_parallel():
         # parallel cast: S(0) -> S(0), identity
@@ -265,9 +265,9 @@ def backward_p2b_parallel_cast(x):
         # backward: [S(0), P] cast to [S(0), B], for layernorm grad not supporting P, cast from P to B
         x = flow.hierarchical_parallel_cast(
             x,
-            parallel_distribution=parallel_dist,
+            nd_sbp=parallel_dist,
             grad_mode="manual",
-            grad_parallel_distribution=parallel_dist,
+            grad_nd_sbp=parallel_dist,
         )
     elif dist_util.is_data_parallel():
         # parallel cast: S(0) -> S(0), identity
@@ -288,7 +288,7 @@ def output_parallel_cast(x, device="gpu"):
     dist_util = get_dist_util()
     if dist_util.is_hybrid_parallel():
         with flow.scope.placement(device, dist_util.get_layer_placement(-1)):
-            x = flow.hierarchical_parallel_cast(x, parallel_distribution=["B"])
+            x = flow.hierarchical_parallel_cast(x, nd_sbp=["B"])
 
     return x
 
@@ -297,7 +297,7 @@ def input_data_parallel_cast(x):
     dist_util = get_dist_util()
     if dist_util.is_hybrid_parallel():
         x = flow.hierarchical_parallel_cast(
-            x, parallel_distribution=get_data_parallel_dist(),
+            x, nd_sbp=get_data_parallel_dist(),
         )
 
     return x

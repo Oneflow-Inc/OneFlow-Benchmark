@@ -26,8 +26,12 @@ from util import Snapshot, InitNodes, Metric, CreateOptimizer, GetFunctionConfig
 
 parser = configs.get_parser()
 parser.add_argument("--data_dir", type=str, default=None)
-parser.add_argument("--data_part_num", type=int, default=32, help="data part number in dataset")
-parser.add_argument("--iter_num", type=int, default=1144000, help="total iterations to run")
+parser.add_argument(
+    "--data_part_num", type=int, default=32, help="data part number in dataset"
+)
+parser.add_argument(
+    "--iter_num", type=int, default=1144000, help="total iterations to run"
+)
 parser.add_argument("--batch_size_per_device", type=int, default=64)
 args = parser.parse_args()
 configs.print_args(args)
@@ -35,15 +39,22 @@ configs.print_args(args)
 batch_size = args.num_nodes * args.gpu_num_per_node * args.batch_size_per_device
 
 
-def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions_per_seq):
-    ofrecord = flow.data.ofrecord_reader(data_dir,
-                                         batch_size=batch_size,
-                                         data_part_num=data_part_num,
-                                         random_shuffle = True,
-                                         shuffle_after_epoch=True)
+def BertDecoder(
+    data_dir, batch_size, data_part_num, seq_length, max_predictions_per_seq
+):
+    ofrecord = flow.data.ofrecord_reader(
+        data_dir,
+        batch_size=batch_size,
+        data_part_num=data_part_num,
+        random_shuffle=True,
+        shuffle_after_epoch=True,
+    )
     blob_confs = {}
+
     def _blob_conf(name, shape, dtype=flow.int32):
-        blob_confs[name] = flow.data.OFRecordRawDecoder(ofrecord, name, shape=shape, dtype=dtype)
+        blob_confs[name] = flow.data.OFRecordRawDecoder(
+            ofrecord, name, shape=shape, dtype=dtype
+        )
 
     _blob_conf("input_ids", [seq_length])
     _blob_conf("next_sentence_labels", [1])
@@ -54,19 +65,30 @@ def BertDecoder(data_dir, batch_size, data_part_num, seq_length, max_predictions
     _blob_conf("masked_lm_weights", [max_predictions_per_seq], flow.float)
     return blob_confs
 
-@flow.global_function(type='train', function_config=GetFunctionConfig(args))
+
+@flow.global_function(type="train", function_config=GetFunctionConfig(args))
 def PretrainJob():
     hidden_size = 64 * args.num_attention_heads  # , H = 64, size per head
     intermediate_size = hidden_size * 4
 
     if args.data_part_num == 1:
         with flow.scope.placement("cpu", "0:0"):
-            decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
-                                   args.max_predictions_per_seq)
+            decoders = BertDecoder(
+                args.data_dir,
+                batch_size,
+                args.data_part_num,
+                args.seq_length,
+                args.max_predictions_per_seq,
+            )
     else:
         assert args.data_part_num > 1
-        decoders = BertDecoder(args.data_dir, batch_size, args.data_part_num, args.seq_length,
-                               args.max_predictions_per_seq)
+        decoders = BertDecoder(
+            args.data_dir,
+            batch_size,
+            args.data_part_num,
+            args.seq_length,
+            args.max_predictions_per_seq,
+        )
 
     total_loss, mlm_loss, nsp_loss = PreTrain(
         decoders["input_ids"],
@@ -93,7 +115,7 @@ def PretrainJob():
     )
     opt = CreateOptimizer(args)
     opt.minimize(total_loss)
-    return {'total_loss': total_loss, 'mlm_loss': mlm_loss, 'nsp_loss': nsp_loss}
+    return {"total_loss": total_loss, "mlm_loss": mlm_loss, "nsp_loss": nsp_loss}
 
 
 def main():
@@ -102,13 +124,19 @@ def main():
 
     InitNodes(args)
 
-    snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
+    snapshot = Snapshot(args.model_save_dir, args.model_load_dir, args.model_save_init)
 
-    metric = Metric(desc='train', print_steps=args.loss_print_every_n_iter, 
-                    batch_size=batch_size, keys=['total_loss', 'mlm_loss', 'nsp_loss'])
+    print("num_accumulation_steps:", args.num_accumulation_steps)
+    metric = Metric(
+        desc="train",
+        print_steps=args.loss_print_every_n_iter,
+        batch_size=batch_size * args.num_accumulation_steps,
+        keys=["total_loss", "mlm_loss", "nsp_loss"],
+    )
+
     for step in range(args.iter_num):
         PretrainJob().async_get(metric.metric_cb(step))
-        #PretrainJob().async_get(metric.metric_cb(step, epoch=3))
+        # PretrainJob().async_get(metric.metric_cb(step, epoch=3))
         if (step + 1) % args.model_save_every_n_iter == 0:
             snapshot.save("snapshot_%d" % (step + 1))
 

@@ -16,10 +16,7 @@ limitations under the License.
 
 import os
 import time
-import numpy as np
 from collections import OrderedDict
-import pandas as pd
-from datetime import datetime
 import oneflow.compatible.single_client as flow
 
 
@@ -28,7 +25,7 @@ def InitNodes(args):
         assert args.num_nodes <= len(args.node_ips)
         flow.env.ctrl_port(args.ctrl_port)
         nodes = []
-        for ip in args.node_ips[:args.num_nodes]:
+        for ip in args.node_ips[: args.num_nodes]:
             addr_dict = {}
             addr_dict["addr"] = ip
             nodes.append(addr_dict)
@@ -37,18 +34,20 @@ def InitNodes(args):
 
 
 class Snapshot(object):
-    def __init__(self, model_save_dir, model_load_dir):
+    def __init__(self, model_save_dir, model_load_dir, model_save_init=False):
         self._model_save_dir = model_save_dir
         if model_load_dir:
             assert os.path.isdir(model_load_dir)
             print("Restoring model from {}.".format(model_load_dir))
             flow.load_variables(flow.checkpoint.get(model_load_dir))
-        else:
-            flow.checkpoint.save('initial_model')
+        elif model_save_init:
+            flow.checkpoint.save("initial_model")
             print("Init model on demand.")
 
     def save(self, name):
-        snapshot_save_path = os.path.join(self._model_save_dir, "snapshot_{}".format(name))
+        snapshot_save_path = os.path.join(
+            self._model_save_dir, "snapshot_{}".format(name)
+        )
         if not os.path.exists(snapshot_save_path):
             os.makedirs(snapshot_save_path)
         print("Saving model to {}.".format(snapshot_save_path))
@@ -77,7 +76,14 @@ class StopWatch(object):
 
 
 class Metric(object):
-    def __init__(self, desc='train', print_steps=-1, batch_size=256, keys=[]):
+    def __init__(
+        self,
+        desc="train",
+        print_steps=-1,
+        batch_size=256,
+        keys=[],
+        nvidia_smi_report_step=10,
+    ):
         r"""accumulate and calculate metric
 
         Args:
@@ -91,11 +97,12 @@ class Metric(object):
         self.print_steps = print_steps
         assert batch_size > 0
         self.batch_size = batch_size
+        self.nvidia_smi_report_step = nvidia_smi_report_step
 
         assert isinstance(keys, (list, tuple))
         self.keys = keys
         self.metric_dict = OrderedDict()
-        self.metric_dict['step'] = 0
+        self.metric_dict["step"] = 0
 
         self.timer = StopWatch()
         self.timer.start()
@@ -104,58 +111,90 @@ class Metric(object):
     def _clear(self):
         for key in self.keys:
             self.metric_dict[key] = 0.0
-            self.metric_dict['n_' + key] = 0.0
-        self.metric_dict['throughput'] = 0.0
+            self.metric_dict["n_" + key] = 0.0
+        self.metric_dict["throughput"] = 0.0
         self.num_samples = 0.0
 
     def update_and_save(self, key, value, step, **kwargs):
         self.metric_dict[key] = value
-        self.metric_dict.pop('n_' + key, None)
+        self.metric_dict.pop("n_" + key, None)
 
     def metric_cb(self, step=0, **kwargs):
         def callback(outputs):
-            if step == 0: self._clear()
+            if step == 0:
+                self._clear()
+
+            if step == self.nvidia_smi_report_step:
+                cmd = "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv"
+                os.system(cmd)
 
             for key in self.keys:
                 self.metric_dict[key] += outputs[key].sum()
-                self.metric_dict['n_' + key] += outputs[key].size
+                self.metric_dict["n_" + key] += outputs[key].size
 
             self.num_samples += self.batch_size
 
             if (step + 1) % self.print_steps == 0:
-                self.metric_dict['step'] = step
+                self.metric_dict["step"] = step
                 for k, v in kwargs.items():
                     self.metric_dict[k] = v
                 throughput = self.num_samples / self.timer.split()
-                self.update_and_save('throughput', throughput, step)
+                self.update_and_save("throughput", throughput, step)
                 for key in self.keys:
-                    value = self.metric_dict[key] / self.metric_dict['n_' + key]
+                    value = self.metric_dict[key] / self.metric_dict["n_" + key]
                     self.update_and_save(key, value, step, **kwargs)
-                print(', '.join(('{}: {}' if type(v) is int else '{}: {:.3f}').format(k, v) \
-                                for k, v in self.metric_dict.items()), time.time())
+                print(
+                    ", ".join(
+                        ("{}: {}" if type(v) is int else "{}: {:.3f}").format(k, v)
+                        for k, v in self.metric_dict.items()
+                    ),
+                    time.time(),
+                )
                 self._clear()
 
         return callback
 
+
 def CreateOptimizer(args):
     warmup_batches = int(args.iter_num * args.warmup_proportion)
     lr_warmup = flow.optimizer.warmup.linear(warmup_batches, 0)
-    lr_scheduler = flow.optimizer.PolynomialScheduler(args.learning_rate, args.iter_num, 0.0,
-                                                     warmup=lr_warmup)
+    lr_scheduler = flow.optimizer.PolynomialScheduler(
+        args.learning_rate, args.iter_num, 0.0, warmup=lr_warmup
+    )
     loss_scale_policy = None
     if args.use_fp16:
-        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(increment_period=2000);
-    return flow.optimizer.AdamW(lr_scheduler, epsilon=1e-6, weight_decay=args.weight_decay_rate,
-                                weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
-                                grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0),
-                                loss_scale_policy=loss_scale_policy)
+        loss_scale_policy = flow.optimizer.loss_scale.dynamic_loss_scale(
+            increment_period=2000
+        )
+
+    if args.optimizer_type == "lamb":
+        return flow.optimizer.LAMB(
+            lr_scheduler,
+            beta1=0.9,
+            beta2=0.999,
+            epsilon=1e-6,
+            weight_decay=args.weight_decay_rate,
+            weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
+            grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0),
+            loss_scale_policy=loss_scale_policy,
+        )
+    else:
+        return flow.optimizer.AdamW(
+            lr_scheduler,
+            epsilon=1e-6,
+            weight_decay=args.weight_decay_rate,
+            weight_decay_excludes=["bias", "LayerNorm", "layer_norm"],
+            grad_clipping=flow.optimizer.grad_clipping.by_global_norm(1.0),
+            loss_scale_policy=loss_scale_policy,
+        )
+
 
 def GetFunctionConfig(args):
     config = flow.function_config()
     config.enable_auto_mixed_precision(args.use_fp16)
+    config.train.num_gradient_accumulation_steps(args.num_accumulation_steps)
     if args.use_xla:
         config.use_xla_jit(True)
     config.enable_fuse_add_to_output(True)
     config.enable_fuse_model_update_ops(True)
     return config
-

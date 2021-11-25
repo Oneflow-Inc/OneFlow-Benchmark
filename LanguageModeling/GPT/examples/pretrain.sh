@@ -84,7 +84,7 @@ cmd+=" --multihead-attention-fusion"
 cmd+=" --fp16"
 
 if [[ ${num_nodes} -gt 1 ]]; then
-    cmd+=" --use-rdma"
+    export ONEFLOW_COMM_NET_IB_ENABLE=1
 fi
 
 if [[ ! -z "${ONEFLOW_GTP_PROFILE_FILE}" ]]; then

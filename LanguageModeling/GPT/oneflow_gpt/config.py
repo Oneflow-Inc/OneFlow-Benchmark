@@ -635,11 +635,7 @@ def _add_misc_args(parser):
         action="store_true",
         help="open transformer layer profiler",
     )
-    group.add_argument(
-        "--use-rdma",
-        action="store_true",
-        help="Use rdma.",
-    )
+
     return parser
 
 

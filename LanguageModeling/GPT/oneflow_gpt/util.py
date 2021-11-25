@@ -145,7 +145,7 @@ class Metric(object):
                 output = outputs[key].numpy()
                 assert isinstance(output, np.ndarray)
                 if micro_batches is None:
-                    micro_batches = output.shape[0]
+                    micro_batches = output.shape[0] if output.shape else 1
                 else:
                     assert micro_batches == output.shape[0]
                 self.kv_store_[key] += output.sum()
@@ -174,6 +174,8 @@ class Metric(object):
 
                 self.print_fn_()
 
+                for key in self.keys_:
+                    self.kv_store_[key] = 0.0
                 self.acc_elapsed_time_ = 0.0
                 self.acc_micro_batches_ = 0
                 self.acc_samples_ = 0

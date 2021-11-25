@@ -47,8 +47,6 @@ def _init_config(args):
                 " please try other version."
             )
 
-    if args.use_rdma:
-        flow.config.use_rdma(True)
 
     flow.config.enable_legacy_model_io()
     flow.config.enable_model_io_v2(True)

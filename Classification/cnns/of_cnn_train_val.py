@@ -65,8 +65,6 @@ if args.nccl_fusion_threshold_mb:
 if args.nccl_fusion_max_ops:
     flow.config.collective_boxing.nccl_fusion_max_ops(args.nccl_fusion_max_ops)
 
-if args.num_nodes > 1 and args.use_rdma:
-    flow.config.use_rdma(True)
 
 def label_smoothing(labels, classes, eta, dtype):
     assert classes > 0
@@ -133,11 +131,11 @@ def main():
     InitNodes(args)
     flow.env.log_dir(args.log_dir)
 
-    snapshot = Snapshot(args.model_save_dir, args.model_load_dir)
+    snapshot = Snapshot(args.model_save_dir, args.model_load_dir, args.save_init)
 
     print(" {} iter per epoch...".format(epoch_size))
 
-    for epoch in range(args.num_epochs):
+    for epoch in range(1, args.num_epochs + 1):
         metric = Metric(
             desc="train",
             calculate_batches=args.loss_print_every_n_iter,
@@ -155,7 +153,11 @@ def main():
             )
             for i in range(num_val_steps):
                 InferenceNet().async_get(metric.metric_cb(epoch, i))
-        snapshot.save("epoch_{}".format(epoch))
+        if epoch % args.save_epoch_interval == 0:
+            snapshot.save("epoch_{}".format(epoch))
+
+    if args.save_last:
+        snapshot.save("epoch_{}".format("last"))
 
 
 if __name__ == "__main__":
