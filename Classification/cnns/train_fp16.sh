@@ -27,14 +27,18 @@ echo NCCL_LAUNCH_MODE=$NCCL_LAUNCH_MODE
 export ONEFLOW_COMM_NET_IB_ENABLE=1
 
 python3 of_cnn_train_val.py \
+     --train_data_dir=$DATA_ROOT/train \
+     --train_data_part_num=256 \
+     --val_data_dir=$DATA_ROOT/validation \
+     --val_data_part_num=256 \
      --num_nodes=1 \
-     --gpu_num_per_node=1 \
+     --gpu_num_per_node=8 \
      --optimizer="sgd" \
      --momentum=0.875 \
      --label_smoothing=0.1 \
      --learning_rate=1.536 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=64 \
+     --batch_size_per_device=192 \
      --val_batch_size_per_device=50 \
      --use_fp16 \
      --channel_last=True \

@@ -19,7 +19,6 @@ echo DATA_ROOT=$DATA_ROOT
 LOG_FOLDER=../logs
 mkdir -p $LOG_FOLDER
 LOGFILE=$LOG_FOLDER/resnet_training.log
-export PYTHONUNBUFFERED=1
 
 python3 of_cnn_train_val.py \
      --train_data_dir=$DATA_ROOT/train \
@@ -27,16 +26,15 @@ python3 of_cnn_train_val.py \
      --val_data_dir=$DATA_ROOT/validation \
      --val_data_part_num=256 \
      --num_nodes=1 \
-     --gpu_num_per_node=4 \
+     --gpu_num_per_node=8 \
      --optimizer="sgd" \
      --momentum=0.875 \
      --label_smoothing=0.1 \
      --learning_rate=1.024 \
      --loss_print_every_n_iter=100 \
-     --batch_size_per_device=32 \
+     --batch_size_per_device=128 \
      --val_batch_size_per_device=50 \
      --num_epoch=$NUM_EPOCH \
      --model="resnet50" 2>&1 | tee ${LOGFILE}
-     #--model="resnet50" 2>&1 | tee ${LOGFILE}
 
 echo "Writting log to ${LOGFILE}"
