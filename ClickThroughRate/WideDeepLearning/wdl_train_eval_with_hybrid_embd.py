@@ -316,8 +316,6 @@ def main():
     flow.config.enable_model_io_v2(True)
     flow.config.enable_debug_mode(True)
     flow.config.collective_boxing.nccl_enable_all_to_all(True)
-    check_point = flow.train.CheckPoint()
-    check_point.init()
     for i in range(FLAGS.max_iter):
         train_job().async_get(_create_train_callback(i))
         if (i + 1 ) % FLAGS.eval_interval == 0:
