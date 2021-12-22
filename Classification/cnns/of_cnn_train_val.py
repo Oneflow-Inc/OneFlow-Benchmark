@@ -36,7 +36,10 @@ total_device_num = args.num_nodes * args.gpu_num_per_node
 train_batch_size = total_device_num * args.batch_size_per_device
 val_batch_size = total_device_num * args.val_batch_size_per_device
 (C, H, W) = args.image_shape
-epoch_size = math.ceil(args.num_examples / train_batch_size)
+if args.exit_iter != -1:
+    epoch_size = args.exit_iter
+else:
+    epoch_size = math.ceil(args.num_examples / train_batch_size)
 num_val_steps = int(args.num_val_examples / val_batch_size)
 
 
@@ -131,9 +134,6 @@ def main():
     flow.env.log_dir(args.log_dir)
 
     snapshot = Snapshot(args.model_save_dir, args.model_load_dir, args.save_init)
-
-    if args.exit_iter != -1:
-        epoch_size = args.exit_iter
 
     print(" {} iter per epoch...".format(epoch_size))
 
