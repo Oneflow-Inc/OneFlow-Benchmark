@@ -198,6 +198,10 @@ def _create_train_callback(step):
         print(step+1, 'time', time.time(), 'loss',  global_loss/FLAGS.loss_print_every_n_iter)
         global_loss = 0.0
 
+    if step == 99:
+        cmd = "nvidia-smi --query-gpu=timestamp,name,driver_version,utilization.gpu,utilization.memory,memory.total,memory.free,memory.used --format=csv"
+        os.system(cmd)
+
     if (step + 1) % FLAGS.loss_print_every_n_iter == 0:
         return print_loss
     else:

@@ -48,6 +48,11 @@ if $DEBUG_AND_NCCL; then
     echo NCCL_DEBUG=$NCCL_DEBUG
 fi
 
+export ONEFLOW_KERNEL_ENABLE_CUDA_GRAPH=1
+export ONEFLOW_THREAD_ENABLE_LOCAL_MESSAGE_QUEUE=1
+export ONEFLOW_KERNEL_DISABLE_BLOB_ACCESS_CHECKER=1
+export ONEFLOW_ACTOR_ENABLE_LIGHT_ACTOR=1
+
 if [[ ${NUM_NODES} -gt 1 ]]; then
     export ONEFLOW_COMM_NET_IB_ENABLE=1
 fi
@@ -83,12 +88,14 @@ fi
 CMD+="--eval_data_part_num=256 "
 CMD+="--eval_part_name_suffix_length=5 "
 
+#DATASET_FORMAT="synthetic" # ofrecord
+DATASET_FORMAT="ofrecord" # ofrecord
 CMD+="--num_nodes=${NUM_NODES} "
 CMD+="--gpu_num=${NUM_GPUS_PER_NODE} "
 CMD+="--node_ips=${NODE_IPS} "
 CMD+="--train_part_name_suffix_length=5 "
 CMD+="--hidden_units_num=2 "
-CMD+="--dataset_format=ofrecord "
+CMD+="--dataset_format=${DATASET_FORMAT} "
 CMD+="--max_iter=${MAX_ITER} "
 CMD+="--loss_print_every_n_iter=${LOSS_PRINT_ITER} "
 CMD+="--eval_interval=10000 "
