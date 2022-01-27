@@ -34,6 +34,7 @@ import resnet_model
 import resnext_model
 import alexnet_model
 import mobilenet_v2_model
+import ghostnet_model
 
 
 total_device_num = args.num_nodes * args.gpu_num_per_node
@@ -48,6 +49,7 @@ model_dict = {
     "alexnet": alexnet_model.alexnet,
     "mobilenetv2": mobilenet_v2_model.Mobilenet,
     "resnext50": resnext_model.resnext50,
+    "ghostnet": ghostnet_model.ghostnet,
 }
 
 

@@ -33,6 +33,7 @@ import resnext_model
 import vgg_model
 import alexnet_model
 import mobilenet_v2_model
+import ghostnet_model
 
 model_dict = {
     "resnet50": resnet_model.resnet50,
@@ -40,6 +41,7 @@ model_dict = {
     "alexnet": alexnet_model.alexnet,
     "mobilenetv2": mobilenet_v2_model.Mobilenet,
     "resnext50": resnext_model.resnext50,
+    "ghostnet": ghostnet_model.ghostnet,
 }
 
 
