@@ -82,8 +82,8 @@ def TrainNet():
     if args.train_data_dir:
         assert os.path.exists(args.train_data_dir)
         print("Loading data from {}".format(args.train_data_dir))
-        (labels, images) = ofrecord_util.load_imagenet_for_training(args)
-
+        # (labels, images) = ofrecord_util.load_imagenet_for_training(args)
+        (labels, images) = ofrecord_util.load_imagenet_for_training_v2(args)
     else:
         print("Loading synthetic data.")
         (labels, images) = ofrecord_util.load_synthetic(args)
