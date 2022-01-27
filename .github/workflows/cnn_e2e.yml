@@ -1,18 +1,217 @@
 name: 'resnet e2e test'
 on: 
-  pull_request:
-    types: [review_requested]
-    branches:
-      - "*"
+  # pull_request:
+  #   types: [review_requested]
+  #   branches:
+  #     - "*"
   workflow_dispatch:
     inputs:
-      placeholder:
-        description: "placeholder, no effect"
+      of_branch_or_commit:
+        description: 'oneflow branch or commit'
+        required: true
+        default: 'master'
+      num_epochs:
+        description: 'number of training epoches'
+        required: true
+        default: 50
+      gpu_num_per_node:
+        description: 'gpu number per node'
+        required: true
+        default: 8
+      python_version:
+        description: "python_version"
+        default: "3.7"
         required: false
-
+      compute_platform:
+        description: "compute_platform"
+        default: "cu102"
+        required: false
+env:
+  ONEFLOW_SRC: oneflow-src
 jobs:
-  build: 
-    name: 'Build and test this repo'
+  cancel_previous:
+    name: Cancel previous runs
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - name: Cancel previous runs of outdated commit
+        uses: styfle/cancel-workflow-action@0.9.0
+        with:
+          access_token: ${{ github.token }}
+          all_but_latest: true
+  find-oss-wheel:
+    name: "Set env and Find wheel in oss"
+    runs-on: ubuntu-latest
+    env:
+      OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+      OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+    outputs:
+      find-wheel-hit: ${{ steps.find-wheel.outputs.find-wheel-hit }}
+      ONEFLOW_WHEEL_PATH: ${{ steps.set-wheel-path.outputs.ONEFLOW_WHEEL_PATH }}
+    steps:
+      - name: Checkout Oneflow-Inc/oneflow
+        uses: actions/checkout@v2
+        with:
+          repository: Oneflow-Inc/oneflow
+          ref: ${{ github.event.inputs.of_branch_or_commit }}
+          path: ${{ env.ONEFLOW_SRC }}
+      - name: Get Oneflow Wheel Path
+        id: set-wheel-path
+        run: |
+          set -x
+          cd ${{ env.ONEFLOW_SRC }}
+          oneflow_commit=`git rev-parse HEAD`
+          echo "oneflow_commit=${oneflow_commit}" >> $GITHUB_ENV
+          oneflow_wheel_path=commit/${oneflow_commit}/${{ github.event.inputs.compute_platform }}
+          echo "::set-output name=ONEFLOW_WHEEL_PATH::${oneflow_wheel_path}"
+          set +x
+      - name: Check if wheel available
+        id: find-wheel
+        uses: Oneflow-Inc/get-oneflow/find-wheel@ae140da7d4e5ea983b6bbd8dc5f3621557cb472f
+        with:
+          ref: ${{ env.oneflow_commit }}
+          entry: ${{ github.event.inputs.compute_platform }}
+          python-version: ${{ github.event.inputs.python_version }}
+  build-oneflow:
+    name: "Build OneFlow ${{ github.event.inputs.compute_platform }}"
+    needs: [find-oss-wheel]
+    runs-on: ['self-hosted', 'linux', 'provision']
+    env:
+      MANYLINUX_CACHE_DIR: ~/manylinux-cache-dir/${{ github.event.inputs.compute_platform }}
+      WHEELHOUSE_DIR: manylinux-wheelhouse
+      OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+      OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+    if: ${{ !fromJson(needs.find-oss-wheel.outputs.find-wheel-hit) }}
+    steps:
+      - name: Fix permissions
+        run: |
+          set -x
+          docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
+      - name: Remove leftover cuda-installer.log
+        run: |
+          docker run --rm -v /tmp:/host/tmp -w /p busybox rm -f /host/tmp/cuda-installer.log
+      - uses: actions/checkout@v2
+      - name: Checkout Oneflow-Inc/oneflow
+        uses: actions/checkout@v2
+        with:
+          repository: Oneflow-Inc/oneflow
+          ref: ${{ github.event.inputs.of_branch_or_commit }}
+          path: ${{ env.ONEFLOW_SRC }}
+      - name: Set environment variables
+        id: set-env
+        run: |
+          set -x
+          current_dir=$PWD
+          cd ${{ env.ONEFLOW_SRC }}
+          oneflow_branch=`git rev-parse --abbrev-ref HEAD`
+          # oneflow_branch=`git branch --show-current`
+          # oneflow_branch=`git symbolic-ref --short HEAD`
+          oneflow_commit=`git rev-parse HEAD`
+          # oss_branch_dir=branch/${oneflow_branch}/${{ github.event.inputs.compute_platform }}
+          oss_branch_dir=branch/${oneflow_branch}/${{ github.event.inputs.compute_platform }}
+          oss_dir=${oss_branch_dir}/${oneflow_commit}
+          echo "oss_branch_dir=${oss_branch_dir}" >> $GITHUB_ENV
+          echo "oss_dir=${oss_dir}" >> $GITHUB_ENV
+          cd $current_dir
+          set +x
+      - uses: Oneflow-Inc/get-oneflow@2a9efceab8d45b725a687e73f870f9b75a15e472
+        name: Build OneFlow ${{ github.event.inputs.compute_platform }}
+        id: build-cuda
+        with:
+          cmake-init-cache: ${{ env.ONEFLOW_SRC }}/cmake/caches/ci/cuda.cmake
+          build-script: ${{ env.ONEFLOW_SRC }}/ci/manylinux/build-gcc7.sh
+          oneflow-src: ${{ env.ONEFLOW_SRC }}
+          oneflow-build-env: manylinux
+          wheelhouse-dir: ${{ env.WHEELHOUSE_DIR }}
+          clear-wheelhouse-dir: true
+          self-hosted: true
+          cuda-version: "10.2"
+          manylinux-cache-dir: ${{ env.MANYLINUX_CACHE_DIR }}
+          docker-run-use-system-http-proxy: false
+          docker-run-use-lld: false
+          retry-failed-build: true
+          python-versions: |
+            ${{ github.event.inputs.python_version }}
+      - name: Upload wheel
+        if: ${{ steps.build-cuda.outcome == 'success' }}
+        uses: ./.github/actions/upload_oss
+        with:
+          src_path: ${{ env.WHEELHOUSE_DIR }}
+          oss_dst_path: oss://oneflow-staging/${{ env.oss_dir }}
+          oss_access_key_id: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+      - name: Update pip index
+        if: ${{ steps.build-cuda.outcome == 'success' }}
+        run: |
+          python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+          python3 -m pip install oss2 beautifulsoup4 --user
+          python3 ${{ env.ONEFLOW_SRC }}/tools/create_pip_index.py --dir_key ${oss_dir} -b oneflow-staging --index_key=${oss_branch_dir}/index.html --index_key=${oss_dir}/index.html --index_key=${{ needs.find-oss-wheel.outputs.ONEFLOW_WHEEL_PATH }}/index.html
+
+  test:
+    name: Test ResNet50
+    needs: [build-oneflow, find-oss-wheel]
+    if: always()
+    runs-on: ['self-hosted', 'linux', 'x64', 'gpu-8-titan-v']
+    env:
+      TEST_CONTAINER_NAME: "oneflow_benchmark-run-id-${{ github.run_id }}-${{ github.event.inputs.compute_platform }}-test"
+      TEST_WITH_TORCH_IMG_TAG: registry.cn-beijing.aliyuncs.com/oneflow/test-with-pytorch-1.9.0:e7a497b41d8b7f1bce055b1f23d027f93b1557ae
+    steps:
+      - name: Fix permissions
+        run: |
+          set -x
+          docker run --rm -v $PWD:/p -w /p busybox chown -R $(id -u):$(id -g) .
+      - name: Checkout Oneflow-Inc/OneFlow-Benchmark
+        uses: actions/checkout@v2
+      - name: Remove container
+        timeout-minutes: 45
+        run: |
+          docker rm -f ${{ env.TEST_CONTAINER_NAME }} || true
+      - name: Enable Pytorch container
+        run: |
+          echo "TEST_IMG_TAG=${TEST_WITH_TORCH_IMG_TAG}" >> $GITHUB_ENV
+      - name: Start container
+        run: |
+          docker pull ${{ env.TEST_IMG_TAG }}
+          docker run -d --rm --privileged --network host --shm-size=8g \
+            --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+            --runtime=nvidia \
+            -v /DATA/disk1:/dataset:ro \
+            -e ONEFLOW_WHEEL_PATH=${{ env.ONEFLOW_WHEEL_PATH }} \
+            -v $PWD:$PWD \
+            -w $PWD \
+            -e E2E_NUM_EPOCHS=${{ github.event.inputs.num_epochs }} \
+            -e E2E_GPU_NUM_PER_NODE=${{ github.event.inputs.gpu_num_per_node }} \
+            -e E2E_NODE_NUM=1 \
+            -e E2E_BATCH_SIZE=32 \
+            -e E2E_LEARNING_RATE=1.536 \
+            -e E2E_SRC_ROOT=Classification/cnns \
+            -e E2E_DATA_ROOT=/dataset/ImageNet/ofrecord \
+            --name ${TEST_CONTAINER_NAME} \
+            ${{ env.TEST_IMG_TAG }} \
+            sleep 3600
+            # -e ONEFLOW_CI=1 \
+            # -v /model_zoo:/model_zoo:ro \
+            # -v $HOME/test-container-cache/dot-local:/root/.local \
+            # -v $HOME/test-container-cache/dot-cache:/root/.cache \
+            # -e ONEFLOW_BIN_PATH=${ONEFLOW_BIN_PATH} \
+            # -v ${ONEFLOW_WHEEL_PATH}:${ONEFLOW_WHEEL_PATH}:ro \
+            # -v ${ONEFLOW_BIN_PATH}:${ONEFLOW_BIN_PATH}:ro \
+            # -v ${ONEFLOW_TEST_CACHE_DIR}:${ONEFLOW_TEST_CACHE_DIR} \
+            # -e ONEFLOW_TEST_CACHE_DIR=${ONEFLOW_TEST_CACHE_DIR} \
+      - name: Install OneFlow
+        run: |
+          docker exec ${TEST_CONTAINER_NAME} python3 --version
+          docker exec ${TEST_CONTAINER_NAME} python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+          docker exec ${TEST_CONTAINER_NAME} python3 -m pip install --find-links=https://staging.oneflow.info/${{ needs.find-oss-wheel.outputs.ONEFLOW_WHEEL_PATH }} oneflow
+      - name: Run Test
+        run: |
+          docker exec ${{ env.TEST_CONTAINER_NAME }} bash ci/test/resnet50_e2e.sh 
+      - name: Upload log 
+        uses: ./.github/actions/upload_oss
+        with:
+          src_path: log
+          oss_dst_path: oss://oneflow-log/OneFlow-Benchmark/${{ github.ref }}.${GITHUB_SHA::7}/oneflow/${{ github.event.inputs.of_branch_or_commit }}/${{github.run_id}}/log
+          oss_access_key_id: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          oss_access_key_secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+          upload_core: false
+
+
