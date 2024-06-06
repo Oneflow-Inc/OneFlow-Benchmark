@@ -12,7 +12,7 @@
 │   └── update_tools.sh # 将主节点的tools文件夹复制到各个子节点
 ├── tools # 在各个节点使用的文件
 │   ├── args_train_ddp_graph_resnet50.sh # 接受模型训练参数并启动训练
-│   ├── models.tar.gz # 模型，为防止git网络问题，所以先下载放在共享目录下
+│   ├── models.tar.gz # 模型，为防止git网络问题，建议先下载放在共享目录下
 │   ├── extract.py # 提取log中train阶段的throughput的平均值
 │   ├── prepare_docker.sh # 用于配置docker内环境
 │   ├── profile.sh # 根据节点数在本机启动profile
