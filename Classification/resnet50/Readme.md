@@ -121,12 +121,24 @@ cp tools/profile.sh models/Vision/classification/image/resnet50/
 NUM_NODES=${1:-1}
 
 if [ "$NODE_RANK" -lt "$NUM_NODES" ]; then
-  bash examples/args_train_ddp_graph.sh "$NUM_NODES" 8 "$NODE_RANK" 192.168.1.27 /data/dataset/ImageNet/ofrecord 192 50 true python3 graph gpu 100 false '' 1
+  bash examples/args_train_ddp_graph_resnet50.sh "$NUM_NODES" 8 "$NODE_RANK" 192.168.1.27 /data/dataset/ImageNet/ofrecord 192 50 true python3 graph gpu 100 false '' 1
 else
   echo do nothing
 fi
 ```
-其中[args_train_ddp_graph.sh](https://github.com/Oneflow-Inc/OneAutoTest/blob/main/ResNet50/args_train_ddp_graph.sh)参考自OneAutoTest仓库
+启动dokcer内profile(./tools/profile.sh)如下：
+```Bash
+# 根据使用的节点数，来判断是否在本地开始profile
+NUM_NODES=${1:-1}
+
+if [ "$NODE_RANK" -lt "$NUM_NODES" ]; then
+  # 在启动训练时添加nsys启动路径，即可进行profile
+  bash examples/args_train_ddp_graph_resnet50.sh "$NUM_NODES" 8 "$NODE_RANK" 192.168.1.27 /data/dataset/ImageNet/ofrecord 192 50 true python3 graph gpu 100 false '/usr/local/cuda/bin/nsys' 1
+else
+  echo do nothing
+fi
+```
+args_train_ddp_graph_resnet50.sh文件参考自OneAutoTest仓库[args_train_ddp_graph.sh](https://github.com/Oneflow-Inc/OneAutoTest/blob/main/ResNet50/args_train_ddp_graph.sh)，其中包含使用nsys启动的选项
 ### 1.4 使用ansible 在所有节点执行 docker load, docker tag命令
 根据上文中inventory.ini文件依次在节点上创建docker，并将NODE_RANK写入docker的环境变量内，脚本(./ansible_workspace/set_docker.sh)内容如下：
 ```Bash
@@ -207,18 +219,6 @@ NUM_NODES="$1"
 docker_name="cd_test_new"
 ansible hosts -i inventory.ini -m shell -a "docker exec $docker_name bash -c 'cd /workspace/models/Vision/classification/image/resnet50 && bash profile.sh $NUM_NODES'"
 ```
-```Bash
-# 根据使用的节点数，来判断是否在本地开始profile
-NUM_NODES=${1:-1}
-
-if [ "$NODE_RANK" -lt "$NUM_NODES" ]; then
-  # 在启动训练时添加nsys启动路径，即可进行profile
-  bash examples/args_train_ddp_graph.sh "$NUM_NODES" 8 "$NODE_RANK" 192.168.1.27 /data/dataset/ImageNet/ofrecord 192 50 true python3 graph gpu 100 false '/usr/local/cuda/bin/nsys' 1
-else
-  echo do nothing
-fi
-```
-[args_train_ddp_graph.sh](https://github.com/Oneflow-Inc/OneAutoTest/blob/main/ResNet50/args_train_ddp_graph.sh)中包含使用nsys启动的选项
 - 需要一个参数: 节点数，
 - 运行该命令能够自动启动相应数量的节点运行。
 - 运行结束后收集日志和nsys相关文件到主节点。
