@@ -75,5 +75,9 @@ node2 ansible_host=192.168.1.28 ansible_user=myuser
 ```bash
 ansible-playbook -i inventory.ini distribute_ssh_key.yml --ask-vault-pass
 ```
+或者运行
 
+```bash
+./dist_ssh_key.sh
+```
 
