@@ -1,0 +1,19 @@
+---
+- name: Distribute SSH key
+  hosts: all
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Create .ssh directory if it doesn't exist
+      file:
+        path: /home/{{ ansible_user }}/.ssh
+        state: directory
+        mode: '0700'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Copy the SSH key to the authorized_keys file
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', '/home/xiexuan/.ssh/id_rsa.pub') }}"
