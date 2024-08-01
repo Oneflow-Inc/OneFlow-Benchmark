@@ -1,0 +1,17 @@
+---
+- name: Pull specified Docker image
+  hosts: all
+  vars:
+    docker_image: "oneflowinc/oneflow:0.9.1.dev20240203-cuda11.8"
+
+  tasks:
+    - name: Check if the Docker image is already present
+      command: "docker images -q {{ docker_image }}"
+      register: docker_image_id
+      changed_when: false
+
+    - name: Pull Docker image if not present
+      docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+      when: docker_image_id.stdout == ""
