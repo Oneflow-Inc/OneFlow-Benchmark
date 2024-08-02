@@ -1,19 +1,19 @@
 ---
 - name: Distributed Training Setup
-  hosts: all
+  hosts: one_node
   vars:
     device_num_per_node: 8
-    num_nodes: "{{ groups['all'] | length }}"
-    master_addr: "{{ hostvars[groups['all'][0]].ansible_host }}"
+    num_nodes: "{{ groups['one_node'] | length }}"
+    master_addr: "{{ hostvars[groups['one_node'][0]].ansible_host }}"
     docker_image: "oneflowinc/oneflow:0.9.1.dev20240203-cuda11.8"
     src: "/share_nfs/k85/models/Vision/classification/image/resnet50"
 
   tasks:
     - name: Set node rank
       set_fact:
-        node_rank: "{{ groups['all'].index(inventory_hostname) }}"
+        node_rank: "{{ groups['one_node'].index(inventory_hostname) }}"
 
-    - name: distributed training in Docker container
+    - name: Training on one node in Docker container
       command: >
         docker run --rm --gpus all 
         --runtime=nvidia --privileged
