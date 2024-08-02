@@ -16,6 +16,10 @@
 │   ├── pull_docker_image.yml         # 拉取镜像 ansible playbook
 │   ├── pull.sh                       # 拉取镜像执行脚本
 │   └── README.md                     # 说明文件
+├── 2_distributed_training            # 分布式训练
+│   ├── dist_training.yml             # 用于分布式训练的 ansible playbook 
+│   └── README.md                     # 说明文件
+│   └── run_dist_training.sh          # 分布式训练执行脚本
 ├── inventory.ini                     # 主机清单文件，需要根据实际情况配置
 └── README.md                         # 说明文件
 ```
