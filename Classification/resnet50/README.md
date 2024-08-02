@@ -20,6 +20,10 @@
 │   ├── dist_training.yml             # 用于分布式训练的 ansible playbook 
 │   └── README.md                     # 说明文件
 │   └── run_dist_training.sh          # 分布式训练执行脚本
+├── 3_1node_training                  # 在一个节点上训练，用于获得基准
+│   ├── one_node_training.yml         # 单节点训练playbook
+│   ├── README.md                     # 说明文件
+│   └── run_one_node_training.sh      # 单节点训练执行脚本
 ├── inventory.ini                     # 主机清单文件，需要根据实际情况配置
 └── README.md                         # 说明文件
 ```

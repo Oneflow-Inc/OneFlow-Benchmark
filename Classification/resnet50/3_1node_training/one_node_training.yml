@@ -1,5 +1,5 @@
 ---
-- name: Distributed Training Setup
+- name: One Node Training Setup
   hosts: one_node
   vars:
     device_num_per_node: 8

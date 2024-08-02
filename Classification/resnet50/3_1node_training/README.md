@@ -1,6 +1,6 @@
 # run_one_node_training.sh 使用说明
 
-`run_one_node_training.sh` 是一个 Bash 脚本，用于运行 `ansible-playbook` 命令来启动分布式训练。此脚本支持通过参数指定 Docker 镜像和源目录。
+`run_one_node_training.sh` 是一个 Bash 脚本，用于运行 `ansible-playbook` 命令来启动单节点上的训练。此脚本支持通过参数指定 Docker 镜像和源目录。
 
 ## 用法
 
