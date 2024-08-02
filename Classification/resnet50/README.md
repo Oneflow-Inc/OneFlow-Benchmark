@@ -24,6 +24,10 @@
 │   ├── one_node_training.yml         # 单节点训练playbook
 │   ├── README.md                     # 说明文件
 │   └── run_one_node_training.sh      # 单节点训练执行脚本
+├── 4_profiling                       # 使用nsys采集性能相关信息
+│   ├── profiling.yml                 # profiling ansible playbook
+│   ├── README.md                     # 说明文件
+│   └── run_profiling.sh              # 采集信息执行脚本
 ├── inventory.ini                     # 主机清单文件，需要根据实际情况配置
 └── README.md                         # 说明文件
 ```
