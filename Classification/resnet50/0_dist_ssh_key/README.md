@@ -1,4 +1,6 @@
 # 使用 Ansible 将 SSH 公钥分发到多个目标主机
+<img width="829" alt="image" src="https://github.com/user-attachments/assets/ec938595-dee4-4f6e-8818-93b3a299020e">
+
 ## 0. 安装Ansible
 
 ```bash
