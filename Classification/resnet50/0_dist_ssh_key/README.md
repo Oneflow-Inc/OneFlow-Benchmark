@@ -1,4 +1,9 @@
 # 使用 Ansible 将 SSH 公钥分发到多个目标主机
+## 0. 安装Ansible
+
+```bash
+pip install ansible-vault
+```
 
 ## 1. 创建变量文件并加密
 
