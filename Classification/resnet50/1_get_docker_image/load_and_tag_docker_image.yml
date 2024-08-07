@@ -1,0 +1,28 @@
+---
+- name: Load and tag Docker image
+  hosts: all
+  vars:
+    docker_image_path: "/share_nfs/k85/oneflow.0.9.1.dev20240203-cuda11.8.tar"
+    docker_image_tag: "oneflowinc/oneflow:0.9.1.dev20240203-cuda11.8"
+    force_load: false
+
+  tasks:
+    - name: Check if Docker image with the specified tag already exists
+      command: "docker images -q {{ docker_image_tag }}"
+      register: image_id
+      changed_when: false
+      when: not force_load
+
+    - name: Load Docker image from tar file
+      command: "docker load -i {{ docker_image_path }}"
+      when: force_load or image_id.stdout == ""
+      register: load_output
+
+    - name: Get image ID from load output
+      set_fact:
+        loaded_image_id: "{{ load_output.stdout_lines[-1] | regex_search('sha256:[0-9a-f]+') }}"
+      when: force_load or image_id.stdout == ""
+
+    - name: Tag the loaded Docker image
+      command: "docker tag {{ loaded_image_id }} {{ docker_image_tag }}"
+      when: force_load or image_id.stdout == ""

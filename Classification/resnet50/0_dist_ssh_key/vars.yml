@@ -1,0 +1,8 @@
+all:
+  hosts:
+    192.168.1.27:
+      ansible_user: myuser
+      ansible_password: mypassword
+    192.168.1.28:
+      ansible_user: myuser
+      ansible_password: mypassword
