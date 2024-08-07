@@ -37,8 +37,6 @@
             --use-fp16 \
             --metric-local False \
             --metric-train-acc True \
-            --fuse-bn-relu \
-            --fuse-bn-add-relu \
             --use-gpu-decode \
             --channel-last \
             --skip-eval
